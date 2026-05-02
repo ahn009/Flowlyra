@@ -40,6 +40,12 @@ htmlcov/
 # IDE
 .vscode/
 .idea/
+.codex/
+.agents/
+.jules/
+
 
 #docxuments
 LOCAL_DEVELOPMENT_AND_TESTING.md
+
+

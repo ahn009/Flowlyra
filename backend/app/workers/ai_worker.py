@@ -1,5 +1,6 @@
 import asyncio
 import uuid
+from typing import Any
 
 from app.db.session import AsyncSessionLocal
 from app.services.ai_service import assigned_agent_for_chat, generate_agent_suggestions
@@ -7,9 +8,17 @@ from app.socket_manager import emit_ai_suggestions
 from app.workers.celery_app import celery_app
 
 
-@celery_app.task(name="app.workers.ai_worker.get_agent_suggestions")
-def get_agent_suggestions(chat_id: str, message: str, org_id: str) -> list[str]:
-    return asyncio.run(_run(chat_id, message, org_id))
+@celery_app.task(
+    bind=True,
+    name="app.workers.ai_worker.get_agent_suggestions",
+    max_retries=3,
+    default_retry_delay=5,
+)
+def get_agent_suggestions(self: Any, chat_id: str, message: str, org_id: str) -> list[str]:
+    try:
+        return asyncio.run(_run(chat_id, message, org_id))
+    except Exception as exc:  # noqa: BLE001
+        raise self.retry(exc=exc, countdown=5) from exc
 
 
 async def _run(chat_id: str, message: str, org_id: str) -> list[str]:

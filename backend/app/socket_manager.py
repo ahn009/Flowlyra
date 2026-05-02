@@ -11,6 +11,7 @@ from app.middleware.auth import verify_socket_token
 from app.models.chat import Chat
 from app.models.contact import Contact
 from app.models.message import Message
+from app.models.user import User
 from app.services.chat_service import add_message, get_chat, start_chat
 
 settings = get_settings()
@@ -20,6 +21,25 @@ sio = socketio.AsyncServer(async_mode="asgi", client_manager=manager, cors_allow
 
 async def emit_error(sid: str, message: str) -> None:
     await sio.emit("error", {"message": message}, to=sid)
+
+
+def _to_uuid(value: object) -> uuid.UUID:
+    return uuid.UUID(str(value))
+
+
+async def _chat_for_session(db, session: dict, chat_id: uuid.UUID) -> Chat:
+    if session.get("kind") == "agent":
+        user = session.get("user") or {}
+        return await get_chat(db, _to_uuid(user["organization_id"]), chat_id)
+    if session.get("kind") == "widget":
+        org_id = session.get("organization_id")
+        if not org_id:
+            raise ValueError("Widget session is not linked to an organization")
+        chat = await get_chat(db, _to_uuid(org_id), chat_id)
+        if session.get("chat_id") and session.get("chat_id") != str(chat.id):
+            raise ValueError("Widget access denied for this chat")
+        return chat
+    raise ValueError("Unauthorized socket session")
 
 
 async def emit_unique(event: str, payload: dict, rooms: list[str]) -> None:
@@ -77,6 +97,10 @@ async def disconnect(sid: str) -> None:
 @sio.on("chat:start")
 async def chat_start(sid: str, data: dict) -> None:
     try:
+        session = await sio.get_session(sid)
+        if session.get("kind") != "widget":
+            await emit_error(sid, "Only widget clients can start chats")
+            return
         async with AsyncSessionLocal() as db:
             chat, message = await start_chat(
                 db,
@@ -104,12 +128,21 @@ async def chat_start(sid: str, data: dict) -> None:
 @sio.on("chat:message")
 async def chat_message(sid: str, data: dict) -> None:
     try:
+        session = await sio.get_session(sid)
         async with AsyncSessionLocal() as db:
-            chat = await get_chat(db, uuid.UUID(str(data["organization_id"])), uuid.UUID(str(data["chat_id"])))
-            session = await sio.get_session(sid)
-            sender_type = data.get("sender_type") or ("agent" if session.get("kind") == "agent" else "customer")
-            sender_id = uuid.UUID(str(session["user"]["id"])) if session.get("kind") == "agent" else chat.contact_id
-            message = await add_message(db, chat, sender_type, data.get("content"), sender_id, bool(data.get("is_internal", False)))
+            chat = await _chat_for_session(db, session, _to_uuid(data["chat_id"]))
+            if session.get("kind") == "agent":
+                sender_type = "agent"
+                sender_id = _to_uuid(session["user"]["id"])
+                is_internal = bool(data.get("is_internal", False))
+            elif session.get("kind") == "widget":
+                sender_type = "customer"
+                sender_id = chat.contact_id
+                is_internal = False
+            else:
+                await emit_error(sid, "Unauthorized socket session")
+                return
+            message = await add_message(db, chat, sender_type, data.get("content"), sender_id, is_internal)
             await db.commit()
             if not message.is_internal:
                 payload = _message_payload(message)
@@ -117,7 +150,7 @@ async def chat_message(sid: str, data: dict) -> None:
                 if chat.assigned_user_id:
                     rooms.append(f"agent:{chat.assigned_user_id}")
                 await emit_unique("chat:message:new", payload, rooms)
-            else:
+            elif chat.assigned_user_id:
                 await sio.emit("chat:message:new", _message_payload(message), room=f"agent:{chat.assigned_user_id}")
             if sender_type == "customer" and chat.assigned_user_id:
                 from app.workers.ai_worker import get_agent_suggestions
@@ -129,33 +162,45 @@ async def chat_message(sid: str, data: dict) -> None:
 
 @sio.on("chat:typing:start")
 async def typing_start(sid: str, data: dict) -> None:
-    await sio.emit("chat:typing", {"chat_id": data.get("chat_id"), "typing": True, "sender_type": data.get("sender_type")}, room=f"chat:{data.get('chat_id')}", skip_sid=sid)
+    session = await sio.get_session(sid)
+    async with AsyncSessionLocal() as db:
+        chat = await _chat_for_session(db, session, _to_uuid(data["chat_id"]))
+    sender_type = "agent" if session.get("kind") == "agent" else "customer"
+    await sio.emit("chat:typing", {"chat_id": str(chat.id), "typing": True, "sender_type": sender_type}, room=f"chat:{chat.id}", skip_sid=sid)
 
 
 @sio.on("chat:typing:stop")
 async def typing_stop(sid: str, data: dict) -> None:
-    await sio.emit("chat:typing", {"chat_id": data.get("chat_id"), "typing": False, "sender_type": data.get("sender_type")}, room=f"chat:{data.get('chat_id')}", skip_sid=sid)
+    session = await sio.get_session(sid)
+    async with AsyncSessionLocal() as db:
+        chat = await _chat_for_session(db, session, _to_uuid(data["chat_id"]))
+    sender_type = "agent" if session.get("kind") == "agent" else "customer"
+    await sio.emit("chat:typing", {"chat_id": str(chat.id), "typing": False, "sender_type": sender_type}, room=f"chat:{chat.id}", skip_sid=sid)
 
 
 @sio.on("chat:typing:preview")
 async def typing_preview(sid: str, data: dict) -> None:
+    session = await sio.get_session(sid)
+    if session.get("kind") != "widget":
+        await emit_error(sid, "Typing preview is widget-only")
+        return
     async with AsyncSessionLocal() as db:
-        chat = (await db.execute(select(Chat).where(Chat.id == uuid.UUID(str(data["chat_id"]))))).scalar_one_or_none()
-        if chat and chat.assigned_user_id:
+        chat = await _chat_for_session(db, session, _to_uuid(data["chat_id"]))
+        if chat.assigned_user_id:
             await sio.emit("chat:typing:preview", {"chat_id": str(chat.id), "text": data.get("text", "")}, room=f"agent:{chat.assigned_user_id}")
 
 
 @sio.on("agent:join:chat")
 @sio.on("widget:join:chat")
 async def join_chat(sid: str, data: dict) -> None:
-    await sio.enter_room(sid, f"chat:{data.get('chat_id')}")
     session = await sio.get_session(sid)
+    async with AsyncSessionLocal() as db:
+        chat = await _chat_for_session(db, session, _to_uuid(data["chat_id"]))
+    await sio.enter_room(sid, f"chat:{chat.id}")
     if session.get("kind") == "widget":
         async with AsyncSessionLocal() as db:
-            chat = (await db.execute(select(Chat).where(Chat.id == uuid.UUID(str(data["chat_id"]))))).scalar_one_or_none()
-            if chat:
-                await sio.save_session(sid, {"kind": "widget", "chat_id": str(chat.id), "organization_id": str(chat.organization_id)})
-                await set_visitor_presence(chat, True)
+            await sio.save_session(sid, {"kind": "widget", "chat_id": str(chat.id), "organization_id": str(chat.organization_id)})
+            await set_visitor_presence(chat, True)
 
 
 @sio.on("agent:leave:chat")
@@ -174,8 +219,29 @@ async def agent_status(sid: str, data: dict) -> None:
 @sio.on("chat:assign")
 async def chat_assign(sid: str, data: dict) -> None:
     async with AsyncSessionLocal() as db:
-        chat = await get_chat(db, uuid.UUID(str(data["organization_id"])), uuid.UUID(str(data["chat_id"])))
-        chat.assigned_user_id = uuid.UUID(str(data["assigned_user_id"]))
+        session = await sio.get_session(sid)
+        if session.get("kind") != "agent":
+            await emit_error(sid, "Only agents can assign chats")
+            return
+        user = session.get("user") or {}
+        organization_id = _to_uuid(user["organization_id"])
+        chat_id = _to_uuid(data["chat_id"])
+        chat = (
+            await db.execute(select(Chat).where(Chat.id == chat_id, Chat.organization_id == organization_id).with_for_update())
+        ).scalar_one_or_none()
+        if chat is None:
+            await emit_error(sid, "Chat not found")
+            return
+        assigned_user_id = _to_uuid(data["assigned_user_id"])
+        assignee = (
+            await db.execute(
+                select(User).where(User.id == assigned_user_id, User.organization_id == organization_id, User.is_active.is_(True))
+            )
+        ).scalar_one_or_none()
+        if assignee is None:
+            await emit_error(sid, "Target agent not found in this organization")
+            return
+        chat.assigned_user_id = assigned_user_id
         chat.status = "active"
         await db.commit()
         payload = {"chat_id": str(chat.id), "assigned_user_id": str(chat.assigned_user_id)}
@@ -192,7 +258,8 @@ async def chat_transfer(sid: str, data: dict) -> None:
 @sio.on("chat:resolve")
 async def chat_resolve(sid: str, data: dict) -> None:
     async with AsyncSessionLocal() as db:
-        chat = await get_chat(db, uuid.UUID(str(data["organization_id"])), uuid.UUID(str(data["chat_id"])))
+        session = await sio.get_session(sid)
+        chat = await _chat_for_session(db, session, _to_uuid(data["chat_id"]))
         chat.status = "resolved"
         chat.resolved_at = datetime.now(UTC)
         await db.commit()
@@ -202,14 +269,17 @@ async def chat_resolve(sid: str, data: dict) -> None:
 @sio.on("chat:read")
 async def chat_read(sid: str, data: dict) -> None:
     async with AsyncSessionLocal() as db:
-        await db.execute(Message.__table__.update().where(Message.chat_id == uuid.UUID(str(data["chat_id"]))).values(is_read=True))
+        session = await sio.get_session(sid)
+        chat = await _chat_for_session(db, session, _to_uuid(data["chat_id"]))
+        await db.execute(Message.__table__.update().where(Message.chat_id == chat.id).values(is_read=True))
         await db.commit()
 
 
 @sio.on("chat:csat")
 async def chat_csat(sid: str, data: dict) -> None:
     async with AsyncSessionLocal() as db:
-        chat = await get_chat(db, uuid.UUID(str(data["organization_id"])), uuid.UUID(str(data["chat_id"])))
+        session = await sio.get_session(sid)
+        chat = await _chat_for_session(db, session, _to_uuid(data["chat_id"]))
         chat.csat_score = int(data["score"])
         chat.csat_comment = data.get("comment")
         await db.commit()
@@ -223,12 +293,56 @@ async def chat_file(sid: str, data: dict) -> None:
 
 @sio.on("chat:snooze")
 async def chat_snooze(sid: str, data: dict) -> None:
-    await sio.emit("chat:status:changed", data, room=f"agent:{data.get('agent_id')}")
+    session = await sio.get_session(sid)
+    if session.get("kind") != "agent":
+        await emit_error(sid, "Only agents can snooze chats")
+        return
+    user = session.get("user") or {}
+    async with AsyncSessionLocal() as db:
+        chat = await _chat_for_session(db, session, _to_uuid(data["chat_id"]))
+        target_agent_id = _to_uuid(data["agent_id"])
+        target = (
+            await db.execute(
+                select(User).where(
+                    User.id == target_agent_id,
+                    User.organization_id == _to_uuid(user["organization_id"]),
+                    User.is_active.is_(True),
+                )
+            )
+        ).scalar_one_or_none()
+        if target is None:
+            await emit_error(sid, "Snooze target agent not found")
+            return
+    payload = {"chat_id": str(chat.id), "agent_id": str(target_agent_id), "status": data.get("status", "snoozed")}
+    await sio.emit("chat:status:changed", payload, room=f"agent:{target_agent_id}")
 
 
 @sio.on("whisper")
 async def whisper(sid: str, data: dict) -> None:
-    await sio.emit("whisper:new", data, room=f"agent:{data.get('target_user_id')}")
+    session = await sio.get_session(sid)
+    if session.get("kind") != "agent":
+        await emit_error(sid, "Only agents can send whispers")
+        return
+    user = session.get("user") or {}
+    target_user_id = _to_uuid(data["target_user_id"])
+    async with AsyncSessionLocal() as db:
+        target = (
+            await db.execute(
+                select(User).where(
+                    User.id == target_user_id,
+                    User.organization_id == _to_uuid(user["organization_id"]),
+                    User.is_active.is_(True),
+                )
+            )
+        ).scalar_one_or_none()
+        if target is None:
+            await emit_error(sid, "Whisper target not found")
+            return
+    await sio.emit(
+        "whisper:new",
+        {"from_user_id": user["id"], "message": data.get("message", "")},
+        room=f"agent:{target_user_id}",
+    )
 
 
 async def emit_ai_suggestions(agent_id: str, chat_id: str, suggestions: list[str]) -> None:
@@ -245,7 +359,11 @@ async def _chat_payload_with_contact(db, chat: Chat) -> dict:
     payload["visitor_email"] = None
     payload["visitor_status"] = "online" if await get_redis().exists(f"presence:visitor:{chat.id}") else "offline"
     if chat.contact_id:
-        contact = (await db.execute(select(Contact).where(Contact.id == chat.contact_id))).scalar_one_or_none()
+        contact = (
+            await db.execute(
+                select(Contact).where(Contact.id == chat.contact_id, Contact.organization_id == chat.organization_id)
+            )
+        ).scalar_one_or_none()
         if contact:
             payload["visitor_name"] = contact.full_name
             payload["visitor_email"] = contact.email

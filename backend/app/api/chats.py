@@ -57,9 +57,14 @@ async def chats_with_contact_data(db: AsyncSession, chats: list[Chat]) -> list[d
     contact_ids = [chat.contact_id for chat in chats if chat.contact_id]
     contacts = {}
     if contact_ids:
+        organization_id = chats[0].organization_id
         contacts = {
             contact.id: contact
-            for contact in (await db.execute(select(Contact).where(Contact.id.in_(contact_ids)))).scalars().all()
+            for contact in (
+                await db.execute(
+                    select(Contact).where(Contact.id.in_(contact_ids), Contact.organization_id == organization_id)
+                )
+            ).scalars().all()
         }
 
     chat_ids = [chat.id for chat in chats]

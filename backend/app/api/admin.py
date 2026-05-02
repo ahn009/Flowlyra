@@ -15,6 +15,7 @@ from app.models.organization import Organization
 from app.models.proactive_trigger import ProactiveTrigger
 from app.models.routing_rule import RoutingRule
 from app.models.team import Team, team_members
+from app.models.user import User
 from app.schemas.admin import CannedCreate, MemberRequest, OrgUpdate, RuleCreate, TeamCreate, TriggerCreate
 from app.workers.system_tasks import ping
 
@@ -73,6 +74,9 @@ async def add_member(team_id: uuid.UUID, payload: MemberRequest, user: AdminUser
     team = (await db.execute(select(Team).where(Team.id == team_id, Team.organization_id == user.organization_id))).scalar_one_or_none()
     if team is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Team not found")
+    member = (await db.execute(select(User).where(User.id == payload.user_id, User.organization_id == user.organization_id))).scalar_one_or_none()
+    if member is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found")
     statement = insert(team_members).values(team_id=team_id, user_id=payload.user_id).on_conflict_do_nothing()
     await db.execute(statement)
     await db.commit()
@@ -81,6 +85,9 @@ async def add_member(team_id: uuid.UUID, payload: MemberRequest, user: AdminUser
 
 @router.delete("/teams/{team_id}/members/{uid}")
 async def remove_member(team_id: uuid.UUID, uid: uuid.UUID, user: AdminUser, db: AsyncSession = Depends(get_db)) -> dict:
+    team = (await db.execute(select(Team).where(Team.id == team_id, Team.organization_id == user.organization_id))).scalar_one_or_none()
+    if team is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Team not found")
     await db.execute(team_members.delete().where(team_members.c.team_id == team_id, team_members.c.user_id == uid))
     await db.commit()
     return {"ok": True}

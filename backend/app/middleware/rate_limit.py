@@ -13,23 +13,27 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if request.url.path in {"/health", "/docs", "/openapi.json"}:
             return await call_next(request)
 
-        redis = get_redis()
-        auth = request.headers.get("authorization", "")
-        if auth.startswith("Bearer "):
-            token_fingerprint = hashlib.sha256(auth.removeprefix("Bearer ").encode()).hexdigest()[:24]
-            principal = f"token:{token_fingerprint}"
-        else:
-            principal = request.client.host if request.client else "unknown"
-        is_auth_path = request.url.path.startswith("/api/v1/auth")
-        limit = 10 if is_auth_path else 120
-        key = f"rate:{'auth' if is_auth_path else 'api'}:{principal}"
-        count = await redis.incr(key)
-        if count == 1:
-            await redis.expire(key, 60)
-        if count > limit:
-            return Response(
-                content='{"type":"about:blank","title":"Too Many Requests","status":429,"detail":"Rate limit exceeded"}',
-                status_code=429,
-                media_type="application/problem+json",
-            )
+        try:
+            redis = get_redis()
+            auth = request.headers.get("authorization", "")
+            if auth.startswith("Bearer "):
+                token_fingerprint = hashlib.sha256(auth.removeprefix("Bearer ").encode()).hexdigest()[:24]
+                principal = f"token:{token_fingerprint}"
+            else:
+                principal = request.client.host if request.client else "unknown"
+            is_auth_path = request.url.path.startswith("/api/v1/auth")
+            limit = 10 if is_auth_path else 120
+            key = f"rate:{'auth' if is_auth_path else 'api'}:{principal}"
+            count = await redis.incr(key)
+            if count == 1:
+                await redis.expire(key, 60)
+            if count > limit:
+                return Response(
+                    content='{"type":"about:blank","title":"Too Many Requests","status":429,"detail":"Rate limit exceeded"}',
+                    status_code=429,
+                    media_type="application/problem+json",
+                )
+        except Exception:  # noqa: BLE001
+            # Fail open if Redis is unavailable to preserve API availability.
+            return await call_next(request)
         return await call_next(request)
