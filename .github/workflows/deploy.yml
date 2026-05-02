@@ -1,0 +1,76 @@
+name: Deploy ChatFlow
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: chatflow_test
+          POSTGRES_USER: cf_user
+          POSTGRES_PASSWORD: cf_pass
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U cf_user"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install backend
+        working-directory: backend
+        run: pip install -r requirements.txt -r requirements-dev.txt
+      - name: Test backend
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql+asyncpg://cf_user:cf_pass@localhost:5432/chatflow_test
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: ci-secret-key-with-enough-length-for-tests
+        run: pytest --cov=app
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Test frontend
+        working-directory: frontend
+        run: npm ci || npm install && npm test
+
+  build-and-deploy:
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker images
+        run: |
+          docker build -f docker/Dockerfile.backend -t chatflow-backend:latest backend
+          docker build -t chatflow-frontend:latest frontend
+          docker build -t chatflow-widget:latest widget
+      - name: Push images
+        if: ${{ secrets.REGISTRY_URL != '' }}
+        run: |
+          echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login "${{ secrets.REGISTRY_URL }}" -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+          docker tag chatflow-backend:latest "${{ secrets.REGISTRY_URL }}/chatflow-backend:${{ github.sha }}"
+          docker push "${{ secrets.REGISTRY_URL }}/chatflow-backend:${{ github.sha }}"
+      - name: Deploy to DigitalOcean App Platform
+        if: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN != '' && secrets.DIGITALOCEAN_APP_ID != '' }}
+        uses: digitalocean/app_action/deploy@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          app_id: ${{ secrets.DIGITALOCEAN_APP_ID }}

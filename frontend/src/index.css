@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color: #0f172a;
+  background: #f6f8fb;
+  font-family: Inter, system-ui, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: #f6f8fb;
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+}
+
+::selection {
+  background: #dbeafe;
+  color: #0f172a;
+}
+
+input,
+textarea,
+select,
+button {
+  font: inherit;
+}
+
+button,
+a,
+select {
+  transition: transform 150ms cubic-bezier(0.23, 1, 0.32, 1), background-color 150ms ease, border-color 150ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+button:active,
+a:active {
+  transform: scale(0.98);
+}
+
+.focus-ring {
+  @apply outline-none focus-visible:ring-4 focus-visible:ring-blue-100;
+}
+
+.status-waiting { @apply bg-yellow-100 text-yellow-800; }
+.status-active { @apply bg-green-100 text-green-800; }
+.status-pending { @apply bg-orange-100 text-orange-800; }
+.status-resolved { @apply bg-slate-100 text-slate-700; }
+.priority-urgent { @apply bg-red-100 text-red-800; }
+.priority-high { @apply bg-orange-100 text-orange-800; }
+.priority-medium { @apply bg-yellow-100 text-yellow-800; }
+.priority-low { @apply bg-slate-100 text-slate-700; }
