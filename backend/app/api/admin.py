@@ -198,7 +198,7 @@ async def delete_trigger(item_id: uuid.UUID, user: AdminUser, db: AsyncSession =
 
 
 @router.post("/tasks/ping")
-async def ping_worker(payload: dict[str, str] | None = None) -> dict[str, Any]:
+async def ping_worker(user: AdminUser, payload: dict[str, str] | None = None) -> dict[str, Any]:
     echo = (payload or {}).get("echo", "ping")
     result = ping.delay(echo)
     try:

@@ -28,10 +28,13 @@ def create_fastapi_app() -> FastAPI:
     @app.exception_handler(Exception)
     async def problem_details(request: Request, exc: Exception) -> JSONResponse:
         logging.exception("unhandled error path=%s", request.url.path)
+        detail = str(exc)
+        if settings.environment.lower() in {"production", "staging"}:
+            detail = "An unexpected error occurred. Please contact support."
         return JSONResponse(
             status_code=500,
             media_type="application/problem+json",
-            content={"type": "about:blank", "title": "Internal Server Error", "status": 500, "detail": str(exc)},
+            content={"type": "about:blank", "title": "Internal Server Error", "status": 500, "detail": detail},
         )
 
     @app.get("/health")
