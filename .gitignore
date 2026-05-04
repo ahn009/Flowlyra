@@ -11,6 +11,10 @@ venv/
 # Environment files
 .env
 .env.*
+!.env.example
+!.env.aws.example
+!frontend/.env.example
+!frontend/.env.aws.example
 
 # Node modules
 node_modules/
@@ -47,5 +51,4 @@ htmlcov/
 
 #docxuments
 LOCAL_DEVELOPMENT_AND_TESTING.md
-
 
