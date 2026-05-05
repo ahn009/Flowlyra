@@ -6,6 +6,7 @@ import { Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart, Respons
 import { PageHeader } from "../components/AgentLayout";
 import { Button, Card, EmptyPanel, Field, MetricCard, PageShell, PanelHeader, SelectInput, TextArea } from "../components/ui";
 import { api } from "../lib/api";
+import { useThemeStore } from "../stores/themeStore";
 
 export function AgentsPage(): JSX.Element {
   const { data = [] } = useQuery({ queryKey: ["agents"], queryFn: async () => (await api.get("/agents")).data });
@@ -22,7 +23,7 @@ export function WidgetConfigPage(): JSX.Element {
   const color = String(data?.widget_color ?? "#1E40AF");
   return (
     <PageShell>
-      <PageHeader title="Widget" action={<a className="inline-flex items-center gap-2 rounded-lg border border-border bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" href="/admin/install"><ExternalLink size={16} /> Install</a>} />
+      <PageHeader title="Widget" action={<a className="inline-flex items-center gap-2 rounded-lg border border-border bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700" href="/admin/install"><ExternalLink size={16} /> Install</a>} />
       <div className="grid grid-cols-1 gap-4 p-4 lg:grid-cols-[minmax(300px,420px)_minmax(0,1fr)] lg:gap-6 lg:p-6">
         <Card>
           <PanelHeader title="Live editor" description="Match the widget to your website and make the first customer screen feel human." />
@@ -87,7 +88,7 @@ export function InstallPage(): JSX.Element {
   );
   return (
     <PageShell>
-      <PageHeader title="Install Widget" action={<a className="inline-flex items-center gap-2 rounded-lg border border-border bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" href="http://localhost:5174/" target="_blank" rel="noreferrer"><ExternalLink size={16} /> Test page</a>} />
+      <PageHeader title="Install Widget" action={<a className="inline-flex items-center gap-2 rounded-lg border border-border bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700" href="http://localhost:5174/" target="_blank" rel="noreferrer"><ExternalLink size={16} /> Test page</a>} />
       <div className="grid gap-4 p-4 sm:p-6">
         <Card className="p-4 sm:p-5">
           <h2 className="text-lg font-black text-slate-950">Local JavaScript Link</h2>
@@ -114,7 +115,7 @@ export function InstallPage(): JSX.Element {
 }
 
 function FeatureToggle({ icon, title }: { icon: ReactElement; title: string }): JSX.Element {
-  return <div className="flex items-center gap-2 rounded-lg border border-border bg-slate-50 p-3 text-sm font-bold text-slate-700">{icon}<span className="min-w-0 truncate">{title}</span></div>;
+  return <div className="flex items-center gap-2 rounded-lg border border-border bg-slate-50 p-3 text-sm font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">{icon}<span className="min-w-0 truncate">{title}</span></div>;
 }
 
 export function RoutingRulesPage(): JSX.Element {
@@ -135,27 +136,144 @@ export function BillingPage(): JSX.Element {
 }
 
 export function AnalyticsPage(): JSX.Element {
-  const chart = [
-    { bucket: "Mon", chats: 22, p50: 40, csat: 4.6 },
-    { bucket: "Tue", chats: 31, p50: 35, csat: 4.7 },
-    { bucket: "Wed", chats: 28, p50: 42, csat: 4.4 }
-  ];
+  const theme = useThemeStore((state) => state.theme);
+  const axisColor = theme === "dark" ? "#9aacbf" : "#64748b";
+  const gridColor = theme === "dark" ? "#243244" : "#dbe3ee";
+  const tooltipStyle = theme === "dark" ? { backgroundColor: "#111b2e", border: "1px solid #243244", color: "#e6edf7" } : { backgroundColor: "#ffffff", border: "1px solid #dbe3ee", color: "#0f172a" };
+  const { data: overview } = useQuery({
+    queryKey: ["analytics", "overview"],
+    queryFn: async () => (await api.get<{
+      active_chats: number;
+      queue_length: number;
+      agents_online: number;
+      avg_wait_seconds: number;
+      todays_resolved: number;
+      todays_csat: number | null;
+    }>("/analytics/overview")).data,
+    refetchInterval: 5000
+  });
+  const { data: volume = [] } = useQuery({
+    queryKey: ["analytics", "chat-volume"],
+    queryFn: async () => (await api.get<Array<{ bucket: string; count: number }>>("/analytics/chat-volume")).data,
+    refetchInterval: 5000
+  });
+  const { data: csat = [] } = useQuery({
+    queryKey: ["analytics", "csat"],
+    queryFn: async () => (await api.get<Array<{ bucket: string; score: number }>>("/analytics/csat")).data,
+    refetchInterval: 5000
+  });
+  const { data: responseTime } = useQuery({
+    queryKey: ["analytics", "response-time"],
+    queryFn: async () => (await api.get<{ p50: number; p90: number; p99: number }>("/analytics/response-time")).data,
+    refetchInterval: 5000
+  });
+  const { data: agentStats = [] } = useQuery({
+    queryKey: ["analytics", "agent-stats"],
+    queryFn: async () => (await api.get<Array<{ agent_id: string; name: string; chats: number; csat: number | null }>>("/analytics/agent-stats")).data,
+    refetchInterval: 5000
+  });
+  const { data: missed = [] } = useQuery({
+    queryKey: ["analytics", "missed-chats"],
+    queryFn: async () => (await api.get<Array<{ id: string }>>("/analytics/missed-chats")).data,
+    refetchInterval: 5000
+  });
+
+  const todayChats = volume.reduce((total, point) => (isToday(point.bucket) ? total + point.count : total), 0);
+  const chatSeries = volume.slice(-7).map((point) => ({ bucket: shortDate(point.bucket), chats: point.count }));
+  const csatSeries = csat.slice(-7).map((point) => ({ bucket: shortDate(point.bucket), csat: Number(point.score.toFixed(2)) }));
+  const agentSeries = [...agentStats]
+    .sort((a, b) => b.chats - a.chats)
+    .slice(0, 7)
+    .map((row) => ({ agent: row.name, chats: row.chats }));
+  const csatValue = overview?.todays_csat ?? null;
+  const avgResponseSeconds = overview?.avg_wait_seconds ?? responseTime?.p50 ?? 0;
   return (
     <PageShell>
       <PageHeader title="Analytics" />
       <div className="grid gap-4 p-4 sm:p-6">
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-6">
-          {["Chats today", "Resolved", "Waiting", "CSAT", "Avg response", "Missed"].map((label, index) => <MetricCard key={label} label={label} value={index === 3 ? "0.0" : 0} tone={index === 1 ? "green" : index === 2 ? "yellow" : "slate"} />)}
+          <MetricCard label="Chats today" value={todayChats} tone="blue" />
+          <MetricCard label="Resolved" value={overview?.todays_resolved ?? 0} tone="green" />
+          <MetricCard label="Waiting" value={overview?.queue_length ?? 0} tone="yellow" />
+          <MetricCard label="CSAT" value={csatValue == null ? "-" : csatValue.toFixed(1)} tone="slate" />
+          <MetricCard label="Avg response" value={formatDuration(avgResponseSeconds)} tone="slate" />
+          <MetricCard label="Missed" value={missed.length} tone={missed.length > 0 ? "red" : "slate"} />
         </div>
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-          <Chart title="Chat volume"><AreaChart data={chart}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="bucket" /><YAxis /><Tooltip /><Area dataKey="chats" stroke="#1E40AF" fill="#DBEAFE" /></AreaChart></Chart>
-          <Chart title="Response time"><BarChart data={chart}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="bucket" /><YAxis /><Tooltip /><Bar dataKey="p50" fill="#3B82F6" /></BarChart></Chart>
-          <Chart title="CSAT trend"><LineChart data={chart}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="bucket" /><YAxis /><Tooltip /><Line dataKey="csat" stroke="#16A34A" /></LineChart></Chart>
+          <Chart title="Chat volume">
+            <AreaChart data={chatSeries}>
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+              <XAxis dataKey="bucket" stroke={axisColor} />
+              <YAxis stroke={axisColor} allowDecimals={false} />
+              <Tooltip contentStyle={tooltipStyle} />
+              <Area dataKey="chats" stroke="#1E40AF" fill="#DBEAFE" />
+            </AreaChart>
+          </Chart>
+          <Chart title="Chats by agent">
+            <BarChart data={agentSeries}>
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+              <XAxis dataKey="agent" stroke={axisColor} />
+              <YAxis stroke={axisColor} allowDecimals={false} />
+              <Tooltip contentStyle={tooltipStyle} />
+              <Bar dataKey="chats" fill="#3B82F6" />
+            </BarChart>
+          </Chart>
+          <Chart title="CSAT trend">
+            <LineChart data={csatSeries}>
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+              <XAxis dataKey="bucket" stroke={axisColor} />
+              <YAxis stroke={axisColor} domain={[0, 5]} />
+              <Tooltip contentStyle={tooltipStyle} />
+              <Line dataKey="csat" stroke="#16A34A" />
+            </LineChart>
+          </Chart>
         </div>
-        <Card><EmptyPanel title="Agent performance" description="Per-agent response time, resolution rate, and customer satisfaction will appear here." /></Card>
+        <Card className="overflow-x-auto">
+          {agentStats.length ? (
+            <table className="w-full min-w-[560px] text-left text-sm">
+              <thead className="border-b border-border bg-slate-50 dark:bg-slate-800">
+                <tr>
+                  <th className="px-4 py-3 font-bold text-slate-600 dark:text-slate-300">Agent</th>
+                  <th className="px-4 py-3 font-bold text-slate-600 dark:text-slate-300">Chats</th>
+                  <th className="px-4 py-3 font-bold text-slate-600 dark:text-slate-300">CSAT</th>
+                </tr>
+              </thead>
+              <tbody>
+                {agentStats.map((row) => (
+                  <tr key={row.agent_id} className="border-b border-border last:border-0">
+                    <td className="px-4 py-3 font-semibold text-slate-800 dark:text-slate-100">{row.name}</td>
+                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{row.chats}</td>
+                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{row.csat == null ? "-" : row.csat.toFixed(1)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <EmptyPanel title="No analytics yet" description="Live agent performance appears once conversations are active." />
+          )}
+        </Card>
       </div>
     </PageShell>
   );
+}
+
+function isToday(value: string): boolean {
+  const date = new Date(value);
+  const now = new Date();
+  return date.getUTCFullYear() === now.getUTCFullYear() && date.getUTCMonth() === now.getUTCMonth() && date.getUTCDate() === now.getUTCDate();
+}
+
+function shortDate(value: string): string {
+  const date = new Date(value);
+  return new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(date);
+}
+
+function formatDuration(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds <= 0) return "0s";
+  if (seconds < 60) return `${Math.round(seconds)}s`;
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.round(seconds % 60);
+  return `${mins}m ${secs}s`;
 }
 
 function TablePage({ title, rows, columns, action }: { title: string; rows: Record<string, unknown>[]; columns: string[]; action: string }): JSX.Element {
@@ -167,8 +285,8 @@ function TablePage({ title, rows, columns, action }: { title: string; rows: Reco
           {rows.length ? (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[720px] text-left text-sm">
-                <thead className="border-b border-border bg-slate-50 text-slate-500"><tr>{columns.map((column) => <th key={column} className="px-5 py-3 font-bold capitalize">{column.replace(/_/g, " ")}</th>)}<th className="px-5 py-3" /></tr></thead>
-                <tbody>{rows.map((row, index) => <tr key={String(row.id ?? index)} className="border-b border-border last:border-0 hover:bg-slate-50">{columns.map((column) => <td key={column} className="max-w-[280px] truncate px-5 py-4 font-medium text-slate-700">{String(row[column] ?? "")}</td>)}<td className="px-5 py-4 text-right"><Button size="sm">Edit</Button></td></tr>)}</tbody>
+                <thead className="border-b border-border bg-slate-50 text-slate-500 dark:bg-slate-800 dark:text-slate-300"><tr>{columns.map((column) => <th key={column} className="px-5 py-3 font-bold capitalize">{column.replace(/_/g, " ")}</th>)}<th className="px-5 py-3" /></tr></thead>
+                <tbody>{rows.map((row, index) => <tr key={String(row.id ?? index)} className="border-b border-border last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800">{columns.map((column) => <td key={column} className="max-w-[280px] truncate px-5 py-4 font-medium text-slate-700 dark:text-slate-200">{String(row[column] ?? "")}</td>)}<td className="px-5 py-4 text-right"><Button size="sm">Edit</Button></td></tr>)}</tbody>
               </table>
             </div>
           ) : (
@@ -193,7 +311,7 @@ function BuilderPage({ title, label }: { title: string; label: string }): JSX.El
 }
 
 function Chart({ title, children }: { title: string; children: ReactElement }): JSX.Element {
-  return <Card className="h-72 p-4"><h2 className="mb-3 font-black text-slate-950">{title}</h2><ResponsiveContainer width="100%" height="85%">{children}</ResponsiveContainer></Card>;
+  return <Card className="h-72 p-4"><h2 className="mb-3 font-black text-slate-950 dark:text-slate-100">{title}</h2><ResponsiveContainer width="100%" height="85%">{children}</ResponsiveContainer></Card>;
 }
 
 function CodeBlock({ code }: { code: string }): JSX.Element {
@@ -204,7 +322,7 @@ function CodeBlock({ code }: { code: string }): JSX.Element {
     window.setTimeout(() => setCopied(false), 1200);
   }
   return (
-    <div className="mt-4 overflow-hidden rounded-lg border border-border bg-slate-950">
+    <div className="mt-4 overflow-hidden rounded-lg border border-border bg-slate-950 dark:bg-slate-900">
       <div className="flex items-center justify-between border-b border-slate-800 px-4 py-2">
         <span className="text-xs font-semibold uppercase text-slate-400">HTML</span>
         <button onClick={() => void copy()} className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-slate-100">
@@ -226,10 +344,10 @@ function CopyLine({ label, value }: { label: string; value: string }): JSX.Eleme
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-border px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
-        <div className="font-semibold">{label}</div>
-        <div className="truncate text-slate-500">{value}</div>
+        <div className="font-semibold text-slate-900 dark:text-slate-100">{label}</div>
+        <div className="truncate text-slate-500 dark:text-slate-400">{value}</div>
       </div>
-      <button onClick={() => void copy()} className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-border px-3 py-1.5 font-semibold hover:bg-slate-50">
+      <button onClick={() => void copy()} className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-border px-3 py-1.5 font-semibold hover:bg-slate-50 dark:hover:bg-slate-800">
         {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? "Copied" : "Copy"}
       </button>
     </div>

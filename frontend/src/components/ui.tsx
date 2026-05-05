@@ -1,4 +1,6 @@
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
+import { Moon, Sun } from "lucide-react";
+import { useThemeStore } from "../stores/themeStore";
 
 export function cx(...classes: Array<string | false | null | undefined>): string {
   return classes.filter(Boolean).join(" ");
@@ -20,8 +22,8 @@ export function Button({ children, variant = "secondary", size = "md", className
         "inline-flex shrink-0 items-center justify-center gap-2 rounded-lg font-semibold outline-none transition focus-visible:ring-4 focus-visible:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-60",
         size === "sm" ? "h-9 px-3 text-sm" : "h-10 px-4 text-sm",
         variant === "primary" && "bg-primary text-white shadow-sm shadow-blue-900/10 hover:bg-primary-hover",
-        variant === "secondary" && "border border-border bg-white text-slate-700 shadow-sm shadow-slate-200/40 hover:border-slate-300 hover:bg-slate-50",
-        variant === "ghost" && "text-slate-600 hover:bg-slate-100",
+        variant === "secondary" && "border border-border bg-white text-slate-700 shadow-sm shadow-slate-200/40 hover:border-slate-300 hover:bg-slate-50 dark:bg-slate-700 dark:text-slate-200 dark:border-slate-600 dark:hover:bg-slate-600",
+        variant === "ghost" && "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700",
         variant === "danger" && "bg-danger text-white shadow-sm shadow-red-900/10 hover:bg-red-700",
         className
       )}
@@ -38,7 +40,7 @@ interface CardProps {
 }
 
 export function Card({ children, className }: CardProps): JSX.Element {
-  return <div className={cx("rounded-lg border border-border bg-white shadow-soft", className)}>{children}</div>;
+  return <div className={cx("rounded-lg border border-border bg-white shadow-soft dark:bg-slate-800 dark:shadow-none", className)}>{children}</div>;
 }
 
 interface PageShellProps {
@@ -47,7 +49,7 @@ interface PageShellProps {
 }
 
 export function PageShell({ children, className }: PageShellProps): JSX.Element {
-  return <section className={cx("min-h-[calc(100dvh-64px)] bg-[linear-gradient(180deg,#f8fafc_0%,#f6f8fb_42%,#eef3f8_100%)]", className)}>{children}</section>;
+  return <section className={cx("min-h-[calc(100dvh-64px)] bg-[linear-gradient(180deg,#f8fafc_0%,#f6f8fb_42%,#eef3f8_100%)] dark:bg-none dark:bg-slate-900", className)}>{children}</section>;
 }
 
 interface PanelHeaderProps {
@@ -78,7 +80,7 @@ interface FieldProps {
 
 export function Field({ label, children, hint }: FieldProps): JSX.Element {
   return (
-    <label className="grid gap-2 text-sm font-semibold text-slate-800">
+    <label className="grid gap-2 text-sm font-semibold text-slate-800 dark:text-slate-200">
       {label && <span>{label}</span>}
       {children}
       {hint && <span className="text-xs font-normal leading-5 text-slate-500">{hint}</span>}
@@ -90,7 +92,7 @@ export function TextInput({ className, ...props }: InputHTMLAttributes<HTMLInput
   return (
     <input
       className={cx(
-        "h-10 w-full rounded-lg border border-border bg-white px-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-300 focus:ring-4 focus:ring-blue-100",
+        "h-10 w-full rounded-lg border border-border bg-white px-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-300 focus:ring-4 focus:ring-blue-100 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500",
         className
       )}
       {...props}
@@ -102,7 +104,7 @@ export function TextArea({ className, ...props }: TextareaHTMLAttributes<HTMLTex
   return (
     <textarea
       className={cx(
-        "w-full resize-none rounded-lg border border-border bg-white px-3 py-2 text-sm leading-6 outline-none transition placeholder:text-slate-400 focus:border-blue-300 focus:ring-4 focus:ring-blue-100",
+        "w-full resize-none rounded-lg border border-border bg-white px-3 py-2 text-sm leading-6 outline-none transition placeholder:text-slate-400 focus:border-blue-300 focus:ring-4 focus:ring-blue-100 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500",
         className
       )}
       {...props}
@@ -113,7 +115,7 @@ export function TextArea({ className, ...props }: TextareaHTMLAttributes<HTMLTex
 export function SelectInput({ className, ...props }: SelectHTMLAttributes<HTMLSelectElement>): JSX.Element {
   return (
     <select
-      className={cx("h-10 w-full rounded-lg border border-border bg-white px-3 text-sm font-semibold outline-none focus:border-blue-300 focus:ring-4 focus:ring-blue-100", className)}
+      className={cx("h-10 w-full rounded-lg border border-border bg-white px-3 text-sm font-semibold outline-none focus:border-blue-300 focus:ring-4 focus:ring-blue-100 dark:bg-slate-800 dark:text-slate-100", className)}
       {...props}
     />
   );
@@ -177,4 +179,25 @@ export function Pill({ children, tone = "slate", className }: PillProps): JSX.El
     orange: "bg-orange-50 text-orange-700 ring-orange-100"
   };
   return <span className={cx("inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-bold ring-1", tones[tone], className)}>{children}</span>;
+}
+
+export function ThemeToggle(): JSX.Element {
+  const { theme, toggle } = useThemeStore();
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      aria-pressed={theme === "dark"}
+      aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+      title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+      className="inline-flex items-center gap-1 rounded-xl border border-border bg-white p-1 text-slate-600 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+    >
+      <span className={cx("inline-flex h-8 w-8 items-center justify-center rounded-lg transition", theme === "light" ? "bg-blue-100 text-blue-800" : "text-slate-500 dark:text-slate-300")}>
+        <Sun size={16} />
+      </span>
+      <span className={cx("inline-flex h-8 w-8 items-center justify-center rounded-lg transition", theme === "dark" ? "bg-slate-900 text-slate-100 dark:bg-slate-100 dark:text-slate-900" : "text-slate-500 dark:text-slate-300")}>
+        <Moon size={16} />
+      </span>
+    </button>
+  );
 }

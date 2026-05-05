@@ -3,6 +3,12 @@
 @tailwind utilities;
 
 :root {
+  --color-surface: #f6f8fb;
+  --color-surface-muted: #f1f5f9;
+  --color-ink: #0f172a;
+  --color-muted: #64748b;
+  --color-border: #dbe3ee;
+
   color: #0f172a;
   background: #f6f8fb;
   font-family: Inter, system-ui, sans-serif;
@@ -10,17 +16,31 @@
   text-rendering: optimizeLegibility;
 }
 
+html.dark {
+  --color-surface: #0b1220;
+  --color-surface-muted: #111b2e;
+  --color-ink: #e6edf7;
+  --color-muted: #9aacbf;
+  --color-border: #243244;
+
+  color: #e6edf7;
+  background: #0b1220;
+}
+
 * {
   box-sizing: border-box;
 }
 
 html {
-  background: #f6f8fb;
+  background: var(--color-surface);
 }
 
 body {
   min-width: 320px;
   margin: 0;
+  color: var(--color-ink);
+  background: var(--color-surface);
+  transition: background-color 150ms ease, color 150ms ease;
 }
 
 ::selection {

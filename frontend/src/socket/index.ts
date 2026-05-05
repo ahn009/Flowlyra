@@ -38,7 +38,17 @@ function registerListeners(instance: Socket): void {
   instance.on("connect_error", () => toast.error("Live chat connection failed"));
   instance.on("disconnect", () => toast("Live chat disconnected", { duration: 1600 }));
   instance.on("chat:message:new", (message: Message) => {
+    const activeChatId = useChatStore.getState().activeChatId;
     useChatStore.getState().addMessage(message);
+    if (message.sender_type === "customer" && !message.is_internal && activeChatId !== message.chat_id) {
+      const chat = useChatStore.getState().chats[message.chat_id];
+      useNotificationStore.getState().addNotification({
+        title: chat?.visitor_name || chat?.visitor_email || "New visitor message",
+        body: message.content ?? "New message from widget",
+        level: "info"
+      });
+      toast("New message in inbox");
+    }
     onRealtimeUpdate?.();
   });
   instance.on("chat:typing", (payload: { chat_id: string; typing: boolean }) => useChatStore.getState().setTyping(payload.chat_id, payload.typing));
@@ -49,6 +59,7 @@ function registerListeners(instance: Socket): void {
   });
   instance.on("chat:new", (payload: { chat: Chat; message?: Message | null }) => {
     useChatStore.getState().addChat(payload.message ? { ...payload.chat, last_message: { content: payload.message.content, sender_type: payload.message.sender_type, created_at: payload.message.created_at } } : payload.chat);
+    if (payload.message) useChatStore.getState().addMessage(payload.message);
     useNotificationStore.getState().addNotification({ title: "New chat", body: payload.message?.content ?? payload.chat.subject ?? "Waiting in queue", level: "info" });
     toast("New chat assigned");
     onRealtimeUpdate?.();

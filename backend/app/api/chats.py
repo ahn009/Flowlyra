@@ -45,6 +45,14 @@ async def detail(chat_id: uuid.UUID, user: Annotated[TokenUser, Depends(current_
     chat = await get_chat(db, user.organization_id, chat_id)
     messages = (await db.execute(select(Message).where(Message.chat_id == chat.id).order_by(Message.created_at.desc()).limit(50))).scalars().all()
     data = ChatOut.model_validate(chat).model_dump()
+    contact = None
+    if chat.contact_id:
+        contact = (
+            await db.execute(select(Contact).where(Contact.id == chat.contact_id, Contact.organization_id == user.organization_id))
+        ).scalar_one_or_none()
+    data["visitor_name"] = contact.full_name if contact else None
+    data["visitor_email"] = contact.email if contact else None
+    data["visitor_status"] = "online" if await get_redis().exists(f"presence:visitor:{chat.id}") else "offline"
     data["messages"] = list(reversed(messages))
     data["contact"] = {"id": str(chat.contact_id)} if chat.contact_id else None
     return data

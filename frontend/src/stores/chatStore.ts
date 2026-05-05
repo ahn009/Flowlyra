@@ -16,6 +16,7 @@ interface ChatState {
   setActiveChat: (chatId: string | null) => void;
   setSuggestions: (chatId: string, suggestions: string[]) => void;
   setVisitorStatus: (chatId: string, status: "online" | "offline") => void;
+  clearUnread: (chatId: string) => void;
 }
 
 export const useChatStore = create<ChatState>((set) => ({
@@ -28,11 +29,12 @@ export const useChatStore = create<ChatState>((set) => ({
   aiSuggestions: {},
   addChat: (chat) => set((state) => ({ chats: { ...state.chats, [chat.id]: chat } })),
   addMessage: (message) =>
-    set((state) => ({
-      messages: hasMessage(state.messages[message.chat_id] ?? [], message.id)
+    set((state) => {
+      const alreadyExists = hasMessage(state.messages[message.chat_id] ?? [], message.id);
+      const nextMessages = alreadyExists
         ? state.messages
-        : { ...state.messages, [message.chat_id]: [...(state.messages[message.chat_id] ?? []), message] },
-      chats:
+        : { ...state.messages, [message.chat_id]: [...(state.messages[message.chat_id] ?? []), message] };
+      const nextChats =
         message.is_internal || !state.chats[message.chat_id]
           ? state.chats
           : {
@@ -42,19 +44,32 @@ export const useChatStore = create<ChatState>((set) => ({
                 last_message: { content: message.content, sender_type: message.sender_type, created_at: message.created_at },
                 updated_at: message.created_at
               }
-            },
-      unreadCounts:
-        hasMessage(state.messages[message.chat_id] ?? [], message.id) || state.activeChatId === message.chat_id
-          ? state.unreadCounts
-          : { ...state.unreadCounts, [message.chat_id]: (state.unreadCounts[message.chat_id] ?? 0) + 1 }
-    })),
+            };
+      const shouldIncrementUnread =
+        !alreadyExists &&
+        !message.is_internal &&
+        message.sender_type === "customer" &&
+        state.activeChatId !== message.chat_id;
+      const nextUnread = shouldIncrementUnread
+        ? { ...state.unreadCounts, [message.chat_id]: (state.unreadCounts[message.chat_id] ?? 0) + 1 }
+        : state.unreadCounts;
+      return { messages: nextMessages, chats: nextChats, unreadCounts: nextUnread };
+    }),
   setPreview: (chatId, text) => set((state) => ({ typingPreview: { ...state.typingPreview, [chatId]: text } })),
   setTyping: (chatId, typing) => set((state) => ({ typingAgents: { ...state.typingAgents, [chatId]: typing } })),
-  setActiveChat: (chatId) => set({ activeChatId: chatId }),
+  setActiveChat: (chatId) =>
+    set((state) => ({
+      activeChatId: chatId,
+      unreadCounts: chatId ? { ...state.unreadCounts, [chatId]: 0 } : state.unreadCounts
+    })),
   setSuggestions: (chatId, suggestions) => set((state) => ({ aiSuggestions: { ...state.aiSuggestions, [chatId]: suggestions } })),
   setVisitorStatus: (chatId, status) =>
     set((state) => ({
       chats: state.chats[chatId] ? { ...state.chats, [chatId]: { ...state.chats[chatId], visitor_status: status } } : state.chats
+    })),
+  clearUnread: (chatId) =>
+    set((state) => ({
+      unreadCounts: { ...state.unreadCounts, [chatId]: 0 }
     }))
 }));
 
