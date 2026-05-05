@@ -46,9 +46,11 @@ htmlcov/
 .idea/
 .codex/
 .agents/
-.jules/
+.jules
+.stitch
 
 
-#docxuments
+#documents
 LOCAL_DEVELOPMENT_AND_TESTING.md
+REVIEW_REPORT.md
 
