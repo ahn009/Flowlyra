@@ -8,6 +8,7 @@ import { connectSocket, setRealtimeUpdateHandler } from "../socket";
 import { useAuthStore } from "../stores/authStore";
 import { useNotificationStore } from "../stores/notificationStore";
 import { Button, Pill, ThemeToggle } from "./ui";
+import flowlyraMark from "../assets/flowlyra-mark.svg";
 
 const nav = [
   { section: "Conversations", items: [
@@ -53,7 +54,7 @@ export function AgentLayout(): JSX.Element {
       <Toaster position="top-right" />
       <aside className={`fixed inset-y-0 left-0 z-20 border-r border-border bg-white text-slate-800 shadow-soft dark:bg-slate-900 dark:text-slate-100 ${sidebarWidth}`}>
         <div className="flex h-16 items-center justify-center border-b border-border px-2 md:justify-between md:px-4">
-          {!collapsed && <div className="hidden items-center gap-3 md:flex"><span className="grid h-9 w-9 place-items-center rounded-xl bg-primary font-black text-white">CF</span><span className="font-extrabold tracking-tight">ChatFlow</span></div>}
+          {!collapsed && <div className="hidden items-center gap-3 md:flex"><img src={flowlyraMark} alt="FlowLyra logo" className="h-9 w-9 rounded-xl" /><span className="font-extrabold tracking-tight">FlowLyra</span></div>}
           <button aria-label="Toggle navigation" className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white" onClick={() => setCollapsed((value) => !value)}>
             {collapsed ? <Menu size={18} /> : <ChevronLeft size={18} />}
           </button>

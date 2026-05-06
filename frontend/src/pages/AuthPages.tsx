@@ -1,12 +1,13 @@
 import { FormEvent, useState } from "react";
 import type { ReactNode } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
+import flowlyraLogo from "../assets/flowlyra-logo.svg";
 import { api } from "../lib/api";
 import { useAuthStore } from "../stores/authStore";
 import { Button, Card, Field, TextInput, ThemeToggle } from "../components/ui";
 
 export function LoginPage(): JSX.Element {
-  const [email, setEmail] = useState("admin@chatflow.dev");
+  const [email, setEmail] = useState("admin@flowlyra.dev");
   const [password, setPassword] = useState("Dev@12345");
   const [error, setError] = useState("");
   const login = useAuthStore((state) => state.login);
@@ -74,12 +75,9 @@ function AuthShell({ title, children }: { title: string; children: ReactNode }):
     <main className="relative grid min-h-screen place-items-center bg-[radial-gradient(circle_at_top_left,#dbeafe,transparent_34%),linear-gradient(#f8fafc,#eef3f8)] p-4 dark:bg-none dark:bg-slate-900">
       <div className="absolute right-4 top-4"><ThemeToggle /></div>
       <Card className="w-full max-w-sm p-6">
-        <div className="mb-6 flex items-center gap-3">
-          <span className="grid h-10 w-10 place-items-center rounded-lg bg-primary font-black text-white">CF</span>
-          <div>
-            <h1 className="text-xl font-black text-slate-950 dark:text-slate-100">ChatFlow</h1>
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Human-first support</p>
-          </div>
+        <div className="mb-6">
+          <img src={flowlyraLogo} alt="FlowLyra logo" className="h-16 w-auto" />
+          <p className="mt-2 text-xs font-semibold text-slate-500 dark:text-slate-400">AI-powered support workflow platform</p>
         </div>
         <h2 className="mb-4 text-lg font-black text-slate-950 dark:text-slate-100">{title}</h2>
         {children}

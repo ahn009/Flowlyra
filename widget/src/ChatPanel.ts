@@ -29,7 +29,7 @@ export class ChatPanel {
             <span class="cf-avatar cf-avatar-b">A</span>
           </div>
           <div>
-            <div class="cf-title">ChatFlow</div>
+            <div class="cf-title">FlowLyra</div>
             <div class="cf-subtitle"><span class="cf-status-dot"></span>${init.is_online ? "Online now" : "Away for now"}</div>
           </div>
         </div>

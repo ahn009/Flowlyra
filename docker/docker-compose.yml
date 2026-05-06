@@ -2,7 +2,7 @@ services:
   postgres:
     image: postgres:15-alpine
     environment:
-      POSTGRES_DB: chatflow
+      POSTGRES_DB: flowlyra
       POSTGRES_USER: cf_user
       POSTGRES_PASSWORD: cf_pass
     volumes:
@@ -10,7 +10,7 @@ services:
     ports:
       - "5433:5432"
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "cf_user", "-d", "chatflow"]
+      test: ["CMD", "pg_isready", "-U", "cf_user", "-d", "flowlyra"]
       interval: 10s
       retries: 5
 

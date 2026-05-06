@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ChatFlow Widget Test</title>
+    <title>FlowLyra Widget Test</title>
     <style>
       body {
         margin: 0;
@@ -64,9 +64,9 @@
     <main>
       <div class="hero">
         <section>
-          <h1>ChatFlow Widget Test</h1>
+          <h1>FlowLyra Widget Test</h1>
           <p>This page simulates a customer website. Open the chat bubble, fill the pre-chat fields, and confirm messages arrive in the agent inbox.</p>
-          <button id="reset-chatflow-session" type="button">Reset widget session</button>
+          <button id="reset-flowlyra-session" type="button">Reset widget session</button>
         </section>
         <aside class="panel">
           <div class="metric"><span>Live agents</span><strong>Online</strong></div>
@@ -77,13 +77,13 @@
       </div>
     </main>
     <script>
-      document.getElementById("reset-chatflow-session").addEventListener("click", function () {
+      document.getElementById("reset-flowlyra-session").addEventListener("click", function () {
         localStorage.removeItem("cf_session_token");
         location.reload();
       });
     </script>
     <script>
-      window.ChatFlowConfig = {
+      window.FlowLyraConfig = {
         orgSlug: "test-org",
         apiUrl: "http://localhost:8000"
       };

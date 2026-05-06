@@ -18,8 +18,8 @@ async def send_email(to_email: str, subject: str, html: str) -> None:
 
 
 async def send_invite(to_email: str, token: str) -> None:
-    await send_email(to_email, "You’re invited to ChatFlow", f"<p>Accept your invite with token <b>{token}</b>.</p>")
+    await send_email(to_email, "You’re invited to FlowLyra", f"<p>Accept your invite with token <b>{token}</b>.</p>")
 
 
 async def send_csat(to_email: str, chat_id: str) -> None:
-    await send_email(to_email, "How was your ChatFlow support?", f"<p>Please rate your chat: {chat_id}</p>")
+    await send_email(to_email, "How was your FlowLyra support?", f"<p>Please rate your chat: {chat_id}</p>")

@@ -16,8 +16,8 @@ export class Widget {
   private styleElement: HTMLStyleElement | null = null;
 
   constructor() {
-    const config = window.ChatFlowConfig;
-    if (!config?.orgSlug) throw new Error("ChatFlowConfig.orgSlug is required");
+    const config = window.FlowLyraConfig;
+    if (!config?.orgSlug) throw new Error("FlowLyraConfig.orgSlug is required");
     this.apiUrl = config.apiUrl ?? "http://localhost:8000";
     void this.boot(config.orgSlug);
   }
@@ -122,8 +122,8 @@ export class Widget {
   }
 
   private createOfflineTicket(email: string, message: string): void {
-    void fetch(`${this.apiUrl}/api/v1/widget/init`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ org_slug: window.ChatFlowConfig?.orgSlug, email, url: location.href }) });
-    console.info("ChatFlow offline message captured", message);
+    void fetch(`${this.apiUrl}/api/v1/widget/init`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ org_slug: window.FlowLyraConfig?.orgSlug, email, url: location.href }) });
+    console.info("FlowLyra offline message captured", message);
   }
 
   private setState(state: WidgetState): void {
@@ -154,8 +154,8 @@ export class Widget {
 }
 
 function bootWidget(): void {
-  window.ChatFlow?.destroy();
-  window.ChatFlow = new Widget();
+  window.FlowLyra?.destroy();
+  window.FlowLyra = new Widget();
 }
 
 if (document.readyState === "loading") {
@@ -165,5 +165,5 @@ if (document.readyState === "loading") {
 }
 
 if (import.meta.hot) {
-  import.meta.hot.dispose(() => window.ChatFlow?.destroy());
+  import.meta.hot.dispose(() => window.FlowLyra?.destroy());
 }

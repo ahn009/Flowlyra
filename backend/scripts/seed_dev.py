@@ -36,7 +36,7 @@ async def seed() -> None:
         admin = await ensure_user(
             db,
             org,
-            email="admin@chatflow.dev",
+            email="admin@flowlyra.dev",
             full_name="Admin User",
             password="Dev@12345",
             role="admin",
@@ -56,7 +56,7 @@ async def seed() -> None:
         agent1 = await ensure_user(
             db,
             org,
-            email="agent1@chatflow.dev",
+            email="agent1@flowlyra.dev",
             full_name="Ava Agent",
             password="Dev@12345",
             role="agent",
@@ -66,7 +66,7 @@ async def seed() -> None:
         agent2 = await ensure_user(
             db,
             org,
-            email="agent2@chatflow.dev",
+            email="agent2@flowlyra.dev",
             full_name="Noah Agent",
             password="Dev@12345",
             role="agent",

@@ -15,7 +15,7 @@ logging.basicConfig(level=settings.log_level)
 
 
 def create_fastapi_app() -> FastAPI:
-    app = FastAPI(title="ChatFlow API", version="1.0.0")
+    app = FastAPI(title="FlowLyra API", version="1.0.0")
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origin_list,

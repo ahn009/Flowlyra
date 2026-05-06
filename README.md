@@ -1,6 +1,6 @@
-# ChatFlow
+# FlowLyra
 
-ChatFlow is a multi-tenant, human-first customer support platform.
+FlowLyra is a multi-tenant, human-first customer support platform.
 Customers chat with real agents in real time; AI is used only for private agent reply suggestions.
 
 ## What Is In This Repository
@@ -82,7 +82,7 @@ docker compose up --build
 
 4. Default seeded login:
 
-- Email: `admin@chatflow.dev`
+- Email: `admin@flowlyra.dev`
 - Password: `Dev@12345`
 
 ## Important Environment Variables
@@ -182,7 +182,7 @@ Local development embed:
 
 ```html
 <script>
-  window.ChatFlowConfig = {
+  window.FlowLyraConfig = {
     orgSlug: "test-org",
     apiUrl: "http://localhost:8000"
   };
@@ -194,12 +194,12 @@ Production-style embed:
 
 ```html
 <script>
-  window.ChatFlowConfig = {
+  window.FlowLyraConfig = {
     orgSlug: "your-org-slug",
-    apiUrl: "https://api.chatflow.io"
+    apiUrl: "https://api.flowlyra.com"
   };
 </script>
-<script async src="https://cdn.chatflow.io/widget.js"></script>
+<script async src="https://cdn.flowlyra.com/widget.js"></script>
 ```
 
 ## Docker Images
@@ -207,9 +207,9 @@ Production-style embed:
 Build locally:
 
 ```bash
-docker build -f docker/Dockerfile.backend -t chatflow-backend:latest backend
-docker build -t chatflow-frontend:latest frontend
-docker build -t chatflow-widget:latest widget
+docker build -f docker/Dockerfile.backend -t flowlyra-backend:latest backend
+docker build -t flowlyra-frontend:latest frontend
+docker build -t flowlyra-widget:latest widget
 ```
 
 ## Production Readiness Checklist

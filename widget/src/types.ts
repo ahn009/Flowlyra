@@ -1,6 +1,6 @@
 export type WidgetState = "HIDDEN" | "BUBBLE" | "PRECHAT" | "CHATTING" | "WAITING" | "CSAT" | "OFFLINE";
 
-export interface ChatFlowConfig {
+export interface FlowLyraConfig {
   orgSlug: string;
   apiUrl?: string;
 }
@@ -42,7 +42,7 @@ export interface StartChatPayload {
 
 declare global {
   interface Window {
-    ChatFlowConfig?: ChatFlowConfig;
-    ChatFlow?: { destroy: () => void };
+    FlowLyraConfig?: FlowLyraConfig;
+    FlowLyra?: { destroy: () => void };
   }
 }

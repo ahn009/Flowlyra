@@ -4,7 +4,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: "src/Widget.ts",
-      name: "ChatFlowWidget",
+      name: "FlowLyraWidget",
       formats: ["iife"],
       fileName: () => "widget.js"
     },

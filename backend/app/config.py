@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    database_url: str = "postgresql+asyncpg://cf_user:cf_pass@localhost:5432/chatflow"
+    database_url: str = "postgresql+asyncpg://cf_user:cf_pass@localhost:5432/flowlyra"
     redis_url: str = "redis://localhost:6379/0"
     celery_broker_url: str = "redis://localhost:6379/1"
     celery_result_backend: str = "redis://localhost:6379/2"
@@ -21,11 +21,11 @@ class Settings(BaseSettings):
     openai_model: str = "gpt-4o-mini"
     aws_access_key_id: str = ""
     aws_secret_access_key: str = ""
-    aws_s3_bucket: str = "chatflow-uploads"
+    aws_s3_bucket: str = "flowlyra-uploads"
     aws_region: str = "us-east-1"
     sendgrid_api_key: str = ""
-    from_email: str = "hello@chatflow.io"
-    cloudflare_widget_url: str = "https://cdn.chatflow.io/widget.js"
+    from_email: str = "hello@flowlyra.com"
+    cloudflare_widget_url: str = "https://cdn.flowlyra.com/widget.js"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

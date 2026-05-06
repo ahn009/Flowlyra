@@ -1,4 +1,4 @@
-"""Initial ChatFlow schema.
+"""Initial FlowLyra schema.
 
 Revision ID: 001_initial_schema
 Revises:

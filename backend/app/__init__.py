@@ -1,1 +1,1 @@
-"""ChatFlow backend package."""
+"""FlowLyra backend package."""

@@ -69,5 +69,5 @@ async def password_reset(payload: PasswordResetRequest, db: AsyncSession = Depen
         token = secrets.token_urlsafe(32)
         user.invite_token = token
         await db.commit()
-        await send_email(user.email, "ChatFlow password reset", f"<p>Use this token to reset your password: <b>{token}</b></p>")
+        await send_email(user.email, "FlowLyra password reset", f"<p>Use this token to reset your password: <b>{token}</b></p>")
     return {"ok": True}

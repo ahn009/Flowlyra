@@ -3,6 +3,7 @@ import type { ReactElement } from "react";
 import { Check, Copy, ExternalLink, MessageSquare, Palette, ShieldCheck, Sparkles, UsersRound } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import flowlyraMark from "../assets/flowlyra-mark.svg";
 import { PageHeader } from "../components/AgentLayout";
 import { Button, Card, EmptyPanel, Field, MetricCard, PageShell, PanelHeader, SelectInput, TextArea } from "../components/ui";
 import { api } from "../lib/api";
@@ -46,8 +47,10 @@ export function WidgetConfigPage(): JSX.Element {
             <div className="w-full max-w-[390px] overflow-hidden rounded-lg border border-slate-200 bg-white shadow-2xl">
               <div className="p-5 text-white" style={{ background: color }}>
                 <div className="flex items-center gap-3">
-                  <div className="grid h-10 w-10 place-items-center rounded-full bg-white font-black" style={{ color }}>CF</div>
-                  <div><div className="font-black">ChatFlow</div><div className="text-xs opacity-85">Online now</div></div>
+                  <div className="grid h-10 w-10 place-items-center rounded-full bg-white">
+                    <img src={flowlyraMark} alt="FlowLyra mark" className="h-8 w-8 rounded-lg" />
+                  </div>
+                  <div><div className="font-black">FlowLyra</div><div className="text-xs opacity-85">Online now</div></div>
                 </div>
                 <div className="mt-5 text-2xl font-black leading-tight">{data?.widget_greeting ?? "Hi! How can we help you today?"}</div>
               </div>
@@ -68,7 +71,7 @@ export function InstallPage(): JSX.Element {
   const orgSlug = String(data?.slug ?? "test-org");
   const localSnippet = useMemo(
     () => `<script>
-  window.ChatFlowConfig = {
+  window.FlowLyraConfig = {
     orgSlug: "${orgSlug}",
     apiUrl: "http://localhost:8000"
   };
@@ -78,12 +81,12 @@ export function InstallPage(): JSX.Element {
   );
   const productionSnippet = useMemo(
     () => `<script>
-  window.ChatFlowConfig = {
+  window.FlowLyraConfig = {
     orgSlug: "${orgSlug}",
-    apiUrl: "https://api.chatflow.io"
+    apiUrl: "https://api.flowlyra.com"
   };
 </script>
-<script async src="https://cdn.chatflow.io/widget.js"></script>`,
+<script async src="https://cdn.flowlyra.com/widget.js"></script>`,
     [orgSlug]
   );
   return (
@@ -106,7 +109,7 @@ export function InstallPage(): JSX.Element {
             <CopyLine label="Local widget source" value="http://localhost:5174/src/Widget.ts" />
             <CopyLine label="Local test page" value="http://localhost:5174/" />
             <CopyLine label="Local API" value="http://localhost:8000" />
-            <CopyLine label="Production CDN" value="https://cdn.chatflow.io/widget.js" />
+            <CopyLine label="Production CDN" value="https://cdn.flowlyra.com/widget.js" />
           </div>
         </Card>
       </div>
