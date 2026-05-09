@@ -108,6 +108,9 @@ export class Widget {
     this.socket.on<{ chat_id: string }>("chat:resolved", (payload) => {
       if (payload.chat_id === this.chatId) this.setState("CSAT");
     });
+    this.socket.on<{ message: string }>("error", (payload) => {
+      console.error("[FlowLyra] socket error:", payload.message);
+    });
   }
 
   private startChat(name: string, email: string, subject: string, message: string): void {
@@ -117,6 +120,17 @@ export class Widget {
 
   private send(text: string): void {
     if (!this.initData || !this.chatId) return;
+    // Show the message optimistically so the customer sees it immediately,
+    // even if the server echo is delayed or fails.
+    this.panel?.addMessage({
+      id: `opt-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      chat_id: this.chatId,
+      sender_type: "customer",
+      content: text,
+      content_type: "text",
+      is_internal: false,
+      created_at: new Date().toISOString(),
+    });
     this.socket?.sendMessage({ organization_id: this.initData.organization_id, chat_id: this.chatId, content: text, sender_type: "customer" });
     this.socket?.typing(this.chatId, false);
   }

@@ -10,6 +10,7 @@ export class ChatPanel {
   input = document.createElement("textarea");
   fileInput = document.createElement("input");
   private renderedMessageIds = new Set<string>();
+  private optimisticContents = new Set<string>();
 
   constructor(init: WidgetInitResponse, private handlers: {
     onClose: () => void;
@@ -78,6 +79,19 @@ export class ChatPanel {
   addMessage(message: Message): void {
     if (message.is_internal) return;
     if (this.renderedMessageIds.has(message.id)) return;
+
+    // Skip server echoes of messages already rendered optimistically.
+    const isOptimistic = message.id.startsWith("opt-");
+    if (isOptimistic) {
+      this.optimisticContents.add(message.content ?? "");
+    } else if (message.sender_type === "customer" && this.optimisticContents.has(message.content ?? "")) {
+      // Server echo of an optimistic message - track the real id but
+      // don't render a duplicate bubble.
+      this.optimisticContents.delete(message.content ?? "");
+      this.renderedMessageIds.add(message.id);
+      return;
+    }
+
     this.renderedMessageIds.add(message.id);
     const node = document.createElement("div");
     node.className = message.sender_type === "customer" ? "cf-msg cf-customer" : message.sender_type === "agent" ? "cf-msg cf-agent" : "cf-system";

@@ -42,14 +42,17 @@ async def _chat_for_session(db, session: dict, chat_id: uuid.UUID) -> Chat:
     raise ValueError("Unauthorized socket session")
 
 
-async def emit_unique(event: str, payload: dict, rooms: list[str]) -> None:
-    sent: set[str] = set()
+async def emit_to_rooms(event: str, payload: dict, rooms: list[str]) -> None:
+    """Emit an event to multiple rooms.
+
+    Uses the standard ``sio.emit`` per room so that the
+    ``AsyncRedisManager`` correctly publishes across all server
+    processes.  The previous implementation manually iterated
+    ``get_participants`` which only returns *local* sids and silently
+    dropped messages destined for sids on other workers.
+    """
     for room in rooms:
-        for sid, _ in sio.manager.get_participants("/", room):
-            if sid in sent:
-                continue
-            sent.add(sid)
-            await sio.emit(event, payload, to=sid)
+        await sio.emit(event, payload, room=room)
 
 
 async def set_visitor_presence(chat: Chat, online: bool) -> None:
@@ -117,6 +120,16 @@ async def chat_start(sid: str, data: dict) -> None:
             payload = {"chat": await _chat_payload_with_contact(db, chat), "message": _message_payload(message) if message else None}
             await sio.emit("chat:started", payload, to=sid)
             await sio.emit("chat:new", payload, room=f"org:{chat.organization_id}")
+            await sio.emit(
+                "notification",
+                {
+                    "title": "New incoming chat",
+                    "body": (message.content if message and message.content else chat.subject) or "A visitor started a chat",
+                    "level": "info",
+                    "chat_id": str(chat.id),
+                },
+                room=f"org:{chat.organization_id}",
+            )
             if chat.assigned_user_id and message:
                 from app.workers.ai_worker import get_agent_suggestions
 
@@ -149,7 +162,18 @@ async def chat_message(sid: str, data: dict) -> None:
                 rooms = [f"chat:{chat.id}", f"org:{chat.organization_id}"]
                 if chat.assigned_user_id:
                     rooms.append(f"agent:{chat.assigned_user_id}")
-                await emit_unique("chat:message:new", payload, rooms)
+                await emit_to_rooms("chat:message:new", payload, rooms)
+                if sender_type == "customer":
+                    await sio.emit(
+                        "notification",
+                        {
+                            "title": "New visitor message",
+                            "body": (message.content or "Visitor sent a new message")[:180],
+                            "level": "info",
+                            "chat_id": str(chat.id),
+                        },
+                        room=f"org:{chat.organization_id}",
+                    )
             elif chat.assigned_user_id:
                 await sio.emit("chat:message:new", _message_payload(message), room=f"agent:{chat.assigned_user_id}")
             if sender_type == "customer" and chat.assigned_user_id:
@@ -194,13 +218,33 @@ async def typing_preview(sid: str, data: dict) -> None:
 @sio.on("widget:join:chat")
 async def join_chat(sid: str, data: dict) -> None:
     session = await sio.get_session(sid)
-    async with AsyncSessionLocal() as db:
-        chat = await _chat_for_session(db, session, _to_uuid(data["chat_id"]))
-    await sio.enter_room(sid, f"chat:{chat.id}")
+    chat_id = _to_uuid(data["chat_id"])
+
     if session.get("kind") == "widget":
+        # Widget sessions may not yet have organization_id (e.g. on
+        # reconnect).  Look up the chat directly so we can populate
+        # the session before any authorization check.
         async with AsyncSessionLocal() as db:
-            await sio.save_session(sid, {"kind": "widget", "chat_id": str(chat.id), "organization_id": str(chat.organization_id)})
-            await set_visitor_presence(chat, True)
+            chat = (
+                await db.execute(select(Chat).where(Chat.id == chat_id))
+            ).scalar_one_or_none()
+            if chat is None:
+                await emit_error(sid, "Chat not found")
+                return
+            # Persist org linkage so subsequent calls succeed.
+            await sio.save_session(sid, {
+                "kind": "widget",
+                "chat_id": str(chat.id),
+                "organization_id": str(chat.organization_id),
+            })
+        await sio.enter_room(sid, f"chat:{chat.id}")
+        await set_visitor_presence(chat, True)
+        return
+
+    # Agent path
+    async with AsyncSessionLocal() as db:
+        chat = await _chat_for_session(db, session, chat_id)
+    await sio.enter_room(sid, f"chat:{chat.id}")
 
 
 @sio.on("agent:leave:chat")
