@@ -5,7 +5,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api import admin, agents, analytics, auth, chats, contacts, tickets, upload, widget
+from app.api import admin, agents, analytics, auth, chats, contacts, public, tickets, upload, widget
 from app.config import get_settings
 from app.middleware.rate_limit import RateLimitMiddleware
 from app.socket_manager import sio
@@ -19,7 +19,11 @@ def create_fastapi_app() -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origin_list,
-        allow_credentials=True,
+        # The widget is embedded on customer-owned websites, so production
+        # deployments commonly use CORS_ORIGINS="*". Credentials are not
+        # cookie-based in FlowLyra (dashboard auth uses Bearer tokens), and
+        # wildcard origins are invalid when credentials are enabled.
+        allow_credentials="*" not in settings.cors_origin_list,
         allow_methods=["*"],
         allow_headers=["*"],
     )
@@ -41,7 +45,18 @@ def create_fastapi_app() -> FastAPI:
     async def health() -> dict:
         return {"ok": True}
 
-    for router in (auth.router, widget.router, chats.router, tickets.router, contacts.router, agents.router, admin.router, analytics.router, upload.router):
+    for router in (
+        auth.router,
+        public.router,
+        widget.router,
+        chats.router,
+        tickets.router,
+        contacts.router,
+        agents.router,
+        admin.router,
+        analytics.router,
+        upload.router,
+    ):
         app.include_router(router, prefix="/api/v1")
     return app
 

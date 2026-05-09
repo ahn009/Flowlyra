@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Clock, Mail, MessageSquare, Search, UserRound, Users } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Clock, Globe2, MessageSquare, Search, UserRound, Users } from "lucide-react";
 import { api } from "../lib/api";
 import { PageHeader } from "../components/AgentLayout";
 import { Card, EmptyPanel, PageShell, Pill, TextInput } from "../components/ui";
@@ -13,6 +12,7 @@ interface Contact {
   created_at: string;
   chat_count?: number;
   last_seen_at?: string | null;
+  ip_address?: string | null;
 }
 
 export function ContactsPage(): JSX.Element {
@@ -38,12 +38,13 @@ export function ContactsPage(): JSX.Element {
             <div className="p-6 text-center text-sm font-semibold text-slate-500 dark:text-slate-400">Loading contacts...</div>
           ) : data.length ? (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[640px] text-left text-sm">
+              <table className="w-full min-w-[760px] text-left text-sm">
                 <thead className="border-b border-border bg-slate-50 dark:bg-slate-800/50">
                   <tr>
                     <th className="px-5 py-3 font-bold text-slate-600 dark:text-slate-300">Contact</th>
                     <th className="px-5 py-3 font-bold text-slate-600 dark:text-slate-300">Email</th>
                     <th className="px-5 py-3 font-bold text-slate-600 dark:text-slate-300">Chats</th>
+                    <th className="px-5 py-3 font-bold text-slate-600 dark:text-slate-300">IP address</th>
                     <th className="px-5 py-3 font-bold text-slate-600 dark:text-slate-300">Last seen</th>
                   </tr>
                 </thead>
@@ -63,6 +64,12 @@ export function ContactsPage(): JSX.Element {
                         <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
                           <MessageSquare size={14} />
                           {contact.chat_count ?? 0}
+                        </div>
+                      </td>
+                      <td className="px-5 py-4 text-slate-600 dark:text-slate-400">
+                        <div className="flex items-center gap-1.5">
+                          <Globe2 size={14} />
+                          {contact.ip_address || "Unknown"}
                         </div>
                       </td>
                       <td className="px-5 py-4 text-slate-500 dark:text-slate-400">

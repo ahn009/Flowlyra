@@ -31,6 +31,7 @@ async def create_or_resume_session(
     referrer: str | None,
     email: str | None = None,
     full_name: str | None = None,
+    ip_address: str | None = None,
 ) -> tuple[Session, Chat | None]:
     session = None
     if session_token:
@@ -51,11 +52,14 @@ async def create_or_resume_session(
             session_token=secrets.token_urlsafe(48),
             current_url=current_url,
             referrer=referrer,
+            ip_address=ip_address,
         )
         db.add(session)
     else:
         session.current_url = current_url
         session.referrer = referrer
+        if ip_address:
+            session.ip_address = ip_address
         session.page_views += 1
         session.last_seen_at = datetime.now(UTC)
         if contact:
@@ -88,6 +92,7 @@ async def start_chat(
             await db.flush()
         else:
             contact.full_name = name or contact.full_name
+        contact.total_chats = (contact.total_chats or 0) + 1
         session.contact_id = contact.id
     elif name and session.contact_id:
         contact = (await db.execute(select(Contact).where(Contact.organization_id == organization_id, Contact.id == session.contact_id))).scalar_one_or_none()
@@ -123,6 +128,12 @@ async def add_message(
 ) -> Message:
     if sender_type == "agent" and chat.first_response_at is None and not is_internal:
         chat.first_response_at = datetime.now(UTC)
+    if not is_internal:
+        if sender_type == "agent":
+            chat.status = "active"
+        elif sender_type == "customer":
+            chat.resolved_at = None
+            chat.status = "active" if chat.assigned_user_id else "waiting"
     message = Message(
         chat_id=chat.id,
         sender_type=sender_type,
