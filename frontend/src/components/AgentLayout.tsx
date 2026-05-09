@@ -45,6 +45,9 @@ export function AgentLayout(): JSX.Element {
     connectSocket();
     setRealtimeUpdateHandler(() => {
       void queryClient.invalidateQueries({ queryKey: ["chats"] });
+      void queryClient.invalidateQueries({ queryKey: ["tickets"] });
+      void queryClient.invalidateQueries({ queryKey: ["analytics"] });
+      void queryClient.invalidateQueries({ queryKey: ["contacts"] });
     });
     return () => setRealtimeUpdateHandler(null);
   }, [queryClient, user?.id]);
@@ -136,7 +139,7 @@ export function AgentLayout(): JSX.Element {
 
 export function PageHeader({ title, action }: { title: string; action?: ReactNode }): JSX.Element {
   return (
-    <div className="flex min-h-[64px] flex-col gap-3 border-b border-border bg-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 dark:bg-slate-800">
+    <div className="flex min-h-[64px] flex-col gap-3 border-b border-border bg-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 dark:bg-slate-900">
       <div className="min-w-0">
         <h1 className="truncate text-xl font-black tracking-tight text-ink">{title}</h1>
       </div>

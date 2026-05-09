@@ -27,9 +27,9 @@ export function InboxPage(): JSX.Element {
               <MetricCard label="Online" value={online} tone="blue" />
             </div>
             <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-3">
-              {["All", "Waiting", "Active", "Resolved"].map((label, index) => <button key={label} className={`shrink-0 rounded-lg border px-3 py-1.5 text-sm font-semibold ${index === 0 ? "border-blue-200 bg-blue-50 text-primary dark:border-blue-900 dark:bg-blue-950/50 dark:text-blue-200" : "border-border text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"}`}>{label}</button>)}
+              {["All", "Waiting", "Active", "Resolved"].map((label, index) => <button key={label} className={`shrink-0 rounded-lg border px-3 py-1.5 text-sm font-semibold ${index === 0 ? "border-blue-200 bg-blue-50 text-primary dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-300" : "border-border text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"}`}>{label}</button>)}
             </div>
-            <label className="flex items-center gap-2 rounded-lg border border-border bg-white px-3 text-sm text-slate-500 focus-within:border-blue-300 focus-within:ring-4 focus-within:ring-blue-100 dark:bg-slate-800 dark:text-slate-300">
+            <label className="flex items-center gap-2 rounded-lg border border-border bg-white px-3 text-sm text-slate-500 focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-100 dark:bg-slate-800 dark:text-slate-400 dark:focus-within:border-blue-500 dark:focus-within:ring-blue-900/40">
               <Search size={16} /> <TextInput className="border-0 px-0 shadow-none focus:ring-0" placeholder="Search chats" />
             </label>
           </div>

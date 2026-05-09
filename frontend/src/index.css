@@ -8,12 +8,17 @@
   --color-ink: #0f172a;
   --color-muted: #64748b;
   --color-border: #dbe3ee;
+  --color-card: #ffffff;
+  --color-card-hover: #f8fafc;
+  --color-heading: #0f172a;
+  --color-body: #475569;
 
   color: #0f172a;
   background: #f6f8fb;
   font-family: Inter, system-ui, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 html.dark {
@@ -22,9 +27,14 @@ html.dark {
   --color-ink: #e6edf7;
   --color-muted: #9aacbf;
   --color-border: #243244;
+  --color-card: #131c2e;
+  --color-card-hover: #1a2540;
+  --color-heading: #f0f4fa;
+  --color-body: #9aacbf;
 
   color: #e6edf7;
   background: #0b1220;
+  color-scheme: dark;
 }
 
 * {
@@ -46,6 +56,11 @@ body {
 ::selection {
   background: #dbeafe;
   color: #0f172a;
+}
+
+html.dark ::selection {
+  background: #1e3a5f;
+  color: #e6edf7;
 }
 
 input,
@@ -78,14 +93,22 @@ a:active {
 }
 
 .focus-ring {
-  @apply outline-none focus-visible:ring-4 focus-visible:ring-blue-100;
+  @apply outline-none focus-visible:ring-4 focus-visible:ring-blue-100 dark:focus-visible:ring-blue-900/40;
 }
 
-.status-waiting { @apply bg-yellow-100 text-yellow-800; }
-.status-active { @apply bg-green-100 text-green-800; }
-.status-pending { @apply bg-orange-100 text-orange-800; }
-.status-resolved { @apply bg-slate-100 text-slate-700; }
-.priority-urgent { @apply bg-red-100 text-red-800; }
-.priority-high { @apply bg-orange-100 text-orange-800; }
-.priority-medium { @apply bg-yellow-100 text-yellow-800; }
-.priority-low { @apply bg-slate-100 text-slate-700; }
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+html.dark ::-webkit-scrollbar-thumb { background: #334155; }
+
+/* Status + priority badges */
+.status-waiting { @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300; }
+.status-active { @apply bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300; }
+.status-pending { @apply bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300; }
+.status-resolved { @apply bg-slate-100 text-slate-700 dark:bg-slate-700/40 dark:text-slate-300; }
+.status-open { @apply bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300; }
+.priority-urgent { @apply bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300; }
+.priority-high { @apply bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300; }
+.priority-medium { @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300; }
+.priority-low { @apply bg-slate-100 text-slate-700 dark:bg-slate-700/40 dark:text-slate-300; }
