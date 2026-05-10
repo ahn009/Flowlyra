@@ -27,6 +27,7 @@ import {
   TermsPage
 } from "./pages/PublicPages";
 import { useAuthStore } from "./stores/authStore";
+import { registerNotificationSoundUnlock } from "./lib/notificationSound";
 
 function AuthGuard(): JSX.Element {
   const user = useAuthStore((state) => state.user);
@@ -68,6 +69,10 @@ function AuthGuard(): JSX.Element {
 }
 
 export function App(): JSX.Element {
+  useEffect(() => {
+    registerNotificationSoundUnlock();
+  }, []);
+
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
