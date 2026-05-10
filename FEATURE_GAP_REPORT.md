@@ -3,9 +3,9 @@
 **Generated:** 2026-05-10
 **Analyzed by:** Jcode Agent
 **Total Features Checked:** 428
-**Present:** 70 (16.4%)
-**Partial:** 93 (21.7%)
-**Missing:** 265 (61.9%)
+**Present:** 75 (17.5%)
+**Partial:** 91 (21.3%)
+**Missing:** 262 (61.2%)
 
 ---
 
@@ -80,9 +80,9 @@ Missing Categories (most gaps first):
 
 | Category | Total | Present | Partial | Missing |
 |----------|-------|---------|---------|---------|
-| Chat Widget | 36 | 15 | 14 | 7 |
+| Chat Widget | 36 | 17 | 13 | 6 |
 | Dashboard - Home | 6 | 0 | 3 | 3 |
-| Dashboard - Chats | 18 | 7 | 9 | 2 |
+| Dashboard - Chats | 18 | 8 | 8 | 2 |
 | Dashboard - Archives | 7 | 0 | 2 | 5 |
 | Dashboard - Engage | 15 | 1 | 5 | 9 |
 | Reports & Analytics | 21 | 4 | 8 | 9 |
@@ -93,7 +93,7 @@ Missing Categories (most gaps first):
 | Sales & Ecommerce | 11 | 0 | 2 | 9 |
 | Team Management | 13 | 5 | 3 | 5 |
 | Admin/Settings | 15 | 4 | 2 | 9 |
-| Security | 18 | 4 | 6 | 8 |
+| Security | 18 | 5 | 6 | 7 |
 | Real-Time | 8 | 5 | 3 | 0 |
 | API Platform | 23 | 1 | 4 | 18 |
 | Integrations | 22 | 0 | 4 | 18 |
@@ -104,7 +104,7 @@ Missing Categories (most gaps first):
 | Model Fields | 14 | 6 | 2 | 6 |
 | API Endpoints | 23 | 8 | 6 | 9 |
 | Frontend Pages | 45 | 18 | 6 | 21 |
-| Security Checks | 15 | 4 | 5 | 6 |
+| Security Checks | 15 | 5 | 5 | 5 |
 
 ---
 
@@ -126,7 +126,7 @@ Legend: ✅ PRESENT, ⚠️ PARTIAL, ❌ MISSING.
 | 1.8 | Rich Messages Cards | ❌ MISSING | `Message.content_type` exists in `backend/app/models/message.py:19`, but widget renders text only in `widget/src/ChatPanel.ts:78-104`. |
 | 1.9 | Rich Messages Carousels | ❌ MISSING | No carousel message metadata renderer. |
 | 1.10 | Quick Reply Buttons | ⚠️ PARTIAL | Static quick topics in `widget/src/ChatPanel.ts:141-166`; no message-level quick replies. |
-| 1.11 | File Upload Visitor | ⚠️ PARTIAL | Widget file button sends filename text only `widget/src/Widget.ts:59`; real upload endpoint exists for agents only `backend/app/api/upload.py:12-13`. |
+| 1.11 | File Upload Visitor | ✅ PRESENT | Widget uploads via `POST /api/v1/upload/widget` in `widget/src/Widget.ts:163-184`; backend validates session/chat and stores file metadata through socket messages in `backend/app/api/upload.py:22-39`, `backend/app/socket_manager.py:160-172`. |
 | 1.12 | Emoji Picker | ❌ MISSING | No emoji picker dependency or widget UI. |
 | 1.13 | Agent Profiles in Widget | ⚠️ PARTIAL | Static agent avatars/header in `widget/src/ChatPanel.ts:25-35`; no real assigned agent name/avatar. |
 | 1.14 | Typing Indicators | ✅ PRESENT | Widget typing indicator `widget/src/ChatPanel.ts:89-96`; socket handlers `backend/app/socket_manager.py:184-199`. |
@@ -147,7 +147,7 @@ Legend: ✅ PRESENT, ⚠️ PARTIAL, ❌ MISSING.
 | 1.29 | Persistent Chat | ⚠️ PARTIAL | Session token local storage in `widget/src/utils.ts:1-8`; no email link continuation. |
 | 1.30 | Direct Chat Link/Page | ❌ MISSING | No standalone public chat route. |
 | 1.31 | Voice/Video/Screen Sharing | ❌ MISSING | No WebRTC. |
-| 1.32 | Credit Card Masking | ❌ MISSING | No message sanitization/masking. |
+| 1.32 | Credit Card Masking | ✅ PRESENT | `backend/app/services/chat_service.py:19-32` masks 13-19 digit card-like numbers before message persistence. |
 | 1.33 | Lazy Loading | ⚠️ PARTIAL | Widget boot is async, but init call runs immediately in `widget/src/Widget.ts:18-23`; no idle/interaction lazy init. |
 | 1.34 | Widget Preview | ✅ PRESENT | Preview in `frontend/src/pages/AdminPages.tsx:196-215`. |
 | 1.35 | Multiple Widgets | ❌ MISSING | Widget config stored on Organization only `backend/app/models/organization.py:23-28`. |
@@ -179,7 +179,7 @@ Legend: ✅ PRESENT, ⚠️ PARTIAL, ❌ MISSING.
 | 3.9 | Chat Transfer | ⚠️ PARTIAL | API/socket transfer exists `backend/app/api/chats.py:197-207`, `backend/app/socket_manager.py:273-277`; UI action placeholder only. |
 | 3.10 | Chat Notes | ✅ PRESENT | API note creates internal message `backend/app/api/chats.py:228-235`; ChatPage noteMode `frontend/src/pages/ChatPage.tsx:29-57`. |
 | 3.11 | Customer Details Panel | ⚠️ PARTIAL | Visitor panel `frontend/src/pages/ChatPage.tsx:181-223`; lacks device/custom/ecommerce/history depth. |
-| 3.12 | File Sharing Agent | ⚠️ PARTIAL | Upload endpoint `backend/app/api/upload.py:12-13`; ChatPage buttons placeholders, no actual attach/send. |
+| 3.12 | File Sharing Agent | ✅ PRESENT | Agent composer uploads to `/upload/`, sends file metadata through socket, and renders attachment links in `frontend/src/pages/ChatPage.tsx:61-75`, `frontend/src/pages/ChatPage.tsx:157-184`, `backend/app/socket_manager.py:160-172`. |
 | 3.13 | Emojis & GIFs | ❌ MISSING | No picker/Giphy. |
 | 3.14 | Chat Actions | ⚠️ PARTIAL | Resolve API and button; assign/snooze placeholder `frontend/src/pages/ChatPage.tsx:94-99`. Ban API exists `backend/app/api/chats.py:247-250`. |
 | 3.15 | Multi-Chat Handling | ⚠️ PARTIAL | Agent max chats field exists `backend/app/models/user.py:24`; no visual tabs. |
@@ -407,7 +407,7 @@ Legend: ✅ PRESENT, ⚠️ PARTIAL, ❌ MISSING.
 | 14.4 | JWT + Refresh Rotation | ⚠️ PARTIAL | JWT access/refresh exists `backend/app/api/auth.py`; not HTTP-only cookies/rotation DB. |
 | 14.5 | RBAC | ⚠️ PARTIAL | `require_role` used on admin endpoints; not granular. |
 | 14.6 | Audit Logging | ❌ MISSING | No AuditLog model. |
-| 14.7 | Credit Card Masking | ❌ MISSING | No mask pipeline. |
+| 14.7 | Credit Card Masking | ✅ PRESENT | Chat messages are masked server-side by `mask_sensitive_message` in `backend/app/services/chat_service.py:19-32` before save/broadcast. |
 | 14.8 | Visitor Banning | ⚠️ PARTIAL | Ban endpoint changes chat status only `backend/app/api/chats.py:247-250`; no IP/session block enforcement. |
 | 14.9 | GDPR Export | ❌ MISSING | No export endpoint. |
 | 14.10 | GDPR Deletion | ⚠️ PARTIAL | Contact delete cascades related data `backend/app/api/contacts.py:65-77`. |
@@ -687,7 +687,7 @@ Legend: ✅ PRESENT, ⚠️ PARTIAL, ❌ MISSING.
 | S9 | CSRF protection | ⚠️ PARTIAL | Bearer token architecture; no CSRF tokens. |
 | S10 | SQL injection prevention | ✅ PRESENT | SQLAlchemy. |
 | S11 | Tenant isolation | ⚠️ PARTIAL | Widespread org filters; no comprehensive tests. |
-| S12 | Credit card masking | ❌ MISSING | No masking. |
+| S12 | Credit card masking | ✅ PRESENT | Server-side regex masking for card-like numbers before persistence in `backend/app/services/chat_service.py:19-32`. |
 | S13 | Audit logging | ❌ MISSING | No AuditLog. |
 | S14 | GDPR export | ❌ MISSING | No export. |
 | S15 | GDPR deletion | ⚠️ PARTIAL | Contact delete endpoint. |
@@ -734,5 +734,6 @@ Multi-channel integrations, campaigns/goals, full ticketing, KB, reporting expor
 | Area | Changes |
 |------|---------|
 | Widget config and visitor persistence | Added widget theme, domain allowlist, configurable pre-chat fields, post-chat survey settings, visitor history endpoint, unread badge, all-position widget CSS, and phone/custom pre-chat persistence in `backend/app/models/organization.py`, `backend/migrations/versions/002_widget_config_fields.py`, `backend/app/api/widget.py`, `backend/app/services/chat_service.py`, `backend/app/socket_manager.py`, `widget/src/*`, and `frontend/src/pages/AdminPages.tsx`. |
+| File upload and PCI masking | Added authenticated and widget-scoped upload flows, file metadata persistence/rendering, and server-side credit-card masking in `backend/app/api/upload.py`, `backend/app/services/chat_service.py`, `backend/app/socket_manager.py`, `widget/src/*`, `frontend/src/pages/ChatPage.tsx`, and `frontend/src/types/index.ts`. |
 
 Initial analysis report was created after codebase exploration, stack/config/model/API/frontend/test review, and feature-by-feature comparison.

@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 import secrets
 import uuid
+import re
 
 from fastapi import HTTPException, status
 from sqlalchemy import or_, select
@@ -14,6 +15,21 @@ from app.models.session import Session
 from app.models.ticket import Ticket
 from app.services.analytics_service import log_event
 from app.services.routing_service import route_chat
+
+CARD_RE = re.compile(r"(?<!\d)(?:\d[ -]?){13,19}(?!\d)")
+
+
+def mask_sensitive_message(content: str | None) -> str | None:
+    if not content:
+        return content
+
+    def mask(match: re.Match[str]) -> str:
+        digits = re.sub(r"\D", "", match.group(0))
+        if len(digits) < 13 or len(digits) > 19:
+            return match.group(0)
+        return f"[masked card ending {digits[-4:]}]"
+
+    return CARD_RE.sub(mask, content)
 
 
 async def get_chat(db: AsyncSession, organization_id: uuid.UUID, chat_id: uuid.UUID) -> Chat:
@@ -112,7 +128,7 @@ async def start_chat(
     await route_chat(db, chat)
     message = None
     if content:
-        message = Message(chat_id=chat.id, sender_type="customer", sender_id=session.contact_id, content=content)
+        message = Message(chat_id=chat.id, sender_type="customer", sender_id=session.contact_id, content=mask_sensitive_message(content))
         db.add(message)
         await log_event(db, organization_id, "message_created", chat_id=chat.id, contact_id=session.contact_id)
     await log_event(db, organization_id, "chat_started", chat_id=chat.id, contact_id=session.contact_id)
@@ -146,7 +162,7 @@ async def add_message(
         chat_id=chat.id,
         sender_type=sender_type,
         sender_id=sender_id,
-        content=content,
+        content=mask_sensitive_message(content),
         content_type=content_type,
         file_url=file_url,
         file_name=file_name,

@@ -95,7 +95,10 @@ export class ChatPanel {
     this.renderedMessageIds.add(message.id);
     const node = document.createElement("div");
     node.className = message.sender_type === "customer" ? "cf-msg cf-customer" : message.sender_type === "agent" ? "cf-msg cf-agent" : "cf-system";
-    node.innerHTML = message.sender_type === "agent" ? `<div class="cf-agent-name">Support agent</div>${escapeHtml(message.content ?? "")}` : escapeHtml(message.content ?? "");
+    const content = message.file_url
+      ? `<a class="cf-attachment" href="${escapeAttribute(message.file_url)}" target="_blank" rel="noreferrer">📎 ${escapeHtml(message.file_name ?? message.content ?? "Attachment")}</a>`
+      : escapeHtml(message.content ?? "");
+    node.innerHTML = message.sender_type === "agent" ? `<div class="cf-agent-name">Support agent</div>${content}` : content;
     this.body.append(node);
     this.body.scrollTop = this.body.scrollHeight;
   }
@@ -186,4 +189,8 @@ function safeToken(value: string): string {
 
 function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[char] ?? char);
+}
+
+function escapeAttribute(value: string): string {
+  return escapeHtml(value).replace(/`/g, "&#096;");
 }

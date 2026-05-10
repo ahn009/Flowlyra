@@ -36,6 +36,8 @@ export interface Message {
   content_type: string;
   file_url?: string | null;
   file_name?: string | null;
+  file_size?: number | null;
+  file_mime?: string | null;
   is_internal: boolean;
   created_at: string;
 }

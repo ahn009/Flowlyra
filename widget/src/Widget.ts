@@ -61,7 +61,7 @@ export class Widget {
       onPreview: debounce((text: string) => {
         if (this.chatId) this.socket?.typingPreview(this.chatId, text);
       }, 200),
-      onFile: (file) => this.send(`Uploaded file: ${file.name}`),
+      onFile: (file) => void this.uploadAndSendFile(file),
       onOffline: (data) => this.createOfflineTicket(data.email, data.message),
       onCsat: (score, comment) => {
         if (this.chatId && this.initData) this.socket?.csat(this.chatId, this.initData.organization_id, score, comment);
@@ -158,6 +158,29 @@ export class Widget {
     });
     this.socket?.sendMessage({ organization_id: this.initData.organization_id, chat_id: this.chatId, content: text, sender_type: "customer" });
     this.socket?.typing(this.chatId, false);
+  }
+
+  private async uploadAndSendFile(file: File): Promise<void> {
+    if (!this.initData || !this.chatId) return;
+    const form = new FormData();
+    form.append("file", file);
+    form.append("org_slug", window.FlowLyraConfig?.orgSlug ?? "");
+    form.append("session_token", this.initData.session_token);
+    form.append("chat_id", this.chatId);
+    const response = await fetch(`${this.apiUrl}/api/v1/upload/widget`, { method: "POST", body: form });
+    if (!response.ok) {
+      console.error("[FlowLyra] file upload failed", await response.text());
+      return;
+    }
+    const uploaded = await response.json() as { file_url: string; file_name: string; file_size: number; file_mime: string };
+    this.socket?.sendMessage({
+      organization_id: this.initData.organization_id,
+      chat_id: this.chatId,
+      content: uploaded.file_name,
+      sender_type: "customer",
+      content_type: "file",
+      ...uploaded,
+    });
   }
 
   private createOfflineTicket(email: string, message: string): void {

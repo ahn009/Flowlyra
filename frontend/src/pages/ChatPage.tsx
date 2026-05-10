@@ -7,6 +7,7 @@ import { api } from "../lib/api";
 import { activeSocket } from "../socket";
 import { useChatStore } from "../stores/chatStore";
 import type { Chat, Message } from "../types";
+import toast from "react-hot-toast";
 
 interface ChatDetail extends Chat {
   messages: Message[];
@@ -55,6 +56,22 @@ export function ChatPage(): JSX.Element {
     if (noteMode) void api.post(`/chats/${id}/note`, { content: reply });
     else activeSocket()?.emit("chat:message", { organization_id: data?.organization_id, chat_id: id, content: reply, sender_type: "agent" });
     setReply("");
+  }
+
+  async function uploadFile(file: File): Promise<void> {
+    const form = new FormData();
+    form.append("file", file);
+    const response = await api.post("/upload/", form, { headers: { "Content-Type": "multipart/form-data" } });
+    const uploaded = response.data as { file_url: string; file_name: string; file_size: number; file_mime: string };
+    activeSocket()?.emit("chat:message", {
+      organization_id: data?.organization_id,
+      chat_id: id,
+      content: uploaded.file_name,
+      sender_type: "agent",
+      content_type: "file",
+      ...uploaded
+    });
+    toast.success("File sent");
   }
 
   return (
@@ -139,6 +156,7 @@ export function ChatPage(): JSX.Element {
             setReply={setReply}
             setNoteMode={setNoteMode}
             send={send}
+            uploadFile={(file) => void uploadFile(file)}
           />
         </div>
         <VisitorPanel chat={data} />
@@ -162,7 +180,7 @@ function MessageRow({ message }: { message: Message }): JSX.Element {
       {mine && <div className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-blue-600 text-[10px] font-black text-white shadow-sm sm:h-8 sm:w-8 sm:rounded-xl sm:text-xs">CF</div>}
       <div className={`max-w-[82%] overflow-hidden break-words rounded-xl px-3 py-2 text-sm leading-6 shadow-sm sm:max-w-[72%] sm:rounded-2xl sm:px-4 sm:py-3 ${mine ? "rounded-bl-md bg-blue-600 text-white" : "rounded-br-md border border-slate-200 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"}`}>
         {mine && <div className="mb-1 text-[11px] font-black uppercase tracking-wide text-blue-100">Support agent</div>}
-        {message.content}
+        {message.file_url ? <a className="font-black underline underline-offset-4" href={message.file_url} target="_blank" rel="noreferrer">📎 {message.file_name ?? message.content ?? "Attachment"}</a> : message.content}
         <div className={`mt-1 text-[10px] font-semibold ${mine ? "text-blue-100" : "text-slate-400 dark:text-slate-500"}`}>{formatTime(message.created_at)}</div>
       </div>
       {!mine && <div className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-slate-200 text-[10px] font-black text-slate-700 sm:h-8 sm:w-8 sm:rounded-xl sm:text-xs">V</div>}
@@ -266,7 +284,8 @@ function Composer({
   cannedReplies,
   setReply,
   setNoteMode,
-  send
+  send,
+  uploadFile
 }: {
   reply: string;
   noteMode: boolean;
@@ -274,7 +293,9 @@ function Composer({
   setReply: (value: string) => void;
   setNoteMode: (value: boolean) => void;
   send: () => void;
+  uploadFile: (file: File) => void;
 }): JSX.Element {
+  const fileInputId = "agent-chat-upload";
   return (
     <div className="shrink-0 border-t border-slate-200 bg-white px-3 py-3 dark:border-slate-700 dark:bg-slate-900 sm:px-4 lg:px-6 lg:py-4">
       <div className="mx-auto max-w-5xl rounded-lg border border-border bg-white p-3 shadow-soft dark:bg-slate-900">
@@ -285,8 +306,13 @@ function Composer({
           >
             <ShieldCheck size={14} /> {noteMode ? "Internal note" : "Public reply"}
           </button>
-          <button className="inline-flex shrink-0 items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-black text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"><Paperclip size={14} />Attach</button>
-          <button className="inline-flex shrink-0 items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-black text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"><FileUp size={14} />Upload</button>
+          <input id={fileInputId} className="hidden" type="file" onChange={(event) => {
+            const file = event.target.files?.[0];
+            if (file) uploadFile(file);
+            event.currentTarget.value = "";
+          }} />
+          <label htmlFor={fileInputId} className="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-black text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"><Paperclip size={14} />Attach</label>
+          <label htmlFor={fileInputId} className="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-black text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"><FileUp size={14} />Upload</label>
           <button className="inline-flex shrink-0 items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-black text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"><Plus size={14} />More</button>
           {cannedReplies.map((item) => <button key={item} onClick={() => setReply(item)} className="shrink-0 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-black text-slate-600 hover:bg-slate-50 dark:bg-slate-800/50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">/{item.split(" ")[0].toLowerCase()}</button>)}
         </div>

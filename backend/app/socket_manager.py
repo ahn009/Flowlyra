@@ -157,7 +157,19 @@ async def chat_message(sid: str, data: dict) -> None:
             else:
                 await emit_error(sid, "Unauthorized socket session")
                 return
-            message = await add_message(db, chat, sender_type, data.get("content"), sender_id, is_internal)
+            message = await add_message(
+                db,
+                chat,
+                sender_type,
+                data.get("content"),
+                sender_id,
+                is_internal,
+                data.get("content_type", "text"),
+                data.get("file_url"),
+                data.get("file_name"),
+                data.get("file_size"),
+                data.get("file_mime"),
+            )
             await db.commit()
             if not message.is_internal:
                 payload = _message_payload(message)
