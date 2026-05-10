@@ -1,7 +1,7 @@
 import { CSATForm } from "./CSATForm";
 import { OfflineForm } from "./OfflineForm";
 import { PreChatForm } from "./PreChatForm";
-import type { Message, WidgetInitResponse } from "./types";
+import type { Message, PreChatData, WidgetInitResponse } from "./types";
 
 export class ChatPanel {
   root = document.createElement("div");
@@ -12,16 +12,16 @@ export class ChatPanel {
   private renderedMessageIds = new Set<string>();
   private optimisticContents = new Set<string>();
 
-  constructor(init: WidgetInitResponse, private handlers: {
+  constructor(private init: WidgetInitResponse, private handlers: {
     onClose: () => void;
-    onPreChat: (data: { name: string; email: string; subject: string; message: string }) => void;
+    onPreChat: (data: PreChatData) => void;
     onMessage: (text: string) => void;
     onPreview: (text: string) => void;
     onFile: (file: File) => void;
     onOffline: (data: { email: string; message: string }) => void;
     onCsat: (score: number, comment: string) => void;
   }) {
-    this.root.className = "cf-panel cf-root";
+    this.root.className = `cf-panel cf-root cf-pos-${safeToken(init.widget_config.position)} cf-theme-${safeToken(init.widget_config.theme)}`;
     this.root.innerHTML = `
       <div class="cf-head">
         <div class="cf-brand-row">
@@ -49,7 +49,7 @@ export class ChatPanel {
   }
 
   showPreChat(): void {
-    this.body.replaceChildren(this.buildWelcomeOptions(), new PreChatForm(this.handlers.onPreChat).element);
+    this.body.replaceChildren(this.buildWelcomeOptions(), new PreChatForm(this.handlers.onPreChat, this.init.widget_config.pre_chat_form).element);
     this.footer.hidden = true;
   }
 
@@ -178,6 +178,10 @@ export class ChatPanel {
     });
     return node;
   }
+}
+
+function safeToken(value: string): string {
+  return /^[a-z0-9-]+$/i.test(value) ? value : "auto";
 }
 
 function escapeHtml(value: string): string {

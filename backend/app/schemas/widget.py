@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class WidgetInitRequest(BaseModel):
@@ -16,6 +16,9 @@ class WidgetConfig(BaseModel):
     greeting: str
     logo_url: str | None
     position: str
+    theme: str = "auto"
+    pre_chat_form: dict = Field(default_factory=lambda: {"enabled": True, "fields": ["name", "email", "subject", "message"]})
+    post_chat_survey: dict = Field(default_factory=lambda: {"enabled": True, "type": "csat_5"})
     custom_css: str | None
 
 
@@ -25,3 +28,13 @@ class WidgetInitResponse(BaseModel):
     existing_chat_id: str | None
     is_online: bool
     widget_config: WidgetConfig
+
+
+class WidgetHistoryRequest(BaseModel):
+    org_slug: str
+    session_token: str
+    chat_id: str
+
+
+class WidgetHistoryResponse(BaseModel):
+    messages: list[dict]

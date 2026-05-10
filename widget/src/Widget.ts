@@ -1,7 +1,7 @@
 import { ChatPanel } from "./ChatPanel";
 import { SocketClient } from "./SocketClient";
 import { styles } from "./styles";
-import type { Message, WidgetInitResponse, WidgetState } from "./types";
+import type { Message, PreChatData, WidgetHistoryResponse, WidgetInitResponse, WidgetState } from "./types";
 import { debounce, sessionToken, setSessionToken, trackRouteChanges } from "./utils";
 
 export class Widget {
@@ -14,6 +14,7 @@ export class Widget {
   private chatId: string | null = null;
   private apiUrl: string;
   private styleElement: HTMLStyleElement | null = null;
+  private unreadCount = 0;
 
   constructor() {
     const config = window.FlowLyraConfig;
@@ -34,6 +35,10 @@ export class Widget {
         user_agent: navigator.userAgent
       })
     });
+    if (!response.ok) {
+      console.warn("[FlowLyra] widget disabled:", await response.text());
+      return;
+    }
     this.initData = await response.json() as WidgetInitResponse;
     setSessionToken(this.initData.session_token);
     this.chatId = this.initData.existing_chat_id;
@@ -51,7 +56,7 @@ export class Widget {
     this.bindSocketHandlers();
     this.panel = new ChatPanel(this.initData, {
       onClose: () => this.close(),
-      onPreChat: (data) => this.startChat(data.name, data.email, data.subject, data.message),
+      onPreChat: (data) => this.startChat(data),
       onMessage: (text) => this.send(text),
       onPreview: debounce((text: string) => {
         if (this.chatId) this.socket?.typingPreview(this.chatId, text);
@@ -64,10 +69,12 @@ export class Widget {
       }
     });
     document.body.append(this.panel.root);
+    this.clearUnread();
     if (!this.initData.is_online) this.setState("OFFLINE");
     else if (this.chatId) {
       this.socket.joinChat(this.chatId);
       this.setState("CHATTING");
+      void this.loadHistory();
     }
     else this.setState("PRECHAT");
   }
@@ -100,22 +107,40 @@ export class Widget {
       if (payload.message) this.panel?.addMessage(payload.message);
     });
     this.socket.on<Message>("chat:message:new", (message) => {
-      if (message.chat_id === this.chatId) this.panel?.addMessage(message);
+      if (message.chat_id === this.chatId) {
+        if (this.panel) this.panel.addMessage(message);
+        else if (message.sender_type === "agent") this.incrementUnread();
+      }
     });
     this.socket.on<{ chat_id: string; typing: boolean }>("chat:typing", (payload) => {
       if (payload.chat_id === this.chatId) this.panel?.typingIndicator(payload.typing);
     });
     this.socket.on<{ chat_id: string }>("chat:resolved", (payload) => {
-      if (payload.chat_id === this.chatId) this.setState("CSAT");
+      if (payload.chat_id === this.chatId) {
+        if (this.initData?.widget_config.post_chat_survey.enabled === false) this.close();
+        else this.setState("CSAT");
+      }
     });
     this.socket.on<{ message: string }>("error", (payload) => {
       console.error("[FlowLyra] socket error:", payload.message);
     });
   }
 
-  private startChat(name: string, email: string, subject: string, message: string): void {
+  private startChat(data: PreChatData): void {
     if (!this.initData) return;
-    this.socket?.startChat({ organization_id: this.initData.organization_id, session_token: this.initData.session_token, name, email, subject, message });
+    this.socket?.startChat({ organization_id: this.initData.organization_id, session_token: this.initData.session_token, ...data });
+  }
+
+  private async loadHistory(): Promise<void> {
+    if (!this.initData || !this.chatId) return;
+    const response = await fetch(`${this.apiUrl}/api/v1/widget/history`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ org_slug: window.FlowLyraConfig?.orgSlug, session_token: this.initData.session_token, chat_id: this.chatId })
+    });
+    if (!response.ok) return;
+    const history = await response.json() as WidgetHistoryResponse;
+    history.messages.forEach((message) => this.panel?.addMessage(message));
   }
 
   private send(text: string): void {
@@ -152,19 +177,45 @@ export class Widget {
   private injectStyles(): void {
     this.styleElement?.remove();
     const style = document.createElement("style");
-    style.textContent = styles(this.initData?.widget_config.color ?? "#1E40AF", this.initData?.widget_config.custom_css ?? "");
+    style.textContent = styles(
+      this.initData?.widget_config.color ?? "#1E40AF",
+      this.initData?.widget_config.custom_css ?? "",
+    );
     document.head.append(style);
     this.styleElement = style;
   }
 
   private renderBubble(): void {
     this.bubble = document.createElement("button");
-    this.bubble.className = "cf-bubble cf-root";
+    const position = safeToken(this.initData?.widget_config.position ?? "bottom-right");
+    const theme = safeToken(this.initData?.widget_config.theme ?? "auto");
+    this.bubble.className = `cf-bubble cf-root cf-pos-${position} cf-theme-${theme}`;
     this.bubble.type = "button";
-    this.bubble.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>`;
+    this.bubble.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg><span class="cf-badge" hidden>0</span>`;
     this.bubble.addEventListener("click", () => this.open());
     document.body.append(this.bubble);
   }
+
+  private incrementUnread(): void {
+    this.unreadCount += 1;
+    this.updateBadge();
+  }
+
+  private clearUnread(): void {
+    this.unreadCount = 0;
+    this.updateBadge();
+  }
+
+  private updateBadge(): void {
+    const badge = this.bubble?.querySelector<HTMLSpanElement>(".cf-badge");
+    if (!badge) return;
+    badge.hidden = this.unreadCount === 0;
+    badge.textContent = String(Math.min(this.unreadCount, 99));
+  }
+}
+
+function safeToken(value: string): string {
+  return /^[a-z0-9-]+$/i.test(value) ? value : "auto";
 }
 
 function bootWidget(): void {

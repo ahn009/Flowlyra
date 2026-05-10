@@ -15,6 +15,15 @@ export interface WidgetInitResponse {
     greeting: string;
     logo_url: string | null;
     position: string;
+    theme: "light" | "dark" | "auto" | string;
+    pre_chat_form: {
+      enabled?: boolean;
+      fields?: string[];
+    };
+    post_chat_survey: {
+      enabled?: boolean;
+      type?: string;
+    };
     custom_css: string | null;
   };
 }
@@ -36,8 +45,23 @@ export interface StartChatPayload {
   session_token: string;
   name?: string;
   email?: string;
+  phone?: string;
   subject?: string;
   message?: string;
+  custom_fields?: Record<string, string>;
+}
+
+export interface PreChatData {
+  name: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  message: string;
+  custom_fields?: Record<string, string>;
+}
+
+export interface WidgetHistoryResponse {
+  messages: Message[];
 }
 
 declare global {

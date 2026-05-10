@@ -5,10 +5,15 @@ from pydantic import BaseModel, Field
 
 class OrgUpdate(BaseModel):
     name: str | None = None
+    plan: str | None = None
     widget_color: str | None = Field(default=None, pattern=r"^#[0-9A-Fa-f]{6}$")
     widget_logo_url: str | None = None
     widget_greeting: str | None = None
     widget_position: str | None = None
+    widget_theme: str | None = None
+    widget_domain_allowlist: dict | None = None
+    widget_pre_chat_form: dict | None = None
+    widget_post_chat_survey: dict | None = None
     widget_custom_css: str | None = None
     operating_hours: dict | None = None
     sla_config: dict | None = None

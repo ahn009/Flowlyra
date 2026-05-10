@@ -113,6 +113,8 @@ async def chat_start(sid: str, data: dict) -> None:
                 data.get("message"),
                 data.get("name"),
                 data.get("email"),
+                data.get("phone"),
+                data.get("custom_fields"),
             )
             await sio.enter_room(sid, f"chat:{chat.id}")
             await sio.save_session(sid, {"kind": "widget", "chat_id": str(chat.id), "organization_id": str(chat.organization_id)})

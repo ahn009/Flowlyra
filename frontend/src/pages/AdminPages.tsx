@@ -148,13 +148,21 @@ export function WidgetConfigPage(): JSX.Element {
   const [color, setColor] = useState("#1E40AF");
   const [greeting, setGreeting] = useState("Hi! How can we help you today?");
   const [position, setPosition] = useState("bottom-right");
+  const [theme, setTheme] = useState("auto");
+  const [allowlist, setAllowlist] = useState("");
+  const [preChatFields, setPreChatFields] = useState("name,email,subject,message");
+  const [postChatSurveyEnabled, setPostChatSurveyEnabled] = useState(true);
 
   const saveWidget = useMutation({
     mutationFn: async () => {
       await api.patch("/admin/org", {
         widget_color: color,
         widget_greeting: greeting,
-        widget_position: position
+        widget_position: position,
+        widget_theme: theme,
+        widget_domain_allowlist: { domains: allowlist.split("\n").map((item) => item.trim()).filter(Boolean) },
+        widget_pre_chat_form: { enabled: true, fields: preChatFields.split(",").map((item) => item.trim()).filter(Boolean) },
+        widget_post_chat_survey: { enabled: postChatSurveyEnabled, type: "csat_5" }
       });
     },
     onSuccess: async () => {
@@ -169,6 +177,10 @@ export function WidgetConfigPage(): JSX.Element {
     setColor(String(data.widget_color ?? "#1E40AF"));
     setGreeting(String(data.widget_greeting ?? "Hi! How can we help you today?"));
     setPosition(String(data.widget_position ?? "bottom-right"));
+    setTheme(String(data.widget_theme ?? "auto"));
+    setAllowlist(((data.widget_domain_allowlist?.domains ?? []) as string[]).join("\n"));
+    setPreChatFields(((data.widget_pre_chat_form?.fields ?? ["name", "email", "subject", "message"]) as string[]).join(","));
+    setPostChatSurveyEnabled(data.widget_post_chat_survey?.enabled !== false);
   }, [data]);
 
   return (
@@ -183,7 +195,11 @@ export function WidgetConfigPage(): JSX.Element {
           }}>
           <Field label="Brand color"><input className="h-11 w-full rounded-lg border border-border bg-white dark:bg-slate-900 p-1" type="color" value={color} onChange={(event) => setColor(event.target.value)} /></Field>
           <Field label="Greeting"><TextArea className="min-h-24" value={greeting} onChange={(event) => setGreeting(event.target.value)} /></Field>
-          <Field label="Position"><SelectInput value={position} onChange={(event) => setPosition(event.target.value)}><option>bottom-right</option><option>bottom-left</option></SelectInput></Field>
+          <Field label="Position"><SelectInput value={position} onChange={(event) => setPosition(event.target.value)}><option>bottom-right</option><option>bottom-left</option><option>top-right</option><option>top-left</option></SelectInput></Field>
+          <Field label="Theme"><SelectInput value={theme} onChange={(event) => setTheme(event.target.value)}><option>auto</option><option>light</option><option>dark</option></SelectInput></Field>
+          <Field label="Pre-chat fields"><TextInput value={preChatFields} onChange={(event) => setPreChatFields(event.target.value)} placeholder="name,email,phone,subject,message" /></Field>
+          <Field label="Allowed domains"><TextArea className="min-h-20" value={allowlist} onChange={(event) => setAllowlist(event.target.value)} placeholder="example.com&#10;*.example.com" /></Field>
+          <label className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300"><input type="checkbox" checked={postChatSurveyEnabled} onChange={(event) => setPostChatSurveyEnabled(event.target.checked)} /> Show post-chat CSAT survey</label>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <FeatureToggle icon={<UsersRound size={16} />} title="Agent profiles" />
             <FeatureToggle icon={<Sparkles size={16} />} title="Quick topics" />

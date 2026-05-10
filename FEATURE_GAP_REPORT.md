@@ -3,9 +3,9 @@
 **Generated:** 2026-05-10
 **Analyzed by:** Jcode Agent
 **Total Features Checked:** 428
-**Present:** 65 (15.2%)
-**Partial:** 96 (22.4%)
-**Missing:** 267 (62.4%)
+**Present:** 70 (16.4%)
+**Partial:** 93 (21.7%)
+**Missing:** 265 (61.9%)
 
 ---
 
@@ -80,7 +80,7 @@ Missing Categories (most gaps first):
 
 | Category | Total | Present | Partial | Missing |
 |----------|-------|---------|---------|---------|
-| Chat Widget | 36 | 10 | 17 | 9 |
+| Chat Widget | 36 | 15 | 14 | 7 |
 | Dashboard - Home | 6 | 0 | 3 | 3 |
 | Dashboard - Chats | 18 | 7 | 9 | 2 |
 | Dashboard - Archives | 7 | 0 | 2 | 5 |
@@ -117,11 +117,11 @@ Legend: ✅ PRESENT, ⚠️ PARTIAL, ❌ MISSING.
 | # | Feature | Status | Evidence / Notes |
 |---|---------|--------|------------------|
 | 1.1 | Embeddable JS Widget | ✅ PRESENT | `widget/vite.config.ts` builds IIFE `widget.js`; install snippets in `frontend/src/pages/AdminPages.tsx:221-243`. |
-| 1.2 | Widget Positioning | ⚠️ PARTIAL | Config field returned in `backend/app/api/widget.py:46-54`; CSS currently hardcodes bottom-right in `widget/src/styles.ts:5-8`. Missing all four position rendering. |
-| 1.3 | Widget Theme | ⚠️ PARTIAL | Color/custom CSS supported in `widget/src/styles.ts:1-19`; no light/dark/auto mode switch. |
+| 1.2 | Widget Positioning | ✅ PRESENT | All four positions are rendered via `widget/src/styles.ts:5-10`; admin supports bottom/top left/right in `frontend/src/pages/AdminPages.tsx:198`. |
+| 1.3 | Widget Theme | ✅ PRESENT | Admin theme setting supports light/dark/auto in `frontend/src/pages/AdminPages.tsx:199`; widget dark/auto CSS in `widget/src/styles.ts:19-20`; color/custom CSS retained. |
 | 1.4 | Custom Greeting Message | ⚠️ PARTIAL | Single greeting configurable in `frontend/src/pages/AdminPages.tsx:145-194` and rendered `widget/src/ChatPanel.ts:38-40`; no random rotation. |
 | 1.5 | Language Selection | ❌ MISSING | No i18n/detection/switcher files found. |
-| 1.6 | Pre-Chat Form | ⚠️ PARTIAL | `widget/src/PreChatForm.ts:1-28` has fixed name/email/topic/message; not admin-configurable, no phone/custom fields. |
+| 1.6 | Pre-Chat Form | ⚠️ PARTIAL | Configurable standard fields including phone are stored on Organization and rendered by `widget/src/PreChatForm.ts:1-45`; still missing arbitrary custom field builder UI. |
 | 1.7 | Post-Chat Survey | ✅ PRESENT | CSAT flow in `widget/src/CSATForm.ts:1-32`, socket handler `backend/app/socket_manager.py:299-307`. |
 | 1.8 | Rich Messages Cards | ❌ MISSING | `Message.content_type` exists in `backend/app/models/message.py:19`, but widget renders text only in `widget/src/ChatPanel.ts:78-104`. |
 | 1.9 | Rich Messages Carousels | ❌ MISSING | No carousel message metadata renderer. |
@@ -134,16 +134,16 @@ Legend: ✅ PRESENT, ⚠️ PARTIAL, ❌ MISSING.
 | 1.16 | Chat Rating | ✅ PRESENT | Same as CSAT: `widget/src/CSATForm.ts`, `backend/app/socket_manager.py:299-307`. |
 | 1.17 | Offline Mode | ⚠️ PARTIAL | Widget form in `widget/src/OfflineForm.ts:1-21`; current submit logs/init only `widget/src/Widget.ts:138-140`; no email notification. |
 | 1.18 | Sound Notifications | ❌ MISSING | No audio assets/settings. |
-| 1.19 | Unread Message Badge | ❌ MISSING | CSS has `.cf-badge` but no logic in `widget/src/Widget.ts`. |
+| 1.19 | Unread Message Badge | ✅ PRESENT | Widget increments/clears badge for agent messages while closed in `widget/src/Widget.ts:109-114` and `widget/src/Widget.ts:199-214`. |
 | 1.20 | Mobile Responsive | ✅ PRESENT | Responsive CSS in `widget/src/styles.ts:17`. |
 | 1.21 | Eye-Catchers | ⚠️ PARTIAL | Bubble animation `widget/src/styles.ts:8-9`; no custom popups/eye-catcher config. |
 | 1.22 | Chat Buttons | ❌ MISSING | No DOM attribute scanner/API. |
-| 1.23 | Domain Whitelist/Blacklist | ❌ MISSING | No domain validation in `backend/app/api/widget.py`. |
+| 1.23 | Domain Whitelist/Blacklist | ✅ PRESENT | Domain allowlist stored on Organization and enforced during init in `backend/app/api/widget.py:40-58`; admin entry in `frontend/src/pages/AdminPages.tsx:201`. |
 | 1.24 | White Label | ❌ MISSING | Branding fixed as FlowLyra in `widget/src/ChatPanel.ts:32`. |
 | 1.25 | Custom CSS/JS Injection | ⚠️ PARTIAL | Custom CSS supported `widget/src/styles.ts:18`; no custom JS injection. |
 | 1.26 | Accessibility WCAG | ⚠️ PARTIAL | Some labels/buttons exist; no full keyboard/screen-reader audit. |
 | 1.27 | Bot-to-Human Handoff | ❌ MISSING | No chatbot/bot session model. |
-| 1.28 | Chat History Visitor Side | ⚠️ PARTIAL | Existing chat ID resumes `backend/app/api/widget.py:55`; messages are not fetched/rendered on reopen. |
+| 1.28 | Chat History Visitor Side | ✅ PRESENT | Returning visitors load prior non-internal messages from `/widget/history` in `backend/app/api/widget.py:95-113`, rendered by `widget/src/Widget.ts:134-144`. |
 | 1.29 | Persistent Chat | ⚠️ PARTIAL | Session token local storage in `widget/src/utils.ts:1-8`; no email link continuation. |
 | 1.30 | Direct Chat Link/Page | ❌ MISSING | No standalone public chat route. |
 | 1.31 | Voice/Video/Screen Sharing | ❌ MISSING | No WebRTC. |
@@ -731,4 +731,8 @@ Multi-channel integrations, campaigns/goals, full ticketing, KB, reporting expor
 
 ## Changes Made
 
-No build changes were made during this analysis phase. This report was created after codebase exploration, stack/config/model/API/frontend/test review, and feature-by-feature comparison.
+| Area | Changes |
+|------|---------|
+| Widget config and visitor persistence | Added widget theme, domain allowlist, configurable pre-chat fields, post-chat survey settings, visitor history endpoint, unread badge, all-position widget CSS, and phone/custom pre-chat persistence in `backend/app/models/organization.py`, `backend/migrations/versions/002_widget_config_fields.py`, `backend/app/api/widget.py`, `backend/app/services/chat_service.py`, `backend/app/socket_manager.py`, `widget/src/*`, and `frontend/src/pages/AdminPages.tsx`. |
+
+Initial analysis report was created after codebase exploration, stack/config/model/API/frontend/test review, and feature-by-feature comparison.

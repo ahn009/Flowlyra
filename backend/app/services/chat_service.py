@@ -79,6 +79,8 @@ async def start_chat(
     content: str | None,
     name: str | None = None,
     email: str | None = None,
+    phone: str | None = None,
+    custom_attrs: dict | None = None,
 ) -> tuple[Chat, Message | None]:
     session = (await db.execute(select(Session).where(Session.organization_id == organization_id, Session.session_token == session_token))).scalar_one_or_none()
     if session is None:
@@ -87,17 +89,23 @@ async def start_chat(
     if email:
         contact = (await db.execute(select(Contact).where(Contact.organization_id == organization_id, Contact.email == email))).scalar_one_or_none()
         if contact is None:
-            contact = Contact(organization_id=organization_id, email=email, full_name=name)
+            contact = Contact(organization_id=organization_id, email=email, full_name=name, phone=phone)
             db.add(contact)
             await db.flush()
         else:
             contact.full_name = name or contact.full_name
+            contact.phone = phone or contact.phone
+        if custom_attrs:
+            contact.custom_attrs = {**(contact.custom_attrs or {}), **custom_attrs}
         contact.total_chats = (contact.total_chats or 0) + 1
         session.contact_id = contact.id
     elif name and session.contact_id:
         contact = (await db.execute(select(Contact).where(Contact.organization_id == organization_id, Contact.id == session.contact_id))).scalar_one_or_none()
         if contact:
             contact.full_name = name
+            contact.phone = phone or contact.phone
+            if custom_attrs:
+                contact.custom_attrs = {**(contact.custom_attrs or {}), **custom_attrs}
     chat = Chat(organization_id=organization_id, session_id=session.id, contact_id=session.contact_id, subject=subject)
     db.add(chat)
     await db.flush()
