@@ -23,6 +23,31 @@ Customers chat with real agents in real time; AI is used only for private agent 
 - Optional SendGrid email integration
 - Celery worker for async background tasks
 
+## Public Website Pages (Production IA)
+
+FlowLyra now includes a full public-facing website layer (in addition to the agent app):
+
+- `/` home
+- `/features`
+- `/pricing`
+- `/solutions/customer-support`
+- `/solutions/sales-marketing`
+- `/solutions/enterprise`
+- `/integrations`
+- `/customers`
+- `/product-tour`
+- `/help`
+- `/contact`
+- `/status`
+- `/privacy`
+- `/terms`
+- `/signup`
+
+Authenticated product workspace remains under:
+
+- `/inbox`, `/chat/:id`, `/tickets`, `/contacts`
+- `/admin/*`
+
 ## Architecture
 
 ```text
@@ -95,6 +120,7 @@ Required for production:
 - `DATABASE_URL`: production Postgres connection string
 - `REDIS_URL`, `CELERY_BROKER_URL`, `CELERY_RESULT_BACKEND`
 - `CORS_ORIGINS`: explicit allowed origins (no wildcards)
+- `FRONTEND_BASE_URL`: used to generate password reset links
 - `ENVIRONMENT=production`
 
 Common optional integrations:

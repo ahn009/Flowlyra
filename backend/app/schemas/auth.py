@@ -7,6 +7,14 @@ class LoginRequest(BaseModel):
     password: str = Field(min_length=8)
 
 
+class SignupRequest(BaseModel):
+    full_name: str = Field(min_length=2, max_length=255)
+    email: EmailStr
+    password: str = Field(min_length=8)
+    organization_name: str = Field(min_length=2, max_length=255)
+    organization_slug: str | None = Field(default=None, min_length=2, max_length=100)
+
+
 class RefreshRequest(BaseModel):
     refresh_token: str
 
@@ -23,6 +31,11 @@ class InviteAcceptRequest(BaseModel):
 
 class PasswordResetRequest(BaseModel):
     email: EmailStr
+
+
+class PasswordResetConfirmRequest(BaseModel):
+    token: str
+    password: str = Field(min_length=8)
 
 
 class UserOut(BaseModel):

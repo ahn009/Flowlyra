@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 import uuid
 
-from sqlalchemy import Float, case, cast, func, select
+from sqlalchemy import Float, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.analytics_event import AnalyticsEvent
@@ -41,17 +41,17 @@ async def overview(db: AsyncSession, organization_id: uuid.UUID) -> dict:
         select(func.count()).select_from(Chat).where(Chat.organization_id == organization_id, Chat.status == "resolved", func.date(Chat.resolved_at) == today)
     )
     csat = await db.scalar(
-        select(func.avg(cast(Chat.csat_score, Float))).where(Chat.organization_id == organization_id, Chat.csat_score.is_not(None))
+        select(func.avg(cast(Chat.csat_score, Float))).where(
+            Chat.organization_id == organization_id,
+            Chat.csat_score.is_not(None),
+            func.date(Chat.updated_at) == today,
+        )
     )
     wait_avg = await db.scalar(
-        select(
-            func.avg(
-                case(
-                    (Chat.first_response_at.is_not(None), func.extract("epoch", Chat.first_response_at - Chat.created_at)),
-                    else_=0,
-                )
-            )
-        ).where(Chat.organization_id == organization_id)
+        select(func.avg(func.extract("epoch", Chat.first_response_at - Chat.created_at))).where(
+            Chat.organization_id == organization_id,
+            Chat.first_response_at.is_not(None),
+        )
     )
     return {
         "active_chats": active_chats or 0,

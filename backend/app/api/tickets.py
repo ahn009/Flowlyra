@@ -10,6 +10,7 @@ from app.db.session import get_db
 from app.middleware.auth import TokenUser, current_user
 from app.models.ticket import Ticket, TicketComment
 from app.schemas.ticket import CommentCreate, CommentOut, TicketCreate, TicketOut, TicketUpdate
+from app.services.analytics_service import log_event
 from app.services.ticket_service import add_comment, create_ticket, get_ticket
 
 router = APIRouter(prefix="/tickets", tags=["tickets"])
@@ -57,6 +58,7 @@ async def update(ticket_id: uuid.UUID, payload: TicketUpdate, user: Annotated[To
     ticket = await get_ticket(db, user.organization_id, ticket_id)
     for key, value in payload.model_dump(exclude_unset=True).items():
         setattr(ticket, key, value)
+    await log_event(db, user.organization_id, "ticket_updated", chat_id=ticket.source_chat_id, user_id=user.id)
     await db.commit()
     await db.refresh(ticket)
     return ticket
@@ -67,6 +69,7 @@ async def resolve(ticket_id: uuid.UUID, user: Annotated[TokenUser, Depends(curre
     ticket = await get_ticket(db, user.organization_id, ticket_id)
     ticket.status = "resolved"
     ticket.resolved_at = datetime.now(UTC)
+    await log_event(db, user.organization_id, "ticket_resolved", chat_id=ticket.source_chat_id, user_id=user.id)
     await db.commit()
     await db.refresh(ticket)
     return ticket
@@ -82,6 +85,7 @@ async def comments(ticket_id: uuid.UUID, user: Annotated[TokenUser, Depends(curr
 async def create_comment(ticket_id: uuid.UUID, payload: CommentCreate, user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db)) -> TicketComment:
     ticket = await get_ticket(db, user.organization_id, ticket_id)
     comment = await add_comment(db, ticket, user.id, payload.content, payload.is_internal)
+    await log_event(db, user.organization_id, "ticket_comment_added", chat_id=ticket.source_chat_id, user_id=user.id)
     await db.commit()
     await db.refresh(comment)
     return comment

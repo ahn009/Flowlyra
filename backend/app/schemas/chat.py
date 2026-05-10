@@ -38,6 +38,10 @@ class ChatOut(BaseModel):
     visitor_name: str | None = None
     visitor_email: str | None = None
     visitor_status: str = "offline"
+    visitor_ip: str | None = None
+    visitor_current_url: str | None = None
+    visitor_referrer: str | None = None
+    visitor_page_views: int | None = None
 
     model_config = {"from_attributes": True}
 
@@ -45,6 +49,7 @@ class ChatOut(BaseModel):
 class ChatDetail(ChatOut):
     messages: list[MessageOut] = []
     contact: dict | None = None
+    visitor_session: dict | None = None
 
 
 class ChatUpdate(BaseModel):
