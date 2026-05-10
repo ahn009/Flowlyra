@@ -1,5 +1,5 @@
-import { Bell, Bot, ChevronLeft, ClipboardList, Code2, Contact, Inbox, LayoutDashboard, LifeBuoy, LogOut, Menu, Search, Send, Settings, Tag, Ticket, UserPlus, Users } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Bell, Bot, CheckCheck, ChevronLeft, ClipboardList, Code2, Contact, Inbox, LayoutDashboard, LifeBuoy, LogOut, Menu, Search, Send, Settings, Tag, Ticket, Trash2, UserPlus, Users, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -9,6 +9,7 @@ import { useAuthStore } from "../stores/authStore";
 import { useNotificationStore } from "../stores/notificationStore";
 import { Button, Pill, ThemeToggle } from "./ui";
 import flowlyraMark from "../assets/flowlyra-mark.svg";
+import type { Notification } from "../types";
 
 const nav = [
   { section: "Conversations", items: [
@@ -35,7 +36,12 @@ export function AgentLayout(): JSX.Element {
   const logout = useAuthStore((state) => state.logout);
   const unread = useNotificationStore((state) => state.unread);
   const notifications = useNotificationStore((state) => state.notifications);
+  const markAllRead = useNotificationStore((state) => state.markAllRead);
+  const clearNotifications = useNotificationStore((state) => state.clearNotifications);
+  const removeNotification = useNotificationStore((state) => state.removeNotification);
   const [collapsed, setCollapsed] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const notificationPanelRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const sidebarWidth = collapsed ? "w-14 md:w-16" : "w-14 md:w-64";
@@ -51,6 +57,21 @@ export function AgentLayout(): JSX.Element {
     });
     return () => setRealtimeUpdateHandler(null);
   }, [queryClient, user?.id]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent): void {
+      if (!notificationPanelRef.current?.contains(event.target as Node)) setNotificationsOpen(false);
+    }
+    function handleEscape(event: KeyboardEvent): void {
+      if (event.key === "Escape") setNotificationsOpen(false);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-surface text-ink">
@@ -105,18 +126,34 @@ export function AgentLayout(): JSX.Element {
           </div>
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             <ThemeToggle />
-            <div className="relative">
-              <button className="rounded-xl border border-border bg-white p-2 hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800" aria-label="Notifications">
+            <div ref={notificationPanelRef} className="relative">
+              <button
+                className="relative rounded-xl border border-border bg-white p-2 text-slate-700 shadow-sm hover:bg-slate-50 focus-ring dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+                aria-label="Notifications"
+                aria-expanded={notificationsOpen}
+                onClick={() => {
+                  setNotificationsOpen((value) => !value);
+                  markAllRead();
+                }}
+              >
                 <Bell size={18} />
               </button>
               {unread > 0 && <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-danger px-1 text-xs text-white">{unread}</span>}
+              {notificationsOpen && (
+                <NotificationCenter
+                  notifications={notifications}
+                  onClose={() => setNotificationsOpen(false)}
+                  onClear={clearNotifications}
+                  onRemove={removeNotification}
+                />
+              )}
             </div>
             <div className="hidden text-right sm:block">
               <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">{user?.full_name ?? "Agent"}</div>
               <div className="text-xs text-slate-500 dark:text-slate-400">{user?.role ?? "agent"}</div>
             </div>
             <button
-              className="rounded-xl border border-border bg-white p-2 hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800"
+              className="rounded-xl border border-border bg-white p-2 text-slate-700 shadow-sm hover:bg-slate-50 focus-ring dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
               onClick={() => {
                 void logout().then(() => navigate("/login"));
               }}
@@ -135,6 +172,57 @@ export function AgentLayout(): JSX.Element {
       </div>
     </div>
   );
+}
+
+function NotificationCenter({ notifications, onClose, onClear, onRemove }: { notifications: Notification[]; onClose: () => void; onClear: () => void; onRemove: (id: string) => void }): JSX.Element {
+  return (
+    <div className="absolute right-0 top-12 z-50 w-[min(92vw,420px)] overflow-hidden rounded-3xl border border-border bg-white shadow-2xl shadow-slate-950/15 ring-1 ring-slate-950/5 dark:border-slate-700 dark:bg-slate-950 dark:shadow-black/40 dark:ring-white/10">
+      <div className="flex items-start justify-between gap-3 border-b border-border bg-gradient-to-br from-blue-50 via-white to-slate-50 px-4 py-4 dark:from-slate-900 dark:via-slate-950 dark:to-blue-950/30">
+        <div>
+          <div className="flex items-center gap-2 text-base font-black text-slate-950 dark:text-white"><Bell size={17} className="text-blue-600 dark:text-blue-300" /> Notifications</div>
+          <p className="mt-1 text-xs font-semibold text-slate-500 dark:text-slate-400">New chats, visitor messages, assignments, and system alerts.</p>
+        </div>
+        <button aria-label="Close notifications" className="rounded-xl p-2 text-slate-500 hover:bg-white hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white" onClick={onClose}><X size={17} /></button>
+      </div>
+      <div className="flex items-center justify-between border-b border-border px-4 py-2">
+        <span className="text-xs font-black uppercase tracking-wide text-slate-500 dark:text-slate-400">{notifications.length} recent</span>
+        <div className="flex items-center gap-2">
+          <button className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold text-blue-700 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-blue-950/40" onClick={onClose}><CheckCheck size={14} /> Read</button>
+          <button className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold text-red-700 hover:bg-red-50 disabled:opacity-40 dark:text-red-300 dark:hover:bg-red-950/40" onClick={onClear} disabled={!notifications.length}><Trash2 size={14} /> Clear</button>
+        </div>
+      </div>
+      <div className="max-h-[420px] overflow-y-auto p-2">
+        {notifications.length ? notifications.map((notification) => (
+          <NotificationRow key={notification.id} notification={notification} onRemove={() => onRemove(notification.id)} />
+        )) : <div className="grid min-h-48 place-items-center px-6 py-8 text-center"><div><div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300"><Bell size={20} /></div><div className="font-black text-slate-900 dark:text-white">No notifications yet</div><p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">When a visitor messages the admin, it will appear here with the sound alert.</p></div></div>}
+      </div>
+    </div>
+  );
+}
+
+function NotificationRow({ notification, onRemove }: { notification: Notification; onRemove: () => void }): JSX.Element {
+  const tone = notification.level === "urgent" ? "bg-red-500" : notification.level === "warning" ? "bg-yellow-500" : "bg-blue-500";
+  return (
+    <div className="group flex gap-3 rounded-2xl px-3 py-3 hover:bg-slate-50 dark:hover:bg-slate-900">
+      <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${tone}`} />
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-sm font-black text-slate-900 dark:text-white">{notification.title}</div>
+        <p className="mt-1 line-clamp-2 text-sm leading-5 text-slate-500 dark:text-slate-400">{notification.body}</p>
+        <div className="mt-2 text-[11px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">{formatNotificationTime(notification.createdAt)}</div>
+      </div>
+      <button aria-label="Remove notification" className="h-8 w-8 rounded-lg text-slate-400 opacity-100 hover:bg-white hover:text-red-600 sm:opacity-0 sm:group-hover:opacity-100 dark:hover:bg-slate-800 dark:hover:text-red-300" onClick={onRemove}><X size={15} className="mx-auto" /></button>
+    </div>
+  );
+}
+
+function formatNotificationTime(value: string): string {
+  const diffMs = Date.now() - new Date(value).getTime();
+  const diffMinutes = Math.max(0, Math.floor(diffMs / 60000));
+  if (diffMinutes < 1) return "just now";
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+  return new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(value));
 }
 
 export function PageHeader({ title, action }: { title: string; action?: ReactNode }): JSX.Element {

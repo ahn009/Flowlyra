@@ -21,9 +21,9 @@ export function Button({ children, variant = "secondary", size = "md", className
       className={cx(
         "inline-flex shrink-0 items-center justify-center gap-2 rounded-xl font-bold outline-none transition focus-visible:ring-4 focus-visible:ring-blue-100 dark:focus-visible:ring-blue-900/40 disabled:cursor-not-allowed disabled:opacity-60",
         size === "sm" ? "h-9 px-3 text-sm" : "h-10 px-4 text-sm",
-        variant === "primary" && "bg-slate-950 text-white shadow-sm hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200",
-        variant === "secondary" && "border border-border bg-white text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-700 dark:shadow-none dark:hover:bg-slate-800",
-        variant === "ghost" && "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700",
+        variant === "primary" && "bg-blue-600 text-white shadow-sm shadow-blue-900/10 hover:bg-blue-700 dark:bg-blue-500 dark:text-white dark:hover:bg-blue-400 dark:shadow-blue-950/30",
+        variant === "secondary" && "border border-border bg-white text-slate-800 shadow-sm hover:border-slate-300 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:shadow-none dark:hover:border-slate-500 dark:hover:bg-slate-800",
+        variant === "ghost" && "text-slate-700 hover:bg-slate-100 dark:text-slate-100 dark:hover:bg-slate-800",
         variant === "danger" && "bg-danger text-white shadow-sm shadow-red-900/10 hover:bg-red-700",
         className
       )}
