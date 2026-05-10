@@ -10,6 +10,14 @@ import type { Chat, Message } from "../types";
 let socket: Socket | null = null;
 let socketToken: string | null = null;
 let onRealtimeUpdate: (() => void) | null = null;
+const recentNotificationKeys = new Map<string, number>();
+
+interface ServerNotificationPayload {
+  title: string;
+  body: string;
+  level?: "info" | "warning" | "urgent";
+  chat_id?: string;
+}
 
 export function setRealtimeUpdateHandler(handler: (() => void) | null): void {
   onRealtimeUpdate = handler;
@@ -42,6 +50,8 @@ function registerListeners(instance: Socket): void {
     const activeChatId = useChatStore.getState().activeChatId;
     useChatStore.getState().addMessage(message);
     if (message.sender_type === "customer" && !message.is_internal) {
+      rememberNotification(`message:${message.id}`);
+      rememberNotification(`chat:${message.chat_id}`);
       playIncomingChatSound();
       const chat = useChatStore.getState().chats[message.chat_id];
       useNotificationStore.getState().addNotification({
@@ -62,6 +72,8 @@ function registerListeners(instance: Socket): void {
   instance.on("chat:new", (payload: { chat: Chat; message?: Message | null }) => {
     useChatStore.getState().addChat(payload.message ? { ...payload.chat, last_message: { content: payload.message.content, sender_type: payload.message.sender_type, created_at: payload.message.created_at } } : payload.chat);
     if (payload.message) useChatStore.getState().addMessage(payload.message);
+    rememberNotification(`chat:${payload.chat.id}`);
+    if (payload.message) rememberNotification(`message:${payload.message.id}`);
     useNotificationStore.getState().addNotification({ title: "New chat", body: payload.message?.content ?? payload.chat.subject ?? "Waiting in queue", level: "info" });
     playIncomingChatSound();
     toast("New chat assigned");
@@ -76,8 +88,25 @@ function registerListeners(instance: Socket): void {
   instance.on("agent:status:changed", (payload: { user_id: string; status: string }) => useAgentStore.getState().setPresence(payload.user_id, payload.status));
   instance.on("ai:suggestions", (payload: { chat_id: string; suggestions: string[] }) => useChatStore.getState().setSuggestions(payload.chat_id, payload.suggestions));
   instance.on("whisper:new", (payload: { from?: string; message: string }) => toast(`Whisper: ${payload.message}`));
-  instance.on("notification", (payload: { title: string; body: string; level?: "info" | "warning" | "urgent" }) =>
-    useNotificationStore.getState().addNotification({ title: payload.title, body: payload.body, level: payload.level ?? "info" })
-  );
+  instance.on("notification", (payload: ServerNotificationPayload) => {
+    const key = payload.chat_id ? `chat:${payload.chat_id}` : `${payload.title}:${payload.body}`;
+    if (wasRecentlyNotified(key)) return;
+    rememberNotification(key);
+    useNotificationStore.getState().addNotification({ title: payload.title, body: payload.body, level: payload.level ?? "info" });
+    playIncomingChatSound();
+  });
   instance.on("sla:breach", () => toast.error("SLA breach"));
+}
+
+function rememberNotification(key: string): void {
+  const now = Date.now();
+  recentNotificationKeys.set(key, now);
+  for (const [storedKey, storedAt] of recentNotificationKeys) {
+    if (now - storedAt > 4000) recentNotificationKeys.delete(storedKey);
+  }
+}
+
+function wasRecentlyNotified(key: string): boolean {
+  const storedAt = recentNotificationKeys.get(key);
+  return storedAt !== undefined && Date.now() - storedAt < 4000;
 }

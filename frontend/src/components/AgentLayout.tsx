@@ -10,6 +10,7 @@ import { useNotificationStore } from "../stores/notificationStore";
 import { Button, Pill, ThemeToggle } from "./ui";
 import flowlyraMark from "../assets/flowlyra-mark.svg";
 import type { Notification } from "../types";
+import { playIncomingChatSound, unlockNotificationSound } from "../lib/notificationSound";
 
 const nav = [
   { section: "Conversations", items: [
@@ -182,7 +183,17 @@ function NotificationCenter({ notifications, onClose, onClear, onRemove }: { not
           <div className="flex items-center gap-2 text-base font-black text-slate-950 dark:text-white"><Bell size={17} className="text-blue-600 dark:text-blue-300" /> Notifications</div>
           <p className="mt-1 text-xs font-semibold text-slate-500 dark:text-slate-400">New chats, visitor messages, assignments, and system alerts.</p>
         </div>
-        <button aria-label="Close notifications" className="rounded-xl p-2 text-slate-500 hover:bg-white hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white" onClick={onClose}><X size={17} /></button>
+        <div className="flex items-center gap-1">
+          <button
+            className="rounded-xl border border-blue-100 bg-white px-3 py-2 text-xs font-black text-blue-700 shadow-sm hover:bg-blue-50 dark:border-blue-900/50 dark:bg-blue-950/40 dark:text-blue-200 dark:hover:bg-blue-900/40"
+            onClick={() => {
+              void unlockNotificationSound().then(() => playIncomingChatSound());
+            }}
+          >
+            Test sound
+          </button>
+          <button aria-label="Close notifications" className="rounded-xl p-2 text-slate-500 hover:bg-white hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white" onClick={onClose}><X size={17} /></button>
+        </div>
       </div>
       <div className="flex items-center justify-between border-b border-border px-4 py-2">
         <span className="text-xs font-black uppercase tracking-wide text-slate-500 dark:text-slate-400">{notifications.length} recent</span>
