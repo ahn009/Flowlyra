@@ -1,12 +1,31 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { AgentLayout } from "./components/AgentLayout";
+import { ArchivesPage } from "./pages/ArchivesPage";
 import { AcceptInvitePage, LoginPage, ResetPasswordPage } from "./pages/AuthPages";
 import { ChatPage } from "./pages/ChatPage";
 import { ContactsPage } from "./pages/ContactsPage";
 import { InboxPage } from "./pages/InboxPage";
 import { TicketDetailPage, TicketsPage } from "./pages/TicketsPage";
 import { AgentsPage, AnalyticsPage, BillingPage, CannedResponsesPage, InstallPage, RoutingRulesPage, TeamsPage, TriggersPage, WidgetConfigPage } from "./pages/AdminPages";
+import {
+  ContactPage,
+  CustomersPage,
+  FeaturesPage,
+  HelpPage,
+  HomePage,
+  IntegrationsPage,
+  NotFoundPage,
+  PricingPage,
+  PrivacyPage,
+  ProductTourPage,
+  SignupPage,
+  SolutionEnterprisePage,
+  SolutionSalesPage,
+  SolutionSupportPage,
+  StatusPage,
+  TermsPage
+} from "./pages/PublicPages";
 import { useAuthStore } from "./stores/authStore";
 
 function AuthGuard(): JSX.Element {
@@ -51,12 +70,28 @@ function AuthGuard(): JSX.Element {
 export function App(): JSX.Element {
   return (
     <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/features" element={<FeaturesPage />} />
+      <Route path="/pricing" element={<PricingPage />} />
+      <Route path="/solutions/customer-support" element={<SolutionSupportPage />} />
+      <Route path="/solutions/sales-marketing" element={<SolutionSalesPage />} />
+      <Route path="/solutions/enterprise" element={<SolutionEnterprisePage />} />
+      <Route path="/integrations" element={<IntegrationsPage />} />
+      <Route path="/customers" element={<CustomersPage />} />
+      <Route path="/product-tour" element={<ProductTourPage />} />
+      <Route path="/help" element={<HelpPage />} />
+      <Route path="/contact" element={<ContactPage />} />
+      <Route path="/status" element={<StatusPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/terms" element={<TermsPage />} />
+      <Route path="/signup" element={<SignupPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/invite/:token" element={<AcceptInvitePage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route element={<AuthGuard />}>
-        <Route path="/" element={<Navigate to="/inbox" replace />} />
+        <Route path="/app" element={<Navigate to="/inbox" replace />} />
         <Route path="/inbox" element={<InboxPage />} />
+        <Route path="/archives" element={<ArchivesPage />} />
         <Route path="/chat/:id" element={<ChatPage />} />
         <Route path="/tickets" element={<TicketsPage />} />
         <Route path="/ticket/:id" element={<TicketDetailPage />} />
@@ -71,6 +106,7 @@ export function App(): JSX.Element {
         <Route path="/admin/analytics" element={<AnalyticsPage />} />
         <Route path="/admin/billing" element={<BillingPage />} />
       </Route>
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }

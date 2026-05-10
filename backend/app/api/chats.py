@@ -3,6 +3,7 @@ from typing import Annotated, Any
 import uuid
 
 from fastapi import APIRouter, Depends, Query
+from fastapi.responses import PlainTextResponse
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -44,6 +45,9 @@ async def search(q: str, user: Annotated[TokenUser, Depends(current_user)], db: 
 async def detail(chat_id: uuid.UUID, user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db)) -> dict:
     chat = await get_chat(db, user.organization_id, chat_id)
     messages = (await db.execute(select(Message).where(Message.chat_id == chat.id).order_by(Message.created_at.desc()).limit(50))).scalars().all()
+    session = (
+        await db.execute(select(Session).where(Session.id == chat.session_id, Session.organization_id == user.organization_id))
+    ).scalar_one_or_none()
     data = ChatOut.model_validate(chat).model_dump()
     contact = None
     if chat.contact_id:
@@ -52,9 +56,28 @@ async def detail(chat_id: uuid.UUID, user: Annotated[TokenUser, Depends(current_
         ).scalar_one_or_none()
     data["visitor_name"] = contact.full_name if contact else None
     data["visitor_email"] = contact.email if contact else None
+    data["visitor_ip"] = str(session.ip_address) if session and session.ip_address else None
+    data["visitor_current_url"] = session.current_url if session else None
+    data["visitor_referrer"] = session.referrer if session else None
+    data["visitor_page_views"] = session.page_views if session else None
     data["visitor_status"] = "online" if await get_redis().exists(f"presence:visitor:{chat.id}") else "offline"
     data["messages"] = list(reversed(messages))
     data["contact"] = {"id": str(chat.contact_id)} if chat.contact_id else None
+    data["visitor_session"] = (
+        {
+            "id": str(session.id),
+            "ip_address": str(session.ip_address) if session.ip_address else None,
+            "country": session.country,
+            "city": session.city,
+            "current_url": session.current_url,
+            "referrer": session.referrer,
+            "page_views": session.page_views,
+            "first_seen_at": session.first_seen_at.isoformat() if session.first_seen_at else None,
+            "last_seen_at": session.last_seen_at.isoformat() if session.last_seen_at else None,
+        }
+        if session
+        else None
+    )
     return data
 
 
@@ -76,6 +99,15 @@ async def chats_with_contact_data(db: AsyncSession, chats: list[Chat]) -> list[d
         }
 
     chat_ids = [chat.id for chat in chats]
+    session_ids = [chat.session_id for chat in chats]
+    sessions_by_id = {}
+    if session_ids:
+        sessions_by_id = {
+            session.id: session
+            for session in (
+                await db.execute(select(Session).where(Session.id.in_(session_ids), Session.organization_id == chats[0].organization_id))
+            ).scalars().all()
+        }
     latest_message_subquery = (
         select(
             Message.chat_id.label("chat_id"),
@@ -113,6 +145,11 @@ async def chats_with_contact_data(db: AsyncSession, chats: list[Chat]) -> list[d
         data = ChatOut.model_validate(chat).model_dump()
         data["visitor_name"] = contact.full_name if contact else None
         data["visitor_email"] = contact.email if contact else None
+        session = sessions_by_id.get(chat.session_id)
+        data["visitor_ip"] = str(session.ip_address) if session and session.ip_address else None
+        data["visitor_current_url"] = session.current_url if session else None
+        data["visitor_referrer"] = session.referrer if session else None
+        data["visitor_page_views"] = session.page_views if session else None
         data["visitor_status"] = visitor_presence[chat.id]
         data["last_message"] = {
             "content": latest_message.content,
@@ -127,6 +164,21 @@ async def chats_with_contact_data(db: AsyncSession, chats: list[Chat]) -> list[d
 async def messages(chat_id: uuid.UUID, user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db), limit: int = Query(50, le=100)) -> list[Any]:
     chat = await get_chat(db, user.organization_id, chat_id)
     return (await db.execute(select(Message).where(Message.chat_id == chat.id).order_by(Message.created_at.desc()).limit(limit))).scalars().all()
+
+
+@router.get("/{chat_id}/transcript.txt", response_class=PlainTextResponse)
+async def transcript_txt(chat_id: uuid.UUID, user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db)) -> PlainTextResponse:
+    chat = await get_chat(db, user.organization_id, chat_id)
+    messages = (await db.execute(select(Message).where(Message.chat_id == chat.id, Message.is_internal.is_(False)).order_by(Message.created_at.asc()))).scalars().all()
+    lines = [f"FlowLyra transcript", f"Chat: {chat.id}", f"Status: {chat.status}", f"Subject: {chat.subject or 'Live chat'}", ""]
+    for message in messages:
+        sender = {"customer": "Visitor", "agent": "Agent", "system": "System"}.get(message.sender_type, message.sender_type.title())
+        body = message.file_name or message.content or ""
+        if message.file_url:
+            body = f"{body} ({message.file_url})"
+        lines.append(f"[{message.created_at.isoformat()}] {sender}: {body}")
+    filename = f"flowlyra-chat-{chat.id}.txt"
+    return PlainTextResponse("\n".join(lines), headers={"Content-Disposition": f'attachment; filename="{filename}"'})
 
 
 @router.get("/{chat_id}/visitor")

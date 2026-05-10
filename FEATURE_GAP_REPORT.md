@@ -3,9 +3,9 @@
 **Generated:** 2026-05-10
 **Analyzed by:** Jcode Agent
 **Total Features Checked:** 428
-**Present:** 75 (17.5%)
-**Partial:** 91 (21.3%)
-**Missing:** 262 (61.2%)
+**Present:** 78 (18.2%)
+**Partial:** 89 (20.8%)
+**Missing:** 261 (61.0%)
 
 ---
 
@@ -83,7 +83,7 @@ Missing Categories (most gaps first):
 | Chat Widget | 36 | 17 | 13 | 6 |
 | Dashboard - Home | 6 | 0 | 3 | 3 |
 | Dashboard - Chats | 18 | 8 | 8 | 2 |
-| Dashboard - Archives | 7 | 0 | 2 | 5 |
+| Dashboard - Archives | 7 | 2 | 1 | 4 |
 | Dashboard - Engage | 15 | 1 | 5 | 9 |
 | Reports & Analytics | 21 | 4 | 8 | 9 |
 | AI & Automation | 24 | 2 | 5 | 17 |
@@ -103,7 +103,7 @@ Missing Categories (most gaps first):
 | Database Models | 41 | 14 | 3 | 24 |
 | Model Fields | 14 | 6 | 2 | 6 |
 | API Endpoints | 23 | 8 | 6 | 9 |
-| Frontend Pages | 45 | 18 | 6 | 21 |
+| Frontend Pages | 45 | 19 | 6 | 20 |
 | Security Checks | 15 | 5 | 5 | 5 |
 
 ---
@@ -191,9 +191,9 @@ Legend: ✅ PRESENT, ⚠️ PARTIAL, ❌ MISSING.
 
 | # | Feature | Status | Evidence / Notes |
 |---|---------|--------|------------------|
-| 4.1 | Archived Chats List | ⚠️ PARTIAL | `GET /chats` can filter status `backend/app/api/chats.py:22-35`; no archive page. |
+| 4.1 | Archived Chats List | ✅ PRESENT | `/archives` route renders resolved chat list in `frontend/src/pages/ArchivesPage.tsx:9-65` backed by `GET /chats?status=resolved`. |
 | 4.2 | Filters | ⚠️ PARTIAL | Backend list filters status/assigned/team/channel/tag `backend/app/services/chat_service.py:155-163`; no date/rating UI. |
-| 4.3 | Transcript Export | ❌ MISSING | No transcript email/PDF/TXT. |
+| 4.3 | Transcript Export | ⚠️ PARTIAL | TXT transcript download endpoint `backend/app/api/chats.py:169-181` and archive action `frontend/src/pages/ArchivesPage.tsx:55-58`; PDF/email export still missing. |
 | 4.4 | Ban from Archive | ⚠️ PARTIAL | Ban API exists `backend/app/api/chats.py:247-250`; no archive UI. |
 | 4.5 | Batch Tag Archives | ❌ MISSING | No bulk archive operations. |
 | 4.6 | Detailed Customer Info | ⚠️ PARTIAL | Chat detail visitor session `backend/app/api/chats.py:65-79`; no archive-specific page. |
@@ -631,7 +631,7 @@ Legend: ✅ PRESENT, ⚠️ PARTIAL, ❌ MISSING.
 | P5 | Dashboard / | ⚠️ PARTIAL | `/` is marketing home; `/app` redirects inbox. No dashboard home. |
 | P6 | /chats | ⚠️ PARTIAL | Existing `/inbox`; no `/chats` route. |
 | P7 | /chats/:id | ⚠️ PARTIAL | Existing `/chat/:id`. |
-| P8 | /archives | ❌ MISSING | No route. |
+| P8 | /archives | ✅ PRESENT | Route registered in `frontend/src/App.tsx:94`, page in `frontend/src/pages/ArchivesPage.tsx`. |
 | P9 | /engage/traffic | ❌ MISSING | No route. |
 | P10 | /engage/campaigns | ⚠️ PARTIAL | Existing `/admin/triggers`. |
 | P11 | /engage/campaigns/new | ❌ MISSING | No route. |
@@ -735,5 +735,6 @@ Multi-channel integrations, campaigns/goals, full ticketing, KB, reporting expor
 |------|---------|
 | Widget config and visitor persistence | Added widget theme, domain allowlist, configurable pre-chat fields, post-chat survey settings, visitor history endpoint, unread badge, all-position widget CSS, and phone/custom pre-chat persistence in `backend/app/models/organization.py`, `backend/migrations/versions/002_widget_config_fields.py`, `backend/app/api/widget.py`, `backend/app/services/chat_service.py`, `backend/app/socket_manager.py`, `widget/src/*`, and `frontend/src/pages/AdminPages.tsx`. |
 | File upload and PCI masking | Added authenticated and widget-scoped upload flows, file metadata persistence/rendering, and server-side credit-card masking in `backend/app/api/upload.py`, `backend/app/services/chat_service.py`, `backend/app/socket_manager.py`, `widget/src/*`, `frontend/src/pages/ChatPage.tsx`, and `frontend/src/types/index.ts`. |
+| Archives and transcripts | Added `/archives` page and TXT transcript export in `frontend/src/pages/ArchivesPage.tsx`, `frontend/src/App.tsx`, and `backend/app/api/chats.py`. |
 
 Initial analysis report was created after codebase exploration, stack/config/model/API/frontend/test review, and feature-by-feature comparison.
