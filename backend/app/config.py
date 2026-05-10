@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    database_url: str = "postgresql+asyncpg://cf_user:cf_pass@localhost:5432/flowlyra"
+    database_url: str = "postgresql+asyncpg://cf_user:cf_pass@localhost:5432/chatflow"
     redis_url: str = "redis://localhost:6379/0"
     celery_broker_url: str = "redis://localhost:6379/1"
     celery_result_backend: str = "redis://localhost:6379/2"
@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     cors_origins: str = "http://localhost:5173,http://localhost:5174"
     api_base_url: str = "http://localhost:8000"
+    frontend_base_url: str = "http://localhost:5173"
     openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
     aws_access_key_id: str = ""
