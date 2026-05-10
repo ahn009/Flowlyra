@@ -18,14 +18,14 @@ export function InboxPage(): JSX.Element {
   const totalUnread = Object.values(unreadCounts).reduce((sum, count) => sum + count, 0);
 
   return (
-    <PageShell className="bg-[radial-gradient(circle_at_top_left,#dbeafe_0,transparent_32%),linear-gradient(180deg,#f8fafc,#eef3f8)]">
+    <PageShell>
       <PageHeader
         title="Inbox"
-        action={<div className="hidden items-center gap-2 rounded-full border border-blue-100 bg-white/80 px-3 py-2 text-sm font-bold text-slate-600 shadow-sm md:flex dark:border-blue-900/50 dark:bg-slate-900/70 dark:text-slate-300"><Sparkles size={16} className="text-blue-600" /> Live sneak-peek, AI replies, sound alerts</div>}
+        action={<div className="hidden items-center gap-2 rounded-xl border border-border bg-white px-3 py-2 text-sm font-bold text-slate-600 shadow-sm md:flex dark:bg-slate-900 dark:text-slate-300"><Sparkles size={16} className="text-slate-700 dark:text-slate-200" /> Live sneak-peek, AI replies, sound alerts</div>}
       />
       <div className="grid min-h-[calc(100dvh-128px)] grid-cols-1 gap-4 p-3 lg:grid-cols-[minmax(340px,460px)_minmax(0,1fr)] lg:p-5">
-        <Card className="min-w-0 overflow-hidden border-0 bg-white/90 shadow-2xl shadow-slate-200/70 backdrop-blur dark:bg-slate-900/90 dark:shadow-black/20">
-          <div className="border-b border-border bg-gradient-to-br from-white to-blue-50/70 p-4 dark:from-slate-900 dark:to-blue-950/20">
+        <Card className="min-w-0 overflow-hidden bg-white dark:bg-slate-900">
+          <div className="border-b border-border bg-white p-4 dark:bg-slate-900">
             <div className="mb-4 grid grid-cols-4 gap-2">
               <MetricCard label="Waiting" value={waiting} tone="yellow" />
               <MetricCard label="Active" value={active} tone="green" />
@@ -38,7 +38,7 @@ export function InboxPage(): JSX.Element {
                 ["Waiting", waiting],
                 ["Active", active],
                 ["Resolved", rows.filter((chat) => chat.status === "resolved").length]
-              ].map(([label, count], index) => <button key={label} className={`shrink-0 rounded-full border px-3 py-1.5 text-sm font-black transition ${index === 0 ? "border-blue-200 bg-blue-600 text-white shadow-lg shadow-blue-900/20" : "border-border bg-white/80 text-slate-600 hover:border-blue-200 hover:bg-blue-50 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"}`}>{label} <span className="opacity-75">{count}</span></button>)}
+              ].map(([label, count], index) => <button key={label} className={`shrink-0 rounded-xl border px-3 py-1.5 text-sm font-black transition ${index === 0 ? "border-slate-950 bg-slate-950 text-white dark:border-white dark:bg-white dark:text-slate-950" : "border-border bg-white text-slate-600 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"}`}>{label} <span className="opacity-75">{count}</span></button>)}
             </div>
             <label className="flex items-center gap-2 rounded-2xl border border-border bg-white px-3 text-sm text-slate-500 shadow-sm focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-100 dark:bg-slate-800 dark:text-slate-400 dark:focus-within:border-blue-500 dark:focus-within:ring-blue-900/40">
               <Search size={16} /> <TextInput className="h-11 border-0 px-0 shadow-none focus:ring-0" placeholder="Search conversations, email, topic" />
@@ -48,8 +48,8 @@ export function InboxPage(): JSX.Element {
             {rows.length ? rows.map((chat) => <ChatRow key={chat.id} chat={chat} unreadCount={unreadCounts[chat.id] ?? 0} />) : <EmptyState />}
           </div>
         </Card>
-        <div className="grid place-items-center rounded-[2rem] border border-white/70 bg-white/50 p-4 shadow-inner shadow-white/60 backdrop-blur dark:border-slate-700/60 dark:bg-slate-900/40 sm:p-8">
-          <Card className="w-full max-w-xl border-0 bg-white/90 shadow-2xl shadow-blue-900/10 dark:bg-slate-900/90">
+        <div className="grid place-items-center rounded-2xl border border-border bg-white/70 p-4 backdrop-blur dark:bg-slate-900/50 sm:p-8">
+          <Card className="w-full max-w-xl bg-white dark:bg-slate-900">
             <EmptyPanel icon={<MessageCircle size={24} />} title="Choose a conversation" description="Reply, see live typing previews, use AI suggestions, send files, and review visitor context from one clean workspace." />
           </Card>
         </div>
@@ -69,7 +69,7 @@ function ChatRow({ chat, unreadCount }: { chat: Chat; unreadCount: number }): JS
   const isUnread = unreadCount > 0;
   return (
     <Link to={`/chat/${chat.id}`} className={`group flex min-w-0 items-center gap-3 border-b border-border px-4 py-3 outline-none transition last:border-0 focus-visible:bg-blue-50 dark:focus-visible:bg-slate-800 ${isUnread ? "bg-blue-50/80 hover:bg-blue-50 dark:bg-blue-950/20" : "hover:bg-slate-50 dark:hover:bg-slate-800/80"}`}>
-      <div className="relative grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-400 text-white shadow-lg shadow-blue-900/15"><MessageSquare size={19} /><span className={`absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full border-2 border-white ${chat.visitor_status === "online" ? "bg-success" : "bg-slate-400"}`} /></div>
+      <div className="relative grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-slate-950 text-white shadow-sm dark:bg-white dark:text-slate-950"><MessageSquare size={19} /><span className={`absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full border-2 border-white ${chat.visitor_status === "online" ? "bg-success" : "bg-slate-400"}`} /></div>
       <div className="min-w-0 flex-1">
         <div className="flex min-w-0 items-center gap-2">
           <div className={`truncate font-black ${isUnread ? "text-slate-950 dark:text-white" : "text-slate-800 dark:text-slate-200"}`}>{chat.visitor_name || chat.visitor_email || "Website visitor"}</div>

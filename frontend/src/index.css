@@ -3,18 +3,18 @@
 @tailwind utilities;
 
 :root {
-  --color-surface: #f6f8fb;
+  --color-surface: #f8fafc;
   --color-surface-muted: #f1f5f9;
-  --color-ink: #0f172a;
-  --color-muted: #64748b;
-  --color-border: #dbe3ee;
+  --color-ink: #101828;
+  --color-muted: #667085;
+  --color-border: #e2e8f0;
   --color-card: #ffffff;
   --color-card-hover: #f8fafc;
   --color-heading: #0f172a;
   --color-body: #475569;
 
   color: #0f172a;
-  background: #f6f8fb;
+  background: #f8fafc;
   font-family: Inter, system-ui, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -22,15 +22,15 @@
 }
 
 html.dark {
-  --color-surface: #0b1220;
-  --color-surface-muted: #111b2e;
-  --color-ink: #e6edf7;
-  --color-muted: #9aacbf;
-  --color-border: #243244;
-  --color-card: #131c2e;
-  --color-card-hover: #1a2540;
-  --color-heading: #f0f4fa;
-  --color-body: #9aacbf;
+  --color-surface: #0f172a;
+  --color-surface-muted: #111827;
+  --color-ink: #f8fafc;
+  --color-muted: #94a3b8;
+  --color-border: #263244;
+  --color-card: #111827;
+  --color-card-hover: #172033;
+  --color-heading: #f8fafc;
+  --color-body: #cbd5e1;
 
   color: #e6edf7;
   background: #0b1220;
@@ -51,6 +51,18 @@ body {
   color: var(--color-ink);
   background: var(--color-surface);
   transition: background-color 150ms ease, color 150ms ease;
+}
+
+.premium-surface {
+  background:
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.08), transparent 34rem),
+    linear-gradient(180deg, #ffffff 0%, #f8fafc 48%, #eef2f7 100%);
+}
+
+html.dark .premium-surface {
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.16), transparent 34rem),
+    linear-gradient(180deg, #0f172a 0%, #111827 52%, #0b1120 100%);
 }
 
 ::selection {

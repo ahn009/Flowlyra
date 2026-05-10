@@ -107,8 +107,8 @@ const audienceCards = [
 
 function PublicLayout({ title, subtitle, children }: { title: string; subtitle: string; children: JSX.Element | JSX.Element[] }): JSX.Element {
   return (
-    <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,#dbeafe_0,transparent_34%),linear-gradient(180deg,#ffffff_0%,#f8fbff_46%,#eef4ff_100%)] text-slate-900">
-      <header className="sticky top-0 z-40 border-b border-white/70 bg-white/80 shadow-sm shadow-slate-200/70 backdrop-blur-xl">
+    <div className="min-h-screen bg-white text-slate-900">
+      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur-xl">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <Link to="/" className="inline-flex items-center gap-3">
             <img src={flowlyraMark} alt="FlowLyra" className="h-10 w-10 rounded-2xl shadow-lg shadow-blue-900/10" />
@@ -119,7 +119,7 @@ function PublicLayout({ title, subtitle, children }: { title: string; subtitle: 
               <NavLink
                 key={item.to}
                 to={item.to}
-                className={({ isActive }) => cx("rounded-full px-3 py-2 text-sm font-bold transition", isActive ? "bg-blue-600 text-white shadow-lg shadow-blue-900/20" : "text-slate-600 hover:bg-slate-100 hover:text-slate-950")}
+                className={({ isActive }) => cx("rounded-xl px-3 py-2 text-sm font-bold transition", isActive ? "bg-slate-950 text-white" : "text-slate-600 hover:bg-slate-100 hover:text-slate-950")}
               >
                 {item.label}
               </NavLink>
@@ -147,17 +147,17 @@ function PublicLayout({ title, subtitle, children }: { title: string; subtitle: 
       </header>
 
       <main>
-        <section className="relative border-b border-white/70">
-          <div className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-blue-200/50 blur-3xl" />
-          <div className="pointer-events-none absolute right-0 top-32 h-80 w-80 rounded-full bg-cyan-200/50 blur-3xl" />
+        <section className="relative border-b border-slate-200 bg-slate-50">
+          <div className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-slate-200/70 blur-3xl" />
+          <div className="pointer-events-none absolute right-0 top-32 h-80 w-80 rounded-full bg-blue-100/60 blur-3xl" />
           <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[minmax(0,1fr)_430px] lg:items-center lg:py-20">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white/80 px-3 py-2 text-sm font-black text-blue-700 shadow-sm"><Sparkles size={16} /> FlowLyra production suite</div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-black text-slate-700 shadow-sm"><Sparkles size={16} /> FlowLyra production suite</div>
               <h1 className="mt-5 max-w-4xl text-4xl font-black tracking-[-0.04em] text-slate-950 sm:text-5xl lg:text-6xl">{title}</h1>
               <p className="mt-5 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">{subtitle}</p>
               <div className="mt-7 flex flex-wrap gap-3">
-                <Link to="/signup"><Button variant="primary" className="h-12 rounded-2xl px-6 shadow-xl shadow-blue-900/20">Start free</Button></Link>
-                <Link to="/product-tour"><Button variant="secondary" className="h-12 rounded-2xl px-6">View product tour</Button></Link>
+                <Link to="/signup"><Button variant="primary" className="h-12 rounded-xl px-6">Start free</Button></Link>
+                <Link to="/product-tour"><Button variant="secondary" className="h-12 rounded-xl px-6">View product tour</Button></Link>
               </div>
               <div className="mt-7 grid max-w-xl grid-cols-3 gap-3 text-center text-xs font-black uppercase tracking-wide text-slate-500">
                 <div className="rounded-2xl border border-white bg-white/70 p-3 shadow-sm"><div className="text-2xl text-slate-950">2.4s</div>Avg reply</div>
@@ -166,7 +166,7 @@ function PublicLayout({ title, subtitle, children }: { title: string; subtitle: 
               </div>
             </div>
             <div className="relative">
-              <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-blue-200 to-cyan-100 blur-2xl" />
+              <div className="absolute -inset-4 rounded-[2rem] bg-slate-200/60 blur-2xl" />
               <Card className="relative overflow-hidden rounded-[2rem] border-white/80 bg-white/90 p-5 shadow-2xl shadow-blue-900/15 backdrop-blur sm:p-6">
                 <div className="flex items-center justify-between gap-3">
                   <img src={flowlyraLogo} alt="FlowLyra logo" className="h-12 w-auto" />
@@ -175,7 +175,7 @@ function PublicLayout({ title, subtitle, children }: { title: string; subtitle: 
                 <div className="mt-5 rounded-3xl bg-slate-950 p-4 text-white">
                   <div className="flex items-center gap-2 text-xs font-bold text-blue-200"><span className="h-2 w-2 rounded-full bg-green-400" /> Visitor from pricing page</div>
                   <div className="mt-4 rounded-2xl bg-white/10 p-3 text-sm">Hi, do you offer team routing and file uploads?</div>
-                  <div className="ml-auto mt-3 max-w-[85%] rounded-2xl bg-blue-500 p-3 text-sm shadow-lg">Yes. FlowLyra routes by team, stores chat history, and supports secure attachments.</div>
+                  <div className="ml-auto mt-3 max-w-[85%] rounded-2xl bg-white p-3 text-sm text-slate-950 shadow-sm">Yes. FlowLyra routes by team, stores chat history, and supports secure attachments.</div>
                   <div className="mt-4 grid grid-cols-3 gap-2 text-center text-[11px] font-bold text-slate-300">
                     <div className="rounded-xl bg-white/10 p-2">AI draft</div>
                     <div className="rounded-xl bg-white/10 p-2">Transfer</div>

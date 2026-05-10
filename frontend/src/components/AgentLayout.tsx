@@ -55,7 +55,7 @@ export function AgentLayout(): JSX.Element {
   return (
     <div className="min-h-screen bg-surface text-ink">
       <Toaster position="top-right" />
-      <aside className={`fixed inset-y-0 left-0 z-20 border-r border-border bg-white text-slate-800 shadow-soft dark:bg-slate-900 dark:text-slate-100 ${sidebarWidth}`}>
+      <aside className={`fixed inset-y-0 left-0 z-20 border-r border-border bg-white/95 text-slate-800 shadow-[0_1px_2px_rgba(16,24,40,0.04)] backdrop-blur dark:bg-slate-950/95 dark:text-slate-100 ${sidebarWidth}`}>
         <div className="flex h-16 items-center justify-center border-b border-border px-2 md:justify-between md:px-4">
           {!collapsed && <div className="hidden items-center gap-3 md:flex"><img src={flowlyraMark} alt="FlowLyra logo" className="h-9 w-9 rounded-xl" /><span className="font-extrabold tracking-tight">FlowLyra</span></div>}
           <button aria-label="Toggle navigation" className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white" onClick={() => setCollapsed((value) => !value)}>
@@ -73,7 +73,7 @@ export function AgentLayout(): JSX.Element {
                     key={item.to}
                     to={item.to}
                     className={({ isActive }) =>
-                      `flex h-10 items-center justify-center gap-3 rounded-lg px-0 text-sm font-semibold md:justify-start md:px-3 ${isActive ? "bg-primary text-white shadow-sm shadow-blue-900/20" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"}`
+                      `flex h-10 items-center justify-center gap-3 rounded-xl px-0 text-sm font-bold md:justify-start md:px-3 ${isActive ? "bg-slate-950 text-white shadow-sm dark:bg-white dark:text-slate-950" : "text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"}`
                     }
                   >
                     <Icon size={18} className="shrink-0" />
@@ -84,19 +84,19 @@ export function AgentLayout(): JSX.Element {
             </div>
           ))}
         </nav>
-        {!collapsed && <div className="absolute inset-x-3 bottom-3 hidden rounded-xl border border-border bg-slate-50 p-3 dark:bg-slate-800 md:block">
+        {!collapsed && <div className="absolute inset-x-3 bottom-3 hidden rounded-2xl border border-border bg-slate-50 p-3 dark:bg-slate-900 md:block">
           <div className="flex items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-100"><LifeBuoy size={16} /> Human-first support</div>
           <div className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">AI suggestions stay private to agents.</div>
         </div>}
       </aside>
       <div className={contentOffset}>
-        <header className="sticky top-0 z-10 flex h-16 min-w-0 items-center justify-between gap-3 border-b border-border bg-white/90 px-3 shadow-sm shadow-slate-200/40 backdrop-blur sm:px-5 dark:bg-slate-900/90 dark:shadow-slate-900/40">
+        <header className="sticky top-0 z-10 flex h-16 min-w-0 items-center justify-between gap-3 border-b border-border bg-white/85 px-3 shadow-sm backdrop-blur-xl sm:px-5 dark:bg-slate-950/85">
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-            <label className="hidden min-w-[220px] items-center gap-2 rounded-lg border border-border bg-slate-50 px-3 py-2 text-sm text-slate-500 md:flex lg:min-w-[320px] dark:bg-slate-800 dark:text-slate-400">
+            <label className="hidden min-w-[220px] items-center gap-2 rounded-xl border border-border bg-slate-50 px-3 py-2 text-sm text-slate-500 md:flex lg:min-w-[320px] dark:bg-slate-900 dark:text-slate-400">
               <Search size={16} />
               <input className="w-full bg-transparent outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500 dark:text-slate-200" placeholder="Search chats, tickets, contacts" />
             </label>
-            <select className="max-w-[112px] rounded-lg border border-border bg-white px-2 py-2 text-sm font-semibold sm:max-w-none sm:px-3 dark:bg-slate-800 dark:text-slate-200">
+            <select className="max-w-[112px] rounded-xl border border-border bg-white px-2 py-2 text-sm font-semibold sm:max-w-none sm:px-3 dark:bg-slate-900 dark:text-slate-200">
               <option>online</option>
               <option>busy</option>
               <option>away</option>
@@ -106,7 +106,7 @@ export function AgentLayout(): JSX.Element {
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             <ThemeToggle />
             <div className="relative">
-              <button className="rounded-lg border border-border p-2 hover:bg-slate-50 dark:hover:bg-slate-700" aria-label="Notifications">
+              <button className="rounded-xl border border-border bg-white p-2 hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800" aria-label="Notifications">
                 <Bell size={18} />
               </button>
               {unread > 0 && <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-danger px-1 text-xs text-white">{unread}</span>}
@@ -116,7 +116,7 @@ export function AgentLayout(): JSX.Element {
               <div className="text-xs text-slate-500 dark:text-slate-400">{user?.role ?? "agent"}</div>
             </div>
             <button
-              className="rounded-lg border border-border p-2 hover:bg-slate-50 dark:hover:bg-slate-700"
+              className="rounded-xl border border-border bg-white p-2 hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800"
               onClick={() => {
                 void logout().then(() => navigate("/login"));
               }}
@@ -139,7 +139,7 @@ export function AgentLayout(): JSX.Element {
 
 export function PageHeader({ title, action }: { title: string; action?: ReactNode }): JSX.Element {
   return (
-    <div className="flex min-h-[64px] flex-col gap-3 border-b border-border bg-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 dark:bg-slate-900">
+    <div className="flex min-h-[64px] flex-col gap-3 border-b border-border bg-white/80 px-4 py-4 backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:px-6 dark:bg-slate-950/80">
       <div className="min-w-0">
         <h1 className="truncate text-xl font-black tracking-tight text-ink">{title}</h1>
       </div>

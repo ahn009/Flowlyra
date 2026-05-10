@@ -75,10 +75,10 @@ export function ChatPage(): JSX.Element {
   }
 
   return (
-    <section className="min-h-[calc(100dvh-64px)] bg-[radial-gradient(circle_at_top_left,#dbeafe_0,transparent_34%),linear-gradient(180deg,#f8fafc,#eef3f8)] dark:bg-[radial-gradient(circle_at_top_left,#1e3a8a55_0,transparent_30%),linear-gradient(180deg,#07111f,#0f172a)]">
+    <section className="min-h-[calc(100dvh-64px)] premium-surface">
       <div className="grid min-h-[calc(100dvh-64px)] grid-cols-1 xl:grid-cols-[minmax(0,1fr)_340px]">
         <div className="flex min-h-[calc(100dvh-64px)] min-w-0 flex-col xl:h-[calc(100dvh-64px)]">
-          <header className="border-b border-white/70 bg-white/85 px-3 py-3 shadow-xl shadow-slate-200/50 backdrop-blur-xl dark:border-slate-700/70 dark:bg-slate-900/85 dark:shadow-black/20 sm:px-4 lg:px-6">
+          <header className="border-b border-border bg-white/85 px-3 py-3 shadow-sm backdrop-blur-xl dark:bg-slate-950/85 sm:px-4 lg:px-6">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex min-w-0 items-center gap-3">
                 <button
@@ -90,7 +90,7 @@ export function ChatPage(): JSX.Element {
                 >
                   <ArrowLeft size={16} />
                 </button>
-                <div className="relative grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-blue-600 via-sky-500 to-cyan-400 font-black text-white shadow-xl shadow-blue-900/25">
+                <div className="relative grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-slate-950 font-black text-white shadow-sm dark:bg-white dark:text-slate-950">
                   {initials(data?.visitor_name || data?.visitor_email || "Visitor")}
                   <span className={`absolute -right-1 -top-1 h-3.5 w-3.5 rounded-full border-2 border-white ${data?.visitor_status === "online" ? "bg-success" : "bg-slate-400"}`} />
                 </div>
@@ -118,8 +118,8 @@ export function ChatPage(): JSX.Element {
           </header>
 
           <div className="min-h-0 flex-1 overflow-hidden px-3 py-3 sm:px-4 lg:px-6 lg:py-5">
-            <div className="mx-auto flex h-full max-w-5xl flex-col overflow-hidden rounded-[1.5rem] border border-white/70 bg-white/90 shadow-2xl shadow-slate-200/70 backdrop-blur dark:border-slate-700/70 dark:bg-slate-900/90 dark:shadow-black/20">
-              <div className="border-b border-border bg-gradient-to-r from-white to-blue-50 px-5 py-3 dark:from-slate-900 dark:to-blue-950/30">
+            <div className="mx-auto flex h-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-sm dark:bg-slate-900">
+              <div className="border-b border-border bg-white px-5 py-3 dark:bg-slate-900">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-200">
                     <ShieldCheck size={16} className="text-green-600" />
@@ -136,7 +136,7 @@ export function ChatPage(): JSX.Element {
                 </div>
               )}
 
-              <div className="min-h-[260px] flex-1 overflow-y-auto bg-[radial-gradient(circle_at_top_left,#bfdbfe_0,transparent_28%),linear-gradient(#f8fafc,#eef3f8)] p-3 dark:bg-[radial-gradient(circle_at_top_left,#1e3a8a66_0,transparent_24%),linear-gradient(180deg,#111827,#0b1220)]">
+              <div className="min-h-[260px] flex-1 overflow-y-auto bg-slate-50 p-3 dark:bg-slate-950">
                 {rows.length > 0 ? rows.map((message) => <MessageRow key={message.id} message={message} />) : <EmptyConversation />}
               </div>
 
@@ -298,7 +298,7 @@ function Composer({
   const fileInputId = "agent-chat-upload";
   return (
     <div className="shrink-0 border-t border-slate-200 bg-white px-3 py-3 dark:border-slate-700 dark:bg-slate-900 sm:px-4 lg:px-6 lg:py-4">
-      <div className="mx-auto max-w-5xl rounded-[1.5rem] border border-white/70 bg-white/90 p-3 shadow-2xl shadow-slate-200/70 backdrop-blur dark:border-slate-700/70 dark:bg-slate-900/90 dark:shadow-black/20">
+      <div className="mx-auto max-w-5xl rounded-2xl border border-border bg-white p-3 shadow-sm dark:bg-slate-900">
         <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
           <button
             onClick={() => setNoteMode(!noteMode)}
@@ -326,7 +326,7 @@ function Composer({
               if (event.ctrlKey && event.key === "Enter") send();
             }}
           />
-          <button onClick={send} className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 px-6 text-sm font-black text-white shadow-xl shadow-blue-900/25 transition hover:scale-[1.01] sm:w-auto">
+          <button onClick={send} className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-slate-950 px-6 text-sm font-black text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 sm:w-auto">
             <Send size={17} />Send
           </button>
         </div>

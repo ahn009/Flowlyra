@@ -19,10 +19,10 @@ export function Button({ children, variant = "secondary", size = "md", className
   return (
     <button
       className={cx(
-        "inline-flex shrink-0 items-center justify-center gap-2 rounded-lg font-semibold outline-none transition focus-visible:ring-4 focus-visible:ring-blue-100 dark:focus-visible:ring-blue-900/40 disabled:cursor-not-allowed disabled:opacity-60",
+        "inline-flex shrink-0 items-center justify-center gap-2 rounded-xl font-bold outline-none transition focus-visible:ring-4 focus-visible:ring-blue-100 dark:focus-visible:ring-blue-900/40 disabled:cursor-not-allowed disabled:opacity-60",
         size === "sm" ? "h-9 px-3 text-sm" : "h-10 px-4 text-sm",
-        variant === "primary" && "bg-primary text-white shadow-sm shadow-blue-900/10 hover:bg-primary-hover",
-        variant === "secondary" && "border border-border bg-white text-slate-700 shadow-sm shadow-slate-200/40 hover:border-slate-300 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600 dark:shadow-none dark:hover:bg-slate-700",
+        variant === "primary" && "bg-slate-950 text-white shadow-sm hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200",
+        variant === "secondary" && "border border-border bg-white text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-700 dark:shadow-none dark:hover:bg-slate-800",
         variant === "ghost" && "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700",
         variant === "danger" && "bg-danger text-white shadow-sm shadow-red-900/10 hover:bg-red-700",
         className
@@ -40,7 +40,7 @@ interface CardProps {
 }
 
 export function Card({ children, className }: CardProps): JSX.Element {
-  return <div className={cx("rounded-lg border border-border bg-white shadow-soft dark:bg-slate-800 dark:border-slate-700 dark:shadow-none", className)}>{children}</div>;
+  return <div className={cx("rounded-2xl border border-border bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_32px_rgba(16,24,40,0.06)] dark:bg-slate-900 dark:border-slate-700 dark:shadow-none", className)}>{children}</div>;
 }
 
 interface PageShellProps {
@@ -49,7 +49,7 @@ interface PageShellProps {
 }
 
 export function PageShell({ children, className }: PageShellProps): JSX.Element {
-  return <section className={cx("min-h-[calc(100dvh-64px)] bg-[linear-gradient(180deg,#f8fafc_0%,#f6f8fb_42%,#eef3f8_100%)] dark:bg-[linear-gradient(180deg,#0b1220_0%,#0d1526_42%,#0f182c_100%)]", className)}>{children}</section>;
+  return <section className={cx("premium-surface min-h-[calc(100dvh-64px)]", className)}>{children}</section>;
 }
 
 interface PanelHeaderProps {
@@ -92,7 +92,7 @@ export function TextInput({ className, ...props }: InputHTMLAttributes<HTMLInput
   return (
     <input
       className={cx(
-        "h-10 w-full rounded-lg border border-border bg-white px-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-blue-500 dark:focus:ring-blue-900/40",
+        "h-10 w-full rounded-xl border border-border bg-white px-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-blue-500 dark:focus:ring-blue-900/40",
         className
       )}
       {...props}
@@ -104,7 +104,7 @@ export function TextArea({ className, ...props }: TextareaHTMLAttributes<HTMLTex
   return (
     <textarea
       className={cx(
-        "w-full resize-none rounded-lg border border-border bg-white px-3 py-2 text-sm leading-6 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-blue-500 dark:focus:ring-blue-900/40",
+        "w-full resize-none rounded-xl border border-border bg-white px-3 py-2 text-sm leading-6 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-blue-500 dark:focus:ring-blue-900/40",
         className
       )}
       {...props}
@@ -115,7 +115,7 @@ export function TextArea({ className, ...props }: TextareaHTMLAttributes<HTMLTex
 export function SelectInput({ className, ...props }: SelectHTMLAttributes<HTMLSelectElement>): JSX.Element {
   return (
     <select
-      className={cx("h-10 w-full rounded-lg border border-border bg-white px-3 text-sm font-semibold outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-100 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-blue-500 dark:focus:ring-blue-900/40", className)}
+      className={cx("h-10 w-full rounded-xl border border-border bg-white px-3 text-sm font-semibold outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-100 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-blue-500 dark:focus:ring-blue-900/40", className)}
       {...props}
     />
   );
