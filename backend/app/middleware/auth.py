@@ -5,14 +5,15 @@ import uuid
 from fastapi import Depends, Header, HTTPException, Request, status
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings
 from app.db.redis import get_redis
-from app.db.session import get_db
+from app.db.session import AsyncSessionLocal, get_db
 from app.models.user import User
+from app.models.workspace_membership import WorkspaceMembership
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12)
 ALGORITHM = "HS256"
@@ -23,6 +24,11 @@ class TokenUser(BaseModel):
     organization_id: uuid.UUID
     email: str
     role: str
+    full_name: str | None = None
+    avatar_url: str | None = None
+    granted_permissions: list[str] = Field(default_factory=list)
+    denied_permissions: list[str] = Field(default_factory=list)
+    membership_id: uuid.UUID | None = None
 
 
 def hash_password(password: str) -> str:
@@ -33,11 +39,11 @@ def verify_password(password: str, password_hash: str) -> bool:
     return pwd_context.verify(password, password_hash)
 
 
-def create_token(user: User, token_type: str, expires_delta: timedelta) -> str:
+def create_token(user: User, token_type: str, expires_delta: timedelta, *, organization_id: uuid.UUID | None = None) -> str:
     now = datetime.now(UTC)
     payload = {
         "sub": str(user.id),
-        "org": str(user.organization_id),
+        "org": str(organization_id or user.organization_id),
         "email": user.email,
         "role": user.role,
         "type": token_type,
@@ -61,27 +67,81 @@ async def decode_token(token: str, expected_type: str = "access") -> dict[str, s
     return payload
 
 
+async def _load_membership(db: AsyncSession, user_id: uuid.UUID, organization_id: uuid.UUID) -> WorkspaceMembership | None:
+    result = await db.execute(
+        select(WorkspaceMembership).where(
+            WorkspaceMembership.user_id == user_id,
+            WorkspaceMembership.organization_id == organization_id,
+            WorkspaceMembership.is_active.is_(True),
+        )
+    )
+    return result.scalar_one_or_none()
+
+
 async def current_user(
     request: Request,
     db: Annotated[AsyncSession, Depends(get_db)],
     authorization: Annotated[str | None, Header()] = None,
 ) -> TokenUser:
-    if not authorization or not authorization.startswith("Bearer "):
+    token: str | None = None
+    if authorization and authorization.startswith("Bearer "):
+        token = authorization.removeprefix("Bearer ").strip()
+    else:
+        cookie_token = request.cookies.get("flowlyra_access")
+        if cookie_token:
+            token = cookie_token
+    if not token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing bearer token")
-    payload = await decode_token(authorization.removeprefix("Bearer ").strip())
+    payload = await decode_token(token)
     user_id = uuid.UUID(str(payload["sub"]))
     org_id = uuid.UUID(str(payload["org"]))
-    result = await db.execute(select(User).where(User.id == user_id, User.organization_id == org_id, User.is_active.is_(True)))
+    result = await db.execute(
+        select(User).where(
+            User.id == user_id,
+            User.organization_id == org_id,
+            User.is_active.is_(True),
+            User.deleted_at.is_(None),
+        )
+    )
     user = result.scalar_one_or_none()
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+
+    role = user.role
+    granted: list[str] = []
+    denied: list[str] = []
+    membership_id: uuid.UUID | None = None
+    membership = await _load_membership(db, user.id, org_id)
+    if membership is not None:
+        role = membership.role or role
+        perms = membership.permissions or {}
+        granted = list(perms.get("granted", []) or [])
+        denied = list(perms.get("denied", []) or [])
+        membership_id = membership.id
+
     request.state.organization_id = org_id
-    return TokenUser(id=user.id, organization_id=user.organization_id, email=user.email, role=user.role)
+    request.state.user_id = user.id
+    request.state.user_email = user.email
+    request.state.user_role = role
+    return TokenUser(
+        id=user.id,
+        organization_id=org_id,
+        email=user.email,
+        role=role,
+        full_name=user.full_name,
+        avatar_url=user.avatar_url,
+        granted_permissions=granted,
+        denied_permissions=denied,
+        membership_id=membership_id,
+    )
 
 
 def require_role(*roles: str):
     async def checker(user: Annotated[TokenUser, Depends(current_user)]) -> TokenUser:
         if user.role not in roles:
+            # owner inherits admin everywhere
+            if user.role == "owner" and "admin" in roles:
+                return user
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions")
         return user
 
@@ -90,9 +150,26 @@ def require_role(*roles: str):
 
 async def verify_socket_token(token: str) -> TokenUser:
     payload = await decode_token(token)
-    return TokenUser(
-        id=uuid.UUID(str(payload["sub"])),
-        organization_id=uuid.UUID(str(payload["org"])),
-        email=str(payload["email"]),
-        role=str(payload["role"]),
-    )
+    user_id = uuid.UUID(str(payload["sub"]))
+    org_id = uuid.UUID(str(payload["org"]))
+    async with AsyncSessionLocal() as db:
+        result = await db.execute(
+            select(User).where(
+                User.id == user_id,
+                User.organization_id == org_id,
+                User.is_active.is_(True),
+                User.deleted_at.is_(None),
+            )
+        )
+        user = result.scalar_one_or_none()
+        if user is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+        return TokenUser(
+            id=user.id,
+            organization_id=org_id,
+            email=user.email,
+            role=user.role,
+            full_name=user.full_name,
+            avatar_url=user.avatar_url,
+        )
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")

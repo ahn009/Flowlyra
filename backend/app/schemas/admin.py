@@ -15,6 +15,19 @@ class OrgUpdate(BaseModel):
     widget_pre_chat_form: dict | None = None
     widget_post_chat_survey: dict | None = None
     widget_custom_css: str | None = None
+    widget_custom_js: str | None = None
+    widget_greetings: dict | None = None
+    widget_eye_catcher: dict | None = None
+    widget_white_label: bool | None = None
+    widget_brand_text: str | None = None
+    widget_brand_url: str | None = None
+    widget_sound_enabled: bool | None = None
+    widget_lazy_load: bool | None = None
+    widget_allow_attachments: bool | None = None
+    widget_max_upload_mb: int | None = Field(default=None, ge=1, le=100)
+    widget_default_locale: str | None = None
+    widget_supported_locales: dict | None = None
+    widget_giphy_api_key: str | None = None
     operating_hours: dict | None = None
     sla_config: dict | None = None
     timezone: str | None = None
@@ -52,3 +65,20 @@ class TriggerCreate(BaseModel):
 
 class MemberRequest(BaseModel):
     user_id: UUID
+
+
+class ChatWidgetCreate(BaseModel):
+    slug: str = Field(min_length=2, max_length=100, pattern=r"^[a-z0-9][a-z0-9-]*$")
+    name: str = Field(min_length=2, max_length=255)
+    description: str | None = None
+    config: dict = Field(default_factory=dict)
+    is_default: bool = False
+    is_active: bool = True
+
+
+class ChatWidgetUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=2, max_length=255)
+    description: str | None = None
+    config: dict | None = None
+    is_default: bool | None = None
+    is_active: bool | None = None

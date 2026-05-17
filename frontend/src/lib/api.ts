@@ -3,7 +3,8 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 const baseURL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1";
 
 export const api = axios.create({
-  baseURL
+  baseURL,
+  withCredentials: true
 });
 
 api.interceptors.request.use((config) => {
@@ -30,8 +31,8 @@ api.interceptors.response.use(
 
     try {
       config._retry = true;
-      const { data } = await axios.post<{ access_token: string }>(`${baseURL}/auth/refresh`, { refresh_token: refreshToken });
-      writeAccessToken(data.access_token);
+      const { data } = await axios.post<{ access_token: string; refresh_token?: string }>(`${baseURL}/auth/refresh`, { refresh_token: refreshToken });
+      writeTokens(data.access_token, data.refresh_token);
       config.headers.Authorization = `Bearer ${data.access_token}`;
       return api(config);
     } catch (refreshError) {
@@ -63,11 +64,13 @@ function readAuthState(): PersistedAuth {
   }
 }
 
-function writeAccessToken(accessToken: string): void {
+function writeTokens(accessToken: string, refreshToken?: string | null): void {
   try {
     const raw = localStorage.getItem("cf-auth");
     const parsed = raw ? (JSON.parse(raw) as { state?: Record<string, unknown>; version?: number }) : { state: {} };
-    parsed.state = { ...(parsed.state ?? {}), accessToken };
+    const nextState: Record<string, unknown> = { ...(parsed.state ?? {}), accessToken };
+    if (refreshToken) nextState.refreshTokenValue = refreshToken;
+    parsed.state = nextState;
     localStorage.setItem("cf-auth", JSON.stringify(parsed));
   } catch {
     clearStaleAuth();

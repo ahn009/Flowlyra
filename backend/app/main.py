@@ -5,29 +5,65 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api import admin, agents, analytics, auth, chats, contacts, public, tickets, upload, widget
+from app.api import (
+    admin,
+    agents,
+    analytics,
+    audit,
+    auth,
+    chats,
+    contacts,
+    notifications,
+    public,
+    tickets,
+    upload,
+    webhooks,
+    widget,
+)
 from app.config import get_settings
+from app.logging_setup import configure as configure_logging
+from app.middleware.audit_middleware import AuditMiddleware
+from app.middleware.cors_dynamic import DynamicCorsMiddleware
+from app.middleware.csrf import CsrfMiddleware
 from app.middleware.rate_limit import RateLimitMiddleware
+from app.middleware.request_context import RequestContextMiddleware
+from app.middleware.security_headers import SecurityHeadersMiddleware
 from app.socket_manager import sio
 
 settings = get_settings()
-logging.basicConfig(level=settings.log_level)
+configure_logging(level=settings.log_level, json_logs=settings.json_logs)
+
+if settings.sentry_dsn:
+    try:  # pragma: no cover
+        import sentry_sdk
+
+        sentry_sdk.init(dsn=settings.sentry_dsn, traces_sample_rate=0.05, environment=settings.environment)
+    except Exception:  # noqa: BLE001
+        logging.getLogger(__name__).warning("Sentry SDK not installed; skipping init")
 
 
 def create_fastapi_app() -> FastAPI:
     app = FastAPI(title="FlowLyra API", version="1.0.0")
+
+    # Middlewares run in reverse insertion order; insert outer-most last.
+    app.add_middleware(RateLimitMiddleware)
+    app.add_middleware(AuditMiddleware)
+    app.add_middleware(CsrfMiddleware)
+    app.add_middleware(DynamicCorsMiddleware)
+    app.add_middleware(
+        SecurityHeadersMiddleware,
+        content_security_policy=settings.csp_override or None,
+        environment=settings.environment,
+    )
+    app.add_middleware(RequestContextMiddleware)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origin_list,
-        # The widget is embedded on customer-owned websites, so production
-        # deployments commonly use CORS_ORIGINS="*". Credentials are not
-        # cookie-based in FlowLyra (dashboard auth uses Bearer tokens), and
-        # wildcard origins are invalid when credentials are enabled.
         allow_credentials="*" not in settings.cors_origin_list,
         allow_methods=["*"],
         allow_headers=["*"],
+        expose_headers=["x-request-id", "x-ratelimit-limit", "x-ratelimit-remaining", "x-ratelimit-reset"],
     )
-    app.add_middleware(RateLimitMiddleware)
 
     @app.exception_handler(Exception)
     async def problem_details(request: Request, exc: Exception) -> JSONResponse:
@@ -38,12 +74,47 @@ def create_fastapi_app() -> FastAPI:
         return JSONResponse(
             status_code=500,
             media_type="application/problem+json",
-            content={"type": "about:blank", "title": "Internal Server Error", "status": 500, "detail": detail},
+            content={
+                "type": "about:blank",
+                "title": "Internal Server Error",
+                "status": 500,
+                "detail": detail,
+                "request_id": getattr(request.state, "request_id", None),
+            },
         )
 
     @app.get("/health")
     async def health() -> dict:
         return {"ok": True}
+
+    @app.get("/healthz")
+    async def healthz() -> dict:
+        from sqlalchemy import text
+
+        from app.db.redis import get_redis
+        from app.db.session import AsyncSessionLocal
+
+        checks: dict[str, str] = {}
+        try:
+            async with AsyncSessionLocal() as session:
+                await session.execute(text("SELECT 1"))
+            checks["db"] = "ok"
+        except Exception as exc:  # noqa: BLE001
+            checks["db"] = f"fail: {exc}"
+        try:
+            pong = await get_redis().ping()
+            checks["redis"] = "ok" if pong else "fail"
+        except Exception as exc:  # noqa: BLE001
+            checks["redis"] = f"fail: {exc}"
+        try:
+            from app.workers.system_tasks import ping as celery_ping
+
+            result = celery_ping.apply_async(args=["hc"], expires=5)
+            checks["celery"] = "ok" if result.get(timeout=2) else "fail"
+        except Exception:  # noqa: BLE001
+            checks["celery"] = "unavailable"
+        ok = all(v == "ok" or v == "unavailable" for v in checks.values())
+        return {"ok": ok, "checks": checks, "version": app.version, "environment": settings.environment}
 
     for router in (
         auth.router,
@@ -56,6 +127,9 @@ def create_fastapi_app() -> FastAPI:
         admin.router,
         analytics.router,
         upload.router,
+        audit.router,
+        notifications.router,
+        webhooks.router,
     ):
         app.include_router(router, prefix="/api/v1")
     return app

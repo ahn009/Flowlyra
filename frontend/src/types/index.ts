@@ -59,6 +59,16 @@ export interface Ticket {
   assigned_user_id?: string | null;
   team_id?: string | null;
   tags?: string[];
+  custom_fields?: Record<string, unknown>;
+  portal_enabled?: boolean;
+  merged_into_ticket_id?: string | null;
+  parent_ticket_id?: string | null;
+  email_thread_id?: string | null;
+  sla_due_at?: string | null;
+  sla_first_response_due_at?: string | null;
+  sla_resolution_due_at?: string | null;
+  first_response_breached?: boolean;
+  resolution_breached?: boolean;
   created_at?: string;
   updated_at: string;
 }

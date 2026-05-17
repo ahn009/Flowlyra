@@ -45,6 +45,18 @@ export class SocketClient {
     this.socket?.emit("chat:csat", { chat_id: chatId, organization_id: organizationId, score, comment });
   }
 
+  markRead(chatId: string): void {
+    this.socket?.emit("chat:read", { chat_id: chatId });
+  }
+
+  webrtcSignal(chatId: string, mode: "voice" | "video" | "screen", signal: Record<string, unknown>): void {
+    this.socket?.emit("webrtc:signal", { chat_id: chatId, mode, signal });
+  }
+
+  cobrowseRequest(chatId: string, mode: "screen" | "video" | "voice" = "screen"): void {
+    this.socket?.emit("cobrowse:request", { chat_id: chatId, mode });
+  }
+
   disconnect(): void {
     this.socket?.removeAllListeners();
     this.socket?.disconnect();

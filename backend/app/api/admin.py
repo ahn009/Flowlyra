@@ -11,12 +11,22 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.middleware.auth import TokenUser, require_role
 from app.models.canned_response import CannedResponse
+from app.models.chat_widget import ChatWidget
 from app.models.organization import Organization
 from app.models.proactive_trigger import ProactiveTrigger
 from app.models.routing_rule import RoutingRule
 from app.models.team import Team, team_members
 from app.models.user import User
-from app.schemas.admin import CannedCreate, MemberRequest, OrgUpdate, RuleCreate, TeamCreate, TriggerCreate
+from app.schemas.admin import (
+    CannedCreate,
+    ChatWidgetCreate,
+    ChatWidgetUpdate,
+    MemberRequest,
+    OrgUpdate,
+    RuleCreate,
+    TeamCreate,
+    TriggerCreate,
+)
 from app.workers.system_tasks import ping
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -36,6 +46,65 @@ async def update_org(payload: OrgUpdate, user: AdminUser, db: AsyncSession = Dep
     await db.commit()
     await db.refresh(org_obj)
     return model_dict(org_obj)
+
+
+@router.get("/widgets")
+async def list_widgets(user: AdminUser, db: AsyncSession = Depends(get_db)) -> list[Any]:
+    rows = (
+        await db.execute(
+            select(ChatWidget).where(ChatWidget.organization_id == user.organization_id).order_by(ChatWidget.created_at.desc())
+        )
+    ).scalars().all()
+    return [model_dict(row) for row in rows]
+
+
+@router.post("/widgets")
+async def create_widget(payload: ChatWidgetCreate, user: AdminUser, db: AsyncSession = Depends(get_db)) -> Any:
+    existing = (
+        await db.execute(select(ChatWidget).where(ChatWidget.slug == payload.slug))
+    ).scalar_one_or_none()
+    if existing is not None:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Widget slug already exists")
+    if payload.is_default:
+        await db.execute(
+            ChatWidget.__table__.update().where(ChatWidget.organization_id == user.organization_id).values(is_default=False)
+        )
+    widget = ChatWidget(organization_id=user.organization_id, **payload.model_dump())
+    db.add(widget)
+    await db.commit()
+    await db.refresh(widget)
+    return model_dict(widget)
+
+
+@router.patch("/widgets/{widget_id}")
+async def update_widget(widget_id: uuid.UUID, payload: ChatWidgetUpdate, user: AdminUser, db: AsyncSession = Depends(get_db)) -> Any:
+    widget = (
+        await db.execute(select(ChatWidget).where(ChatWidget.id == widget_id, ChatWidget.organization_id == user.organization_id))
+    ).scalar_one_or_none()
+    if widget is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Widget not found")
+    changes = payload.model_dump(exclude_unset=True)
+    if changes.get("is_default") is True:
+        await db.execute(
+            ChatWidget.__table__.update().where(ChatWidget.organization_id == user.organization_id).values(is_default=False)
+        )
+    for key, value in changes.items():
+        setattr(widget, key, value)
+    await db.commit()
+    await db.refresh(widget)
+    return model_dict(widget)
+
+
+@router.delete("/widgets/{widget_id}")
+async def delete_widget(widget_id: uuid.UUID, user: AdminUser, db: AsyncSession = Depends(get_db)) -> dict:
+    widget = (
+        await db.execute(select(ChatWidget).where(ChatWidget.id == widget_id, ChatWidget.organization_id == user.organization_id))
+    ).scalar_one_or_none()
+    if widget is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Widget not found")
+    await db.delete(widget)
+    await db.commit()
+    return {"ok": True}
 
 
 @router.get("/teams")

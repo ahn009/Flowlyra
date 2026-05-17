@@ -4,10 +4,15 @@ import { AgentLayout } from "./components/AgentLayout";
 import { ArchivesPage } from "./pages/ArchivesPage";
 import { AcceptInvitePage, LoginPage, ResetPasswordPage } from "./pages/AuthPages";
 import { ChatPage } from "./pages/ChatPage";
+import { PublicChatPage } from "./pages/PublicChatPage";
 import { ContactsPage } from "./pages/ContactsPage";
 import { InboxPage } from "./pages/InboxPage";
 import { TicketDetailPage, TicketsPage } from "./pages/TicketsPage";
 import { AgentsPage, AnalyticsPage, BillingPage, CannedResponsesPage, InstallPage, RoutingRulesPage, TeamsPage, TriggersPage, WidgetConfigPage } from "./pages/AdminPages";
+import { AuditLogsPage } from "./pages/AuditLogsPage";
+import { NotificationPreferencesPage } from "./pages/NotificationPreferencesPage";
+import { SettingsOverviewPage } from "./pages/SettingsOverviewPage";
+import { WebhooksPage } from "./pages/WebhooksPage";
 import {
   ContactPage,
   CustomersPage,
@@ -93,11 +98,12 @@ export function App(): JSX.Element {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/invite/:token" element={<AcceptInvitePage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/chat/:wsId" element={<PublicChatPage />} />
       <Route element={<AuthGuard />}>
         <Route path="/app" element={<Navigate to="/inbox" replace />} />
         <Route path="/inbox" element={<InboxPage />} />
         <Route path="/archives" element={<ArchivesPage />} />
-        <Route path="/chat/:id" element={<ChatPage />} />
+        <Route path="/inbox/chat/:id" element={<ChatPage />} />
         <Route path="/tickets" element={<TicketsPage />} />
         <Route path="/ticket/:id" element={<TicketDetailPage />} />
         <Route path="/contacts" element={<ContactsPage />} />
@@ -110,6 +116,10 @@ export function App(): JSX.Element {
         <Route path="/admin/canned" element={<CannedResponsesPage />} />
         <Route path="/admin/analytics" element={<AnalyticsPage />} />
         <Route path="/admin/billing" element={<BillingPage />} />
+        <Route path="/settings" element={<SettingsOverviewPage />} />
+        <Route path="/settings/audit" element={<AuditLogsPage />} />
+        <Route path="/settings/webhooks" element={<WebhooksPage />} />
+        <Route path="/settings/notifications" element={<NotificationPreferencesPage />} />
       </Route>
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

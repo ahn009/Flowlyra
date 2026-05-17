@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:budget": "vite build --outDir .dist-budget --emptyOutDir && gzip -c .dist-budget/widget.js | wc -c | awk '{ if ($1 > 81920) { print \"Widget bundle budget exceeded: \" $1 \" bytes gz\"; exit 1 } else { print \"Widget bundle budget OK: \" $1 \" bytes gz\" } }'"
   },
   "dependencies": {
     "socket.io-client": "4.7.5"

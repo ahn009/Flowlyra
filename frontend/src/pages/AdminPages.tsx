@@ -152,6 +152,37 @@ export function WidgetConfigPage(): JSX.Element {
   const [allowlist, setAllowlist] = useState("");
   const [preChatFields, setPreChatFields] = useState("name,email,subject,message");
   const [postChatSurveyEnabled, setPostChatSurveyEnabled] = useState(true);
+  const [greetings, setGreetings] = useState<string>("");
+  const [eyeCatcherEnabled, setEyeCatcherEnabled] = useState(false);
+  const [eyeCatcherText, setEyeCatcherText] = useState("");
+  const [eyeCatcherImage, setEyeCatcherImage] = useState("");
+  const [whiteLabel, setWhiteLabel] = useState(false);
+  const [brandText, setBrandText] = useState("FlowLyra");
+  const [brandUrl, setBrandUrl] = useState("");
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [lazyLoad, setLazyLoad] = useState(false);
+  const [allowAttachments, setAllowAttachments] = useState(true);
+  const [maxUploadMb, setMaxUploadMb] = useState(10);
+  const [defaultLocale, setDefaultLocale] = useState("en");
+  const [supportedLocales, setSupportedLocales] = useState("en");
+  const [customJs, setCustomJs] = useState("");
+  const [giphyApiKey, setGiphyApiKey] = useState("");
+  const [ohEnabled, setOhEnabled] = useState(false);
+  const [ohTimezone, setOhTimezone] = useState("UTC");
+
+  const parsePreChatFields = (raw: string): Array<string | Record<string, unknown>> => {
+    const text = raw.trim();
+    if (!text) return ["name", "email", "subject", "message"];
+    if (text.startsWith("[") || text.startsWith("{")) {
+      try {
+        const parsed = JSON.parse(text);
+        if (Array.isArray(parsed)) return parsed as Array<string | Record<string, unknown>>;
+      } catch {
+        // fall back to CSV
+      }
+    }
+    return text.split(",").map((item) => item.trim()).filter(Boolean);
+  };
 
   const saveWidget = useMutation({
     mutationFn: async () => {
@@ -161,8 +192,22 @@ export function WidgetConfigPage(): JSX.Element {
         widget_position: position,
         widget_theme: theme,
         widget_domain_allowlist: { domains: allowlist.split("\n").map((item) => item.trim()).filter(Boolean) },
-        widget_pre_chat_form: { enabled: true, fields: preChatFields.split(",").map((item) => item.trim()).filter(Boolean) },
-        widget_post_chat_survey: { enabled: postChatSurveyEnabled, type: "csat_5" }
+        widget_pre_chat_form: { enabled: true, fields: parsePreChatFields(preChatFields) },
+        widget_post_chat_survey: { enabled: postChatSurveyEnabled, type: "csat_5" },
+        widget_greetings: { items: greetings.split("\n").map((item) => item.trim()).filter(Boolean) },
+        widget_eye_catcher: { enabled: eyeCatcherEnabled, text: eyeCatcherText || null, image_url: eyeCatcherImage || null },
+        widget_white_label: whiteLabel,
+        widget_brand_text: brandText,
+        widget_brand_url: brandUrl || null,
+        widget_sound_enabled: soundEnabled,
+        widget_lazy_load: lazyLoad,
+        widget_allow_attachments: allowAttachments,
+        widget_max_upload_mb: maxUploadMb,
+        widget_default_locale: defaultLocale,
+        widget_supported_locales: { locales: supportedLocales.split(",").map((s) => s.trim()).filter(Boolean) },
+        widget_custom_js: customJs || null,
+        widget_giphy_api_key: giphyApiKey || null,
+        operating_hours: { enabled: ohEnabled, timezone: ohTimezone, schedule: data?.operating_hours?.schedule ?? {} }
       });
     },
     onSuccess: async () => {
@@ -179,8 +224,27 @@ export function WidgetConfigPage(): JSX.Element {
     setPosition(String(data.widget_position ?? "bottom-right"));
     setTheme(String(data.widget_theme ?? "auto"));
     setAllowlist(((data.widget_domain_allowlist?.domains ?? []) as string[]).join("\n"));
-    setPreChatFields(((data.widget_pre_chat_form?.fields ?? ["name", "email", "subject", "message"]) as string[]).join(","));
+    const rawFields = (data.widget_pre_chat_form?.fields ?? ["name", "email", "subject", "message"]) as Array<string | Record<string, unknown>>;
+    const hasObjects = rawFields.some((f) => typeof f === "object");
+    setPreChatFields(hasObjects ? JSON.stringify(rawFields, null, 2) : (rawFields as string[]).join(","));
     setPostChatSurveyEnabled(data.widget_post_chat_survey?.enabled !== false);
+    setGreetings(((data.widget_greetings?.items ?? []) as string[]).join("\n"));
+    setEyeCatcherEnabled(Boolean(data.widget_eye_catcher?.enabled));
+    setEyeCatcherText(String(data.widget_eye_catcher?.text ?? ""));
+    setEyeCatcherImage(String(data.widget_eye_catcher?.image_url ?? ""));
+    setWhiteLabel(Boolean(data.widget_white_label));
+    setBrandText(String(data.widget_brand_text ?? "FlowLyra"));
+    setBrandUrl(String(data.widget_brand_url ?? ""));
+    setSoundEnabled(data.widget_sound_enabled !== false);
+    setLazyLoad(Boolean(data.widget_lazy_load));
+    setAllowAttachments(data.widget_allow_attachments !== false);
+    setMaxUploadMb(Number(data.widget_max_upload_mb ?? 10));
+    setDefaultLocale(String(data.widget_default_locale ?? "en"));
+    setSupportedLocales(((data.widget_supported_locales?.locales ?? ["en"]) as string[]).join(","));
+    setCustomJs(String(data.widget_custom_js ?? ""));
+    setGiphyApiKey(String(data.widget_giphy_api_key ?? ""));
+    setOhEnabled(Boolean(data.operating_hours?.enabled));
+    setOhTimezone(String(data.operating_hours?.timezone ?? "UTC"));
   }, [data]);
 
   return (
@@ -197,8 +261,9 @@ export function WidgetConfigPage(): JSX.Element {
           <Field label="Greeting"><TextArea className="min-h-24" value={greeting} onChange={(event) => setGreeting(event.target.value)} /></Field>
           <Field label="Position"><SelectInput value={position} onChange={(event) => setPosition(event.target.value)}><option>bottom-right</option><option>bottom-left</option><option>top-right</option><option>top-left</option></SelectInput></Field>
           <Field label="Theme"><SelectInput value={theme} onChange={(event) => setTheme(event.target.value)}><option>auto</option><option>light</option><option>dark</option></SelectInput></Field>
-          <Field label="Pre-chat fields"><TextInput value={preChatFields} onChange={(event) => setPreChatFields(event.target.value)} placeholder="name,email,phone,subject,message" /></Field>
+          <Field label="Pre-chat fields"><TextArea className="min-h-24 font-mono text-xs" value={preChatFields} onChange={(event) => setPreChatFields(event.target.value)} placeholder='CSV: name,email,phone,subject,message OR JSON: [{"name":"plan","type":"select","options":[{"value":"starter","label":"Starter"}]}]' /></Field>
           <Field label="Allowed domains"><TextArea className="min-h-20" value={allowlist} onChange={(event) => setAllowlist(event.target.value)} placeholder="example.com&#10;*.example.com" /></Field>
+          <Field label="Giphy API key"><TextInput value={giphyApiKey} onChange={(event) => setGiphyApiKey(event.target.value)} placeholder="Optional: enables GIF picker search" /></Field>
           <label className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300"><input type="checkbox" checked={postChatSurveyEnabled} onChange={(event) => setPostChatSurveyEnabled(event.target.checked)} /> Show post-chat CSAT survey</label>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <FeatureToggle icon={<UsersRound size={16} />} title="Agent profiles" />

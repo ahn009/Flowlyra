@@ -56,7 +56,7 @@ function ArchiveRow({ chat }: { chat: Chat }): JSX.Element {
       <td className="px-5 py-4 text-slate-500">{new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(chat.updated_at))}</td>
       <td className="px-5 py-4">
         <div className="flex items-center gap-2">
-          <Link className="rounded-lg border border-border px-3 py-2 text-xs font-black hover:bg-slate-50 dark:hover:bg-slate-800" to={`/chat/${chat.id}`}>View</Link>
+          <Link className="rounded-lg border border-border px-3 py-2 text-xs font-black hover:bg-slate-50 dark:hover:bg-slate-800" to={`/inbox/chat/${chat.id}`}>View</Link>
           <a className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-2 text-xs font-black text-white hover:bg-primary-hover" href={`${import.meta.env.VITE_API_URL ?? "http://localhost:8000"}/api/v1/chats/${chat.id}/transcript.txt`} target="_blank" rel="noreferrer"><Download size={14} /> TXT</a>
         </div>
       </td>

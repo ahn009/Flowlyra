@@ -69,6 +69,23 @@ async def set_visitor_presence(chat: Chat, online: bool) -> None:
     )
 
 
+async def set_ticket_presence(ticket_id: uuid.UUID, user_id: uuid.UUID, online: bool) -> int:
+    redis = get_redis()
+    key = f"presence:ticket:{ticket_id}:{user_id}"
+    if online:
+        await redis.setex(key, 90, "1")
+    else:
+        await redis.delete(key)
+    cursor = b"0"
+    count = 0
+    while True:
+        cursor, keys = await redis.scan(cursor=cursor, match=f"presence:ticket:{ticket_id}:*", count=500)
+        count += len(keys)
+        if cursor == 0 or cursor == b"0":
+            break
+    return count
+
+
 @sio.event
 async def connect(sid: str, environ: dict, auth: dict | None = None) -> bool:
     token = (auth or {}).get("token")
@@ -173,6 +190,16 @@ async def chat_message(sid: str, data: dict) -> None:
             await db.commit()
             if not message.is_internal:
                 payload = _message_payload(message)
+                if sender_type == "agent":
+                    agent = (await db.execute(select(User).where(User.id == sender_id))).scalar_one_or_none()
+                    if agent:
+                        payload["metadata"] = {
+                            "agent": {
+                                "id": str(agent.id),
+                                "name": agent.full_name or agent.email,
+                                "avatar_url": agent.avatar_url,
+                            }
+                        }
                 rooms = [f"chat:{chat.id}", f"org:{chat.organization_id}"]
                 if chat.assigned_user_id:
                     rooms.append(f"agent:{chat.assigned_user_id}")
@@ -203,8 +230,20 @@ async def typing_start(sid: str, data: dict) -> None:
     session = await sio.get_session(sid)
     async with AsyncSessionLocal() as db:
         chat = await _chat_for_session(db, session, _to_uuid(data["chat_id"]))
+    user = session.get("user") if session.get("kind") == "agent" else None
     sender_type = "agent" if session.get("kind") == "agent" else "customer"
-    await sio.emit("chat:typing", {"chat_id": str(chat.id), "typing": True, "sender_type": sender_type}, room=f"chat:{chat.id}", skip_sid=sid)
+    await sio.emit(
+        "chat:typing",
+        {
+            "chat_id": str(chat.id),
+            "typing": True,
+            "sender_type": sender_type,
+            "agent_name": user.get("full_name") if user else None,
+            "agent_avatar_url": user.get("avatar_url") if user else None,
+        },
+        room=f"chat:{chat.id}",
+        skip_sid=sid,
+    )
 
 
 @sio.on("chat:typing:stop")
@@ -212,8 +251,20 @@ async def typing_stop(sid: str, data: dict) -> None:
     session = await sio.get_session(sid)
     async with AsyncSessionLocal() as db:
         chat = await _chat_for_session(db, session, _to_uuid(data["chat_id"]))
+    user = session.get("user") if session.get("kind") == "agent" else None
     sender_type = "agent" if session.get("kind") == "agent" else "customer"
-    await sio.emit("chat:typing", {"chat_id": str(chat.id), "typing": False, "sender_type": sender_type}, room=f"chat:{chat.id}", skip_sid=sid)
+    await sio.emit(
+        "chat:typing",
+        {
+            "chat_id": str(chat.id),
+            "typing": False,
+            "sender_type": sender_type,
+            "agent_name": user.get("full_name") if user else None,
+            "agent_avatar_url": user.get("avatar_url") if user else None,
+        },
+        room=f"chat:{chat.id}",
+        skip_sid=sid,
+    )
 
 
 @sio.on("chat:typing:preview")
@@ -302,7 +353,15 @@ async def chat_assign(sid: str, data: dict) -> None:
         chat.assigned_user_id = assigned_user_id
         chat.status = "active"
         await db.commit()
-        payload = {"chat_id": str(chat.id), "assigned_user_id": str(chat.assigned_user_id)}
+        payload = {
+            "chat_id": str(chat.id),
+            "assigned_user_id": str(chat.assigned_user_id),
+            "assigned": {
+                "id": str(assignee.id),
+                "name": assignee.full_name or assignee.email,
+                "avatar_url": assignee.avatar_url,
+            },
+        }
         await sio.emit("chat:assigned", payload, room=f"agent:{chat.assigned_user_id}")
         await sio.emit("chat:assigned", payload, room=f"chat:{chat.id}")
 
@@ -331,6 +390,42 @@ async def chat_read(sid: str, data: dict) -> None:
         chat = await _chat_for_session(db, session, _to_uuid(data["chat_id"]))
         await db.execute(Message.__table__.update().where(Message.chat_id == chat.id).values(is_read=True))
         await db.commit()
+    await sio.emit("chat:read", {"chat_id": str(chat.id)}, room=f"chat:{chat.id}", skip_sid=sid)
+
+
+@sio.on("webrtc:signal")
+async def webrtc_signal(sid: str, data: dict) -> None:
+    session = await sio.get_session(sid)
+    async with AsyncSessionLocal() as db:
+        chat = await _chat_for_session(db, session, _to_uuid(data["chat_id"]))
+    await sio.emit(
+        "webrtc:signal",
+        {
+            "chat_id": str(chat.id),
+            "signal": data.get("signal"),
+            "mode": data.get("mode", "voice"),
+            "from": "agent" if session.get("kind") == "agent" else "visitor",
+        },
+        room=f"chat:{chat.id}",
+        skip_sid=sid,
+    )
+
+
+@sio.on("cobrowse:request")
+async def cobrowse_request(sid: str, data: dict) -> None:
+    session = await sio.get_session(sid)
+    async with AsyncSessionLocal() as db:
+        chat = await _chat_for_session(db, session, _to_uuid(data["chat_id"]))
+    await sio.emit(
+        "cobrowse:request",
+        {
+            "chat_id": str(chat.id),
+            "from": "agent" if session.get("kind") == "agent" else "visitor",
+            "mode": data.get("mode", "screen"),
+        },
+        room=f"chat:{chat.id}",
+        skip_sid=sid,
+    )
 
 
 @sio.on("chat:csat")
@@ -347,6 +442,30 @@ async def chat_csat(sid: str, data: dict) -> None:
 async def chat_file(sid: str, data: dict) -> None:
     data["content"] = data.get("file_name")
     await chat_message(sid, data)
+
+
+@sio.on("ticket:view:start")
+async def ticket_view_start(sid: str, data: dict) -> None:
+    session = await sio.get_session(sid)
+    if session.get("kind") != "agent":
+        await emit_error(sid, "Only agents can set ticket presence")
+        return
+    user = session.get("user") or {}
+    ticket_id = _to_uuid(data["ticket_id"])
+    viewers = await set_ticket_presence(ticket_id, _to_uuid(user["id"]), True)
+    await sio.emit("ticket:presence", {"ticket_id": str(ticket_id), "viewers": viewers}, room=f"org:{user['organization_id']}")
+
+
+@sio.on("ticket:view:stop")
+async def ticket_view_stop(sid: str, data: dict) -> None:
+    session = await sio.get_session(sid)
+    if session.get("kind") != "agent":
+        await emit_error(sid, "Only agents can set ticket presence")
+        return
+    user = session.get("user") or {}
+    ticket_id = _to_uuid(data["ticket_id"])
+    viewers = await set_ticket_presence(ticket_id, _to_uuid(user["id"]), False)
+    await sio.emit("ticket:presence", {"ticket_id": str(ticket_id), "viewers": viewers}, room=f"org:{user['organization_id']}")
 
 
 @sio.on("chat:snooze")

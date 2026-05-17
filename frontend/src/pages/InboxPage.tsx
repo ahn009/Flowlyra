@@ -68,7 +68,7 @@ function mergeChats(serverChats: Chat[], realtimeChats: Chat[]): Chat[] {
 function ChatRow({ chat, unreadCount }: { chat: Chat; unreadCount: number }): JSX.Element {
   const isUnread = unreadCount > 0;
   return (
-    <Link to={`/chat/${chat.id}`} className={`group flex min-w-0 items-center gap-3 border-b border-border px-4 py-3 outline-none transition last:border-0 focus-visible:bg-blue-50 dark:focus-visible:bg-slate-800 ${isUnread ? "bg-blue-50/80 hover:bg-blue-50 dark:bg-blue-950/20" : "hover:bg-slate-50 dark:hover:bg-slate-800/80"}`}>
+    <Link to={`/inbox/chat/${chat.id}`} className={`group flex min-w-0 items-center gap-3 border-b border-border px-4 py-3 outline-none transition last:border-0 focus-visible:bg-blue-50 dark:focus-visible:bg-slate-800 ${isUnread ? "bg-blue-50/80 hover:bg-blue-50 dark:bg-blue-950/20" : "hover:bg-slate-50 dark:hover:bg-slate-800/80"}`}>
       <div className="relative grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-slate-950 text-white shadow-sm dark:bg-white dark:text-slate-950"><MessageSquare size={19} /><span className={`absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full border-2 border-white ${chat.visitor_status === "online" ? "bg-success" : "bg-slate-400"}`} /></div>
       <div className="min-w-0 flex-1">
         <div className="flex min-w-0 items-center gap-2">

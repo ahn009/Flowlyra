@@ -16,11 +16,11 @@ class SignupRequest(BaseModel):
 
 
 class RefreshRequest(BaseModel):
-    refresh_token: str
+    refresh_token: str | None = None
 
 
 class LogoutRequest(BaseModel):
-    token: str
+    token: str | None = None
 
 
 class InviteAcceptRequest(BaseModel):

@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Check, Clock, FileUp, Mail, MapPin, MoreHorizontal, Paperclip, Plus, Send, ShieldCheck, Sparkles, Tag, UserRound, Zap } from "lucide-react";
+import { ArrowLeft, Check, Clock, FileUp, Mail, MapPin, MoreHorizontal, Paperclip, Phone, PhoneOff, Plus, ScreenShare, Send, ShieldCheck, Sparkles, Tag, UserRound, Video, Zap } from "lucide-react";
 import { api } from "../lib/api";
 import { activeSocket } from "../socket";
 import { useChatStore } from "../stores/chatStore";
@@ -29,6 +29,12 @@ export function ChatPage(): JSX.Element {
   const navigate = useNavigate();
   const [reply, setReply] = useState("");
   const [noteMode, setNoteMode] = useState(false);
+  const [callMode, setCallMode] = useState<null | "voice" | "video" | "screen">(null);
+  const [callConnected, setCallConnected] = useState(false);
+  const localVideoRef = useRef<HTMLVideoElement | null>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
+  const pcRef = useRef<RTCPeerConnection | null>(null);
+  const localStreamRef = useRef<MediaStream | null>(null);
   const { data } = useQuery({ queryKey: ["chat", id], queryFn: async () => (await api.get<ChatDetail>(`/chats/${id}`)).data, enabled: Boolean(id), refetchInterval: 2500 });
   const liveMessages = useChatStore((state) => state.messages[id]) ?? [];
   const messages = mergeMessages(data?.messages ?? [], liveMessages);
@@ -50,12 +56,121 @@ export function ChatPage(): JSX.Element {
     };
   }, [id, setActiveChat]);
 
+  useEffect(() => {
+    const sock = activeSocket();
+    if (!sock) return;
+
+    const onSignal = async (payload: { chat_id: string; mode: "voice" | "video" | "screen"; from: "agent" | "visitor"; signal: Record<string, unknown> }) => {
+      if (payload.chat_id !== id) return;
+      await handleIncomingSignal(payload.mode, payload.from, payload.signal);
+    };
+    const onCobrowse = (payload: { chat_id: string }) => {
+      if (payload.chat_id !== id) return;
+      toast("Visitor requested co-browsing");
+    };
+    sock.on("webrtc:signal", onSignal);
+    sock.on("cobrowse:request", onCobrowse);
+    return () => {
+      sock.off("webrtc:signal", onSignal);
+      sock.off("cobrowse:request", onCobrowse);
+    };
+  }, [id]);
+
+  useEffect(() => () => endCall(), []);
+
   const rows = useMemo(() => messages, [messages]);
   function send(): void {
     if (!reply.trim()) return;
     if (noteMode) void api.post(`/chats/${id}/note`, { content: reply });
     else activeSocket()?.emit("chat:message", { organization_id: data?.organization_id, chat_id: id, content: reply, sender_type: "agent" });
     setReply("");
+  }
+
+  async function ensurePeer(mode: "voice" | "video" | "screen"): Promise<RTCPeerConnection> {
+    if (pcRef.current) return pcRef.current;
+    const pc = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
+    pc.onicecandidate = (event) => {
+      if (!event.candidate) return;
+      activeSocket()?.emit("webrtc:signal", { chat_id: id, mode, signal: { type: "candidate", candidate: event.candidate } });
+    };
+    pc.ontrack = (event) => {
+      const remote = event.streams[0];
+      if (remoteVideoRef.current) remoteVideoRef.current.srcObject = remote;
+      setCallConnected(true);
+    };
+    pc.onconnectionstatechange = () => {
+      if (pc.connectionState === "failed" || pc.connectionState === "disconnected" || pc.connectionState === "closed") {
+        setCallConnected(false);
+      }
+    };
+    pcRef.current = pc;
+    return pc;
+  }
+
+  async function getStreamForMode(mode: "voice" | "video" | "screen"): Promise<MediaStream> {
+    if (mode === "screen") return navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+    if (mode === "video") return navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    return navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+  }
+
+  async function startCall(mode: "voice" | "video" | "screen"): Promise<void> {
+    try {
+      const stream = await getStreamForMode(mode);
+      localStreamRef.current = stream;
+      if (localVideoRef.current) localVideoRef.current.srcObject = stream;
+      const pc = await ensurePeer(mode);
+      stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      activeSocket()?.emit("webrtc:signal", { chat_id: id, mode, signal: { type: "offer", sdp: offer.sdp } });
+      setCallMode(mode);
+    } catch (err) {
+      console.error(err);
+      toast.error("Could not start call");
+    }
+  }
+
+  async function handleIncomingSignal(
+    mode: "voice" | "video" | "screen",
+    from: "agent" | "visitor",
+    signal: Record<string, unknown>,
+  ): Promise<void> {
+    const type = String(signal.type ?? "");
+    const pc = await ensurePeer(mode);
+    if (type === "offer") {
+      const shouldAccept = window.confirm(`Incoming ${mode} request. Accept?`);
+      if (!shouldAccept) return;
+      if (!(mode === "screen" && from === "visitor")) {
+        const stream = await getStreamForMode(mode);
+        localStreamRef.current = stream;
+        if (localVideoRef.current) localVideoRef.current.srcObject = stream;
+        stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+      }
+      await pc.setRemoteDescription({ type: "offer", sdp: String(signal.sdp ?? "") });
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      activeSocket()?.emit("webrtc:signal", { chat_id: id, mode, signal: { type: "answer", sdp: answer.sdp } });
+      setCallMode(mode);
+      return;
+    }
+    if (type === "answer") {
+      await pc.setRemoteDescription({ type: "answer", sdp: String(signal.sdp ?? "") });
+      return;
+    }
+    if (type === "candidate" && signal.candidate) {
+      await pc.addIceCandidate(signal.candidate as RTCIceCandidateInit);
+    }
+  }
+
+  function endCall(): void {
+    localStreamRef.current?.getTracks().forEach((t) => t.stop());
+    localStreamRef.current = null;
+    pcRef.current?.close();
+    pcRef.current = null;
+    if (localVideoRef.current) localVideoRef.current.srcObject = null;
+    if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
+    setCallMode(null);
+    setCallConnected(false);
   }
 
   async function uploadFile(file: File): Promise<void> {
@@ -109,6 +224,11 @@ export function ChatPage(): JSX.Element {
                 </div>
               </div>
               <div className="-mx-1 flex max-w-full shrink-0 items-center gap-2 overflow-x-auto px-1 pb-1">
+                <Action icon={<Phone size={16} />} label="Voice" onClick={() => void startCall("voice")} />
+                <Action icon={<Video size={16} />} label="Video" onClick={() => void startCall("video")} />
+                <Action icon={<ScreenShare size={16} />} label="Share" onClick={() => void startCall("screen")} />
+                <Action icon={<ScreenShare size={16} />} label="Co-browse" onClick={() => activeSocket()?.emit("cobrowse:request", { chat_id: id, mode: "screen" })} />
+                {callMode ? <Action icon={<PhoneOff size={16} />} label={callConnected ? "Hang up" : "Cancel"} onClick={endCall} /> : null}
                 <Action icon={<MoreHorizontal size={16} />} label="Assign" />
                 <Action icon={<Clock size={16} />} label="Snooze" />
                 <Action icon={<Tag size={16} />} label="Tag" />
@@ -133,6 +253,15 @@ export function ChatPage(): JSX.Element {
                 <div className="border-b border-blue-100 bg-blue-50 px-5 py-3 text-sm text-blue-950 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-200">
                   <div className="mb-1 flex items-center gap-2 font-black"><Zap size={16} /> Visitor is typing now</div>
                   <div className="line-clamp-2 italic">{preview}</div>
+                </div>
+              )}
+              {callMode && (
+                <div className="border-b border-purple-100 bg-purple-50 px-5 py-3 dark:border-purple-900 dark:bg-purple-950/20">
+                  <div className="mb-2 text-xs font-black uppercase tracking-wide text-purple-800 dark:text-purple-300">{callMode} call {callConnected ? "connected" : "connecting..."}</div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <video ref={localVideoRef} autoPlay muted playsInline className="w-full rounded-xl bg-slate-900" />
+                    <video ref={remoteVideoRef} autoPlay playsInline className="w-full rounded-xl bg-slate-900" />
+                  </div>
                 </div>
               )}
 
@@ -192,8 +321,8 @@ function EmptyConversation(): JSX.Element {
   return <div className="grid min-h-full place-items-center px-4 py-10 text-center text-sm font-semibold text-slate-500 dark:text-slate-400">No messages yet.</div>;
 }
 
-function Action({ icon, label }: { icon: ReactNode; label: string }): JSX.Element {
-  return <button className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-slate-200 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50">{icon}{label}</button>;
+function Action({ icon, label, onClick }: { icon: ReactNode; label: string; onClick?: () => void }): JSX.Element {
+  return <button onClick={onClick} className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-slate-200 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50">{icon}{label}</button>;
 }
 
 function VisitorPanel({ chat }: { chat?: ChatDetail }): JSX.Element {

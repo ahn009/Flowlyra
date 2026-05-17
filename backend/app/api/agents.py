@@ -11,8 +11,10 @@ from app.db.session import get_db
 from app.middleware.auth import TokenUser, current_user, hash_password, require_role
 from app.models.chat import Chat
 from app.models.user import User
+from app.models.workspace_membership import WorkspaceMembership
 from app.schemas.agent import AgentCreate, AgentOut, AgentUpdate, StatusRequest
 from app.services.email_service import send_invite
+from app.services.plan_service import assert_seat_available
 
 router = APIRouter(prefix="/agents", tags=["agents"])
 
@@ -23,7 +25,8 @@ async def list_agents(user: Annotated[TokenUser, Depends(current_user)], db: Asy
 
 
 @router.post("/", response_model=AgentOut)
-async def create_agent(payload: AgentCreate, user: Annotated[TokenUser, Depends(require_role("admin", "supervisor"))], db: AsyncSession = Depends(get_db)) -> User:
+async def create_agent(payload: AgentCreate, user: Annotated[TokenUser, Depends(require_role("admin", "supervisor", "owner"))], db: AsyncSession = Depends(get_db)) -> User:
+    await assert_seat_available(db, user.organization_id, extra=1)
     token = secrets.token_urlsafe(32)
     agent = User(
         organization_id=user.organization_id,
@@ -36,6 +39,16 @@ async def create_agent(payload: AgentCreate, user: Annotated[TokenUser, Depends(
         is_active=True,
     )
     db.add(agent)
+    await db.flush()
+    db.add(
+        WorkspaceMembership(
+            user_id=agent.id,
+            organization_id=user.organization_id,
+            role=payload.role,
+            invited_by=user.id,
+            is_primary=True,
+        )
+    )
     await db.commit()
     await db.refresh(agent)
     await send_invite(agent.email, token)

@@ -25,6 +25,18 @@ class User(UUIDPkMixin, Base):
     invite_token: Mapped[str | None] = mapped_column(String(128))
     invite_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    failed_login_count: Mapped[int] = mapped_column(Integer, default=0)
+    locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    two_factor_secret: Mapped[str | None] = mapped_column(Text)
+    two_factor_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
+    password_changed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     organization = relationship("Organization", back_populates="users")
+    memberships = relationship(
+        "WorkspaceMembership",
+        foreign_keys="WorkspaceMembership.user_id",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
