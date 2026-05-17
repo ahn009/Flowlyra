@@ -12,6 +12,9 @@ import { AgentsPage, AnalyticsPage, BillingPage, CannedResponsesPage, InstallPag
 import { AuditLogsPage } from "./pages/AuditLogsPage";
 import { NotificationPreferencesPage } from "./pages/NotificationPreferencesPage";
 import { SettingsOverviewPage } from "./pages/SettingsOverviewPage";
+import { TagsPage } from "./pages/TagsPage";
+import { KnowledgeBasePage } from "./pages/KnowledgeBasePage";
+import { PublicKBArticlePage, PublicKBIndexPage } from "./pages/PublicKBPage";
 import { WebhooksPage } from "./pages/WebhooksPage";
 import {
   ContactPage,
@@ -99,6 +102,8 @@ export function App(): JSX.Element {
       <Route path="/invite/:token" element={<AcceptInvitePage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/chat/:wsId" element={<PublicChatPage />} />
+      <Route path="/kb/:orgSlug" element={<PublicKBIndexPage />} />
+      <Route path="/kb/:orgSlug/:slug" element={<PublicKBArticlePage />} />
       <Route element={<AuthGuard />}>
         <Route path="/app" element={<Navigate to="/inbox" replace />} />
         <Route path="/inbox" element={<InboxPage />} />
@@ -114,11 +119,13 @@ export function App(): JSX.Element {
         <Route path="/admin/routing" element={<RoutingRulesPage />} />
         <Route path="/admin/triggers" element={<TriggersPage />} />
         <Route path="/admin/canned" element={<CannedResponsesPage />} />
+        <Route path="/admin/kb" element={<KnowledgeBasePage />} />
         <Route path="/admin/analytics" element={<AnalyticsPage />} />
         <Route path="/admin/billing" element={<BillingPage />} />
         <Route path="/settings" element={<SettingsOverviewPage />} />
         <Route path="/settings/audit" element={<AuditLogsPage />} />
         <Route path="/settings/webhooks" element={<WebhooksPage />} />
+        <Route path="/settings/tags" element={<TagsPage />} />
         <Route path="/settings/notifications" element={<NotificationPreferencesPage />} />
       </Route>
       <Route path="*" element={<NotFoundPage />} />

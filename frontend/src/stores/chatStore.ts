@@ -4,6 +4,7 @@ import type { Chat, Message } from "../types";
 interface ChatState {
   chats: Record<string, Chat>;
   activeChatId: string | null;
+  openChatTabs: string[];
   messages: Record<string, Message[]>;
   typingPreview: Record<string, string>;
   typingAgents: Record<string, boolean>;
@@ -14,14 +15,17 @@ interface ChatState {
   setPreview: (chatId: string, text: string) => void;
   setTyping: (chatId: string, typing: boolean) => void;
   setActiveChat: (chatId: string | null) => void;
+  closeChatTab: (chatId: string) => void;
   setSuggestions: (chatId: string, suggestions: string[]) => void;
   setVisitorStatus: (chatId: string, status: "online" | "offline") => void;
   clearUnread: (chatId: string) => void;
+  updateMessage: (chatId: string, messageId: string, patch: Partial<Message>) => void;
 }
 
 export const useChatStore = create<ChatState>((set) => ({
   chats: {},
   activeChatId: null,
+  openChatTabs: [],
   messages: {},
   typingPreview: {},
   typingAgents: {},
@@ -60,8 +64,15 @@ export const useChatStore = create<ChatState>((set) => ({
   setActiveChat: (chatId) =>
     set((state) => ({
       activeChatId: chatId,
+      openChatTabs: chatId && !state.openChatTabs.includes(chatId) ? [...state.openChatTabs, chatId].slice(-8) : state.openChatTabs,
       unreadCounts: chatId ? { ...state.unreadCounts, [chatId]: 0 } : state.unreadCounts
     })),
+  closeChatTab: (chatId) =>
+    set((state) => {
+      const openChatTabs = state.openChatTabs.filter((item) => item !== chatId);
+      const activeChatId = state.activeChatId === chatId ? (openChatTabs.length ? openChatTabs[openChatTabs.length - 1] : null) : state.activeChatId;
+      return { openChatTabs, activeChatId };
+    }),
   setSuggestions: (chatId, suggestions) => set((state) => ({ aiSuggestions: { ...state.aiSuggestions, [chatId]: suggestions } })),
   setVisitorStatus: (chatId, status) =>
     set((state) => ({
@@ -70,6 +81,13 @@ export const useChatStore = create<ChatState>((set) => ({
   clearUnread: (chatId) =>
     set((state) => ({
       unreadCounts: { ...state.unreadCounts, [chatId]: 0 }
+    })),
+  updateMessage: (chatId, messageId, patch) =>
+    set((state) => ({
+      messages: {
+        ...state.messages,
+        [chatId]: (state.messages[chatId] ?? []).map((item) => (item.id === messageId ? { ...item, ...patch } : item))
+      }
     }))
 }));
 

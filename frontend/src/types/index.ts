@@ -18,6 +18,10 @@ export interface Chat {
   status: "waiting" | "active" | "pending" | "resolved" | "closed";
   channel: string;
   subject?: string | null;
+  is_pinned?: boolean;
+  pinned_by_user_id?: string | null;
+  snoozed_until?: string | null;
+  is_spam?: boolean;
   visitor_name?: string | null;
   visitor_email?: string | null;
   visitor_ip?: string | null;
@@ -45,6 +49,10 @@ export interface Message {
   file_name?: string | null;
   file_size?: number | null;
   file_mime?: string | null;
+  reactions?: Record<string, string[]>;
+  edited_at?: string | null;
+  deleted_at?: string | null;
+  is_read?: boolean;
   is_internal: boolean;
   created_at: string;
 }

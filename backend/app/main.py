@@ -13,6 +13,7 @@ from app.api import (
     auth,
     chats,
     contacts,
+    kb,
     notifications,
     public,
     tickets,
@@ -130,6 +131,8 @@ def create_fastapi_app() -> FastAPI:
         audit.router,
         notifications.router,
         webhooks.router,
+        kb.admin_router,
+        kb.public_router,
     ):
         app.include_router(router, prefix="/api/v1")
     return app

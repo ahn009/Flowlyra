@@ -116,3 +116,15 @@ def check_ticket_sla_breaches(batch_size: int = 200) -> dict[str, int]:
             return {"checked": len(rows), "first_response_breaches": first_breaches, "resolution_breaches": resolution_breaches}
 
     return asyncio.run(_run())
+
+
+@celery_app.task(name="app.workers.system_tasks.publish_scheduled_kb_articles")
+def publish_scheduled_kb_articles() -> dict[str, int]:
+    from app.services.kb_service import publish_scheduled_articles
+
+    async def _run() -> int:
+        async with AsyncSessionLocal() as db:
+            return await publish_scheduled_articles(db)
+
+    promoted = asyncio.run(_run())
+    return {"promoted": promoted}

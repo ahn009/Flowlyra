@@ -438,15 +438,43 @@ async def search_products(payload: WidgetProductSearchRequest, db: AsyncSession 
 
 @router.post("/kb/suggest")
 async def suggest_kb(payload: WidgetKbSuggestRequest, db: AsyncSession = Depends(get_db)) -> dict:
-    await _get_org(db, payload.org_slug)
-    query = payload.query.lower().strip()
+    from app.services.kb_service import search_articles
+
+    org = await _get_org(db, payload.org_slug)
+    query = payload.query.strip()
+    if not query:
+        return {"items": []}
+
+    hits = await search_articles(
+        db,
+        organization_id=org.id,
+        query=query,
+        locale=None,
+        include_internal=False,
+        limit=payload.limit,
+    )
+    if hits:
+        return {
+            "items": [
+                {
+                    "id": str(art.id),
+                    "title": art.title,
+                    "url": f"/kb/{payload.org_slug}/{art.slug}",
+                    "summary": art.summary,
+                    "snippet": snippet,
+                }
+                for art, _score, snippet in hits
+            ]
+        }
+
+    q_lower = query.lower()
     ranked = []
     for item in KB_SUGGESTIONS:
         title = item["title"].lower()
-        if query in title:
+        if q_lower in title:
             score = 0
         else:
-            words = query.split()
+            words = q_lower.split()
             score = sum(0 if word in title else 1 for word in words)
         ranked.append((score, item))
     ranked.sort(key=lambda row: row[0])

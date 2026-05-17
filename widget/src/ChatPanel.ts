@@ -535,7 +535,19 @@ export class ChatPanel {
           a.target = "_blank";
           a.rel = "noreferrer";
           a.className = "cf-kb-item";
-          a.textContent = item.title;
+          const title = document.createElement("div");
+          title.style.fontWeight = "600";
+          title.textContent = item.title;
+          a.append(title);
+          const preview = item.snippet ?? item.summary;
+          if (preview) {
+            const p = document.createElement("div");
+            p.style.fontSize = "11px";
+            p.style.color = "#475569";
+            p.style.marginTop = "2px";
+            p.textContent = preview;
+            a.append(p);
+          }
           return a;
         }),
       );

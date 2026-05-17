@@ -5,6 +5,7 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
 import { connectSocket, setRealtimeUpdateHandler } from "../socket";
+import { api } from "../lib/api";
 import { useAuthStore } from "../stores/authStore";
 import { useNotificationStore } from "../stores/notificationStore";
 import { Button, Pill, ThemeToggle } from "./ui";
@@ -21,6 +22,8 @@ const nav = [
   { section: "Workspace", items: [
     { to: "/admin/analytics", label: "Reports", icon: LayoutDashboard },
     { to: "/admin/canned", label: "Canned", icon: ClipboardList },
+    { to: "/admin/kb", label: "Knowledge", icon: LifeBuoy },
+    { to: "/settings/tags", label: "Tags", icon: Tag },
     { to: "/admin/routing", label: "Routing", icon: Tag },
     { to: "/admin/triggers", label: "Triggers", icon: Bot }
   ] },
@@ -42,6 +45,9 @@ export function AgentLayout(): JSX.Element {
   const removeNotification = useNotificationStore((state) => state.removeNotification);
   const [collapsed, setCollapsed] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [commandOpen, setCommandOpen] = useState(false);
+  const [commandQuery, setCommandQuery] = useState("");
+  const [commandResults, setCommandResults] = useState<Array<{ type: "chat" | "ticket" | "contact" | "nav"; id: string; label: string; href: string }>>([]);
   const notificationPanelRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -73,6 +79,61 @@ export function AgentLayout(): JSX.Element {
       document.removeEventListener("keydown", handleEscape);
     };
   }, []);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent): void => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setCommandOpen((value) => !value);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  useEffect(() => {
+    if (!commandOpen) return;
+    const query = commandQuery.trim();
+    if (!query) {
+      setCommandResults([
+        { type: "nav", id: "inbox", label: "Go to Inbox", href: "/inbox" },
+        { type: "nav", id: "tickets", label: "Go to Tickets", href: "/tickets" },
+        { type: "nav", id: "contacts", label: "Go to Contacts", href: "/contacts" },
+        { type: "nav", id: "tags", label: "Manage Tags", href: "/settings/tags" },
+      ]);
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      void Promise.all([
+        api.get("/chats", { params: { q: query, limit: 8 } }),
+        api.get("/tickets", { params: { q: query, limit: 8 } }),
+        api.get("/contacts", { params: { q: query } }),
+      ]).then(([chatsRes, ticketsRes, contactsRes]) => {
+        const chatRows = (chatsRes.data as Array<{ id: string; visitor_name?: string | null; visitor_email?: string | null; subject?: string | null }>).slice(0, 4).map((row) => ({
+          type: "chat" as const,
+          id: row.id,
+          label: `Chat: ${row.visitor_name || row.visitor_email || row.subject || row.id.slice(0, 6)}`,
+          href: `/inbox/chat/${row.id}`,
+        }));
+        const ticketRows = (ticketsRes.data as Array<{ id: string; ticket_number: number; subject: string }>).slice(0, 4).map((row) => ({
+          type: "ticket" as const,
+          id: row.id,
+          label: `Ticket #${row.ticket_number}: ${row.subject}`,
+          href: `/ticket/${row.id}`,
+        }));
+        const contactRows = (contactsRes.data as Array<{ id: string; email?: string | null; full_name?: string | null }>).slice(0, 4).map((row) => ({
+          type: "contact" as const,
+          id: row.id,
+          label: `Contact: ${row.full_name || row.email || row.id.slice(0, 6)}`,
+          href: "/contacts",
+        }));
+        setCommandResults([...chatRows, ...ticketRows, ...contactRows]);
+      }).catch(() => {
+        setCommandResults([]);
+      });
+    }, 180);
+    return () => window.clearTimeout(timer);
+  }, [commandOpen, commandQuery]);
 
   return (
     <div className="min-h-screen bg-surface text-ink">
@@ -116,7 +177,13 @@ export function AgentLayout(): JSX.Element {
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <label className="hidden min-w-[220px] items-center gap-2 rounded-xl border border-border bg-slate-50 px-3 py-2 text-sm text-slate-500 md:flex lg:min-w-[320px] dark:bg-slate-900 dark:text-slate-400">
               <Search size={16} />
-              <input className="w-full bg-transparent outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500 dark:text-slate-200" placeholder="Search chats, tickets, contacts" />
+              <input
+                className="w-full bg-transparent outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500 dark:text-slate-200"
+                placeholder="Search chats, tickets, contacts (Cmd/Ctrl+K)"
+                value={commandQuery}
+                onFocus={() => setCommandOpen(true)}
+                onChange={(event) => setCommandQuery(event.target.value)}
+              />
             </label>
             <select className="max-w-[112px] rounded-xl border border-border bg-white px-2 py-2 text-sm font-semibold sm:max-w-none sm:px-3 dark:bg-slate-900 dark:text-slate-200">
               <option>online</option>
@@ -171,6 +238,29 @@ export function AgentLayout(): JSX.Element {
       <div className="sr-only" aria-live="polite">
         {notifications[0]?.title}
       </div>
+      {commandOpen ? (
+        <div className="fixed inset-0 z-50 grid place-items-start bg-black/35 p-4 pt-24" onClick={() => setCommandOpen(false)}>
+          <div className="w-full max-w-2xl rounded-2xl border border-border bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="border-b border-border px-4 py-3 text-xs font-black uppercase tracking-wide text-slate-500">Command Palette</div>
+            <div className="max-h-[420px] overflow-y-auto p-2">
+              {commandResults.length ? commandResults.map((row) => (
+                <button
+                  key={`${row.type}:${row.id}`}
+                  className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left hover:bg-slate-50"
+                  onClick={() => {
+                    setCommandOpen(false);
+                    setCommandQuery("");
+                    navigate(row.href);
+                  }}
+                >
+                  <span className="text-sm font-semibold text-slate-800">{row.label}</span>
+                  <span className="text-xs uppercase text-slate-400">{row.type}</span>
+                </button>
+              )) : <div className="p-3 text-sm text-slate-500">No results</div>}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

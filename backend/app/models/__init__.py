@@ -4,6 +4,14 @@ from app.models.canned_response import CannedResponse
 from app.models.chat import Chat
 from app.models.chat_widget import ChatWidget
 from app.models.contact import Contact
+from app.models.kb import (
+    KBArticle,
+    KBArticleComment,
+    KBArticleFeedback,
+    KBArticleRevision,
+    KBArticleView,
+    KBCategory,
+)
 from app.models.message import Message
 from app.models.notification import Notification, NotificationPreference
 from app.models.organization import Organization
@@ -38,6 +46,12 @@ __all__ = [
     "Chat",
     "ChatWidget",
     "Contact",
+    "KBArticle",
+    "KBArticleComment",
+    "KBArticleFeedback",
+    "KBArticleRevision",
+    "KBArticleView",
+    "KBCategory",
     "Message",
     "Notification",
     "NotificationPreference",

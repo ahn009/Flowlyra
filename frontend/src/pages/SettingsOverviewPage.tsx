@@ -15,6 +15,7 @@ const CARDS: Card[] = [
   { title: "Team", description: "Manage agents, invitations & roles.", href: "/admin/agents", permission: "agents.read" },
   { title: "Teams", description: "Groups / departments.", href: "/admin/teams", permission: "teams.read" },
   { title: "Canned responses", description: "Reusable replies and shortcuts.", href: "/admin/canned", permission: "canned.write" },
+  { title: "Tags", description: "Tag colors and chat tag library.", href: "/settings/tags", permission: "tags.write" },
   { title: "Routing rules", description: "Auto-assign chats to teams or agents.", href: "/admin/routing", permission: "routing.write" },
   { title: "Triggers", description: "Proactive engagement & campaigns.", href: "/admin/triggers", permission: "triggers.write" },
   { title: "Analytics", description: "Dashboards & reports.", href: "/admin/analytics", permission: "reports.read" },

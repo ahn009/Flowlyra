@@ -13,6 +13,9 @@ class MessageOut(BaseModel):
     content_type: str
     file_url: str | None
     file_name: str | None
+    reactions: dict = Field(default_factory=dict)
+    edited_at: datetime | None = None
+    deleted_at: datetime | None = None
     is_internal: bool
     is_read: bool
     created_at: datetime
@@ -31,6 +34,10 @@ class ChatOut(BaseModel):
     channel: str
     subject: str | None
     tags: list[str]
+    is_pinned: bool = False
+    pinned_by_user_id: UUID | None = None
+    snoozed_until: datetime | None = None
+    is_spam: bool = False
     csat_score: int | None
     is_missed: bool
     created_at: datetime
@@ -50,6 +57,9 @@ class ChatDetail(ChatOut):
     messages: list[MessageOut] = []
     contact: dict | None = None
     visitor_session: dict | None = None
+    past_chats: list[dict] = []
+    tickets: list[dict] = []
+    ecommerce: dict | None = None
 
 
 class ChatUpdate(BaseModel):
@@ -75,3 +85,15 @@ class NoteRequest(BaseModel):
 
 class TagRequest(BaseModel):
     tag: str = Field(min_length=1, max_length=80)
+
+
+class SnoozeRequest(BaseModel):
+    minutes: int = Field(default=30, ge=1, le=20160)
+
+
+class ReactionRequest(BaseModel):
+    emoji: str = Field(min_length=1, max_length=32)
+
+
+class MessageUpdateRequest(BaseModel):
+    content: str = Field(min_length=1, max_length=10000)

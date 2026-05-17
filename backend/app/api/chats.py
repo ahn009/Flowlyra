@@ -1,23 +1,93 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Annotated, Any
 import uuid
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import PlainTextResponse
-from sqlalchemy import func, select
+from sqlalchemy import and_, desc, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.session import get_db
 from app.db.redis import get_redis
+from app.db.session import get_db
 from app.middleware.auth import TokenUser, current_user, require_role
+from app.models.audit_log import AuditLog
 from app.models.chat import Chat
 from app.models.contact import Contact
 from app.models.message import Message
 from app.models.session import Session
-from app.schemas.chat import AssignRequest, ChatDetail, ChatOut, ChatUpdate, NoteRequest, TagRequest, TransferRequest
-from app.services.chat_service import add_message, convert_to_ticket, get_chat, list_chats, search_chats
+from app.models.ticket import Ticket
+from app.schemas.chat import (
+    AssignRequest,
+    ChatDetail,
+    ChatOut,
+    ChatUpdate,
+    MessageUpdateRequest,
+    NoteRequest,
+    ReactionRequest,
+    SnoozeRequest,
+    TagRequest,
+    TransferRequest,
+)
+from app.services.chat_service import add_message, convert_to_ticket, get_chat, search_chats
 
 router = APIRouter(prefix="/chats", tags=["chats"])
+
+
+@router.get("/dashboard")
+async def dashboard(
+    user: Annotated[TokenUser, Depends(current_user)],
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    now = datetime.now(UTC)
+    one_day_ago = now - timedelta(days=1)
+    active = await db.scalar(
+        select(func.count(Chat.id)).where(
+            Chat.organization_id == user.organization_id,
+            Chat.status.in_(["waiting", "active"]),
+            Chat.is_spam.is_(False),
+        )
+    )
+    online_visitors = await db.scalar(
+        select(func.count(Chat.id)).where(
+            Chat.organization_id == user.organization_id,
+            Chat.updated_at >= one_day_ago,
+            Chat.status.in_(["waiting", "active"]),
+        )
+    )
+    agents_online = await db.scalar(
+        select(func.count()).select_from(
+            select(func.distinct(AuditLog.actor_user_id)).where(
+                AuditLog.organization_id == user.organization_id,
+                AuditLog.created_at >= now - timedelta(minutes=15),
+                AuditLog.actor_user_id.is_not(None),
+            ).subquery()
+        )
+    )
+    recent_activity_rows = (
+        await db.execute(
+            select(AuditLog)
+            .where(AuditLog.organization_id == user.organization_id)
+            .order_by(desc(AuditLog.created_at))
+            .limit(20)
+        )
+    ).scalars().all()
+    activity = [
+        {
+            "id": str(row.id),
+            "event": row.event,
+            "actor_email": row.actor_email,
+            "path": row.path,
+            "status_code": row.status_code,
+            "created_at": row.created_at.isoformat() if row.created_at else None,
+        }
+        for row in recent_activity_rows
+    ]
+    return {
+        "active_chats": int(active or 0),
+        "agents_online": int(agents_online or 0),
+        "online_visitors": int(online_visitors or 0),
+        "activity": activity,
+    }
 
 
 @router.get("/")
@@ -29,11 +99,49 @@ async def list_all(
     team_id: uuid.UUID | None = None,
     channel: str | None = None,
     tag: str | None = None,
+    view: str | None = None,
+    q: str | None = None,
     page: int = 1,
-    limit: int = Query(50, le=100),
+    limit: int = Query(50, ge=1, le=200),
 ) -> list[dict]:
-    chats = await list_chats(db, user.organization_id, locals(), page, limit)
-    return await chats_with_contact_data(db, chats)
+    statement = select(Chat).where(Chat.organization_id == user.organization_id)
+
+    if view == "my":
+        statement = statement.where(Chat.assigned_user_id == user.id)
+    elif view == "queued":
+        statement = statement.where(Chat.assigned_user_id.is_(None), Chat.status == "waiting", Chat.is_spam.is_(False))
+    elif view == "supervised":
+        if user.role not in {"admin", "supervisor", "owner"}:
+            statement = statement.where(Chat.assigned_user_id == user.id)
+        else:
+            statement = statement.where(Chat.assigned_user_id.is_not(None))
+    elif view == "pinned":
+        statement = statement.where(Chat.is_pinned.is_(True))
+    elif view == "archived":
+        statement = statement.where(Chat.status.in_(["resolved", "closed"]))
+
+    if status:
+        statement = statement.where(Chat.status == status)
+    if assigned_user_id:
+        statement = statement.where(Chat.assigned_user_id == assigned_user_id)
+    if team_id:
+        statement = statement.where(Chat.team_id == team_id)
+    if channel:
+        statement = statement.where(Chat.channel == channel)
+    if tag:
+        statement = statement.where(Chat.tags.any(tag))
+    if q:
+        like = f"%{q.strip()}%"
+        statement = statement.where(or_(Chat.subject.ilike(like), Chat.tags.any(q.strip())))
+
+    rows = (
+        await db.execute(
+            statement.order_by(Chat.is_pinned.desc(), Chat.updated_at.desc())
+            .offset((page - 1) * limit)
+            .limit(limit)
+        )
+    ).scalars().all()
+    return await chats_with_contact_data(db, rows)
 
 
 @router.get("/search")
@@ -44,16 +152,63 @@ async def search(q: str, user: Annotated[TokenUser, Depends(current_user)], db: 
 @router.get("/{chat_id}", response_model=ChatDetail)
 async def detail(chat_id: uuid.UUID, user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db)) -> dict:
     chat = await get_chat(db, user.organization_id, chat_id)
-    messages = (await db.execute(select(Message).where(Message.chat_id == chat.id).order_by(Message.created_at.desc()).limit(50))).scalars().all()
+    messages = (
+        await db.execute(select(Message).where(Message.chat_id == chat.id).order_by(Message.created_at.desc()).limit(200))
+    ).scalars().all()
     session = (
         await db.execute(select(Session).where(Session.id == chat.session_id, Session.organization_id == user.organization_id))
     ).scalar_one_or_none()
-    data = ChatOut.model_validate(chat).model_dump()
     contact = None
     if chat.contact_id:
         contact = (
             await db.execute(select(Contact).where(Contact.id == chat.contact_id, Contact.organization_id == user.organization_id))
         ).scalar_one_or_none()
+
+    past_chats: list[dict] = []
+    tickets: list[dict] = []
+    if chat.contact_id:
+        past_chat_rows = (
+            await db.execute(
+                select(Chat)
+                .where(
+                    Chat.organization_id == user.organization_id,
+                    Chat.contact_id == chat.contact_id,
+                    Chat.id != chat.id,
+                )
+                .order_by(Chat.updated_at.desc())
+                .limit(10)
+            )
+        ).scalars().all()
+        past_chats = [
+            {
+                "id": str(item.id),
+                "subject": item.subject,
+                "status": item.status,
+                "updated_at": item.updated_at.isoformat() if item.updated_at else None,
+            }
+            for item in past_chat_rows
+        ]
+        ticket_rows = (
+            await db.execute(
+                select(Ticket)
+                .where(Ticket.organization_id == user.organization_id, Ticket.contact_id == chat.contact_id)
+                .order_by(Ticket.updated_at.desc())
+                .limit(10)
+            )
+        ).scalars().all()
+        tickets = [
+            {
+                "id": str(item.id),
+                "ticket_number": item.ticket_number,
+                "subject": item.subject,
+                "status": item.status,
+                "priority": item.priority,
+                "updated_at": item.updated_at.isoformat() if item.updated_at else None,
+            }
+            for item in ticket_rows
+        ]
+
+    data = ChatOut.model_validate(chat).model_dump()
     data["visitor_name"] = contact.full_name if contact else None
     data["visitor_email"] = contact.email if contact else None
     data["visitor_ip"] = str(session.ip_address) if session and session.ip_address else None
@@ -62,7 +217,7 @@ async def detail(chat_id: uuid.UUID, user: Annotated[TokenUser, Depends(current_
     data["visitor_page_views"] = session.page_views if session else None
     data["visitor_status"] = "online" if await get_redis().exists(f"presence:visitor:{chat.id}") else "offline"
     data["messages"] = list(reversed(messages))
-    data["contact"] = {"id": str(chat.contact_id)} if chat.contact_id else None
+    data["contact"] = {"id": str(chat.contact_id), "custom_attrs": contact.custom_attrs if contact else {}} if chat.contact_id else None
     data["visitor_session"] = (
         {
             "id": str(session.id),
@@ -74,10 +229,27 @@ async def detail(chat_id: uuid.UUID, user: Annotated[TokenUser, Depends(current_
             "page_views": session.page_views,
             "first_seen_at": session.first_seen_at.isoformat() if session.first_seen_at else None,
             "last_seen_at": session.last_seen_at.isoformat() if session.last_seen_at else None,
+            "browser": session.browser,
+            "browser_version": session.browser_version,
+            "os": session.os,
+            "device_type": session.device_type,
+            "custom_variables": session.custom_variables or {},
+            "page_history": (session.page_history or {}).get("items", []),
         }
         if session
         else None
     )
+    data["past_chats"] = past_chats
+    data["tickets"] = tickets
+    if contact:
+        attrs = contact.custom_attrs or {}
+        data["ecommerce"] = attrs.get("ecommerce") or {
+            "lifetime_value": attrs.get("lifetime_value"),
+            "orders": attrs.get("orders"),
+            "last_order": attrs.get("last_order"),
+        }
+    else:
+        data["ecommerce"] = None
     return data
 
 
@@ -105,7 +277,9 @@ async def chats_with_contact_data(db: AsyncSession, chats: list[Chat]) -> list[d
         sessions_by_id = {
             session.id: session
             for session in (
-                await db.execute(select(Session).where(Session.id.in_(session_ids), Session.organization_id == chats[0].organization_id))
+                await db.execute(
+                    select(Session).where(Session.id.in_(session_ids), Session.organization_id == chats[0].organization_id)
+                )
             ).scalars().all()
         }
     latest_message_subquery = (
@@ -161,15 +335,111 @@ async def chats_with_contact_data(db: AsyncSession, chats: list[Chat]) -> list[d
 
 
 @router.get("/{chat_id}/messages")
-async def messages(chat_id: uuid.UUID, user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db), limit: int = Query(50, le=100)) -> list[Any]:
+async def messages(
+    chat_id: uuid.UUID,
+    user: Annotated[TokenUser, Depends(current_user)],
+    db: AsyncSession = Depends(get_db),
+    limit: int = Query(50, ge=1, le=200),
+) -> list[Any]:
     chat = await get_chat(db, user.organization_id, chat_id)
-    return (await db.execute(select(Message).where(Message.chat_id == chat.id).order_by(Message.created_at.desc()).limit(limit))).scalars().all()
+    return (
+        await db.execute(
+            select(Message).where(Message.chat_id == chat.id).order_by(Message.created_at.desc()).limit(limit)
+        )
+    ).scalars().all()
+
+
+@router.post("/{chat_id}/messages/{message_id}/react")
+async def react_to_message(
+    chat_id: uuid.UUID,
+    message_id: uuid.UUID,
+    payload: ReactionRequest,
+    user: Annotated[TokenUser, Depends(current_user)],
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    await get_chat(db, user.organization_id, chat_id)
+    message = (
+        await db.execute(
+            select(Message).where(Message.id == message_id, Message.chat_id == chat_id)
+        )
+    ).scalar_one_or_none()
+    if message is None:
+        raise HTTPException(status_code=404, detail="Message not found")
+    reactions = dict(message.reactions or {})
+    emoji = payload.emoji.strip()
+    users = set(reactions.get(emoji, []))
+    uid = str(user.id)
+    if uid in users:
+        users.remove(uid)
+    else:
+        users.add(uid)
+    if users:
+        reactions[emoji] = sorted(users)
+    elif emoji in reactions:
+        del reactions[emoji]
+    message.reactions = reactions
+    await db.commit()
+    return {"ok": True, "reactions": reactions}
+
+
+@router.patch("/{chat_id}/messages/{message_id}")
+async def edit_message(
+    chat_id: uuid.UUID,
+    message_id: uuid.UUID,
+    payload: MessageUpdateRequest,
+    user: Annotated[TokenUser, Depends(current_user)],
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    await get_chat(db, user.organization_id, chat_id)
+    message = (
+        await db.execute(select(Message).where(Message.id == message_id, Message.chat_id == chat_id))
+    ).scalar_one_or_none()
+    if message is None:
+        raise HTTPException(status_code=404, detail="Message not found")
+    if message.sender_type != "agent" or message.sender_id != user.id:
+        raise HTTPException(status_code=403, detail="Only the original author can edit this message")
+    if datetime.now(UTC) - message.created_at > timedelta(minutes=30):
+        raise HTTPException(status_code=400, detail="Edit window expired")
+    message.content = payload.content
+    message.edited_at = datetime.now(UTC)
+    await db.commit()
+    return {"ok": True}
+
+
+@router.delete("/{chat_id}/messages/{message_id}")
+async def delete_message(
+    chat_id: uuid.UUID,
+    message_id: uuid.UUID,
+    user: Annotated[TokenUser, Depends(current_user)],
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    await get_chat(db, user.organization_id, chat_id)
+    message = (
+        await db.execute(select(Message).where(Message.id == message_id, Message.chat_id == chat_id))
+    ).scalar_one_or_none()
+    if message is None:
+        raise HTTPException(status_code=404, detail="Message not found")
+    if message.sender_type != "agent" or message.sender_id != user.id:
+        raise HTTPException(status_code=403, detail="Only the original author can delete this message")
+    if datetime.now(UTC) - message.created_at > timedelta(minutes=30):
+        raise HTTPException(status_code=400, detail="Delete window expired")
+    message.deleted_at = datetime.now(UTC)
+    message.content = "[deleted]"
+    message.content_type = "deleted"
+    await db.commit()
+    return {"ok": True}
 
 
 @router.get("/{chat_id}/transcript.txt", response_class=PlainTextResponse)
 async def transcript_txt(chat_id: uuid.UUID, user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db)) -> PlainTextResponse:
     chat = await get_chat(db, user.organization_id, chat_id)
-    messages = (await db.execute(select(Message).where(Message.chat_id == chat.id, Message.is_internal.is_(False)).order_by(Message.created_at.asc()))).scalars().all()
+    messages = (
+        await db.execute(
+            select(Message)
+            .where(Message.chat_id == chat.id, Message.is_internal.is_(False))
+            .order_by(Message.created_at.asc())
+        )
+    ).scalars().all()
     lines = [f"FlowLyra transcript", f"Chat: {chat.id}", f"Status: {chat.status}", f"Subject: {chat.subject or 'Live chat'}", ""]
     for message in messages:
         sender = {"customer": "Visitor", "agent": "Agent", "system": "System"}.get(message.sender_type, message.sender_type.title())
@@ -184,7 +454,9 @@ async def transcript_txt(chat_id: uuid.UUID, user: Annotated[TokenUser, Depends(
 @router.get("/{chat_id}/visitor")
 async def visitor(chat_id: uuid.UUID, user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db)) -> dict:
     chat = await get_chat(db, user.organization_id, chat_id)
-    session = (await db.execute(select(Session).where(Session.id == chat.session_id, Session.organization_id == user.organization_id))).scalar_one()
+    session = (
+        await db.execute(select(Session).where(Session.id == chat.session_id, Session.organization_id == user.organization_id))
+    ).scalar_one()
     return {"session": {k: str(v) if isinstance(v, uuid.UUID) else v for k, v in session.__dict__.items() if not k.startswith("_")}}
 
 
@@ -240,6 +512,56 @@ async def close(chat_id: uuid.UUID, user: Annotated[TokenUser, Depends(current_u
     return chat
 
 
+@router.post("/{chat_id}/snooze", response_model=ChatOut)
+async def snooze(chat_id: uuid.UUID, payload: SnoozeRequest, user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db)) -> Chat:
+    chat = await get_chat(db, user.organization_id, chat_id)
+    chat.snoozed_until = datetime.now(UTC) + timedelta(minutes=payload.minutes)
+    chat.status = "pending"
+    await db.commit()
+    await db.refresh(chat)
+    return chat
+
+
+@router.post("/{chat_id}/pin", response_model=ChatOut)
+async def pin(chat_id: uuid.UUID, user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db)) -> Chat:
+    chat = await get_chat(db, user.organization_id, chat_id)
+    chat.is_pinned = True
+    chat.pinned_by_user_id = user.id
+    await db.commit()
+    await db.refresh(chat)
+    return chat
+
+
+@router.post("/{chat_id}/unpin", response_model=ChatOut)
+async def unpin(chat_id: uuid.UUID, user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db)) -> Chat:
+    chat = await get_chat(db, user.organization_id, chat_id)
+    chat.is_pinned = False
+    chat.pinned_by_user_id = None
+    await db.commit()
+    await db.refresh(chat)
+    return chat
+
+
+@router.post("/{chat_id}/spam", response_model=ChatOut)
+async def mark_spam(chat_id: uuid.UUID, user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db)) -> Chat:
+    chat = await get_chat(db, user.organization_id, chat_id)
+    chat.is_spam = True
+    chat.status = "closed"
+    await db.commit()
+    await db.refresh(chat)
+    return chat
+
+
+@router.post("/{chat_id}/unspam", response_model=ChatOut)
+async def unmark_spam(chat_id: uuid.UUID, user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db)) -> Chat:
+    chat = await get_chat(db, user.organization_id, chat_id)
+    chat.is_spam = False
+    chat.status = "waiting" if chat.assigned_user_id is None else "active"
+    await db.commit()
+    await db.refresh(chat)
+    return chat
+
+
 @router.post("/{chat_id}/note")
 async def note(chat_id: uuid.UUID, payload: NoteRequest, user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db)) -> Any:
     chat = await get_chat(db, user.organization_id, chat_id)
@@ -259,9 +581,24 @@ async def tag(chat_id: uuid.UUID, payload: TagRequest, user: Annotated[TokenUser
     return chat
 
 
+@router.delete("/{chat_id}/tag/{tag}", response_model=ChatOut)
+async def untag(chat_id: uuid.UUID, tag: str, user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db)) -> Chat:
+    chat = await get_chat(db, user.organization_id, chat_id)
+    chat.tags = [item for item in chat.tags if item != tag]
+    await db.commit()
+    await db.refresh(chat)
+    return chat
+
+
 @router.post("/{chat_id}/ban")
 async def ban(chat_id: uuid.UUID, user: Annotated[TokenUser, Depends(require_role("admin", "supervisor"))], db: AsyncSession = Depends(get_db)) -> dict:
-    await get_chat(db, user.organization_id, chat_id)
+    chat = await get_chat(db, user.organization_id, chat_id)
+    session = (
+        await db.execute(select(Session).where(Session.id == chat.session_id, Session.organization_id == user.organization_id))
+    ).scalar_one_or_none()
+    if session is not None:
+        session.is_banned = True
+    await db.commit()
     return {"ok": True}
 
 
@@ -270,4 +607,4 @@ async def convert(chat_id: uuid.UUID, user: Annotated[TokenUser, Depends(current
     chat = await get_chat(db, user.organization_id, chat_id)
     ticket = await convert_to_ticket(db, chat)
     await db.commit()
-    return {"ticket_id": str(ticket.id)}
+    return {"ticket_id": str(ticket.id), "ticket_number": ticket.ticket_number, "ticket_url": f"/ticket/{ticket.id}"}

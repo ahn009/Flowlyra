@@ -18,5 +18,9 @@ celery_app.conf.beat_schedule = {
         "task": "app.workers.system_tasks.check_ticket_sla_breaches",
         "schedule": 30.0,
     },
+    "publish-scheduled-kb-articles": {
+        "task": "app.workers.system_tasks.publish_scheduled_kb_articles",
+        "schedule": 60.0,
+    },
 }
 celery_app.autodiscover_tasks(["app.workers"])

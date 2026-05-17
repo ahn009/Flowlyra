@@ -136,8 +136,11 @@ export interface WidgetHistoryResponse {
 }
 
 export interface SuggestedArticle {
+  id?: string;
   title: string;
   url: string;
+  summary?: string | null;
+  snippet?: string | null;
 }
 
 export interface FlowLyraInstance {

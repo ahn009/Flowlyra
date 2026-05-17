@@ -1,20 +1,49 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { Clock, Globe2, MessageCircle, MessageSquare, Search, Sparkles, UsersRound } from "lucide-react";
+import { Clock, Globe2, MessageCircle, MessageSquare, Pin, Search, Sparkles, UsersRound } from "lucide-react";
+import { useMemo, useState } from "react";
 import { api } from "../lib/api";
+import { useMe } from "../lib/me";
 import { PageHeader } from "../components/AgentLayout";
 import { Card, EmptyPanel, MetricCard, PageShell, Pill, TextInput } from "../components/ui";
 import { useChatStore } from "../stores/chatStore";
 import type { Chat } from "../types";
 
+type InboxView = "all" | "my" | "queued" | "supervised" | "pinned" | "archived";
+
+const VIEW_LABELS: Record<InboxView, string> = {
+  all: "All",
+  my: "My chats",
+  queued: "Queued",
+  supervised: "Supervised",
+  pinned: "Pinned",
+  archived: "Archived",
+};
+
 export function InboxPage(): JSX.Element {
-  const { data = [] } = useQuery({ queryKey: ["chats"], queryFn: async () => (await api.get<Chat[]>("/chats")).data, refetchInterval: 2500 });
+  const me = useMe();
+  const role = me.data?.user.role ?? "agent";
+  const queryViewOptions: InboxView[] = role === "admin" || role === "supervisor"
+    ? ["all", "my", "queued", "supervised", "pinned", "archived"]
+    : ["all", "my", "queued", "pinned", "archived"];
+
+  const [view, setView] = useState<InboxView>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const { data = [] } = useQuery({
+    queryKey: ["chats", "inbox", view, searchQuery],
+    queryFn: async () => (await api.get<Chat[]>("/chats", { params: { view: view === "all" ? undefined : view, q: searchQuery || undefined } })).data,
+    refetchInterval: 2500,
+  });
+
   const chats = Object.values(useChatStore((state) => state.chats));
   const unreadCounts = useChatStore((state) => state.unreadCounts);
-  const rows = mergeChats(data, chats);
+  const rows = useMemo(() => mergeChats(data, chats), [data, chats]);
+
   const waiting = rows.filter((chat) => chat.status === "waiting").length;
   const active = rows.filter((chat) => chat.status === "active").length;
   const online = rows.filter((chat) => chat.visitor_status === "online").length;
+  const pinned = rows.filter((chat) => chat.is_pinned).length;
   const totalUnread = Object.values(unreadCounts).reduce((sum, count) => sum + count, 0);
 
   return (
@@ -26,22 +55,32 @@ export function InboxPage(): JSX.Element {
       <div className="grid min-h-[calc(100dvh-128px)] grid-cols-1 gap-4 p-3 lg:grid-cols-[minmax(340px,460px)_minmax(0,1fr)] lg:p-5">
         <Card className="min-w-0 overflow-hidden bg-white dark:bg-slate-900">
           <div className="border-b border-border bg-white p-4 dark:bg-slate-900">
-            <div className="mb-4 grid grid-cols-4 gap-2">
+            <div className="mb-4 grid grid-cols-5 gap-2">
               <MetricCard label="Waiting" value={waiting} tone="yellow" />
               <MetricCard label="Active" value={active} tone="green" />
               <MetricCard label="Online" value={online} tone="blue" />
+              <MetricCard label="Pinned" value={pinned} tone="slate" />
               <MetricCard label="Unread" value={totalUnread} tone={totalUnread ? "red" : "slate"} />
             </div>
             <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
-              {[
-                ["All", rows.length],
-                ["Waiting", waiting],
-                ["Active", active],
-                ["Resolved", rows.filter((chat) => chat.status === "resolved").length]
-              ].map(([label, count], index) => <button key={label} className={`shrink-0 rounded-xl border px-3 py-1.5 text-sm font-black transition ${index === 0 ? "border-slate-950 bg-slate-950 text-white dark:border-white dark:bg-white dark:text-slate-950" : "border-border bg-white text-slate-600 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"}`}>{label} <span className="opacity-75">{count}</span></button>)}
+              {queryViewOptions.map((option) => (
+                <button
+                  key={option}
+                  className={`shrink-0 rounded-xl border px-3 py-1.5 text-sm font-black transition ${view === option ? "border-slate-950 bg-slate-950 text-white dark:border-white dark:bg-white dark:text-slate-950" : "border-border bg-white text-slate-600 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"}`}
+                  onClick={() => setView(option)}
+                >
+                  {VIEW_LABELS[option]}
+                </button>
+              ))}
             </div>
             <label className="flex items-center gap-2 rounded-2xl border border-border bg-white px-3 text-sm text-slate-500 shadow-sm focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-100 dark:bg-slate-800 dark:text-slate-400 dark:focus-within:border-blue-500 dark:focus-within:ring-blue-900/40">
-              <Search size={16} /> <TextInput className="h-11 border-0 px-0 shadow-none focus:ring-0" placeholder="Search conversations, email, topic" />
+              <Search size={16} />
+              <TextInput
+                className="h-11 border-0 px-0 shadow-none focus:ring-0"
+                placeholder="Search conversations, email, topic"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+              />
             </label>
           </div>
           <div className="max-h-[620px] overflow-y-auto lg:max-h-[calc(100dvh-330px)]">
@@ -62,7 +101,10 @@ function mergeChats(serverChats: Chat[], realtimeChats: Chat[]): Chat[] {
   const byId = new Map<string, Chat>();
   for (const chat of serverChats) byId.set(chat.id, chat);
   for (const chat of realtimeChats) byId.set(chat.id, { ...byId.get(chat.id), ...chat });
-  return [...byId.values()].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+  return [...byId.values()].sort((a, b) => {
+    if ((a.is_pinned ? 1 : 0) !== (b.is_pinned ? 1 : 0)) return (b.is_pinned ? 1 : 0) - (a.is_pinned ? 1 : 0);
+    return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+  });
 }
 
 function ChatRow({ chat, unreadCount }: { chat: Chat; unreadCount: number }): JSX.Element {
@@ -73,6 +115,7 @@ function ChatRow({ chat, unreadCount }: { chat: Chat; unreadCount: number }): JS
       <div className="min-w-0 flex-1">
         <div className="flex min-w-0 items-center gap-2">
           <div className={`truncate font-black ${isUnread ? "text-slate-950 dark:text-white" : "text-slate-800 dark:text-slate-200"}`}>{chat.visitor_name || chat.visitor_email || "Website visitor"}</div>
+          {chat.is_pinned ? <Pin size={12} className="text-blue-700" /> : null}
           <ChatStatusBadge status={chat.status} visitorStatus={chat.visitor_status ?? "offline"} />
         </div>
         <div className="mt-1 flex items-center gap-1 truncate text-sm text-slate-500 dark:text-slate-400">

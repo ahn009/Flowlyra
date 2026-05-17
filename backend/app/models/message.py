@@ -2,7 +2,7 @@ from datetime import datetime
 import uuid
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, func
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.session import Base
@@ -21,6 +21,9 @@ class Message(UUIDPkMixin, Base):
     file_name: Mapped[str | None] = mapped_column(String(255))
     file_size: Mapped[int | None] = mapped_column(Integer)
     file_mime: Mapped[str | None] = mapped_column(String(100))
+    reactions: Mapped[dict] = mapped_column(JSONB, default=dict)
+    edited_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     is_internal: Mapped[bool] = mapped_column(Boolean, default=False)
     is_read: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
