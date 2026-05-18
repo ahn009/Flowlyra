@@ -39,7 +39,8 @@ const nav = [
     { to: "/admin/widget", label: "Widget", icon: Settings },
     { to: "/admin/install", label: "Install", icon: Code2 },
     { to: "/settings/api", label: "API Keys", icon: Lock },
-    { to: "/settings/webhooks", label: "Webhooks", icon: Plug }
+    { to: "/settings/webhooks", label: "Webhooks", icon: Plug },
+    { to: "/settings/integrations", label: "Integrations", icon: Plug }
   ] }
 ];
 

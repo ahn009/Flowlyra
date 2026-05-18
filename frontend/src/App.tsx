@@ -22,6 +22,7 @@ import { PublicKBArticlePage, PublicKBIndexPage } from "./pages/PublicKBPage";
 import { WebhooksPage } from "./pages/WebhooksPage";
 import { ApiKeysPage } from "./pages/ApiKeysPage";
 import { ApiChangelogPage, ApiDocsPage, ApiStatusPage } from "./pages/ApiPlatformPages";
+import { IntegrationsMarketplacePage } from "./pages/IntegrationsMarketplacePage";
 import {
   ContactPage,
   CustomersPage,
@@ -142,6 +143,7 @@ export function App(): JSX.Element {
         <Route path="/settings/audit" element={<AuditLogsPage />} />
         <Route path="/settings/webhooks" element={<WebhooksPage />} />
         <Route path="/settings/api" element={<ApiKeysPage />} />
+        <Route path="/settings/integrations" element={<IntegrationsMarketplacePage />} />
         <Route path="/settings/tags" element={<TagsPage />} />
         <Route path="/settings/notifications" element={<NotificationPreferencesPage />} />
       </Route>

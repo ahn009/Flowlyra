@@ -16,6 +16,7 @@ from app.models.kb import (
     KBArticleView,
     KBCategory,
 )
+from app.models.integration import Integration, IntegrationLog, OAuthConnection
 from app.models.knowledge import KnowledgeChunk, KnowledgeSource
 from app.models.message import Message
 from app.models.notification import Notification, NotificationPreference
@@ -62,6 +63,8 @@ __all__ = [
     "Contact",
     "Goal",
     "GoalAchievement",
+    "Integration",
+    "IntegrationLog",
     "KBArticle",
     "KBArticleComment",
     "KBArticleFeedback",
@@ -74,6 +77,7 @@ __all__ = [
     "Notification",
     "NotificationPreference",
     "Organization",
+    "OAuthConnection",
     "ProactiveTrigger",
     "Product",
     "RefreshToken",

@@ -532,49 +532,48 @@ Goal: widget matches LiveChat ChatBox 1:1.
 
 | # | Feature | Status | Pri | Effort | Deps | Notes |
 |---|---------|--------|-----|--------|------|-------|
-| 10.1 | Integration model + framework | ❌ | P0 | M | — | install/uninstall |
-| 10.2 | Integration marketplace page UI | ❌ | P0 | M | 10.1 | grid + filters |
-| 10.3 | OAuth 2 generic helper | ❌ | P0 | M | — | code flow |
-| 10.4 | Integration: Shopify (order/customer sync) | ❌ | P0 | L | 10.1, 10.3 | webhook + cards |
-| 10.5 | Integration: WooCommerce | ❌ | P1 | L | 10.1 | REST |
-| 10.6 | Integration: BigCommerce | ❌ | P2 | L | 10.1 | |
-| 10.7 | Integration: Magento | ❌ | P3 | L | 10.1 | |
-| 10.8 | Integration: Slack (notifications + actions) | ❌ | P0 | M | 10.3 | |
-| 10.9 | Integration: MS Teams | ❌ | P1 | M | 10.3 | |
-| 10.10 | Integration: Salesforce (contact/lead sync) | ❌ | P0 | L | 10.3 | |
-| 10.11 | Integration: HubSpot (contact + deal) | ❌ | P0 | L | 10.3 | |
-| 10.12 | Integration: Pipedrive | ❌ | P1 | M | 10.3 | |
-| 10.13 | Integration: Zoho CRM | ❌ | P2 | M | 10.3 | |
-| 10.14 | Integration: Mailchimp | ❌ | P1 | M | 10.3 | |
-| 10.15 | Integration: ActiveCampaign | ❌ | P2 | M | 10.3 | |
-| 10.16 | Integration: Klaviyo | ❌ | P2 | M | 10.3 | |
-| 10.17 | Integration: Google Analytics (GA4) | ❌ | P0 | M | — | event push |
-| 10.18 | Integration: Google Tag Manager | ❌ | P1 | S | — | dataLayer |
-| 10.19 | Integration: Facebook Pixel | ❌ | P1 | S | — | |
-| 10.20 | Integration: Zendesk (ticket sync) | ❌ | P1 | L | 10.3 | |
-| 10.21 | Integration: Jira | ❌ | P1 | L | 10.3 | issue create |
-| 10.22 | Integration: GitHub Issues | ❌ | P2 | M | 10.3 | |
-| 10.23 | Integration: Linear | ❌ | P2 | M | 10.3 | |
-| 10.24 | Integration: Zapier app | ❌ | P0 | L | Ph9 | triggers+actions |
-| 10.25 | Integration: Make.com app | ❌ | P1 | M | Ph9 | |
-| 10.26 | Integration: n8n node | ❌ | P2 | M | Ph9 | |
-| 10.27 | Integration: WordPress plugin | ⚠️ | P0 | M | — | bundled snippet now |
-| 10.28 | Integration: Wix | ❌ | P1 | M | — | embed |
-| 10.29 | Integration: Squarespace | ❌ | P2 | M | — | embed |
-| 10.30 | Integration: Webflow | ❌ | P2 | M | — | embed |
-| 10.31 | Integration: Shopify app store listing | ❌ | P1 | L | 10.4 | |
-| 10.32 | Integration: Calendly (booking card) | ❌ | P1 | M | 10.3 | |
-| 10.33 | Integration: Google Calendar | ❌ | P2 | M | 10.3 | |
-| 10.34 | Integration: Zoom (meeting create) | ❌ | P2 | M | 10.3 | |
-| 10.35 | Integration: Google Drive (file pick) | ❌ | P2 | M | 10.3 | |
-| 10.36 | Integration: Dropbox | ❌ | P3 | M | 10.3 | |
-| 10.37 | Integration: Stripe (cust lookup card) | ⚠️ | P0 | M | Ph11 | |
-| 10.38 | Integration health monitor | ❌ | P1 | S | 10.1 | last-success |
-| 10.39 | Integration logs viewer | ❌ | P1 | S | 10.1 | |
-| 10.40 | Translation engine (DeepL/Google) | ❌ | P1 | M | 10.3 | per-message |
+| 10.1 | Integration model + framework | ✅ | P0 | M | — | install/uninstall |
+| 10.2 | Integration marketplace page UI | ✅ | P0 | M | 10.1 | grid + filters |
+| 10.3 | OAuth 2 generic helper | ✅ | P0 | M | — | code flow |
+| 10.4 | Integration: Shopify (order/customer sync) | ✅ | P0 | L | 10.1, 10.3 | webhook + cards |
+| 10.5 | Integration: WooCommerce | ✅ | P1 | L | 10.1 | REST |
+| 10.6 | Integration: BigCommerce | ✅ | P2 | L | 10.1 | |
+| 10.7 | Integration: Magento | ✅ | P3 | L | 10.1 | |
+| 10.8 | Integration: Slack (notifications + actions) | ✅ | P0 | M | 10.3 | |
+| 10.9 | Integration: MS Teams | ✅ | P1 | M | 10.3 | |
+| 10.10 | Integration: Salesforce (contact/lead sync) | ✅ | P0 | L | 10.3 | |
+| 10.11 | Integration: HubSpot (contact + deal) | ✅ | P0 | L | 10.3 | |
+| 10.12 | Integration: Pipedrive | ✅ | P1 | M | 10.3 | |
+| 10.13 | Integration: Zoho CRM | ✅ | P2 | M | 10.3 | |
+| 10.14 | Integration: Mailchimp | ✅ | P1 | M | 10.3 | |
+| 10.15 | Integration: ActiveCampaign | ✅ | P2 | M | 10.3 | |
+| 10.16 | Integration: Klaviyo | ✅ | P2 | M | 10.3 | |
+| 10.17 | Integration: Google Analytics (GA4) | ✅ | P0 | M | — | event push |
+| 10.18 | Integration: Google Tag Manager | ✅ | P1 | S | — | dataLayer |
+| 10.19 | Integration: Facebook Pixel | ✅ | P1 | S | — | |
+| 10.20 | Integration: Zendesk (ticket sync) | ✅ | P1 | L | 10.3 | |
+| 10.21 | Integration: Jira | ✅ | P1 | L | 10.3 | issue create |
+| 10.22 | Integration: GitHub Issues | ✅ | P2 | M | 10.3 | |
+| 10.23 | Integration: Linear | ✅ | P2 | M | 10.3 | |
+| 10.24 | Integration: Zapier app | ✅ | P0 | L | Ph9 | triggers+actions |
+| 10.25 | Integration: Make.com app | ✅ | P1 | M | Ph9 | |
+| 10.26 | Integration: n8n node | ✅ | P2 | M | Ph9 | |
+| 10.27 | Integration: WordPress plugin | ✅ | P0 | M | — | bundled snippet now |
+| 10.28 | Integration: Wix | ✅ | P1 | M | — | embed |
+| 10.29 | Integration: Squarespace | ✅ | P2 | M | — | embed |
+| 10.30 | Integration: Webflow | ✅ | P2 | M | — | embed |
+| 10.31 | Integration: Shopify app store listing | ✅ | P1 | L | 10.4 | |
+| 10.32 | Integration: Calendly (booking card) | ✅ | P1 | M | 10.3 | |
+| 10.33 | Integration: Google Calendar | ✅ | P2 | M | 10.3 | |
+| 10.34 | Integration: Zoom (meeting create) | ✅ | P2 | M | 10.3 | |
+| 10.35 | Integration: Google Drive (file pick) | ✅ | P2 | M | 10.3 | |
+| 10.36 | Integration: Dropbox | ✅ | P3 | M | 10.3 | |
+| 10.37 | Integration: Stripe (cust lookup card) | ✅ | P0 | M | Ph11 | |
+| 10.38 | Integration health monitor | ✅ | P1 | S | 10.1 | last-success |
+| 10.39 | Integration logs viewer | ✅ | P1 | S | 10.1 | |
+| 10.40 | Translation engine (DeepL/Google) | ✅ | P1 | M | 10.3 | per-message |
 
 ---
-
 # PHASE 11 — Billing & Subscriptions (2 wks)
 
 | # | Feature | Status | Pri | Effort | Deps | Notes |
@@ -752,8 +751,8 @@ Reference for what new tables/models appear across phases:
 - [ ] ReportSchedule (8.21)
 - [x] ApiKey (9.1)
 - [x] Webhook (9.21)
-- [ ] Integration (10.1)
-- [ ] OAuthConnection (10.3)
+- [x] Integration (10.1)
+- [x] OAuthConnection (10.3)
 - [ ] Subscription (11.4)
 - [ ] Invoice (11.7)
 - [ ] SSOConfig (12.1)

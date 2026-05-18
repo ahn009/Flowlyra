@@ -28,6 +28,8 @@ API_KEY_SCOPES: list[str] = [
     "campaigns.read",
     "campaigns.write",
     "reports.read",
+    "integrations.read",
+    "integrations.write",
     "ai.use",
     "uploads.write",
     "billing.read",

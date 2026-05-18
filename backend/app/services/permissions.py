@@ -38,6 +38,7 @@ _BASE_SUPERVISOR = _BASE_AGENT | {
     "agents.read", "agents.status_set",
     "teams.read",
     "audit.read",
+    "integrations.read",
 }
 _BASE_ADMIN = _BASE_SUPERVISOR | {
     "settings.read", "settings.write",
