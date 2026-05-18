@@ -69,6 +69,15 @@ class Settings(BaseSettings):
     retention_default_audit_days: int = 365
     retention_default_session_days: int = 90
     data_export_signed_url_ttl_seconds: int = 86400
+    # Phase 13 — Web/mobile push
+    push_vapid_public_key: str = ""
+    push_vapid_private_key: str = ""
+    push_vapid_subject: str = "mailto:hello@flowlyra.com"
+    fcm_server_key: str = ""
+    apns_team_id: str = ""
+    apns_key_id: str = ""
+    apns_private_key: str = ""
+    apns_topic: str = ""
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

@@ -4,8 +4,13 @@ import pytest
 
 from app.models import (
     AuditLog,
+    Cart,
+    CartItem,
     Notification,
     NotificationPreference,
+    Order,
+    OrderItem,
+    PushDevice,
     RefreshToken,
     Webhook,
     WebhookDelivery,
@@ -27,6 +32,11 @@ def test_models_have_tablename():
     assert AuditLog.__tablename__ == "audit_logs"
     assert Notification.__tablename__ == "notifications"
     assert NotificationPreference.__tablename__ == "notification_preferences"
+    assert PushDevice.__tablename__ == "push_devices"
+    assert Cart.__tablename__ == "carts"
+    assert CartItem.__tablename__ == "cart_items"
+    assert Order.__tablename__ == "orders"
+    assert OrderItem.__tablename__ == "order_items"
     assert Webhook.__tablename__ == "webhooks"
     assert WebhookDelivery.__tablename__ == "webhook_deliveries"
     assert RefreshToken.__tablename__ == "refresh_tokens"

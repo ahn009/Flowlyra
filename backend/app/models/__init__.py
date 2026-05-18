@@ -7,6 +7,7 @@ from app.models.chat import Chat
 from app.models.chat_widget import ChatWidget
 from app.models.chatbot import ChatbotFlow, ChatbotSession
 from app.models.contact import Contact
+from app.models.ecommerce import Cart, CartItem, Order, OrderItem
 from app.models.engage import Goal, GoalAchievement, VisitorWatch
 from app.models.kb import (
     KBArticle,
@@ -23,6 +24,7 @@ from app.models.notification import Notification, NotificationPreference
 from app.models.organization import Organization
 from app.models.proactive_trigger import ProactiveTrigger
 from app.models.product import Product
+from app.models.push_device import PushDevice
 from app.models.refresh_token import RefreshToken
 from app.models.report_schedule import ReportSchedule
 from app.models.routing_rule import RoutingRule
@@ -71,6 +73,8 @@ __all__ = [
     "ChatbotFlow",
     "ChatbotSession",
     "Contact",
+    "Cart",
+    "CartItem",
     "Goal",
     "GoalAchievement",
     "Integration",
@@ -90,6 +94,9 @@ __all__ = [
     "OAuthConnection",
     "ProactiveTrigger",
     "Product",
+    "Order",
+    "OrderItem",
+    "PushDevice",
     "RefreshToken",
     "ReportSchedule",
     "RoutingRule",

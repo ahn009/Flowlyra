@@ -2,7 +2,7 @@ import { Bell, Bot, BrainCircuit, CheckCheck, ChevronLeft, ClipboardList, Code2,
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
 import { connectSocket, setRealtimeUpdateHandler } from "../socket";
 import { api } from "../lib/api";
@@ -44,15 +44,31 @@ const nav = [
   ] }
 ];
 
+interface NotificationListResponse {
+  items: Array<{
+    id: string;
+    kind?: string;
+    title: string;
+    body: string | null;
+    link_url: string | null;
+    priority: string;
+    is_read: boolean;
+    created_at: string | null;
+  }>;
+  unread: number;
+}
+
 export function AgentLayout(): JSX.Element {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const unread = useNotificationStore((state) => state.unread);
   const notifications = useNotificationStore((state) => state.notifications);
+  const setNotifications = useNotificationStore((state) => state.setNotifications);
   const markAllRead = useNotificationStore((state) => state.markAllRead);
   const clearNotifications = useNotificationStore((state) => state.clearNotifications);
   const removeNotification = useNotificationStore((state) => state.removeNotification);
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
   const [commandQuery, setCommandQuery] = useState("");
@@ -60,8 +76,23 @@ export function AgentLayout(): JSX.Element {
   const notificationPanelRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const sidebarWidth = collapsed ? "w-14 md:w-16" : "w-14 md:w-64";
-  const contentOffset = collapsed ? "pl-14 md:pl-16" : "pl-14 md:pl-64";
+  const sidebarWidth = collapsed ? "md:w-16" : "md:w-64";
+  const contentOffset = collapsed ? "pl-0 md:pl-16" : "pl-0 md:pl-64";
+  const notificationsQuery = useQuery({
+    queryKey: ["notifications", "center"],
+    queryFn: async () => (await api.get<NotificationListResponse>("/notifications", { params: { limit: 50 } })).data,
+    staleTime: 15000,
+    refetchInterval: 15000,
+  });
+  const markReadMutation = useMutation({
+    mutationFn: async () => api.post("/notifications/read", { ids: null }),
+  });
+  const removeNotificationMutation = useMutation({
+    mutationFn: async (id: string) => api.delete(`/notifications/${id}`),
+  });
+  const clearNotificationsMutation = useMutation({
+    mutationFn: async () => api.delete("/notifications"),
+  });
 
   useEffect(() => {
     connectSocket();
@@ -75,11 +106,32 @@ export function AgentLayout(): JSX.Element {
   }, [queryClient, user?.id]);
 
   useEffect(() => {
+    const data = notificationsQuery.data;
+    if (!data) return;
+    setNotifications(
+      data.items.map((item) => ({
+        id: item.id,
+        kind: item.kind,
+        title: item.title,
+        body: item.body ?? "",
+        linkUrl: item.link_url,
+        level: item.priority === "urgent" ? "urgent" : item.priority === "high" ? "warning" : "info",
+        createdAt: item.created_at ?? new Date().toISOString(),
+        isRead: item.is_read,
+      })),
+      data.unread,
+    );
+  }, [notificationsQuery.data, setNotifications]);
+
+  useEffect(() => {
     function handleClickOutside(event: MouseEvent): void {
       if (!notificationPanelRef.current?.contains(event.target as Node)) setNotificationsOpen(false);
     }
     function handleEscape(event: KeyboardEvent): void {
-      if (event.key === "Escape") setNotificationsOpen(false);
+      if (event.key === "Escape") {
+        setNotificationsOpen(false);
+        setMobileNavOpen(false);
+      }
     }
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", handleEscape);
@@ -144,10 +196,25 @@ export function AgentLayout(): JSX.Element {
     return () => window.clearTimeout(timer);
   }, [commandOpen, commandQuery]);
 
+  function handleMarkAllRead(): void {
+    markAllRead();
+    markReadMutation.mutate();
+  }
+
+  function handleRemoveNotification(id: string): void {
+    removeNotification(id);
+    removeNotificationMutation.mutate(id);
+  }
+
+  function handleClearNotifications(): void {
+    clearNotifications();
+    clearNotificationsMutation.mutate();
+  }
+
   return (
     <div className="min-h-screen bg-surface text-ink">
       <Toaster position="top-right" />
-      <aside className={`fixed inset-y-0 left-0 z-20 border-r border-border bg-white/95 text-slate-800 shadow-[0_1px_2px_rgba(16,24,40,0.04)] backdrop-blur dark:bg-slate-950/95 dark:text-slate-100 ${sidebarWidth}`}>
+      <aside className={`fixed inset-y-0 left-0 z-20 hidden border-r border-border bg-white/95 text-slate-800 shadow-[0_1px_2px_rgba(16,24,40,0.04)] backdrop-blur dark:bg-slate-950/95 dark:text-slate-100 md:block ${sidebarWidth}`}>
         <div className="flex h-16 items-center justify-center border-b border-border px-2 md:justify-between md:px-4">
           {!collapsed && <div className="hidden items-center gap-3 md:flex"><img src={flowlyraMark} alt="FlowLyra logo" className="h-9 w-9 rounded-xl" /><span className="font-extrabold tracking-tight">FlowLyra</span></div>}
           <button aria-label="Toggle navigation" className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white" onClick={() => setCollapsed((value) => !value)}>
@@ -181,9 +248,46 @@ export function AgentLayout(): JSX.Element {
           <div className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">AI suggestions stay private to agents.</div>
         </div>}
       </aside>
+      {mobileNavOpen ? (
+        <div className="fixed inset-0 z-40 md:hidden">
+          <button type="button" className="absolute inset-0 bg-slate-900/50" aria-label="Close navigation drawer" onClick={() => setMobileNavOpen(false)} />
+          <aside className="absolute inset-y-0 left-0 w-72 border-r border-border bg-white text-slate-800 shadow-2xl dark:bg-slate-950 dark:text-slate-100">
+            <div className="flex h-16 items-center justify-between border-b border-border px-4">
+              <div className="flex items-center gap-3"><img src={flowlyraMark} alt="FlowLyra logo" className="h-9 w-9 rounded-xl" /><span className="font-extrabold tracking-tight">FlowLyra</span></div>
+              <button aria-label="Close navigation" className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white" onClick={() => setMobileNavOpen(false)}><X size={18} /></button>
+            </div>
+            <nav className="grid gap-4 p-3">
+              {nav.map((group) => (
+                <div key={group.section} className="grid gap-1">
+                  <div className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{group.section}</div>
+                  {group.items.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <NavLink
+                        key={item.to}
+                        to={item.to}
+                        onClick={() => setMobileNavOpen(false)}
+                        className={({ isActive }) =>
+                          `flex h-10 items-center gap-3 rounded-xl px-3 text-sm font-bold ${isActive ? "bg-slate-950 text-white shadow-sm dark:bg-white dark:text-slate-950" : "text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"}`
+                        }
+                      >
+                        <Icon size={18} className="shrink-0" />
+                        <span>{item.label}</span>
+                      </NavLink>
+                    );
+                  })}
+                </div>
+              ))}
+            </nav>
+          </aside>
+        </div>
+      ) : null}
       <div className={contentOffset}>
         <header className="sticky top-0 z-10 flex h-16 min-w-0 items-center justify-between gap-3 border-b border-border bg-white/85 px-3 shadow-sm backdrop-blur-xl sm:px-5 dark:bg-slate-950/85">
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+            <button aria-label="Open navigation drawer" className="rounded-xl border border-border bg-white p-2 text-slate-700 shadow-sm hover:bg-slate-50 focus-ring md:hidden dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800" onClick={() => setMobileNavOpen(true)}>
+              <Menu size={18} />
+            </button>
             <label className="hidden min-w-[220px] items-center gap-2 rounded-xl border border-border bg-slate-50 px-3 py-2 text-sm text-slate-500 md:flex lg:min-w-[320px] dark:bg-slate-900 dark:text-slate-400">
               <Search size={16} />
               <input
@@ -209,8 +313,9 @@ export function AgentLayout(): JSX.Element {
                 aria-label="Notifications"
                 aria-expanded={notificationsOpen}
                 onClick={() => {
-                  setNotificationsOpen((value) => !value);
-                  markAllRead();
+                  const nextOpen = !notificationsOpen;
+                  setNotificationsOpen(nextOpen);
+                  if (nextOpen) handleMarkAllRead();
                 }}
               >
                 <Bell size={18} />
@@ -220,8 +325,8 @@ export function AgentLayout(): JSX.Element {
                 <NotificationCenter
                   notifications={notifications}
                   onClose={() => setNotificationsOpen(false)}
-                  onClear={clearNotifications}
-                  onRemove={removeNotification}
+                  onClear={handleClearNotifications}
+                  onRemove={handleRemoveNotification}
                 />
               )}
             </div>

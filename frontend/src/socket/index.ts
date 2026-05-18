@@ -13,9 +13,13 @@ let onRealtimeUpdate: (() => void) | null = null;
 const recentNotificationKeys = new Map<string, number>();
 
 interface ServerNotificationPayload {
+  id?: string;
+  kind?: string;
   title: string;
   body: string;
   level?: "info" | "warning" | "urgent";
+  priority?: "low" | "normal" | "high" | "urgent";
+  link_url?: string;
   chat_id?: string;
 }
 
@@ -55,9 +59,11 @@ function registerListeners(instance: Socket): void {
       playIncomingChatSound();
       const chat = useChatStore.getState().chats[message.chat_id];
       useNotificationStore.getState().addNotification({
+        kind: "chat.new_message",
         title: chat?.visitor_name || chat?.visitor_email || "New visitor message",
         body: message.content ?? "New message from widget",
-        level: "info"
+        level: "info",
+        linkUrl: `/inbox/chat/${message.chat_id}`,
       });
       if (activeChatId !== message.chat_id) toast("New message in inbox");
     }
@@ -78,7 +84,13 @@ function registerListeners(instance: Socket): void {
     if (payload.message) useChatStore.getState().addMessage(payload.message);
     rememberNotification(`chat:${payload.chat.id}`);
     if (payload.message) rememberNotification(`message:${payload.message.id}`);
-    useNotificationStore.getState().addNotification({ title: "New chat", body: payload.message?.content ?? payload.chat.subject ?? "Waiting in queue", level: "info" });
+    useNotificationStore.getState().addNotification({
+      kind: "chat.new",
+      title: "New chat",
+      body: payload.message?.content ?? payload.chat.subject ?? "Waiting in queue",
+      level: "info",
+      linkUrl: `/inbox/chat/${payload.chat.id}`,
+    });
     playIncomingChatSound();
     toast("New chat assigned");
     onRealtimeUpdate?.();
@@ -96,7 +108,14 @@ function registerListeners(instance: Socket): void {
     const key = payload.chat_id ? `chat:${payload.chat_id}` : `${payload.title}:${payload.body}`;
     if (wasRecentlyNotified(key)) return;
     rememberNotification(key);
-    useNotificationStore.getState().addNotification({ title: payload.title, body: payload.body, level: payload.level ?? "info" });
+    useNotificationStore.getState().addNotification({
+      id: payload.id,
+      kind: payload.kind,
+      title: payload.title,
+      body: payload.body,
+      level: payload.level ?? (payload.priority === "urgent" ? "urgent" : payload.priority === "high" ? "warning" : "info"),
+      linkUrl: payload.link_url ?? (payload.chat_id ? `/inbox/chat/${payload.chat_id}` : null),
+    });
     playIncomingChatSound();
   });
   instance.on("sla:breach", () => toast.error("SLA breach"));

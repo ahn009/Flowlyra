@@ -21,6 +21,7 @@ redis==5.0.8
 sendgrid==6.11.0
 SQLAlchemy==2.0.31
 uvicorn[standard]==0.30.5
+pywebpush==2.0.3
 pyotp==2.9.0
 qrcode[pil]==7.4.2
 python3-saml==1.16.0

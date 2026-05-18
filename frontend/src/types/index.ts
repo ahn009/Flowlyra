@@ -83,8 +83,11 @@ export interface Ticket {
 
 export interface Notification {
   id: string;
+  kind?: string;
   title: string;
   body: string;
+  linkUrl?: string | null;
   level: "info" | "warning" | "urgent";
   createdAt: string;
+  isRead?: boolean;
 }

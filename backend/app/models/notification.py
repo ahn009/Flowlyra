@@ -24,6 +24,7 @@ class Notification(UUIDPkMixin, Base):
     meta: Mapped[JsonDict] = mapped_column(JSONB, default=dict)
     is_read: Mapped[bool] = mapped_column(Boolean, default=False)
     read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    email_digest_sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 

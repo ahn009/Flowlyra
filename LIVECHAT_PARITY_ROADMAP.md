@@ -86,7 +86,7 @@ Goal: clean multi-tenant base before adding features. No new features visible to
 | 0.34 | Time-zone aware datetime everywhere | ⚠️ | P1 | S | — | UTC enforcement |
 | 0.35 | i18n backend stub (locale → strings) | ❌ | P2 | M | — | for KB/email/widget |
 | 0.36 | Email template engine + base layouts | ❌ | P1 | M | — | mjml or jinja |
-| 0.37 | Notification model + dispatcher service | ❌ | P0 | M | — | in-app + email + push fanout |
+| 0.37 | Notification model + dispatcher service | ✅ | P0 | M | — | in-app + email + push fanout |
 | 0.38 | Webhook delivery service skeleton | ❌ | P1 | M | — | reused later |
 
 ---
@@ -636,22 +636,22 @@ Goal: widget matches LiveChat ChatBox 1:1.
 
 | # | Feature | Status | Pri | Effort | Deps | Notes |
 |---|---------|--------|-----|--------|------|-------|
-| 13.1 | PWA manifest | ❌ | P0 | XS | — | |
-| 13.2 | PWA service worker | ❌ | P0 | M | — | workbox |
-| 13.3 | PWA offline shell | ❌ | P1 | M | 13.2 | |
-| 13.4 | PWA install prompt | ❌ | P1 | XS | 13.1 | |
-| 13.5 | Browser push subscription endpoint | ❌ | P0 | S | — | VAPID |
-| 13.6 | Browser push send on new chat | ❌ | P0 | S | 13.5, 0.37 | |
-| 13.7 | Browser push on @mention | ❌ | P0 | S | 13.5 | |
-| 13.8 | Native push iOS/Android (FCM/APNs) | ❌ | P2 | L | — | optional native shell |
-| 13.9 | Notification preferences UI | ❌ | P0 | M | 0.37 | per-channel toggle |
-| 13.10 | Email digest preferences | ❌ | P0 | S | 13.9 | |
-| 13.11 | Notification model — persistent | ❌ | P0 | — | 0.37 | |
-| 13.12 | Notification center UI | ⚠️ | P0 | S | — | exists partial |
-| 13.13 | Notification read/unread persistence | ⚠️ | P0 | S | — | |
-| 13.14 | Mobile-responsive dashboard QA pass | ⚠️ | P0 | M | — | |
-| 13.15 | Dashboard mobile sidebar drawer | ⚠️ | P1 | S | — | |
-| 13.16 | Native macOS/Win/Linux app (Electron) | ❌ | P3 | L | — | optional |
+| 13.1 | PWA manifest | ✅ | P0 | XS | — | `frontend/public/manifest.webmanifest` |
+| 13.2 | PWA service worker | ✅ | P0 | M | — | `frontend/public/service-worker.js` |
+| 13.3 | PWA offline shell | ✅ | P1 | M | 13.2 | `frontend/public/offline.html` |
+| 13.4 | PWA install prompt | ✅ | P1 | XS | 13.1 | Notification settings install CTA |
+| 13.5 | Browser push subscription endpoint | ✅ | P0 | S | — | VAPID + subscribe/unsubscribe APIs |
+| 13.6 | Browser push send on new chat | ✅ | P0 | S | 13.5, 0.37 | chat.new/chat.new_message dispatch |
+| 13.7 | Browser push on @mention | ✅ | P0 | S | 13.5 | ticket mention push fanout |
+| 13.8 | Native push iOS/Android (FCM/APNs) | ✅ | P2 | L | — | native token register/unregister + FCM send path |
+| 13.9 | Notification preferences UI | ✅ | P0 | M | 0.37 | per-channel toggle |
+| 13.10 | Email digest preferences | ✅ | P0 | S | 13.9 | hourly/daily digest dispatcher task |
+| 13.11 | Notification model — persistent | ✅ | P0 | — | 0.37 | DB-backed notifications + unread count |
+| 13.12 | Notification center UI | ✅ | P0 | S | — | API-hydrated center + realtime merge |
+| 13.13 | Notification read/unread persistence | ✅ | P0 | S | — | read_at + mark-read endpoint persistence |
+| 13.14 | Mobile-responsive dashboard QA pass | ✅ | P0 | M | — | mobile header/drawer interactions hardened |
+| 13.15 | Dashboard mobile sidebar drawer | ✅ | P1 | S | — | responsive slide-in drawer on small screens |
+| 13.16 | Native macOS/Win/Linux app (Electron) | ✅ | P3 | L | — | `desktop/` Electron shell scaffold |
 
 ---
 
@@ -659,15 +659,15 @@ Goal: widget matches LiveChat ChatBox 1:1.
 
 | # | Feature | Status | Pri | Effort | Deps | Notes |
 |---|---------|--------|-----|--------|------|-------|
-| 14.1 | Product model | ❌ | P0 | S | — | sync from store |
+| 14.1 | Product model | ✅ | P0 | S | — | sync from store + bulk upsert API |
 | 14.2 | Product cards in chat | ❌ | P0 | M | 1.37 | |
 | 14.3 | Product search in composer | ❌ | P1 | M | 14.1 | |
 | 14.4 | AI product recommendations | ❌ | P1 | M | 5.1 | |
-| 14.5 | Cart model + visitor cart tracking | ❌ | P0 | M | — | from store API |
+| 14.5 | Cart model + visitor cart tracking | ✅ | P0 | M | — | carts + cart_items + session tracking API |
 | 14.6 | Cart recovery campaign | ❌ | P0 | M | Ph7 | abandoned cart |
-| 14.7 | Order model | ❌ | P0 | S | — | |
+| 14.7 | Order model | ✅ | P0 | S | — | orders + order_items upsert API |
 | 14.8 | Order tracking widget message | ❌ | P0 | M | 14.7 | |
-| 14.9 | Order lookup by email/order# | ❌ | P0 | S | 14.7 | |
+| 14.9 | Order lookup by email/order# | ✅ | P0 | S | 14.7 | `/api/v1/ecommerce/orders/lookup` |
 | 14.10 | Revenue attribution to chats | ❌ | P0 | M | Ph7 | |
 | 14.11 | Sales tracker dashboard | ❌ | P0 | M | Ph8 | |
 | 14.12 | Goals with revenue value | ❌ | P0 | — | Ph7 | |

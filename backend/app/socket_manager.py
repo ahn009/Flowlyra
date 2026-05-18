@@ -15,6 +15,7 @@ from app.models.message import Message
 from app.models.session import Session
 from app.models.user import User
 from app.services.chat_service import add_message, get_chat, start_chat
+from app.services.notification_service import notify
 from app.services.webhook_events import CHAT_RESOLVED
 from app.services.webhook_service import dispatch_event
 
@@ -29,6 +30,21 @@ async def emit_error(sid: str, message: str) -> None:
 
 def _to_uuid(value: object) -> uuid.UUID:
     return uuid.UUID(str(value))
+
+
+async def _notification_recipients_for_chat(db, chat: Chat) -> list[uuid.UUID]:
+    if chat.assigned_user_id:
+        return [chat.assigned_user_id]
+    rows = (
+        await db.execute(
+            select(User.id).where(
+                User.organization_id == chat.organization_id,
+                User.is_active.is_(True),
+                User.role.in_(["agent", "supervisor", "admin", "owner"]),
+            )
+        )
+    ).scalars().all()
+    return list(rows)
 
 
 async def _chat_for_session(db, session: dict, chat_id: uuid.UUID) -> Chat:
@@ -153,6 +169,19 @@ async def chat_start(sid: str, data: dict) -> None:
                 },
                 room=f"org:{chat.organization_id}",
             )
+            recipients = await _notification_recipients_for_chat(db, chat)
+            for recipient_id in recipients:
+                await notify(
+                    organization_id=chat.organization_id,
+                    user_id=recipient_id,
+                    kind="chat.new",
+                    title="New incoming chat",
+                    body=(message.content if message and message.content else chat.subject) or "A visitor started a chat",
+                    link_url=f"/inbox/chat/{chat.id}",
+                    via_push=True,
+                    db=db,
+                )
+            await db.commit()
             await sio.emit("analytics:update", {"organization_id": str(chat.organization_id)}, room=f"org:{chat.organization_id}")
             if chat.assigned_user_id and message:
                 from app.workers.ai_worker import get_agent_suggestions
@@ -221,6 +250,19 @@ async def chat_message(sid: str, data: dict) -> None:
                         },
                         room=f"org:{chat.organization_id}",
                     )
+                    recipients = await _notification_recipients_for_chat(db, chat)
+                    for recipient_id in recipients:
+                        await notify(
+                            organization_id=chat.organization_id,
+                            user_id=recipient_id,
+                            kind="chat.new_message",
+                            title="New visitor message",
+                            body=(message.content or "Visitor sent a new message")[:180],
+                            link_url=f"/inbox/chat/{chat.id}",
+                            via_push=True,
+                            db=db,
+                        )
+                    await db.commit()
             elif chat.assigned_user_id:
                 await sio.emit("chat:message:new", _message_payload(message), room=f"agent:{chat.assigned_user_id}")
             if sender_type == "customer" and chat.assigned_user_id:

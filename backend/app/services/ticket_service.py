@@ -364,6 +364,7 @@ async def add_comment(
             title=f"You were mentioned on ticket #{ticket.ticket_number}",
             body=content[:240],
             link_url=f"/ticket/{ticket.id}",
+            via_push=True,
             db=db,
         )
 

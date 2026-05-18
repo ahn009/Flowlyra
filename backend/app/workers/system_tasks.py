@@ -14,7 +14,7 @@ from app.models.user import User
 from app.models.webhook import WebhookDelivery
 from app.models.report_schedule import ReportSchedule
 from app.services.email_service import send_email
-from app.services.notification_service import notify
+from app.services.notification_service import dispatch_due_email_digests, notify
 from app.workers.celery_app import celery_app
 
 logger = logging.getLogger(__name__)
@@ -134,6 +134,17 @@ def publish_scheduled_kb_articles() -> dict[str, int]:
 
     promoted = asyncio.run(_run())
     return {"promoted": promoted}
+
+
+@celery_app.task(name="app.workers.system_tasks.dispatch_notification_digests")
+def dispatch_notification_digests() -> dict[str, int]:
+    async def _run() -> dict[str, int]:
+        async with AsyncSessionLocal() as db:
+            hourly = await dispatch_due_email_digests(db, "hourly")
+            daily = await dispatch_due_email_digests(db, "daily")
+            return {"hourly": hourly, "daily": daily}
+
+    return asyncio.run(_run())
 
 
 @celery_app.task(name="app.workers.system_tasks.dispatch_scheduled_reports")
