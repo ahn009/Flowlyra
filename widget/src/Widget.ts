@@ -701,6 +701,23 @@ export class Widget implements FlowLyraInstance {
       // Optimistic: queue locally; chat:started will trigger join + flush. For now, just push to panel.
       return;
     }
+    const normalized = text.trim().toLowerCase();
+    if (normalized.startsWith("/catalog")) {
+      const query = text.trim().slice("/catalog".length).trim();
+      void this.sendCatalogCards(query);
+      return;
+    }
+    if (normalized.startsWith("/order")) {
+      const orderNumber = text.trim().slice("/order".length).replace("#", "").trim();
+      if (orderNumber) {
+        void this.sendOrderTrackingCard(orderNumber);
+        return;
+      }
+    }
+    if (normalized.includes("checkout help") || normalized.includes("assist checkout")) {
+      void this.sendCheckoutAssistMessage();
+      return;
+    }
     const optimisticId = `opt-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     this.panel?.addMessage({
       id: optimisticId,
@@ -720,6 +737,121 @@ export class Widget implements FlowLyraInstance {
         this.panel?.markFailed(optimisticId);
       }
     }, 8000);
+  }
+
+  private async sendCatalogCards(query: string): Promise<void> {
+    if (!this.initData || !this.chatId) return;
+    const response = await fetch(`${this.apiUrl}/api/v1/widget/catalog`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        org_slug: this.orgSlug,
+        session_token: this.initData.session_token,
+        query: query || null,
+        limit: 6,
+      }),
+    });
+    if (!response.ok) {
+      this.panel?.addMessage({
+        id: `local-${Date.now()}`,
+        chat_id: this.chatId,
+        sender_type: "system",
+        content: "Could not load catalog right now.",
+        content_type: "text",
+        is_internal: false,
+        created_at: new Date().toISOString(),
+      });
+      return;
+    }
+    const payload = (await response.json()) as { items?: Array<{ name: string; description?: string; price?: number; currency?: string; image_url?: string; product_url?: string }> };
+    const items = payload.items ?? [];
+    if (!items.length) {
+      this.panel?.addMessage({
+        id: `local-${Date.now()}`,
+        chat_id: this.chatId,
+        sender_type: "system",
+        content: "No catalog items found.",
+        content_type: "text",
+        is_internal: false,
+        created_at: new Date().toISOString(),
+      });
+      return;
+    }
+    for (const item of items) {
+      this.panel?.addMessage({
+        id: `local-product-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        chat_id: this.chatId,
+        sender_type: "system",
+        content: JSON.stringify(item),
+        content_type: "product_card",
+        is_internal: false,
+        created_at: new Date().toISOString(),
+      });
+    }
+  }
+
+  private async sendOrderTrackingCard(orderNumber: string): Promise<void> {
+    if (!this.initData || !this.chatId) return;
+    const response = await fetch(`${this.apiUrl}/api/v1/widget/orders/lookup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        org_slug: this.orgSlug,
+        session_token: this.initData.session_token,
+        order_number: orderNumber,
+        limit: 1,
+      }),
+    });
+    if (!response.ok) return;
+    const payload = (await response.json()) as { items?: Array<{ order_number: string; status: string; total: number; currency: string; placed_at?: string; fulfilled_at?: string; cancelled_at?: string }> };
+    const row = payload.items?.[0];
+    if (!row) {
+      this.panel?.addMessage({
+        id: `local-order-${Date.now()}`,
+        chat_id: this.chatId,
+        sender_type: "system",
+        content: "Order not found. Please verify the order number.",
+        content_type: "text",
+        is_internal: false,
+        created_at: new Date().toISOString(),
+      });
+      return;
+    }
+    this.panel?.addMessage({
+      id: `local-order-${Date.now()}`,
+      chat_id: this.chatId,
+      sender_type: "system",
+      content: JSON.stringify(row),
+      content_type: "order_tracking",
+      is_internal: false,
+      created_at: new Date().toISOString(),
+    });
+  }
+
+  private async sendCheckoutAssistMessage(): Promise<void> {
+    if (!this.initData || !this.chatId) return;
+    const response = await fetch(`${this.apiUrl}/api/v1/widget/checkout-assist`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        org_slug: this.orgSlug,
+        session_token: this.initData.session_token,
+      }),
+    });
+    if (!response.ok) return;
+    const payload = (await response.json()) as { message?: string; quick_replies?: Array<{ label: string; payload?: string }> };
+    this.panel?.addMessage({
+      id: `local-assist-${Date.now()}`,
+      chat_id: this.chatId,
+      sender_type: "system",
+      content: payload.message || "Checkout assist is active.",
+      content_type: "text",
+      is_internal: false,
+      created_at: new Date().toISOString(),
+      metadata: {
+        quick_replies: payload.quick_replies ?? [],
+      },
+    });
   }
 
   private async uploadAndSendFile(file: File): Promise<void> {

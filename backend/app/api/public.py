@@ -3,13 +3,14 @@ import json
 import secrets
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings
 from app.db.redis import get_redis, ns
 from app.db.session import get_db
+from app.models.analytics_event import AnalyticsEvent
 from app.models.contact import Contact
 from app.models.organization import Organization
 from app.models.ticket import Ticket, TicketComment, TicketPortalToken
@@ -19,6 +20,15 @@ from app.services.email_service import send_email
 from app.services.ticket_service import create_ticket, log_ticket_activity
 
 router = APIRouter(prefix="/public", tags=["public"])
+PIXEL_GIF = (
+    b"GIF89a"
+    b"\x01\x00\x01\x00"
+    b"\x80\x00\x00"
+    b"\x00\x00\x00\xff\xff\xff"
+    b"!\xf9\x04\x01\x00\x00\x00\x00"
+    b",\x00\x00\x00\x00\x01\x00\x01\x00\x00"
+    b"\x02\x02D\x01\x00;"
+)
 
 
 @router.post("/contact")
@@ -40,6 +50,35 @@ async def contact(payload: ContactRequest) -> dict:
 @router.get("/client-ip")
 async def client_ip(request: Request) -> dict:
     return {"ip": request.client.host if request.client else None}
+
+
+@router.get("/pixel.gif")
+async def conversion_pixel(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    org_slug: str | None = None,
+    event: str = "conversion.pixel",
+    value: float | None = None,
+    chat_id: str | None = None,
+    campaign_id: str | None = None,
+) -> Response:
+    if org_slug:
+        org = (
+            await db.execute(select(Organization).where(Organization.slug == org_slug, Organization.is_active.is_(True)))
+        ).scalar_one_or_none()
+        if org is not None:
+            metadata = {
+                "value": value,
+                "chat_id": chat_id,
+                "campaign_id": campaign_id,
+                "url": str(request.url),
+                "referer": request.headers.get("referer"),
+                "user_agent": request.headers.get("user-agent"),
+                "ip": request.client.host if request.client else None,
+            }
+            db.add(AnalyticsEvent(organization_id=org.id, event_type=event, metadata_=metadata))
+            await db.commit()
+    return Response(content=PIXEL_GIF, media_type="image/gif", headers={"Cache-Control": "no-store"})
 
 
 @router.post("/tickets/inbound-email")

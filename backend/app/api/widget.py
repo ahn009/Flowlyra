@@ -17,6 +17,7 @@ from app.models.contact import Contact
 from app.models.engage import Goal, GoalAchievement
 from app.models.message import Message
 from app.models.organization import Organization
+from app.models.ecommerce import Order
 from app.models.proactive_trigger import ProactiveTrigger
 from app.models.product import Product
 from app.models.session import Session
@@ -32,8 +33,12 @@ from app.schemas.widget import (
     WidgetMagicLinkConsumeRequest,
     WidgetMagicLinkRequest,
     WidgetKbSuggestRequest,
+    WidgetCatalogRequest,
+    WidgetCheckoutAssistRequest,
     WidgetOfflineRequest,
+    WidgetOrderLookupRequest,
     WidgetPageViewRequest,
+    WidgetPriceFormatRequest,
     WidgetProductSearchRequest,
     WidgetTrackEventRequest,
 )
@@ -42,6 +47,7 @@ from app.services.email_service import send_email
 from app.services import magic_link
 from app.services.offline_ticket import create_from_offline_form
 from app.services.operating_hours import is_open, next_open_at
+from app.services.sales_service import contact_scores
 from app.services.webhook_events import CONTACT_CREATED, CONTACT_UPDATED, GOAL_ACHIEVED, VISITOR_IDENTIFIED
 from app.services.webhook_service import dispatch_event
 from app.services.widget_i18n import catalog as widget_catalog, normalize as normalize_locale
@@ -600,6 +606,117 @@ async def search_products(payload: WidgetProductSearchRequest, db: AsyncSession 
             }
             for p in rows
         ]
+    }
+
+
+@router.post("/catalog")
+async def browse_catalog(payload: WidgetCatalogRequest, db: AsyncSession = Depends(get_db)) -> dict:
+    org = await _get_org(db, payload.org_slug)
+    session = await _get_session_or_404(db, org.id, payload.session_token)
+    stmt = select(Product).where(Product.organization_id == org.id, Product.is_active.is_(True))
+    if payload.query:
+        like = f"%{payload.query.lower()}%"
+        stmt = stmt.where(or_(Product.name.ilike(like), Product.description.ilike(like), Product.sku.ilike(like), Product.category.ilike(like)))
+    if payload.category:
+        stmt = stmt.where(Product.category.ilike(payload.category.strip()))
+    if payload.cursor:
+        try:
+            cursor_dt = datetime.fromisoformat(payload.cursor)
+            stmt = stmt.where(Product.updated_at < cursor_dt)
+        except ValueError:
+            pass
+    rows = (await db.execute(stmt.order_by(Product.updated_at.desc()).limit(payload.limit))).scalars().all()
+    next_cursor = rows[-1].updated_at.isoformat() if rows and rows[-1].updated_at else None
+    return {
+        "items": [
+            {
+                "id": str(p.id),
+                "sku": p.sku,
+                "name": p.name,
+                "description": p.description,
+                "price": float(p.price) if p.price is not None else None,
+                "currency": p.currency,
+                "image_url": p.image_url,
+                "product_url": p.product_url,
+                "category": p.category,
+                "brand": p.brand,
+                "inventory": p.inventory,
+                "is_in_stock": p.is_in_stock,
+            }
+            for p in rows
+        ],
+        "next_cursor": next_cursor,
+        "session_id": str(session.id),
+    }
+
+
+@router.post("/orders/lookup")
+async def widget_order_lookup(payload: WidgetOrderLookupRequest, db: AsyncSession = Depends(get_db)) -> dict:
+    org = await _get_org(db, payload.org_slug)
+    session = await _get_session_or_404(db, org.id, payload.session_token)
+
+    lookup_email = payload.email
+    if lookup_email is None and session.contact_id:
+        contact = (await db.execute(select(Contact).where(Contact.id == session.contact_id, Contact.organization_id == org.id))).scalar_one_or_none()
+        if contact and contact.email:
+            lookup_email = contact.email
+
+    stmt = select(Order).where(Order.organization_id == org.id)
+    if payload.order_number:
+        stmt = stmt.where(Order.order_number == payload.order_number)
+    elif lookup_email:
+        stmt = stmt.where(Order.email == lookup_email)
+    else:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="order_number or email required")
+
+    rows = (await db.execute(stmt.order_by(Order.placed_at.desc().nullslast(), Order.created_at.desc()).limit(payload.limit))).scalars().all()
+    return {
+        "items": [
+            {
+                "order_number": row.order_number,
+                "status": row.status,
+                "currency": row.currency,
+                "total": float(row.total or 0),
+                "placed_at": row.placed_at.isoformat() if row.placed_at else None,
+                "fulfilled_at": row.fulfilled_at.isoformat() if row.fulfilled_at else None,
+                "cancelled_at": row.cancelled_at.isoformat() if row.cancelled_at else None,
+            }
+            for row in rows
+        ],
+        "email": lookup_email,
+    }
+
+
+@router.post("/checkout-assist")
+async def widget_checkout_assist(payload: WidgetCheckoutAssistRequest, db: AsyncSession = Depends(get_db)) -> dict:
+    org = await _get_org(db, payload.org_slug)
+    session = await _get_session_or_404(db, org.id, payload.session_token)
+    score_payload = {"lead_score": 0.0, "churn_risk": 0.0, "reasons": []}
+    if session.contact_id:
+        score_payload = await contact_scores(db, organization_id=org.id, contact_id=session.contact_id)
+    return {
+        "ok": True,
+        "message": "Checkout assist is available. Ask about shipping, payment methods, returns, or coupons.",
+        "quick_replies": [
+            {"label": "Shipping options", "payload": "What shipping options do you have?"},
+            {"label": "Payment methods", "payload": "Which payment methods do you accept?"},
+            {"label": "Apply coupon", "payload": "How can I apply my coupon code?"},
+            {"label": "Track my order", "payload": "Track order"},
+        ],
+        "lead_score": score_payload.get("lead_score"),
+    }
+
+
+@router.post("/currency/format")
+async def widget_currency_format(payload: WidgetPriceFormatRequest, db: AsyncSession = Depends(get_db)) -> dict:
+    org = await _get_org(db, payload.org_slug)
+    session = await _get_session_or_404(db, org.id, payload.session_token)
+    locale = payload.locale or session.locale or org.widget_default_locale or "en"
+    return {
+        "formatted": f"{payload.currency.upper()} {payload.amount:,.2f}",
+        "currency": payload.currency.upper(),
+        "amount": payload.amount,
+        "locale": locale,
     }
 
 

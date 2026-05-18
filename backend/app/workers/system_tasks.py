@@ -13,6 +13,7 @@ from app.models.ticket import Ticket, TicketFollower
 from app.models.user import User
 from app.models.webhook import WebhookDelivery
 from app.models.report_schedule import ReportSchedule
+from app.models.ecommerce import Cart
 from app.services.email_service import send_email
 from app.services.notification_service import dispatch_due_email_digests, notify
 from app.workers.celery_app import celery_app
@@ -143,6 +144,30 @@ def dispatch_notification_digests() -> dict[str, int]:
             hourly = await dispatch_due_email_digests(db, "hourly")
             daily = await dispatch_due_email_digests(db, "daily")
             return {"hourly": hourly, "daily": daily}
+
+    return asyncio.run(_run())
+
+
+@celery_app.task(name="app.workers.system_tasks.run_cart_recovery_campaigns")
+def run_cart_recovery_campaigns(inactive_minutes: int = 60) -> dict[str, int]:
+    async def _run() -> dict[str, int]:
+        cutoff = datetime.now(UTC) - timedelta(minutes=max(5, inactive_minutes))
+        async with AsyncSessionLocal() as db:
+            rows = (
+                await db.execute(
+                    select(Cart).where(
+                        Cart.status == "active",
+                        Cart.last_activity_at <= cutoff,
+                        Cart.total > 0,
+                    )
+                )
+            ).scalars().all()
+            changed = 0
+            for row in rows:
+                row.status = "abandoned"
+                changed += 1
+            await db.commit()
+            return {"abandoned": changed}
 
     return asyncio.run(_run())
 

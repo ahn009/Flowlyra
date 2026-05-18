@@ -660,27 +660,27 @@ Goal: widget matches LiveChat ChatBox 1:1.
 | # | Feature | Status | Pri | Effort | Deps | Notes |
 |---|---------|--------|-----|--------|------|-------|
 | 14.1 | Product model | ✅ | P0 | S | — | sync from store + bulk upsert API |
-| 14.2 | Product cards in chat | ❌ | P0 | M | 1.37 | |
-| 14.3 | Product search in composer | ❌ | P1 | M | 14.1 | |
-| 14.4 | AI product recommendations | ❌ | P1 | M | 5.1 | |
+| 14.2 | Product cards in chat | ✅ | P0 | M | 1.37 | |
+| 14.3 | Product search in composer | ✅ | P1 | M | 14.1 | |
+| 14.4 | AI product recommendations | ✅ | P1 | M | 5.1 | |
 | 14.5 | Cart model + visitor cart tracking | ✅ | P0 | M | — | carts + cart_items + session tracking API |
-| 14.6 | Cart recovery campaign | ❌ | P0 | M | Ph7 | abandoned cart |
+| 14.6 | Cart recovery campaign | ✅ | P0 | M | Ph7 | abandoned cart |
 | 14.7 | Order model | ✅ | P0 | S | — | orders + order_items upsert API |
-| 14.8 | Order tracking widget message | ❌ | P0 | M | 14.7 | |
+| 14.8 | Order tracking widget message | ✅ | P0 | M | 14.7 | |
 | 14.9 | Order lookup by email/order# | ✅ | P0 | S | 14.7 | `/api/v1/ecommerce/orders/lookup` |
-| 14.10 | Revenue attribution to chats | ❌ | P0 | M | Ph7 | |
-| 14.11 | Sales tracker dashboard | ❌ | P0 | M | Ph8 | |
-| 14.12 | Goals with revenue value | ❌ | P0 | — | Ph7 | |
-| 14.13 | Conversion tracking pixel/event | ❌ | P0 | S | 7.32 | |
-| 14.14 | Coupon delivery in chat | ❌ | P1 | S | — | |
-| 14.15 | Customer LTV display | ❌ | P1 | S | 14.7 | |
-| 14.16 | Customer churn risk score | ❌ | P2 | M | 5.16 | |
-| 14.17 | Lead score | ❌ | P1 | M | — | |
-| 14.18 | Lead → CRM push | ❌ | P1 | — | 10.10/11 | |
-| 14.19 | Upsell trigger | ❌ | P2 | M | Ph7 | |
-| 14.20 | Catalog browse in widget | ❌ | P2 | M | 14.1 | |
-| 14.21 | Checkout assist mode | ❌ | P2 | M | 14.5 | |
-| 14.22 | Currency formatting per visitor | ❌ | P2 | XS | — | |
+| 14.10 | Revenue attribution to chats | ✅ | P0 | M | Ph7 | |
+| 14.11 | Sales tracker dashboard | ✅ | P0 | M | Ph8 | |
+| 14.12 | Goals with revenue value | ✅ | P0 | — | Ph7 | |
+| 14.13 | Conversion tracking pixel/event | ✅ | P0 | S | 7.32 | |
+| 14.14 | Coupon delivery in chat | ✅ | P1 | S | — | |
+| 14.15 | Customer LTV display | ✅ | P1 | S | 14.7 | |
+| 14.16 | Customer churn risk score | ✅ | P2 | M | 5.16 | |
+| 14.17 | Lead score | ✅ | P1 | M | — | |
+| 14.18 | Lead → CRM push | ✅ | P1 | — | 10.10/11 | |
+| 14.19 | Upsell trigger | ✅ | P2 | M | Ph7 | |
+| 14.20 | Catalog browse in widget | ✅ | P2 | M | 14.1 | |
+| 14.21 | Checkout assist mode | ✅ | P2 | M | 14.5 | |
+| 14.22 | Currency formatting per visitor | ✅ | P2 | XS | — | |
 
 ---
 
@@ -760,9 +760,9 @@ Reference for what new tables/models appear across phases:
 - [ ] IpAllowlist (12.9)
 - [ ] DeviceSession (12.10)
 - [ ] PushSubscription (13.5)
-- [ ] Product (14.1)
-- [ ] Cart (14.5)
-- [ ] Order (14.7)
+- [x] Product (14.1)
+- [x] Cart (14.5)
+- [x] Order (14.7)
 
 ---
 

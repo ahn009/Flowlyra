@@ -20,6 +20,7 @@ import {
   MapPin,
   MoreHorizontal,
   Paperclip,
+  Search,
   Pin,
   Plus,
   ScreenShare,
@@ -61,7 +62,16 @@ interface ChatDetail extends Chat {
   } | null;
   past_chats?: Array<{ id: string; subject?: string | null; status: string; updated_at?: string | null }>;
   tickets?: Array<{ id: string; ticket_number: number; subject: string; status: string; priority: string; updated_at?: string | null }>;
-  ecommerce?: { lifetime_value?: string | number | null; orders?: string | number | null; last_order?: string | null } | null;
+  ecommerce?: {
+    lifetime_value?: string | number | null;
+    orders?: string | number | null;
+    last_order?: string | null;
+    attributed_revenue?: string | number | null;
+    refunded_revenue?: string | number | null;
+    net_revenue?: string | number | null;
+    lead_score?: string | number | null;
+    churn_risk?: string | number | null;
+  } | null;
 }
 
 interface CannedResponse {
@@ -70,6 +80,19 @@ interface CannedResponse {
   title: string;
   content: string;
   use_count?: number;
+}
+
+interface ProductCatalogItem {
+  id: string;
+  sku?: string | null;
+  name: string;
+  description?: string | null;
+  price?: number | null;
+  currency?: string | null;
+  image_url?: string | null;
+  product_url?: string | null;
+  category?: string | null;
+  brand?: string | null;
 }
 
 const QUICK_EMOJIS = ["👍", "✅", "🙏", "🙂", "🔥", "🎉"];
@@ -92,6 +115,12 @@ export function ChatPage(): JSX.Element {
   const [snoozeMinutes, setSnoozeMinutes] = useState(30);
   const [copilotOpen, setCopilotOpen] = useState(false);
   const [ghostText, setGhostText] = useState("");
+  const [productPanelOpen, setProductPanelOpen] = useState(false);
+  const [productSearch, setProductSearch] = useState("");
+  const [couponPanelOpen, setCouponPanelOpen] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponDiscountText, setCouponDiscountText] = useState("");
+  const [couponMessage, setCouponMessage] = useState("");
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -107,6 +136,27 @@ export function ChatPage(): JSX.Element {
   });
   const { data: agents = [] } = useQuery({ queryKey: ["agents", "chat"], queryFn: async () => (await api.get<User[]>("/agents")).data });
   const { data: canned = [] } = useQuery({ queryKey: ["canned"], queryFn: async () => (await api.get<CannedResponse[]>("/admin/canned-responses")).data });
+  const normalizedProductSearch = productSearch.trim();
+  const { data: searchedProducts, isFetching: searchingProducts } = useQuery({
+    queryKey: ["ecommerce", "products", "search", id, normalizedProductSearch],
+    queryFn: async () => (await api.get<{ items: ProductCatalogItem[] }>("/ecommerce/products", { params: { q: normalizedProductSearch, limit: 8 } })).data,
+    enabled: productPanelOpen && normalizedProductSearch.length > 0,
+    staleTime: 10_000,
+  });
+  const { data: recommendedProducts, isFetching: loadingRecommendations, refetch: refetchRecommendations } = useQuery({
+    queryKey: ["ecommerce", "products", "recommendations", id, normalizedProductSearch],
+    queryFn: async () => (
+      await api.get<{ items: ProductCatalogItem[] }>("/ecommerce/products/recommendations", {
+        params: {
+          chat_id: id,
+          query: normalizedProductSearch || undefined,
+          limit: 8,
+        },
+      })
+    ).data,
+    enabled: productPanelOpen && normalizedProductSearch.length === 0,
+    staleTime: 10_000,
+  });
 
   const liveMessages = useChatStore((state) => state.messages[id]) ?? [];
   const openChatTabs = useChatStore((state) => state.openChatTabs);
@@ -125,6 +175,10 @@ export function ChatPage(): JSX.Element {
     const query = lastLine.slice(1).trim().toLowerCase();
     return canned.filter((item) => (`${item.shortcut} ${item.title}`.toLowerCase().includes(query))).slice(0, 6);
   }, [reply, canned]);
+  const productItems = useMemo(() => {
+    if (normalizedProductSearch.length > 0) return searchedProducts?.items ?? [];
+    return recommendedProducts?.items ?? [];
+  }, [normalizedProductSearch, searchedProducts?.items, recommendedProducts?.items]);
 
   useEffect(() => {
     setActiveChat(id);
@@ -201,6 +255,27 @@ export function ChatPage(): JSX.Element {
     mutationFn: async ({ messageId, emoji }: { messageId: string; emoji: string }) => (await api.post(`/chats/${id}/messages/${messageId}/react`, { emoji })).data as { reactions: Record<string, string[]> },
     onSuccess: (payload, vars) => updateMessageInStore(id, vars.messageId, { reactions: payload.reactions }),
   });
+  const sendCoupon = useMutation({
+    mutationFn: async () => api.post("/ecommerce/coupons/send", {
+      chat_id: id,
+      code: couponCode.trim(),
+      discount_text: couponDiscountText.trim() || null,
+      message: couponMessage.trim() || null,
+    }),
+    onSuccess: () => {
+      setCouponCode("");
+      setCouponDiscountText("");
+      setCouponMessage("");
+      setCouponPanelOpen(false);
+      toast.success("Coupon delivered");
+    },
+    onError: () => toast.error("Could not send coupon"),
+  });
+  const checkoutAssist = useMutation({
+    mutationFn: async () => api.post(`/ecommerce/chats/${id}/checkout-assist`, { enabled: true, mode: "guided" }),
+    onSuccess: () => toast.success("Checkout assist enabled"),
+    onError: () => toast.error("Could not enable checkout assist"),
+  });
 
   const send = (): void => {
     if (!reply.trim()) return;
@@ -213,6 +288,32 @@ export function ChatPage(): JSX.Element {
     }
     activeSocket()?.emit("chat:message", { organization_id: data?.organization_id, chat_id: id, content: reply, sender_type: "agent" });
     setReply("");
+  };
+
+  const sendProductCard = (product: ProductCatalogItem): void => {
+    const payload = {
+      type: "product_card",
+      product: {
+        id: product.id,
+        sku: product.sku,
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        currency: product.currency || "USD",
+        image_url: product.image_url,
+        product_url: product.product_url,
+        category: product.category,
+        brand: product.brand,
+      },
+    };
+    activeSocket()?.emit("chat:message", {
+      organization_id: data?.organization_id,
+      chat_id: id,
+      content: JSON.stringify(payload),
+      sender_type: "agent",
+      content_type: "product_card",
+    });
+    toast.success(`Sent ${product.name}`);
   };
 
   const useCanned = async (item: CannedResponse): Promise<void> => {
@@ -439,12 +540,100 @@ export function ChatPage(): JSX.Element {
                 {canned.slice(0, 6).map((item) => <button key={item.id} onClick={() => void useCanned(item)} className="shrink-0 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-black text-slate-600 hover:bg-slate-50 dark:bg-slate-800/50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">/{item.shortcut}</button>)}
                 <AIToolsMenu value={reply} onApply={(text) => setReply(text)} />
                 <button
+                  onClick={() => {
+                    setProductPanelOpen((value) => !value);
+                    setCouponPanelOpen(false);
+                  }}
+                  className={`inline-flex shrink-0 items-center gap-2 rounded-full px-3 py-1.5 text-xs font-black ${productPanelOpen ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"}`}
+                >
+                  <Search size={14} /> Products
+                </button>
+                <button
+                  onClick={() => {
+                    setCouponPanelOpen((value) => !value);
+                    setProductPanelOpen(false);
+                  }}
+                  className={`inline-flex shrink-0 items-center gap-2 rounded-full px-3 py-1.5 text-xs font-black ${couponPanelOpen ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300" : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"}`}
+                >
+                  <Tag size={14} /> Coupon
+                </button>
+                <button
+                  onClick={() => checkoutAssist.mutate()}
+                  className="inline-flex shrink-0 items-center gap-2 rounded-full bg-teal-100 px-3 py-1.5 text-xs font-black text-teal-800 hover:bg-teal-200 dark:bg-teal-900/30 dark:text-teal-300 dark:hover:bg-teal-900/50"
+                >
+                  <Zap size={14} /> Checkout assist
+                </button>
+                <button
                   onClick={() => setCopilotOpen(true)}
                   className="inline-flex shrink-0 items-center gap-2 rounded-full bg-purple-600 px-3 py-1.5 text-xs font-black text-white hover:bg-purple-700"
                 >
                   <Sparkles size={14} /> Copilot
                 </button>
               </div>
+              {productPanelOpen && (
+                <div className="mb-3 rounded-xl border border-green-200 bg-green-50 p-3 dark:border-green-900 dark:bg-green-950/20">
+                  <div className="mb-2 flex flex-col gap-2 sm:flex-row">
+                    <input
+                      value={productSearch}
+                      onChange={(event) => setProductSearch(event.target.value)}
+                      placeholder="Search products by name, SKU, category..."
+                      className="h-10 w-full rounded-lg border border-green-200 bg-white px-3 text-sm outline-none ring-2 ring-transparent focus:ring-green-100 dark:border-green-800 dark:bg-slate-900"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => void refetchRecommendations()}
+                      className="inline-flex h-10 shrink-0 items-center justify-center rounded-lg border border-green-200 bg-white px-3 text-xs font-black text-green-800 hover:bg-green-100 dark:border-green-800 dark:bg-slate-900 dark:text-green-300"
+                    >
+                      Refresh recommendations
+                    </button>
+                  </div>
+                  <div className="mb-2 text-xs font-semibold text-green-800 dark:text-green-300">
+                    {normalizedProductSearch ? "Search results" : "AI recommendations"}
+                  </div>
+                  {searchingProducts || loadingRecommendations ? (
+                    <div className="text-xs font-semibold text-green-700 dark:text-green-400">Loading products...</div>
+                  ) : (
+                    <div className="grid gap-2">
+                      {productItems.map((product) => (
+                        <button
+                          key={product.id}
+                          type="button"
+                          onClick={() => sendProductCard(product)}
+                          className="flex items-center justify-between rounded-lg border border-green-200 bg-white px-3 py-2 text-left hover:bg-green-100 dark:border-green-800 dark:bg-slate-900 dark:hover:bg-green-900/20"
+                        >
+                          <div className="min-w-0">
+                            <div className="truncate text-sm font-bold text-slate-900 dark:text-slate-100">{product.name}</div>
+                            <div className="truncate text-xs text-slate-500 dark:text-slate-400">{product.sku || product.category || "No SKU"}</div>
+                          </div>
+                          <div className="ml-3 shrink-0 text-xs font-black text-green-800 dark:text-green-300">
+                            {formatMoney(product.price, product.currency)}
+                          </div>
+                        </button>
+                      ))}
+                      {productItems.length === 0 ? <div className="text-xs text-slate-500 dark:text-slate-400">No matching products found.</div> : null}
+                    </div>
+                  )}
+                </div>
+              )}
+              {couponPanelOpen && (
+                <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950/20">
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <input value={couponCode} onChange={(event) => setCouponCode(event.target.value)} placeholder="Coupon code" className="h-10 rounded-lg border border-amber-200 bg-white px-3 text-sm outline-none ring-2 ring-transparent focus:ring-amber-100 dark:border-amber-800 dark:bg-slate-900" />
+                    <input value={couponDiscountText} onChange={(event) => setCouponDiscountText(event.target.value)} placeholder="Discount text (e.g. 20% off)" className="h-10 rounded-lg border border-amber-200 bg-white px-3 text-sm outline-none ring-2 ring-transparent focus:ring-amber-100 dark:border-amber-800 dark:bg-slate-900" />
+                  </div>
+                  <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+                    <input value={couponMessage} onChange={(event) => setCouponMessage(event.target.value)} placeholder="Optional coupon message" className="h-10 w-full rounded-lg border border-amber-200 bg-white px-3 text-sm outline-none ring-2 ring-transparent focus:ring-amber-100 dark:border-amber-800 dark:bg-slate-900" />
+                    <button
+                      type="button"
+                      disabled={!couponCode.trim() || sendCoupon.isPending}
+                      onClick={() => sendCoupon.mutate()}
+                      className="inline-flex h-10 shrink-0 items-center justify-center rounded-lg bg-amber-600 px-4 text-xs font-black text-white hover:bg-amber-700 disabled:opacity-60"
+                    >
+                      Send coupon
+                    </button>
+                  </div>
+                </div>
+              )}
               {slashResults.length > 0 && (
                 <div className="mb-2 rounded-lg border border-blue-200 bg-blue-50 p-2 text-xs">
                   {slashResults.map((item) => (
@@ -597,7 +786,11 @@ function MessageRow({
               <button className="rounded border border-white/70 px-2 py-1 text-xs" onClick={() => setEditing(false)}>Cancel</button>
             </div>
           </div>
-        ) : message.file_url ? <a className="font-black underline underline-offset-4" href={message.file_url} target="_blank" rel="noreferrer">📎 {message.file_name ?? message.content ?? "Attachment"}</a> : message.content}
+        ) : message.file_url ? (
+          <a className="font-black underline underline-offset-4" href={message.file_url} target="_blank" rel="noreferrer">📎 {message.file_name ?? message.content ?? "Attachment"}</a>
+        ) : (
+          <MessageContent message={message} />
+        )}
         <div className={`mt-1 flex items-center gap-2 text-[10px] font-semibold ${mine ? "text-blue-100" : "text-slate-400 dark:text-slate-500"}`}>
           <span>{formatTime(message.created_at)}</span>
           {message.edited_at ? <span>edited</span> : null}
@@ -617,6 +810,84 @@ function MessageRow({
       )}
     </div>
   );
+}
+
+type StructuredProductPayload = {
+  type: "product_card";
+  product: {
+    id?: string;
+    sku?: string | null;
+    name: string;
+    description?: string | null;
+    price?: number | null;
+    currency?: string | null;
+    image_url?: string | null;
+    product_url?: string | null;
+    category?: string | null;
+    brand?: string | null;
+  };
+};
+
+type StructuredCouponPayload = {
+  type: "coupon";
+  code: string;
+  discount_text?: string | null;
+  expires_at?: string | null;
+  message?: string | null;
+};
+
+type StructuredOrderPayload = {
+  type: "order_tracking";
+  order_number: string;
+  status: string;
+  total?: number | null;
+  currency?: string | null;
+  placed_at?: string | null;
+  fulfilled_at?: string | null;
+  cancelled_at?: string | null;
+};
+
+type StructuredChatMessage = StructuredProductPayload | StructuredCouponPayload | StructuredOrderPayload;
+
+function MessageContent({ message }: { message: Message }): JSX.Element {
+  const structured = parseStructuredMessage(message);
+  if (structured?.type === "product_card") {
+    const product = structured.product;
+    return (
+      <div className="rounded-lg border border-slate-700 bg-slate-900 p-3 text-white">
+        <div className="text-xs font-black uppercase tracking-wide text-slate-300">Product</div>
+        <div className="mt-1 text-sm font-black">{product.name}</div>
+        {product.description ? <div className="mt-1 text-xs text-slate-200">{product.description}</div> : null}
+        <div className="mt-2 flex items-center justify-between gap-3">
+          <div className="text-xs font-black">{formatMoney(product.price, product.currency)}</div>
+          {product.product_url ? <a href={product.product_url} target="_blank" rel="noreferrer" className="text-xs font-black underline underline-offset-4">Open product</a> : null}
+        </div>
+      </div>
+    );
+  }
+  if (structured?.type === "coupon") {
+    return (
+      <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-amber-900">
+        <div className="text-xs font-black uppercase tracking-wide">Coupon</div>
+        <div className="mt-1 text-lg font-black">{structured.code}</div>
+        <div className="text-xs font-semibold">{structured.discount_text || "Special discount unlocked"}</div>
+        {structured.message ? <div className="mt-1 text-xs">{structured.message}</div> : null}
+        {structured.expires_at ? <div className="mt-1 text-[11px] font-semibold">Expires {formatDate(structured.expires_at)}</div> : null}
+      </div>
+    );
+  }
+  if (structured?.type === "order_tracking") {
+    return (
+      <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-blue-950">
+        <div className="text-xs font-black uppercase tracking-wide">Order update</div>
+        <div className="mt-1 text-sm font-black">Order #{structured.order_number}</div>
+        <div className="text-xs font-semibold">Status: {structured.status}</div>
+        {(structured.total ?? null) !== null ? <div className="mt-1 text-xs font-black">{formatMoney(structured.total, structured.currency)}</div> : null}
+        {structured.placed_at ? <div className="mt-1 text-[11px]">Placed {formatDate(structured.placed_at)}</div> : null}
+      </div>
+    );
+  }
+  return <>{message.content || ""}</>;
 }
 
 function EmptyConversation(): JSX.Element {
@@ -702,6 +973,64 @@ function objectToLines(value: Record<string, unknown>): string[] {
   return Object.entries(value).slice(0, 10).map(([k, v]) => `${k}: ${String(v)}`);
 }
 
+function parseStructuredMessage(message: Message): StructuredChatMessage | null {
+  const content = message.content;
+  if (!content) return null;
+  if (!["product_card", "coupon", "order_tracking"].includes(message.content_type)) return null;
+  try {
+    const parsed = JSON.parse(content) as Record<string, unknown>;
+    if (message.content_type === "product_card") {
+      const root = (typeof parsed.product === "object" && parsed.product !== null ? parsed.product : parsed) as Record<string, unknown>;
+      const name = String(root.name || "");
+      if (!name) return null;
+      return {
+        type: "product_card",
+        product: {
+          id: root.id ? String(root.id) : undefined,
+          sku: root.sku ? String(root.sku) : null,
+          name,
+          description: root.description ? String(root.description) : null,
+          price: typeof root.price === "number" ? root.price : root.price ? Number(root.price) : null,
+          currency: root.currency ? String(root.currency) : "USD",
+          image_url: root.image_url ? String(root.image_url) : null,
+          product_url: root.product_url ? String(root.product_url) : null,
+          category: root.category ? String(root.category) : null,
+          brand: root.brand ? String(root.brand) : null,
+        },
+      };
+    }
+    if (message.content_type === "coupon") {
+      const code = String(parsed.code || "");
+      if (!code) return null;
+      return {
+        type: "coupon",
+        code,
+        discount_text: parsed.discount_text ? String(parsed.discount_text) : null,
+        expires_at: parsed.expires_at ? String(parsed.expires_at) : null,
+        message: parsed.message ? String(parsed.message) : null,
+      };
+    }
+    if (message.content_type === "order_tracking") {
+      const orderNumber = String(parsed.order_number || "");
+      const status = String(parsed.status || "");
+      if (!orderNumber || !status) return null;
+      return {
+        type: "order_tracking",
+        order_number: orderNumber,
+        status,
+        total: typeof parsed.total === "number" ? parsed.total : parsed.total ? Number(parsed.total) : null,
+        currency: parsed.currency ? String(parsed.currency) : "USD",
+        placed_at: parsed.placed_at ? String(parsed.placed_at) : null,
+        fulfilled_at: parsed.fulfilled_at ? String(parsed.fulfilled_at) : null,
+        cancelled_at: parsed.cancelled_at ? String(parsed.cancelled_at) : null,
+      };
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
 function statusTone(status: Chat["status"]): string {
   if (status === "waiting") return "bg-yellow-100 text-yellow-800";
   if (status === "active") return "bg-green-100 text-green-800";
@@ -715,6 +1044,17 @@ function formatDate(value: string): string {
 
 function formatTime(value: string): string {
   return new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(new Date(value));
+}
+
+function formatMoney(value: number | string | null | undefined, currency: string | null | undefined): string {
+  const amount = typeof value === "number" ? value : value ? Number(value) : 0;
+  const moneyCurrency = (currency || "USD").toUpperCase();
+  if (!Number.isFinite(amount)) return `${moneyCurrency} 0.00`;
+  try {
+    return new Intl.NumberFormat(undefined, { style: "currency", currency: moneyCurrency }).format(amount);
+  } catch {
+    return `${moneyCurrency} ${amount.toFixed(2)}`;
+  }
 }
 
 function initials(value: string): string {

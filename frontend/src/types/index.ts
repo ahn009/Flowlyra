@@ -49,6 +49,7 @@ export interface Message {
   file_name?: string | null;
   file_size?: number | null;
   file_mime?: string | null;
+  metadata?: Record<string, unknown> | null;
   reactions?: Record<string, string[]>;
   edited_at?: string | null;
   deleted_at?: string | null;

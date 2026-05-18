@@ -29,6 +29,7 @@ from app.schemas.chat import (
     TransferRequest,
 )
 from app.services.chat_service import add_message, convert_to_ticket, get_chat, search_chats
+from app.services.sales_service import chat_revenue_summary, contact_ltv, contact_scores
 from app.services.webhook_events import CHAT_RESOLVED
 from app.services.webhook_service import dispatch_event
 
@@ -243,15 +244,17 @@ async def detail(chat_id: uuid.UUID, user: Annotated[TokenUser, Depends(current_
     )
     data["past_chats"] = past_chats
     data["tickets"] = tickets
+    revenue_summary = await chat_revenue_summary(db, organization_id=user.organization_id, chat_id=chat.id)
     if contact:
-        attrs = contact.custom_attrs or {}
-        data["ecommerce"] = attrs.get("ecommerce") or {
-            "lifetime_value": attrs.get("lifetime_value"),
-            "orders": attrs.get("orders"),
-            "last_order": attrs.get("last_order"),
+        ltv_payload = await contact_ltv(db, organization_id=user.organization_id, contact_id=contact.id)
+        score_payload = await contact_scores(db, organization_id=user.organization_id, contact_id=contact.id)
+        data["ecommerce"] = {
+            **ltv_payload,
+            **score_payload,
+            **revenue_summary,
         }
     else:
-        data["ecommerce"] = None
+        data["ecommerce"] = revenue_summary
     return data
 
 

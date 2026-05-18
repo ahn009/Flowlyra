@@ -124,6 +124,36 @@ class WidgetProductSearchRequest(BaseModel):
     limit: int = Field(default=12, ge=1, le=50)
 
 
+class WidgetCatalogRequest(BaseModel):
+    org_slug: str
+    session_token: str
+    query: str | None = None
+    category: str | None = None
+    cursor: str | None = None
+    limit: int = Field(default=12, ge=1, le=50)
+
+
+class WidgetOrderLookupRequest(BaseModel):
+    org_slug: str
+    session_token: str
+    order_number: str | None = None
+    email: EmailStr | None = None
+    limit: int = Field(default=5, ge=1, le=20)
+
+
+class WidgetPriceFormatRequest(BaseModel):
+    org_slug: str
+    session_token: str
+    amount: float
+    currency: str = "USD"
+    locale: str | None = None
+
+
+class WidgetCheckoutAssistRequest(BaseModel):
+    org_slug: str
+    session_token: str
+
+
 class WidgetKbSuggestRequest(BaseModel):
     org_slug: str
     query: str = Field(min_length=1, max_length=120)
