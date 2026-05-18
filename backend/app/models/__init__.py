@@ -43,6 +43,16 @@ from app.models.ticket import (
     TicketTimeEntry,
     TicketWorkflow,
 )
+from app.models.security import (
+    DataExportJob,
+    OAuthIdentity,
+    RetentionPolicy,
+    ScimToken,
+    SecurityEvent,
+    SsoConfig,
+    UserBackupCode,
+    VisitorBan,
+)
 from app.models.user import User
 from app.models.webhook import Webhook, WebhookDelivery
 from app.models.workspace_membership import WorkspaceMembership
@@ -105,4 +115,12 @@ __all__ = [
     "WebhookDelivery",
     "WorkspaceMembership",
     "team_members",
+    "DataExportJob",
+    "OAuthIdentity",
+    "RetentionPolicy",
+    "ScimToken",
+    "SecurityEvent",
+    "SsoConfig",
+    "UserBackupCode",
+    "VisitorBan",
 ]

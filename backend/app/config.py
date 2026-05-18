@@ -46,6 +46,29 @@ class Settings(BaseSettings):
     login_lockout_minutes: int = 15
     csp_override: str = ""
     use_cookie_auth: bool = False
+    # Phase 12 — Enterprise Security
+    encryption_key: str = ""  # 32-byte url-safe base64 Fernet key; auto-derived from secret_key if empty
+    kms_provider: str = "none"  # none|aws|gcp
+    kms_key_id: str = ""
+    oauth_google_client_id: str = ""
+    oauth_google_client_secret: str = ""
+    oauth_microsoft_client_id: str = ""
+    oauth_microsoft_client_secret: str = ""
+    oauth_microsoft_tenant: str = "common"
+    oauth_redirect_base_url: str = ""  # falls back to api_base_url when empty
+    saml_sp_entity_id: str = "https://flowlyra.com/saml/metadata"
+    saml_sp_acs_base_url: str = ""  # falls back to api_base_url
+    hcaptcha_site_key: str = ""
+    hcaptcha_secret: str = ""
+    recaptcha_site_key: str = ""
+    recaptcha_secret: str = ""
+    twofa_issuer: str = "FlowLyra"
+    twofa_backup_code_count: int = 10
+    retention_default_chat_days: int = 365
+    retention_default_ticket_days: int = 730
+    retention_default_audit_days: int = 365
+    retention_default_session_days: int = 90
+    data_export_signed_url_ttl_seconds: int = 86400
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

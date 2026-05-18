@@ -23,6 +23,7 @@ PUBLIC_PREFIXES = (
     "/api/v1/widget",
     "/api/v1/upload/widget",  # visitor-facing upload uses session token validation
     "/api/v1/channels/webhook",  # external provider webhooks; signature-verified
+    "/api/v1/scim/v2",  # SCIM 2.0 uses bearer ScimToken instead of TokenUser
     "/health",
     "/healthz",
     "/docs",

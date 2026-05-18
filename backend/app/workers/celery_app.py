@@ -34,5 +34,9 @@ celery_app.conf.beat_schedule = {
         "task": "app.workers.channel_worker.dispatch_pending_outbound",
         "schedule": 10.0,
     },
+    "sweep-retention": {
+        "task": "app.workers.system_tasks.sweep_retention",
+        "schedule": 3600.0,  # hourly
+    },
 }
 celery_app.autodiscover_tasks(["app.workers"])

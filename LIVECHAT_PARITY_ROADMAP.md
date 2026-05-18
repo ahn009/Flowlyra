@@ -601,34 +601,34 @@ Goal: widget matches LiveChat ChatBox 1:1.
 
 ---
 
-# PHASE 12 — Enterprise Security (3 wks)
+# PHASE 12 — Enterprise Security (3 wks) — ✅ COMPLETE (100%)
 
 | # | Feature | Status | Pri | Effort | Deps | Notes |
 |---|---------|--------|-----|--------|------|-------|
-| 12.1 | SAML SSO | ❌ | P0 | L | — | python3-saml |
-| 12.2 | SSO config UI per org | ❌ | P0 | M | 12.1 | metadata |
-| 12.3 | SCIM provisioning | ❌ | P1 | L | 12.1 | user sync |
-| 12.4 | Google OAuth login | ❌ | P0 | M | 10.3 | |
-| 12.5 | Microsoft OAuth login | ❌ | P1 | M | 10.3 | |
-| 12.6 | 2FA TOTP | ❌ | P0 | M | — | pyotp |
-| 12.7 | 2FA backup codes | ❌ | P0 | S | 12.6 | |
-| 12.8 | 2FA enforce per org policy | ❌ | P0 | S | 12.6 | |
-| 12.9 | IP allowlist per org | ❌ | P1 | M | — | admin login gate |
-| 12.10 | Session list + revoke | ❌ | P1 | M | 0.9 | per-user |
-| 12.11 | Device tracking | ❌ | P2 | S | 12.10 | |
-| 12.12 | Encryption at rest (column-level for sensitive) | ❌ | P1 | M | — | cryptography lib |
-| 12.13 | KMS integration | ❌ | P2 | M | 12.12 | aws/gcp KMS |
-| 12.14 | GDPR data export endpoint | ❌ | P0 | M | — | zip of contact data |
-| 12.15 | GDPR right-to-erasure flow | ⚠️ | P0 | S | — | already partial |
-| 12.16 | Data retention policy per plan | ❌ | P1 | M | 0.30 | auto-delete |
-| 12.17 | DPA / SOC2 docs page | ❌ | P1 | S | — | static |
-| 12.18 | Privacy/cookie banner widget | ❌ | P1 | S | — | EU |
-| 12.19 | CAPTCHA / bot protection on widget | ❌ | P1 | M | — | hcaptcha |
-| 12.20 | DDoS / abuse rate limit (cloudflare doc) | ❌ | P1 | S | — | guide |
-| 12.21 | Audit log export | ❌ | P1 | S | 0.4 | CSV |
-| 12.22 | Security event alerting | ❌ | P1 | S | 0.37 | login anomaly |
-| 12.23 | Visitor ban — IP/session enforcement | ⚠️ | P0 | M | — | enforce in widget init |
-| 12.24 | TLS config doc (deployment) | ⚠️ | P1 | XS | — | |
+| 12.1 | SAML SSO | ✅ | P0 | L | — | metadata, ACS, signed-response verify |
+| 12.2 | SSO config UI per org | ✅ | P0 | M | 12.1 | /security/sso CRUD |
+| 12.3 | SCIM provisioning | ✅ | P1 | L | 12.1 | /scim/v2 Users CRUD + tokens |
+| 12.4 | Google OAuth login | ✅ | P0 | M | 10.3 | start+callback, auto-provision |
+| 12.5 | Microsoft OAuth login | ✅ | P1 | M | 10.3 | shared OAuth pipeline |
+| 12.6 | 2FA TOTP | ✅ | P0 | M | — | pyotp + QR data-uri |
+| 12.7 | 2FA backup codes | ✅ | P0 | S | 12.6 | hashed, one-time |
+| 12.8 | 2FA enforce per org policy | ✅ | P0 | S | 12.6 | must_enroll_2fa flag |
+| 12.9 | IP allowlist per org | ✅ | P1 | M | — | login + admin enforcement |
+| 12.10 | Session list + revoke | ✅ | P1 | M | 0.9 | /security/sessions |
+| 12.11 | Device tracking | ✅ | P2 | S | 12.10 | UA → browser/os/device |
+| 12.12 | Encryption at rest (column-level for sensitive) | ✅ | P1 | M | — | Fernet EncryptedString |
+| 12.13 | KMS integration | ✅ | P2 | M | 12.12 | AWS KMS unwrap on boot |
+| 12.14 | GDPR data export endpoint | ✅ | P0 | M | — | celery job → zip → S3 |
+| 12.15 | GDPR right-to-erasure flow | ✅ | P0 | S | — | delete or anonymize |
+| 12.16 | Data retention policy per plan | ✅ | P1 | M | 0.30 | hourly sweep |
+| 12.17 | DPA / SOC2 docs page | ✅ | P1 | S | — | docs/LEGAL.md |
+| 12.18 | Privacy/cookie banner widget | ✅ | P1 | S | — | org.cookie_consent in init |
+| 12.19 | CAPTCHA / bot protection on widget | ✅ | P1 | M | — | hCaptcha + reCAPTCHA verify |
+| 12.20 | DDoS / abuse rate limit (cloudflare doc) | ✅ | P1 | S | — | docs/SECURITY.md |
+| 12.21 | Audit log export | ✅ | P1 | S | 0.4 | CSV + JSON + date filters |
+| 12.22 | Security event alerting | ✅ | P1 | S | 0.37 | SecurityEvent + notify |
+| 12.23 | Visitor ban — IP/session enforcement | ✅ | P0 | M | — | VisitorBan + widget init gate |
+| 12.24 | TLS config doc (deployment) | ✅ | P1 | XS | — | docs/SECURITY.md §1 |
 
 ---
 

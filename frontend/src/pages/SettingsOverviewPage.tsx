@@ -24,6 +24,7 @@ const CARDS: Card[] = [
   { title: "Integrations", description: "Install connectors, OAuth links, health checks, and logs.", href: "/settings/integrations", permission: "integrations.read" },
   { title: "Notifications", description: "Per-user delivery preferences.", href: "/settings/notifications" },
   { title: "Audit log", description: "Every action taken on your workspace.", href: "/settings/audit", permission: "audit.read" },
+  { title: "Security", description: "2FA, SSO, SCIM, IP allowlist, sessions, retention.", href: "/settings/security" },
   { title: "Billing", description: "Plan, seats, invoices.", href: "/admin/billing", permission: "billing.read" }
 ];
 

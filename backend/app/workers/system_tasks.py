@@ -1,8 +1,12 @@
 import asyncio
+import io
+import json
 import logging
-from datetime import UTC, datetime
+import uuid
+import zipfile
+from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import or_, select
+from sqlalchemy import delete, or_, select
 
 from app.db.session import AsyncSessionLocal
 from app.models.ticket import Ticket, TicketFollower
@@ -171,5 +175,133 @@ def dispatch_scheduled_reports(batch_size: int = 100) -> dict[str, int]:
                 sent += 1
             await db.commit()
         return {"processed": len(schedules), "sent": sent}
+
+    return asyncio.run(_run())
+
+
+def _serialize_row(row) -> dict:
+    out = {}
+    for col in row.__table__.columns:
+        val = getattr(row, col.name)
+        if isinstance(val, uuid.UUID):
+            out[col.name] = str(val)
+        elif isinstance(val, datetime):
+            out[col.name] = val.isoformat()
+        else:
+            out[col.name] = val
+    return out
+
+
+@celery_app.task(name="app.workers.system_tasks.run_data_export", bind=True, max_retries=3)
+def run_data_export(self, job_id: str) -> dict:
+    """Bundle org or contact data into a zip and upload to S3 (GDPR 12.14)."""
+
+    from app.models.chat import Chat
+    from app.models.contact import Contact
+    from app.models.message import Message
+    from app.models.security import DataExportJob
+    from app.models.ticket import Ticket
+    from app.services.upload_service import upload_bytes
+
+    async def _run() -> dict:
+        async with AsyncSessionLocal() as db:
+            job = (
+                await db.execute(select(DataExportJob).where(DataExportJob.id == uuid.UUID(job_id)))
+            ).scalar_one_or_none()
+            if job is None:
+                return {"status": "missing"}
+            job.status = "running"
+            await db.commit()
+            try:
+                org_id = job.organization_id
+                buf = io.BytesIO()
+                with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+                    if job.scope == "contact" and job.target_id:
+                        contact = (
+                            await db.execute(
+                                select(Contact).where(Contact.id == job.target_id, Contact.organization_id == org_id)
+                            )
+                        ).scalar_one_or_none()
+                        if contact is not None:
+                            zf.writestr("contact.json", json.dumps(_serialize_row(contact), indent=2))
+                            chats = (await db.execute(select(Chat).where(Chat.contact_id == contact.id))).scalars().all()
+                            zf.writestr("chats.json", json.dumps([_serialize_row(c) for c in chats], indent=2))
+                            messages = (
+                                await db.execute(select(Message).where(Message.contact_id == contact.id))
+                            ).scalars().all()
+                            zf.writestr("messages.json", json.dumps([_serialize_row(m) for m in messages], indent=2))
+                            tickets = (
+                                await db.execute(select(Ticket).where(Ticket.contact_id == contact.id))
+                            ).scalars().all()
+                            zf.writestr("tickets.json", json.dumps([_serialize_row(t) for t in tickets], indent=2))
+                    else:
+                        contacts = (
+                            await db.execute(select(Contact).where(Contact.organization_id == org_id).limit(50_000))
+                        ).scalars().all()
+                        zf.writestr("contacts.json", json.dumps([_serialize_row(c) for c in contacts], indent=2))
+                        chats = (
+                            await db.execute(select(Chat).where(Chat.organization_id == org_id).limit(100_000))
+                        ).scalars().all()
+                        zf.writestr("chats.json", json.dumps([_serialize_row(c) for c in chats], indent=2))
+                        tickets = (
+                            await db.execute(select(Ticket).where(Ticket.organization_id == org_id).limit(100_000))
+                        ).scalars().all()
+                        zf.writestr("tickets.json", json.dumps([_serialize_row(t) for t in tickets], indent=2))
+                payload = buf.getvalue()
+                key = f"data-exports/{org_id}/{job.id}.zip"
+                url = await upload_bytes(key, payload, content_type="application/zip", organization_id=org_id)
+                job.file_url = url
+                job.size_bytes = len(payload)
+                job.status = "completed"
+                job.completed_at = datetime.now(UTC)
+            except Exception as exc:  # noqa: BLE001
+                job.status = "failed"
+                job.error_message = str(exc)[:1000]
+                logger.exception("data export failed job=%s", job_id)
+            await db.commit()
+            return {"status": job.status}
+
+    return asyncio.run(_run())
+
+
+@celery_app.task(name="app.workers.system_tasks.sweep_retention")
+def sweep_retention() -> dict:
+    """Soft-delete/anonymize rows past their per-org retention window (12.16)."""
+
+    from app.models.audit_log import AuditLog
+    from app.models.chat import Chat
+    from app.models.message import Message
+    from app.models.security import RetentionPolicy
+    from app.models.session import Session as VisitorSession
+    from app.models.ticket import Ticket
+
+    async def _run() -> dict:
+        now = datetime.now(UTC)
+        async with AsyncSessionLocal() as db:
+            policies = (await db.execute(select(RetentionPolicy).where(RetentionPolicy.enabled.is_(True)))).scalars().all()
+            totals = {"chats": 0, "tickets": 0, "audit": 0, "sessions": 0}
+            for policy in policies:
+                org_id = policy.organization_id
+                if policy.chat_days and policy.chat_days > 0:
+                    cutoff = now - timedelta(days=policy.chat_days)
+                    chats = (await db.execute(select(Chat.id).where(Chat.organization_id == org_id, Chat.created_at < cutoff))).scalars().all()
+                    if chats:
+                        await db.execute(delete(Message).where(Message.chat_id.in_(chats)))
+                        await db.execute(delete(Chat).where(Chat.id.in_(chats)))
+                        totals["chats"] += len(chats)
+                if policy.ticket_days and policy.ticket_days > 0:
+                    cutoff = now - timedelta(days=policy.ticket_days)
+                    res = await db.execute(delete(Ticket).where(Ticket.organization_id == org_id, Ticket.created_at < cutoff))
+                    totals["tickets"] += res.rowcount or 0
+                if policy.audit_days and policy.audit_days > 0:
+                    cutoff = now - timedelta(days=policy.audit_days)
+                    res = await db.execute(delete(AuditLog).where(AuditLog.organization_id == org_id, AuditLog.created_at < cutoff))
+                    totals["audit"] += res.rowcount or 0
+                if policy.session_days and policy.session_days > 0:
+                    cutoff = now - timedelta(days=policy.session_days)
+                    res = await db.execute(delete(VisitorSession).where(VisitorSession.organization_id == org_id, VisitorSession.last_seen_at < cutoff))
+                    totals["sessions"] += res.rowcount or 0
+            await db.commit()
+            return totals
 
     return asyncio.run(_run())

@@ -138,6 +138,16 @@ def _widget_config(org: Organization, locale: str, *, is_returning: bool = False
         "locale": locale,
         "supported_locales": supported,
         "giphy_api_key": org.widget_giphy_api_key,
+        "captcha": {
+            "enabled": bool(org.captcha_enabled),
+            "provider": org.captcha_provider or "hcaptcha",
+            "site_key": (
+                get_settings().hcaptcha_site_key
+                if (org.captcha_provider or "hcaptcha") == "hcaptcha"
+                else get_settings().recaptcha_site_key
+            ),
+        },
+        "cookie_consent": org.cookie_consent or {"enabled": False, "text": None},
     }
 
 
@@ -208,6 +218,15 @@ async def init_widget(payload: WidgetInitRequest, request: Request, db: AsyncSes
     if not _domain_allowed(hostname, org.widget_domain_allowlist):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Widget is not allowed on this domain")
     client_ip = client_ip_from_request(request)
+    from app.services.visitor_bans import is_visitor_banned
+    from app.services.captcha import verify_captcha_token
+
+    if await is_visitor_banned(db, org.id, ip=client_ip, session_token=payload.session_token):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+    if org.captcha_enabled:
+        captcha_token = (payload.visitor or {}).get("captcha_token") if payload.visitor else None
+        if not captcha_token or not await verify_captcha_token(org, captcha_token, remote_ip=client_ip):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Captcha verification required")
     visitor = payload.visitor or {}
     session, existing_chat = await create_or_resume_session(
         db,

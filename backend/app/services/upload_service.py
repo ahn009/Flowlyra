@@ -28,3 +28,27 @@ async def upload_file(file: UploadFile, organization_id: uuid.UUID) -> dict:
     client.put_object(Bucket=settings.aws_s3_bucket, Key=key, Body=data, ContentType=file.content_type)
     url = client.generate_presigned_url("get_object", Params={"Bucket": settings.aws_s3_bucket, "Key": key}, ExpiresIn=3600)
     return {"file_url": url, "file_name": file.filename, "file_size": len(data), "file_mime": file.content_type}
+
+
+async def upload_bytes(key: str, data: bytes, *, content_type: str, organization_id: uuid.UUID) -> str:
+    """Direct byte upload used by data-export and other internal flows.
+
+    Returns a presigned GET URL (1d expiry) when S3 is configured; otherwise a
+    deterministic stub URL so development environments still receive a value.
+    """
+
+    settings = get_settings()
+    if not settings.aws_access_key_id:
+        return f"https://example.invalid/{key}"
+    client = boto3.client(
+        "s3",
+        region_name=settings.aws_region,
+        aws_access_key_id=settings.aws_access_key_id,
+        aws_secret_access_key=settings.aws_secret_access_key,
+    )
+    client.put_object(Bucket=settings.aws_s3_bucket, Key=key, Body=data, ContentType=content_type)
+    return client.generate_presigned_url(
+        "get_object",
+        Params={"Bucket": settings.aws_s3_bucket, "Key": key},
+        ExpiresIn=settings.data_export_signed_url_ttl_seconds,
+    )

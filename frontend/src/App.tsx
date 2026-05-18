@@ -2,7 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { AgentLayout } from "./components/AgentLayout";
 import { ArchivesPage } from "./pages/ArchivesPage";
-import { AcceptInvitePage, LoginPage, ResetPasswordPage } from "./pages/AuthPages";
+import { AcceptInvitePage, LoginPage, OauthCallbackPage, ResetPasswordPage } from "./pages/AuthPages";
 import { ChatPage } from "./pages/ChatPage";
 import { PublicChatPage } from "./pages/PublicChatPage";
 import { ContactsPage } from "./pages/ContactsPage";
@@ -10,6 +10,7 @@ import { InboxPage } from "./pages/InboxPage";
 import { TicketDetailPage, TicketsPage } from "./pages/TicketsPage";
 import { AgentsPage, AnalyticsPage, BillingPage, CannedResponsesPage, InstallPage, RoutingRulesPage, TeamsPage, TriggersPage, WidgetConfigPage } from "./pages/AdminPages";
 import { AuditLogsPage } from "./pages/AuditLogsPage";
+import { SecurityPage } from "./pages/SecurityPage";
 import { NotificationPreferencesPage } from "./pages/NotificationPreferencesPage";
 import { SettingsOverviewPage } from "./pages/SettingsOverviewPage";
 import { TagsPage } from "./pages/TagsPage";
@@ -108,6 +109,7 @@ export function App(): JSX.Element {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/invite/:token" element={<AcceptInvitePage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/auth/callback" element={<OauthCallbackPage />} />
       <Route path="/chat/:wsId" element={<PublicChatPage />} />
       <Route path="/api-docs" element={<ApiDocsPage />} />
       <Route path="/api-changelog" element={<ApiChangelogPage />} />
@@ -141,6 +143,7 @@ export function App(): JSX.Element {
         <Route path="/admin/billing" element={<BillingPage />} />
         <Route path="/settings" element={<SettingsOverviewPage />} />
         <Route path="/settings/audit" element={<AuditLogsPage />} />
+        <Route path="/settings/security" element={<SecurityPage />} />
         <Route path="/settings/webhooks" element={<WebhooksPage />} />
         <Route path="/settings/api" element={<ApiKeysPage />} />
         <Route path="/settings/integrations" element={<IntegrationsMarketplacePage />} />

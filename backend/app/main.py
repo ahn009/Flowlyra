@@ -23,6 +23,8 @@ from app.api import (
     notifications,
     platform,
     public,
+    scim,
+    security,
     tickets,
     upload,
     webhooks,
@@ -162,6 +164,8 @@ def create_fastapi_app() -> FastAPI:
         chatbot.router,
         channels_api.router,
         channels_api.webhook_router,
+        security.router,
+        scim.router,
     ):
         app.include_router(router, prefix="/api/v1")
     return app

@@ -65,6 +65,7 @@ _BASE_OWNER = _BASE_ADMIN | {
     "organization.delete",
     "members.transfer_ownership",
     "security.write",
+    "security.manage",
     "audit.export",
     "data.export",
 }

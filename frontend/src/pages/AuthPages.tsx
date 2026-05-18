@@ -10,7 +10,11 @@ export function LoginPage(): JSX.Element {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [challenge, setChallenge] = useState<{ challenge_token: string; methods: string[] } | null>(null);
+  const [twofaCode, setTwofaCode] = useState("");
+  const [useBackup, setUseBackup] = useState(false);
   const login = useAuthStore((state) => state.login);
+  const completeTwoFactor = useAuthStore((state) => state.completeTwoFactor);
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
   if (user) return <Navigate to="/inbox" replace />;
@@ -18,11 +22,50 @@ export function LoginPage(): JSX.Element {
     event.preventDefault();
     setError("");
     try {
-      await login(email, password);
+      const result = await login(email, password);
+      if (result?.challenge_token) {
+        setChallenge(result);
+        return;
+      }
       navigate("/inbox");
     } catch {
       setError("Invalid email or password");
     }
+  }
+  async function submit2fa(event: FormEvent): Promise<void> {
+    event.preventDefault();
+    setError("");
+    if (!challenge) return;
+    try {
+      await completeTwoFactor(
+        challenge.challenge_token,
+        useBackup ? undefined : twofaCode,
+        useBackup ? twofaCode : undefined,
+      );
+      navigate("/inbox");
+    } catch {
+      setError("Invalid 2FA code");
+    }
+  }
+  if (challenge) {
+    return (
+      <AuthShell title="Two-factor authentication">
+        <form onSubmit={(event) => void submit2fa(event)} className="grid gap-4">
+          <Field label={useBackup ? "Backup code" : "6-digit code from authenticator"}>
+            <TextInput value={twofaCode} onChange={(event) => setTwofaCode(event.target.value)} autoFocus />
+          </Field>
+          {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-semibold text-danger">{error}</p>}
+          <Button variant="primary" type="submit" className="w-full">Verify</Button>
+          <button
+            type="button"
+            className="text-xs font-semibold text-primary hover:text-blue-800"
+            onClick={() => { setUseBackup((v) => !v); setTwofaCode(""); }}
+          >
+            {useBackup ? "Use TOTP code instead" : "Use a backup code instead"}
+          </button>
+        </form>
+      </AuthShell>
+    );
   }
   return (
     <AuthShell title="Sign in">
@@ -31,10 +74,56 @@ export function LoginPage(): JSX.Element {
         <Field label="Password"><TextInput type="password" value={password} onChange={(event) => setPassword(event.target.value)} /></Field>
         {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-semibold text-danger">{error}</p>}
         <Button variant="primary" type="submit" className="w-full">Login</Button>
+        <SsoButtons />
         <Link className="text-sm font-semibold text-primary hover:text-blue-800" to="/reset-password">Reset password</Link>
       </form>
     </AuthShell>
   );
+}
+
+function SsoButtons(): JSX.Element | null {
+  const [providers, setProviders] = useState<{ name: string; enabled: boolean }[]>([]);
+  if (providers.length === 0) {
+    api.get("/auth/oauth/providers").then((res) => setProviders(res.data.providers ?? [])).catch(() => undefined);
+  }
+  const enabled = providers.filter((p) => p.enabled);
+  if (enabled.length === 0) return null;
+  return (
+    <div className="grid gap-2">
+      <p className="text-center text-xs uppercase tracking-wide text-slate-400">or continue with</p>
+      {enabled.map((p) => (
+        <button
+          key={p.name}
+          type="button"
+          className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold capitalize text-slate-700 hover:bg-slate-50"
+          onClick={async () => {
+            const res = await api.get(`/auth/oauth/${p.name}/start`);
+            window.location.href = res.data.authorize_url;
+          }}
+        >
+          {p.name}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export function OauthCallbackPage(): JSX.Element {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const accessToken = searchParams.get("access_token");
+  const refreshTokenValue = searchParams.get("refresh_token");
+  const setAuth = useAuthStore.setState;
+  if (accessToken && refreshTokenValue) {
+    setAuth({ accessToken, refreshTokenValue });
+    api.get("/auth/me").then((res) => {
+      setAuth({ user: res.data.user });
+      navigate("/inbox", { replace: true });
+    }).catch(() => navigate("/login", { replace: true }));
+  } else if (!accessToken) {
+    return <Navigate to="/login" replace />;
+  }
+  return <div className="grid min-h-screen place-items-center text-sm text-slate-500">Signing you in…</div>;
 }
 
 export function AcceptInvitePage(): JSX.Element {

@@ -1,10 +1,13 @@
 from pydantic import BaseModel, EmailStr, Field
+from typing import Union
 from uuid import UUID
 
 
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8)
+    totp_code: str | None = Field(default=None, max_length=12)
+    backup_code: str | None = Field(default=None, max_length=20)
 
 
 class SignupRequest(BaseModel):
@@ -54,3 +57,34 @@ class TokenResponse(BaseModel):
     refresh_token: str
     token_type: str = "bearer"
     user: UserOut
+
+
+class TwoFactorSetupResponse(BaseModel):
+    secret: str
+    otpauth_uri: str
+    qr_data_uri: str
+
+
+class TwoFactorVerifyRequest(BaseModel):
+    code: str = Field(min_length=6, max_length=10)
+
+
+class TwoFactorDisableRequest(BaseModel):
+    password: str = Field(min_length=8)
+    code: str | None = None
+
+
+class TwoFactorBackupCodesResponse(BaseModel):
+    codes: list[str]
+
+
+class TwoFactorChallengeRequiredResponse(BaseModel):
+    challenge_token: str
+    methods: list[str]
+    token_type: str = "challenge"
+
+
+class TwoFactorChallengeRequest(BaseModel):
+    challenge_token: str
+    code: str | None = None
+    backup_code: str | None = None

@@ -7,6 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.session import Base
 from app.models.base import UUIDPkMixin
+from app.services.crypto import EncryptedString
 
 
 class User(UUIDPkMixin, Base):
@@ -30,8 +31,10 @@ class User(UUIDPkMixin, Base):
     last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     failed_login_count: Mapped[int] = mapped_column(Integer, default=0)
     locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    two_factor_secret: Mapped[str | None] = mapped_column(Text)
+    two_factor_secret: Mapped[str | None] = mapped_column(EncryptedString)
     two_factor_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
+    two_factor_enrolled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    backup_codes_generated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     password_changed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
