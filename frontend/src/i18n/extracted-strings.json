@@ -1,0 +1,3572 @@
+{
+  "generated_at": "2026-05-18T15:43:48.393Z",
+  "total_strings": 584,
+  "items": [
+    {
+      "text": "— copy now.",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": ", email:",
+      "files": [
+        "pages/ChannelsPage.tsx"
+      ]
+    },
+    {
+      "text": ", instagram:",
+      "files": [
+        "pages/ChannelsPage.tsx"
+      ]
+    },
+    {
+      "text": ", sms:",
+      "files": [
+        "pages/ChannelsPage.tsx"
+      ]
+    },
+    {
+      "text": ", telegram:",
+      "files": [
+        "pages/ChannelsPage.tsx"
+      ]
+    },
+    {
+      "text": ", whatsapp:",
+      "files": [
+        "pages/ChannelsPage.tsx"
+      ]
+    },
+    {
+      "text": "; action: Record",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "; activeChatId: string | null; openChatTabs: string[]; messages: Record",
+      "files": [
+        "stores/chatStore.ts"
+      ]
+    },
+    {
+      "text": "; aiSuggestions: Record",
+      "files": [
+        "stores/chatStore.ts"
+      ]
+    },
+    {
+      "text": "; async function submit(event: FormEvent): Promise",
+      "files": [
+        "pages/AuthPages.tsx"
+      ]
+    },
+    {
+      "text": "; const tone = status === \"waiting\" ? \"yellow\" : status === \"active\" ? \"green\" : status === \"resolved\" ? \"slate\" : \"orange\"; return",
+      "files": [
+        "pages/InboxPage.tsx"
+      ]
+    },
+    {
+      "text": "; email: Record",
+      "files": [
+        "pages/NotificationPreferencesPage.tsx"
+      ]
+    },
+    {
+      "text": "; if (!canRead) return",
+      "files": [
+        "pages/IntegrationsMarketplacePage.tsx"
+      ]
+    },
+    {
+      "text": "; if (!canWrite) return",
+      "files": [
+        "pages/ApiKeysPage.tsx",
+        "pages/WebhooksPage.tsx"
+      ]
+    },
+    {
+      "text": "; if (!user || !accessToken) return",
+      "files": [
+        "App.tsx"
+      ]
+    },
+    {
+      "text": "; if (line.startsWith(\"# \")) return",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "; if (line.startsWith(\"## \")) return",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "; is_returning?: boolean; is_online?: boolean; chat_id?: string | null; is_watched?: boolean; custom_variables?: Record",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "; nodes: FlowNode[]; edges: FlowEdge[]; variables: Record",
+      "files": [
+        "pages/ChatbotPage.tsx"
+      ]
+    },
+    {
+      "text": "; page_history?: Array",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "; push: Record",
+      "files": [
+        "pages/NotificationPreferencesPage.tsx"
+      ]
+    },
+    {
+      "text": "; return",
+      "files": [
+        "App.tsx",
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "; return (",
+      "files": [
+        "pages/ApiKeysPage.tsx",
+        "pages/ChatPage.tsx",
+        "pages/IntegrationsMarketplacePage.tsx",
+        "pages/NotificationPreferencesPage.tsx",
+        "pages/WebhooksPage.tsx"
+      ]
+    },
+    {
+      "text": "; tickets?: Array",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "; top_helpful: Array",
+      "files": [
+        "pages/KnowledgeBasePage.tsx"
+      ]
+    },
+    {
+      "text": "; top_unhelpful: Array",
+      "files": [
+        "pages/KnowledgeBasePage.tsx"
+      ]
+    },
+    {
+      "text": "; typingAgents: Record",
+      "files": [
+        "stores/chatStore.ts"
+      ]
+    },
+    {
+      "text": "; typingPreview: Record",
+      "files": [
+        "stores/chatStore.ts"
+      ]
+    },
+    {
+      "text": "; unreadCounts: Record",
+      "files": [
+        "stores/chatStore.ts"
+      ]
+    },
+    {
+      "text": "; userChoice: Promise",
+      "files": [
+        "lib/pwa.ts"
+      ]
+    },
+    {
+      "text": "!a.featured), [articles.data]); return (",
+      "files": [
+        "pages/PublicKBPage.tsx"
+      ]
+    },
+    {
+      "text": "!c.permission || hasPermission(me.data?.permissions, c.permission)); return (",
+      "files": [
+        "pages/SettingsOverviewPage.tsx"
+      ]
+    },
+    {
+      "text": ". The widget opens automatically.",
+      "files": [
+        "pages/PublicChatPage.tsx"
+      ]
+    },
+    {
+      "text": "· Health:",
+      "files": [
+        "pages/IntegrationsMarketplacePage.tsx"
+      ]
+    },
+    {
+      "text": "\") .replace(/\\[([^\\]]+)\\]\\(([^)]+)\\)/g, '",
+      "files": [
+        "pages/PublicKBPage.tsx"
+      ]
+    },
+    {
+      "text": "\") .replace(/\\*([^*]+)\\*/g, \"",
+      "files": [
+        "pages/PublicKBPage.tsx"
+      ]
+    },
+    {
+      "text": "\") .replace(/`([^`]+)`/g, \"",
+      "files": [
+        "pages/PublicKBPage.tsx"
+      ]
+    },
+    {
+      "text": "\"Sales chats converted more consistently once routing and script quality became data-driven and measurable.\"",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "\"Support team response time dropped and customer ratings improved after we standardized workflows in one chat workspace.\"",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "( await api.get",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "( await api.post",
+      "files": [
+        "pages/ApiKeysPage.tsx",
+        "pages/ChannelsPage.tsx",
+        "pages/KnowledgeSourcesPage.tsx",
+        "pages/WebhooksPage.tsx"
+      ]
+    },
+    {
+      "text": "( await axios.get",
+      "files": [
+        "pages/PublicKBPage.tsx"
+      ]
+    },
+    {
+      "text": "(\"\"); async function submit(event: FormEvent): Promise",
+      "files": [
+        "pages/AuthPages.tsx"
+      ]
+    },
+    {
+      "text": "(\"\"); const [eyeCatcherEnabled, setEyeCatcherEnabled] = useState(false); const [eyeCatcherText, setEyeCatcherText] = useState(\"\"); const [eyeCatcherImage, setEyeCatcherImage] = useState(\"\"); const [whiteLabel, setWhiteLabel] = useState(false); const [brandText, setBrandText] = useState(\"FlowLyra\"); const [brandUrl, setBrandUrl] = useState(\"\"); const [soundEnabled, setSoundEnabled] = useState(true); const [lazyLoad, setLazyLoad] = useState(false); const [allowAttachments, setAllowAttachments] = useState(true); const [maxUploadMb, setMaxUploadMb] = useState(10); const [defaultLocale, setDefaultLocale] = useState(\"en\"); const [supportedLocales, setSupportedLocales] = useState(\"en\"); const [customJs, setCustomJs] = useState(\"\"); const [giphyApiKey, setGiphyApiKey] = useState(\"\"); const [ohEnabled, setOhEnabled] = useState(false); const [ohTimezone, setOhTimezone] = useState(\"UTC\"); const parsePreChatFields = (raw: string): Array",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "(\"\"); const [selectedIntegrationId, setSelectedIntegrationId] = useState",
+      "files": [
+        "pages/IntegrationsMarketplacePage.tsx"
+      ]
+    },
+    {
+      "text": "(\"\"); const [statusFilter, setStatusFilter] = useState",
+      "files": [
+        "pages/KnowledgeBasePage.tsx"
+      ]
+    },
+    {
+      "text": "(\"all\"); const [query, setQuery] = useState",
+      "files": [
+        "pages/IntegrationsMarketplacePage.tsx"
+      ]
+    },
+    {
+      "text": "(\"all\"); const [searchQuery, setSearchQuery] = useState(\"\"); const [creating, setCreating] = useState(false); const [subject, setSubject] = useState(\"\"); const [description, setDescription] = useState(\"\"); const [priority, setPriority] = useState",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "(\"normal\"); const [assignedUserId, setAssignedUserId] = useState",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "(\"normal\"); const [selectedIds, setSelectedIds] = useState",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "(\"open\"); const [priorityValue, setPriorityValue] = useState",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "(\"url\"); const [url, setUrl] = useState(\"\"); const [content, setContent] = useState(\"\"); const [query, setQuery] = useState(\"\"); const [results, setResults] = useState",
+      "files": [
+        "pages/KnowledgeSourcesPage.tsx"
+      ]
+    },
+    {
+      "text": "(); const [searchParams] = useSearchParams(); const locale = searchParams.get(\"locale\") ?? \"en\"; const [feedbackSent, setFeedbackSent] = useState",
+      "files": [
+        "pages/PublicKBPage.tsx"
+      ]
+    },
+    {
+      "text": "([]); const [helpOpen, setHelpOpen] = useState(false); const [tourOpen, setTourOpen] = useState(false); const notificationPanelRef = useRef",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "text": "(await api.get",
+      "files": [
+        "components/AgentLayout.tsx",
+        "lib/me.ts",
+        "pages/AdminPages.tsx",
+        "pages/ApiKeysPage.tsx",
+        "pages/ArchivesPage.tsx",
+        "pages/ChannelsPage.tsx",
+        "pages/ChatPage.tsx",
+        "pages/ChatbotPage.tsx",
+        "pages/ContactsPage.tsx",
+        "pages/InboxPage.tsx",
+        "pages/IntegrationsMarketplacePage.tsx",
+        "pages/KnowledgeBasePage.tsx",
+        "pages/KnowledgeSourcesPage.tsx",
+        "pages/NotificationPreferencesPage.tsx",
+        "pages/Phase15OpsPage.tsx",
+        "pages/SecurityPage.tsx",
+        "pages/TagsPage.tsx",
+        "pages/TicketsPage.tsx",
+        "pages/WebhooksPage.tsx"
+      ]
+    },
+    {
+      "text": "(await api.get(\"/admin/canned-responses\")).data as Array",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "(await api.get(\"/engage/goals/achievements\")).data as Array",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "(await api.post",
+      "files": [
+        "components/CopilotPanel.tsx",
+        "pages/AdminPages.tsx",
+        "pages/ChatbotPage.tsx",
+        "pages/IntegrationsMarketplacePage.tsx",
+        "pages/KnowledgeSourcesPage.tsx",
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "(await api.put",
+      "files": [
+        "pages/ChatbotPage.tsx"
+      ]
+    },
+    {
+      "text": "(await axios.get",
+      "files": [
+        "pages/PublicKBPage.tsx"
+      ]
+    },
+    {
+      "text": "(null); const [callConnected, setCallConnected] = useState(false); const [shortcutOpen, setShortcutOpen] = useState(false); const [gifUrl, setGifUrl] = useState(\"\"); const [tagText, setTagText] = useState(\"\"); const [assignModal, setAssignModal] = useState(false); const [assignId, setAssignId] = useState(\"\"); const [snoozeMinutes, setSnoozeMinutes] = useState(30); const [copilotOpen, setCopilotOpen] = useState(false); const [ghostText, setGhostText] = useState(\"\"); const [productPanelOpen, setProductPanelOpen] = useState(false); const [productSearch, setProductSearch] = useState(\"\"); const [couponPanelOpen, setCouponPanelOpen] = useState(false); const [couponCode, setCouponCode] = useState(\"\"); const [couponDiscountText, setCouponDiscountText] = useState(\"\"); const [couponMessage, setCouponMessage] = useState(\"\"); const textareaRef = useRef",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "(null); const [categoryFilter, setCategoryFilter] = useState",
+      "files": [
+        "pages/KnowledgeBasePage.tsx"
+      ]
+    },
+    {
+      "text": "(null); const [code, setCode] = useState(\"\"); const [backupCodes, setBackupCodes] = useState",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "(null); const [draft, setDraft] = useState",
+      "files": [
+        "pages/ChatbotPage.tsx"
+      ]
+    },
+    {
+      "text": "(null); const [lang, setLang] = useState(\"Spanish\"); const run = async (op: string, target_language?: string): Promise",
+      "files": [
+        "components/AIToolsMenu.tsx"
+      ]
+    },
+    {
+      "text": "(null); const [selectedWebhookId, setSelectedWebhookId] = useState",
+      "files": [
+        "pages/WebhooksPage.tsx"
+      ]
+    },
+    {
+      "text": "(null); const localStreamRef = useRef",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "(null); const localVideoRef = useRef",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "(null); const pcRef = useRef",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "(null); const remoteVideoRef = useRef",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "(searchParams.get(\"token\") ? \"confirm\" : \"request\"); const [status, setStatus] = useState",
+      "files": [
+        "pages/AuthPages.tsx"
+      ]
+    },
+    {
+      "text": ") :",
+      "files": [
+        "pages/ChatPage.tsx",
+        "pages/InboxPage.tsx"
+      ]
+    },
+    {
+      "text": ") : (",
+      "files": [
+        "pages/AdminPages.tsx",
+        "pages/ArchivesPage.tsx",
+        "pages/AuthPages.tsx",
+        "pages/ChatPage.tsx",
+        "pages/ContactsPage.tsx",
+        "pages/EngagePages.tsx",
+        "pages/IntegrationsMarketplacePage.tsx",
+        "pages/KnowledgeBasePage.tsx",
+        "pages/KnowledgeSourcesPage.tsx",
+        "pages/PublicKBPage.tsx",
+        "pages/TagsPage.tsx",
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": ") : data.length ? (",
+      "files": [
+        "pages/ContactsPage.tsx"
+      ]
+    },
+    {
+      "text": ") : filtered.length ? (",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": ") : message.file_url ? (",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": ").title ?? (r.meta as Record",
+      "files": [
+        "pages/KnowledgeSourcesPage.tsx"
+      ]
+    },
+    {
+      "text": ")) :",
+      "files": [
+        "components/AgentLayout.tsx",
+        "pages/AdminPages.tsx",
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "* or chat.started,ticket.created",
+      "files": [
+        "pages/WebhooksPage.tsx"
+      ]
+    },
+    {
+      "text": "& Partial",
+      "files": [
+        "stores/notificationStore.ts"
+      ]
+    },
+    {
+      "text": "# Heading\\nYour content...",
+      "files": [
+        "pages/Phase15OpsPage.tsx"
+      ]
+    },
+    {
+      "text": "`, [orgSlug] ); return (",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "`) .join(\"\"); return `",
+      "files": [
+        "pages/PublicKBPage.tsx"
+      ]
+    },
+    {
+      "text": "← Help Center",
+      "files": [
+        "pages/PublicKBPage.tsx"
+      ]
+    },
+    {
+      "text": "| null; reactions?: Record",
+      "files": [
+        "types/index.ts"
+      ]
+    },
+    {
+      "text": "👍 Yes",
+      "files": [
+        "pages/PublicKBPage.tsx"
+      ]
+    },
+    {
+      "text": "👎 No",
+      "files": [
+        "pages/PublicKBPage.tsx"
+      ]
+    },
+    {
+      "text": "0 ? (",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "0 &&",
+      "files": [
+        "components/AgentLayout.tsx",
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "0 && (",
+      "files": [
+        "components/CopilotPanel.tsx",
+        "pages/ChatPage.tsx",
+        "pages/KnowledgeBasePage.tsx",
+        "pages/PublicKBPage.tsx"
+      ]
+    },
+    {
+      "text": "0; return (",
+      "files": [
+        "pages/InboxPage.tsx"
+      ]
+    },
+    {
+      "text": "2FA code (optional)",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "5 stars",
+      "files": [
+        "pages/ArchivesPage.tsx"
+      ]
+    },
+    {
+      "text": "98%",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "A/B variants JSON",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "A/B weight",
+      "files": [
+        "pages/ChatbotPage.tsx"
+      ]
+    },
+    {
+      "text": "Abandon rate",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Accept invite",
+      "files": [
+        "pages/AuthPages.tsx"
+      ]
+    },
+    {
+      "text": "Account activated. You can now log in.",
+      "files": [
+        "pages/AuthPages.tsx"
+      ]
+    },
+    {
+      "text": "Account owners manage team permissions, billing obligations, and integration usage under their organization workspace.",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Action (JSON)",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Activate account",
+      "files": [
+        "pages/AuthPages.tsx"
+      ]
+    },
+    {
+      "text": "Activate SSO",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "Active goals",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "Active keys",
+      "files": [
+        "pages/ApiKeysPage.tsx"
+      ]
+    },
+    {
+      "text": "Active sessions",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "Active teams",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Activity timeline",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "Add comment (supports @mentions)",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "Add connection",
+      "files": [
+        "pages/ChannelsPage.tsx"
+      ]
+    },
+    {
+      "text": "Add edge",
+      "files": [
+        "pages/ChatbotPage.tsx"
+      ]
+    },
+    {
+      "text": "Add endpoint",
+      "files": [
+        "pages/WebhooksPage.tsx"
+      ]
+    },
+    {
+      "text": "Add source",
+      "files": [
+        "pages/KnowledgeSourcesPage.tsx"
+      ]
+    },
+    {
+      "text": "Admin console",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Admin session",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Agent dashboard",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "agent id",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Agent profiles",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Agent roles and permissions",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Agent view",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "AI draft",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "AI draft reply",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "AI Knowledge Sources",
+      "files": [
+        "pages/KnowledgeSourcesPage.tsx"
+      ]
+    },
+    {
+      "text": "AI suggestions stay private to agents.",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "text": "AI summarize",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "AI tools",
+      "files": [
+        "components/AIToolsMenu.tsx"
+      ]
+    },
+    {
+      "text": "AI-powered support workflow platform",
+      "files": [
+        "pages/AuthPages.tsx"
+      ]
+    },
+    {
+      "text": "All categories",
+      "files": [
+        "pages/KnowledgeBasePage.tsx"
+      ]
+    },
+    {
+      "text": "All channels",
+      "files": [
+        "pages/ArchivesPage.tsx"
+      ]
+    },
+    {
+      "text": "All features",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "All mutating actions on this workspace.",
+      "files": [
+        "pages/AuditLogsPage.tsx"
+      ]
+    },
+    {
+      "text": "All statuses",
+      "files": [
+        "pages/KnowledgeBasePage.tsx"
+      ]
+    },
+    {
+      "text": "Allowed domains",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Analytics and quality",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Analytics dashboards and exports",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Any rating",
+      "files": [
+        "pages/ArchivesPage.tsx"
+      ]
+    },
+    {
+      "text": "API + widget integration patterns",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "API changelog",
+      "files": [
+        "pages/ApiPlatformPages.tsx"
+      ]
+    },
+    {
+      "text": "API keys",
+      "files": [
+        "pages/ApiKeysPage.tsx"
+      ]
+    },
+    {
+      "text": "API status",
+      "files": [
+        "pages/ApiPlatformPages.tsx"
+      ]
+    },
+    {
+      "text": "Article not found.",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "articles, [articles]); return (",
+      "files": [
+        "pages/KnowledgeBasePage.tsx"
+      ]
+    },
+    {
+      "text": "Ask anything about this chat or your KB. Sources cited inline.",
+      "files": [
+        "components/CopilotPanel.tsx"
+      ]
+    },
+    {
+      "text": "Ask Copilot…",
+      "files": [
+        "components/CopilotPanel.tsx"
+      ]
+    },
+    {
+      "text": "Assign chat",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "At least 8 characters",
+      "files": [
+        "pages/AuthPages.tsx",
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Audit log",
+      "files": [
+        "pages/AuditLogsPage.tsx"
+      ]
+    },
+    {
+      "text": "Auto-provision users on first login",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "Avg reply",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Avg resolution",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Avg response",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Back to inbox",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Backend integration",
+      "files": [
+        "pages/ApiKeysPage.tsx"
+      ]
+    },
+    {
+      "text": "Backup codes — save these now. They will not be shown again.",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "Ban visitor",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Blog / CMS",
+      "files": [
+        "pages/Phase15OpsPage.tsx"
+      ]
+    },
+    {
+      "text": "Body (markdown)",
+      "files": [
+        "pages/KnowledgeBasePage.tsx"
+      ]
+    },
+    {
+      "text": "Bot performance",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "branch (true/false)",
+      "files": [
+        "pages/ChatbotPage.tsx"
+      ]
+    },
+    {
+      "text": "Brand color",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Brand theme",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Browser push",
+      "files": [
+        "pages/NotificationPreferencesPage.tsx"
+      ]
+    },
+    {
+      "text": "Campaign conversion %",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Canned responses",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Change summary (for revision history)",
+      "files": [
+        "pages/KnowledgeBasePage.tsx"
+      ]
+    },
+    {
+      "text": "Channel breakdown",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Chat volume",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Chat workspace:",
+      "files": [
+        "pages/PublicChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Chats by agent",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Chats today",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Checkout assist",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Choose a conversation",
+      "files": [
+        "pages/InboxPage.tsx"
+      ]
+    },
+    {
+      "text": "Choose a team and watch FlowLyra adapt",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Choose which alerts you receive and how.",
+      "files": [
+        "pages/NotificationPreferencesPage.tsx"
+      ]
+    },
+    {
+      "text": "Close help",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "text": "Close navigation",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "text": "Close navigation drawer",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "text": "Close notifications",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "text": "Cohort analysis",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Company name",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Compare period (7d)",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Components (comma separated)",
+      "files": [
+        "pages/Phase15OpsPage.tsx"
+      ]
+    },
+    {
+      "text": "Conditions (JSON)",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Configured goals",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "Connect channel",
+      "files": [
+        "pages/ChannelsPage.tsx"
+      ]
+    },
+    {
+      "text": "Connect FlowLyra to your existing stack",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Contact attributes",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Contact FlowLyra",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Convert to ticket",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Copy this secret now:",
+      "files": [
+        "pages/ApiKeysPage.tsx"
+      ]
+    },
+    {
+      "text": "Coupon code",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Create key",
+      "files": [
+        "pages/ApiKeysPage.tsx"
+      ]
+    },
+    {
+      "text": "Create response",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Create rule",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Create scoped keys for secure server-to-server integrations.",
+      "files": [
+        "pages/ApiKeysPage.tsx"
+      ]
+    },
+    {
+      "text": "Create split ticket",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "Create tag",
+      "files": [
+        "pages/TagsPage.tsx"
+      ]
+    },
+    {
+      "text": "Create team",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Create trigger",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "CSAT goal",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "CSAT trend",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "CSV report type",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "CSV: name,email,phone,subject,message OR JSON: [{",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Ctrl/Cmd + Enter send • R reply • A assign • T tag • N note • ? shortcuts",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Custom dashboard domain (CNAME)",
+      "files": [
+        "pages/Phase15OpsPage.tsx"
+      ]
+    },
+    {
+      "text": "Custom email sender domain (DKIM/SPF)",
+      "files": [
+        "pages/Phase15OpsPage.tsx"
+      ]
+    },
+    {
+      "text": "Custom report builder",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Custom variables",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Customer 360",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Customer support that protects satisfaction and retention",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Customer, email, message",
+      "files": [
+        "pages/ArchivesPage.tsx"
+      ]
+    },
+    {
+      "text": "Dashboard logo URL",
+      "files": [
+        "pages/Phase15OpsPage.tsx"
+      ]
+    },
+    {
+      "text": "Data handling principles",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Data is accessed according to role-based permissions, and operational access should be restricted to authorized staff only.",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Data retention",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "Date from",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Date to",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Default message",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "Default role for new users",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "Default value",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "Delta %",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Deploy FlowLyra with production routing, analytics, widget configuration, and multi-team collaboration.",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Deployment readiness",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Describe the issue",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "detectLocale()); const value = useMemo",
+      "files": [
+        "i18n/I18nProvider.tsx"
+      ]
+    },
+    {
+      "text": "Developer portal",
+      "files": [
+        "pages/ApiPlatformPages.tsx"
+      ]
+    },
+    {
+      "text": "Developer-friendly APIs",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Dimensions (csv)",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Direct URLs",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Disable 2FA",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "Discount text (e.g. 20% off)",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Duration trend (mins)",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Each navigation page now has its own story, while the homepage gives visitors a clickable way to understand the product fast.",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Email digest",
+      "files": [
+        "pages/NotificationPreferencesPage.tsx"
+      ]
+    },
+    {
+      "text": "Enable help/support widget",
+      "files": [
+        "pages/Phase15OpsPage.tsx"
+      ]
+    },
+    {
+      "text": "endCall(), []); const refreshChat = async (): Promise",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Enforce retention",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "Enter 6-digit code",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "Enterprise governance with secure, scalable chat operations",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Escalation-safe transfer flow",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Event name",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "Everything needed for production support operations",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "example.com&#10;*.example.com",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Export CSV",
+      "files": [
+        "pages/AuditLogsPage.tsx",
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "External ID (page_id / phone_id / chat_id)",
+      "files": [
+        "pages/ChannelsPage.tsx"
+      ]
+    },
+    {
+      "text": "f.id === selectedId) ?? null, [flows, selectedId]); const editing = draft && draft.id === selectedId ? draft : selectedFlow; const updateNode = (idx: number, patch: Partial",
+      "files": [
+        "pages/ChatbotPage.tsx"
+      ]
+    },
+    {
+      "text": "Failed to load audit log.",
+      "files": [
+        "pages/AuditLogsPage.tsx"
+      ]
+    },
+    {
+      "text": "Features designed for support quality and sales performance",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "filter by event (e.g. http.post)",
+      "files": [
+        "pages/AuditLogsPage.tsx"
+      ]
+    },
+    {
+      "text": "FlowLyra API docs",
+      "files": [
+        "pages/ApiPlatformPages.tsx"
+      ]
+    },
+    {
+      "text": "FlowLyra blog",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "FlowLyra helps teams deliver faster support and more reliable customer outcomes.",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "FlowLyra may update platform functionality over time to maintain reliability, security, and product quality.",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "FlowLyra processes support conversation data, operator metadata, and configuration settings to provide service functionality and reporting.",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "FlowLyra production suite",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "FlowLyra Redoc",
+      "files": [
+        "pages/ApiPlatformPages.tsx"
+      ]
+    },
+    {
+      "text": "Follow ticket",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "For production use, customers should configure retention policies and compliance workflows based on their legal requirements.",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Frequency cap per day",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "Full name",
+      "files": [
+        "pages/AdminPages.tsx",
+        "pages/AuthPages.tsx",
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Geo map view",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "GIF URL",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Giphy API key",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Go home",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Go to app",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Goal type",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "Goals achieved",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Groups, roles, workload controls, and routing logic keep agents efficient and conversations assigned correctly.",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Handed off",
+      "files": [
+        "pages/ChatbotPage.tsx"
+      ]
+    },
+    {
+      "text": "Head of Customer Experience",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Help Center",
+      "files": [
+        "pages/PublicKBPage.tsx"
+      ]
+    },
+    {
+      "text": "Help center and implementation guidance",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Help widget",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "text": "Helpful ratio",
+      "files": [
+        "pages/KnowledgeBasePage.tsx"
+      ]
+    },
+    {
+      "text": "Hi, do you offer team routing and file uploads?",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Human conversation",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Human only",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Human-first support",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "text": "IdP Certificate (PEM)",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "IdP Entity ID",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "IdP SSO URL",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "Inbox, tickets, contacts, and unified chat handling for day-to-day operations.",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Incident details",
+      "files": [
+        "pages/Phase15OpsPage.tsx"
+      ]
+    },
+    {
+      "text": "Incident title",
+      "files": [
+        "pages/Phase15OpsPage.tsx"
+      ]
+    },
+    {
+      "text": "Insert into reply",
+      "files": [
+        "components/CopilotPanel.tsx"
+      ]
+    },
+    {
+      "text": "Install app",
+      "files": [
+        "pages/NotificationPreferencesPage.tsx"
+      ]
+    },
+    {
+      "text": "Install connectors, monitor health, view logs, and run sync/test operations.",
+      "files": [
+        "pages/IntegrationsMarketplacePage.tsx"
+      ]
+    },
+    {
+      "text": "Install FlowLyra on desktop/mobile for a native-like shell and offline start page.",
+      "files": [
+        "pages/NotificationPreferencesPage.tsx"
+      ]
+    },
+    {
+      "text": "Install Widget",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Integration logs",
+      "files": [
+        "pages/IntegrationsMarketplacePage.tsx"
+      ]
+    },
+    {
+      "text": "Integrations marketplace",
+      "files": [
+        "pages/IntegrationsMarketplacePage.tsx"
+      ]
+    },
+    {
+      "text": "Integrations that keep your entire customer stack connected",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Interactive homepage",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Internal note",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "Internal only",
+      "files": [
+        "pages/KnowledgeBasePage.tsx"
+      ]
+    },
+    {
+      "text": "Invite is invalid or expired.",
+      "files": [
+        "pages/AuthPages.tsx"
+      ]
+    },
+    {
+      "text": "iOS/Android device token endpoints are available at",
+      "files": [
+        "pages/NotificationPreferencesPage.tsx"
+      ]
+    },
+    {
+      "text": "IP address",
+      "files": [
+        "pages/ContactsPage.tsx"
+      ]
+    },
+    {
+      "text": "IP allowlist",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "KB analytics (30d)",
+      "files": [
+        "pages/KnowledgeBasePage.tsx"
+      ]
+    },
+    {
+      "text": "KB views",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Key hint",
+      "files": [
+        "pages/ApiKeysPage.tsx"
+      ]
+    },
+    {
+      "text": "Keyboard shortcuts",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Knowledge Base",
+      "files": [
+        "pages/KnowledgeBasePage.tsx"
+      ]
+    },
+    {
+      "text": "Last delivery",
+      "files": [
+        "pages/WebhooksPage.tsx"
+      ]
+    },
+    {
+      "text": "Last message",
+      "files": [
+        "pages/ArchivesPage.tsx"
+      ]
+    },
+    {
+      "text": "Last seen",
+      "files": [
+        "pages/ContactsPage.tsx"
+      ]
+    },
+    {
+      "text": "Last used",
+      "files": [
+        "pages/ApiKeysPage.tsx"
+      ]
+    },
+    {
+      "text": "Launch-ready customer operations, not a prototype",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Live campaigns",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "Live channels",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Live Chat",
+      "files": [
+        "pages/PublicChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Live editor",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Live health checks for database and Redis dependencies.",
+      "files": [
+        "pages/ApiPlatformPages.tsx"
+      ]
+    },
+    {
+      "text": "Live rules",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Live sneak-peek, AI replies, sound alerts",
+      "files": [
+        "pages/InboxPage.tsx"
+      ]
+    },
+    {
+      "text": "Live triggers",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Live visitors",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "Loading article...",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Loading audit entries…",
+      "files": [
+        "pages/AuditLogsPage.tsx"
+      ]
+    },
+    {
+      "text": "Loading contacts...",
+      "files": [
+        "pages/ContactsPage.tsx"
+      ]
+    },
+    {
+      "text": "Loading posts...",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Loading preferences…",
+      "files": [
+        "pages/NotificationPreferencesPage.tsx"
+      ]
+    },
+    {
+      "text": "Loading products...",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Loading ticket...",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "Loading tickets...",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "Loading traffic...",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "Loading…",
+      "files": [
+        "pages/ApiKeysPage.tsx",
+        "pages/ApiPlatformPages.tsx",
+        "pages/AuditLogsPage.tsx",
+        "pages/IntegrationsMarketplacePage.tsx",
+        "pages/SecurityPage.tsx",
+        "pages/WebhooksPage.tsx"
+      ]
+    },
+    {
+      "text": "Local API",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Local JavaScript Link",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Local test page",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Local widget source",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Log in",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Log time",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "Manage authentication, sessions, and data protection for your workspace.",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "Mark spam",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Markdown mode",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "Marketplace integrations",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Max chats",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Merge into this ticket",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "Merge tickets",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "Method / Path",
+      "files": [
+        "pages/AuditLogsPage.tsx"
+      ]
+    },
+    {
+      "text": "Most popular",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Muhammad Ahsan",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Multi-team routing groups",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Native mobile push",
+      "files": [
+        "pages/NotificationPreferencesPage.tsx"
+      ]
+    },
+    {
+      "text": "Needs attention",
+      "files": [
+        "pages/ArchivesPage.tsx"
+      ]
+    },
+    {
+      "text": "New article",
+      "files": [
+        "pages/KnowledgeBasePage.tsx"
+      ]
+    },
+    {
+      "text": "New campaign",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "New category",
+      "files": [
+        "pages/KnowledgeBasePage.tsx"
+      ]
+    },
+    {
+      "text": "New goal",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "New password",
+      "files": [
+        "pages/AuthPages.tsx"
+      ]
+    },
+    {
+      "text": "New split ticket subject",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "New visitor on /pricing",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "No achievements yet",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "No active visitors",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "No agents added",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "No analytics yet",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "No archived chats yet",
+      "files": [
+        "pages/ArchivesPage.tsx"
+      ]
+    },
+    {
+      "text": "No articles",
+      "files": [
+        "pages/KnowledgeBasePage.tsx"
+      ]
+    },
+    {
+      "text": "No articles published yet.",
+      "files": [
+        "pages/PublicKBPage.tsx"
+      ]
+    },
+    {
+      "text": "No audit entries yet.",
+      "files": [
+        "pages/AuditLogsPage.tsx"
+      ]
+    },
+    {
+      "text": "No campaigns yet",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "No canned responses saved",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "No channels connected yet.",
+      "files": [
+        "pages/ChannelsPage.tsx"
+      ]
+    },
+    {
+      "text": "No chats match this view.",
+      "files": [
+        "pages/InboxPage.tsx"
+      ]
+    },
+    {
+      "text": "No contacts found",
+      "files": [
+        "pages/ContactsPage.tsx"
+      ]
+    },
+    {
+      "text": "No data",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "No flows yet",
+      "files": [
+        "pages/ChatbotPage.tsx"
+      ]
+    },
+    {
+      "text": "No goals yet",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "No incidents published recently.",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "No matching products found.",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "No messages yet.",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "No open chat tabs",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "No posts published yet.",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "No proactive triggers configured",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "No results.",
+      "files": [
+        "pages/PublicKBPage.tsx"
+      ]
+    },
+    {
+      "text": "No routing rules configured",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "No schedules configured.",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "No sources yet.",
+      "files": [
+        "pages/KnowledgeSourcesPage.tsx"
+      ]
+    },
+    {
+      "text": "No tags yet",
+      "files": [
+        "pages/TagsPage.tsx"
+      ]
+    },
+    {
+      "text": "No teams configured",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "No tickets yet",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "Notification preferences",
+      "files": [
+        "pages/NotificationPreferencesPage.tsx"
+      ]
+    },
+    {
+      "text": "OG image URL",
+      "files": [
+        "pages/KnowledgeBasePage.tsx"
+      ]
+    },
+    {
+      "text": "Onboarding drip",
+      "files": [
+        "pages/Phase15OpsPage.tsx"
+      ]
+    },
+    {
+      "text": "One CIDR per line, e.g. 203.0.113.0/24",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "One-time reveal:",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "Online now",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Open navigation drawer",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "text": "Open product",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "OpenAPI JSON",
+      "files": [
+        "pages/ApiPlatformPages.tsx"
+      ]
+    },
+    {
+      "text": "Operational workflows for busy teams",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Operator workspace",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "ops@company.com",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Optional comment…",
+      "files": [
+        "pages/PublicKBPage.tsx"
+      ]
+    },
+    {
+      "text": "Optional coupon message",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Optional: enables GIF picker search",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "or continue with",
+      "files": [
+        "pages/AuthPages.tsx"
+      ]
+    },
+    {
+      "text": "Order update",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "p.enabled); if (enabled.length === 0) return null; return (",
+      "files": [
+        "pages/AuthPages.tsx"
+      ]
+    },
+    {
+      "text": "Page contains",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "Page not found",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Page trail",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Past chats",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Paste content",
+      "files": [
+        "pages/KnowledgeSourcesPage.tsx"
+      ]
+    },
+    {
+      "text": "Paste DKIM TXT record value",
+      "files": [
+        "pages/Phase15OpsPage.tsx"
+      ]
+    },
+    {
+      "text": "Paste SPF TXT value",
+      "files": [
+        "pages/Phase15OpsPage.tsx"
+      ]
+    },
+    {
+      "text": "Paste token",
+      "files": [
+        "pages/AuthPages.tsx"
+      ]
+    },
+    {
+      "text": "Paste TXT verification token value to confirm",
+      "files": [
+        "pages/Phase15OpsPage.tsx"
+      ]
+    },
+    {
+      "text": "Pasted text",
+      "files": [
+        "pages/KnowledgeSourcesPage.tsx"
+      ]
+    },
+    {
+      "text": "Phase 15 Operations",
+      "files": [
+        "pages/Phase15OpsPage.tsx"
+      ]
+    },
+    {
+      "text": "Platform reliability",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Pre-chat fields",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Prebuilt integrations and webhook-ready APIs keep your sales, support, and ops data in sync.",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Pricing that scales with your team",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Primary color",
+      "files": [
+        "pages/Phase15OpsPage.tsx"
+      ]
+    },
+    {
+      "text": "Privacy policy",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Proactive triggers",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Product tour",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Production CDN",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Production Embed",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Production environments need observability, consistency, and secure controls by default.",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Public read-only link:",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Public status page enabled",
+      "files": [
+        "pages/Phase15OpsPage.tsx"
+      ]
+    },
+    {
+      "text": "Publish immediately",
+      "files": [
+        "pages/Phase15OpsPage.tsx"
+      ]
+    },
+    {
+      "text": "Quick topics",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Quickly connect tools already used by support, marketing, and commerce teams.",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Real-time messaging workspace",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Realtime chat",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "reason (optional)",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "Receive real-time event deliveries into your own services.",
+      "files": [
+        "pages/WebhooksPage.tsx"
+      ]
+    },
+    {
+      "text": "Recent goal achievements",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "Recipient email",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Refresh recommendations",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Related articles",
+      "files": [
+        "pages/PublicKBPage.tsx"
+      ]
+    },
+    {
+      "text": "Remove notification",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "text": "Repeat rate",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Report type",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Request reset",
+      "files": [
+        "pages/AuthPages.tsx"
+      ]
+    },
+    {
+      "text": "Reset password",
+      "files": [
+        "pages/AuthPages.tsx"
+      ]
+    },
+    {
+      "text": "Reset token",
+      "files": [
+        "pages/AuthPages.tsx"
+      ]
+    },
+    {
+      "text": "Resolved chat history",
+      "files": [
+        "pages/ArchivesPage.tsx"
+      ]
+    },
+    {
+      "text": "REST API",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "REST reference, webhook events, SDK quickstarts, and integration guides.",
+      "files": [
+        "pages/ApiPlatformPages.tsx"
+      ]
+    },
+    {
+      "text": "Revenue Operations Lead",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Revenue trend",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Revision history",
+      "files": [
+        "pages/KnowledgeBasePage.tsx"
+      ]
+    },
+    {
+      "text": "Role-based access boundaries",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Routing and automation tools",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Routing mode",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Routing rules",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Routing, triggers, widget config, team management, and install controls.",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Sales and marketing workflows that convert intent into revenue",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Sales tracker",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "SAML Single Sign-On",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "Save allowlist",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "Save answer to variable",
+      "files": [
+        "pages/ChatbotPage.tsx"
+      ]
+    },
+    {
+      "text": "Save retention",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "Save SSO settings",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "Saved responses",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Schedule JSON",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "Scheduled publish at (ISO)",
+      "files": [
+        "pages/KnowledgeBasePage.tsx"
+      ]
+    },
+    {
+      "text": "Scheduled reports",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "SCIM tokens",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "scopes,comma,separated",
+      "files": [
+        "pages/ApiKeysPage.tsx"
+      ]
+    },
+    {
+      "text": "Search articles…",
+      "files": [
+        "pages/PublicKBPage.tsx"
+      ]
+    },
+    {
+      "text": "Search contacts by name or email",
+      "files": [
+        "pages/ContactsPage.tsx"
+      ]
+    },
+    {
+      "text": "Search conversations, email, topic",
+      "files": [
+        "pages/InboxPage.tsx"
+      ]
+    },
+    {
+      "text": "Search integrations",
+      "files": [
+        "pages/IntegrationsMarketplacePage.tsx"
+      ]
+    },
+    {
+      "text": "Search products by name, SKU, category...",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Search tickets",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "Select agent",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Select or create a flow.",
+      "files": [
+        "pages/ChatbotPage.tsx"
+      ]
+    },
+    {
+      "text": "Send coupon",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Send proactive message",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "Send test",
+      "files": [
+        "pages/ChannelsPage.tsx"
+      ]
+    },
+    {
+      "text": "Sends staged onboarding emails (day 0 / day 2 / day 7) to active team users.",
+      "files": [
+        "pages/Phase15OpsPage.tsx"
+      ]
+    },
+    {
+      "text": "SEO description",
+      "files": [
+        "pages/KnowledgeBasePage.tsx"
+      ]
+    },
+    {
+      "text": "SEO title",
+      "files": [
+        "pages/KnowledgeBasePage.tsx"
+      ]
+    },
+    {
+      "text": "Service terms overview",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Session timeline",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "Set new password",
+      "files": [
+        "pages/AuthPages.tsx"
+      ]
+    },
+    {
+      "text": "Shortcuts (?)",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Show post-chat CSAT survey",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Sign in",
+      "files": [
+        "pages/AuthPages.tsx"
+      ]
+    },
+    {
+      "text": "Sign out all other sessions",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "Signing secret (copy now):",
+      "files": [
+        "pages/WebhooksPage.tsx"
+      ]
+    },
+    {
+      "text": "Signing you in…",
+      "files": [
+        "pages/AuthPages.tsx"
+      ]
+    },
+    {
+      "text": "Simple per-agent plans with transparent feature tiers for launch, growth, and enterprise rollout.",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "SLA 1st resp",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "SLA resolve",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "slug (example: launch-checklist)",
+      "files": [
+        "pages/Phase15OpsPage.tsx"
+      ]
+    },
+    {
+      "text": "Split ticket",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "Staffing prediction",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Start free",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Start with this topic",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Start your FlowLyra trial",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "state.removeNotification); const [collapsed, setCollapsed] = useState(false); const [mobileNavOpen, setMobileNavOpen] = useState(false); const [notificationsOpen, setNotificationsOpen] = useState(false); const [commandOpen, setCommandOpen] = useState(false); const [commandQuery, setCommandQuery] = useState(\"\"); const [commandResults, setCommandResults] = useState",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "text": "state.signup); const navigate = useNavigate(); const [fullName, setFullName] = useState(\"\"); const [email, setEmail] = useState(\"\"); const [organizationName, setOrganizationName] = useState(\"\"); const [organizationSlug, setOrganizationSlug] = useState(\"\"); const [password, setPassword] = useState(\"\"); const [submitting, setSubmitting] = useState(false); const [error, setError] = useState(\"\"); async function submit(event: FormEvent): Promise",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "state.user); const [reply, setReply] = useState(\"\"); const [noteMode, setNoteMode] = useState(false); const [callMode, setCallMode] = useState",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "state.user); const navigate = useNavigate(); if (user) return",
+      "files": [
+        "pages/AuthPages.tsx"
+      ]
+    },
+    {
+      "text": "Status incidents (public publish)",
+      "files": [
+        "pages/Phase15OpsPage.tsx"
+      ]
+    },
+    {
+      "text": "STEPS[index], [index]); if (!open) return null; return (",
+      "files": [
+        "components/ProductTour.tsx"
+      ]
+    },
+    {
+      "text": "Suggested replies",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Suggested reply ready",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "sum + count, 0); return (",
+      "files": [
+        "pages/InboxPage.tsx"
+      ]
+    },
+    {
+      "text": "Support agent",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Support Widget (Dogfood)",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "text": "Swagger UI",
+      "files": [
+        "pages/ApiPlatformPages.tsx"
+      ]
+    },
+    {
+      "text": "System status",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Tag lead",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Tag library",
+      "files": [
+        "pages/TagsPage.tsx"
+      ]
+    },
+    {
+      "text": "Tags (comma separated)",
+      "files": [
+        "pages/KnowledgeBasePage.tsx",
+        "pages/Phase15OpsPage.tsx"
+      ]
+    },
+    {
+      "text": "Take a product tour before launch",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Talk to sales",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Target URL",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "Targeting rules (AND/OR groups)",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "team id",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Team management",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Tell us what you need for your launch",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Terms of service",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Test page",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Test recipient (psid / phone)",
+      "files": [
+        "pages/ChannelsPage.tsx"
+      ]
+    },
+    {
+      "text": "Test search",
+      "files": [
+        "pages/KnowledgeSourcesPage.tsx"
+      ]
+    },
+    {
+      "text": "Thanks for your feedback!",
+      "files": [
+        "pages/PublicKBPage.tsx"
+      ]
+    },
+    {
+      "text": "The AI live chat platform built to run real customer operations",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "The page you requested does not exist in FlowLyra.",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Thinking…",
+      "files": [
+        "components/CopilotPanel.tsx"
+      ]
+    },
+    {
+      "text": "Ticket IDs comma separated",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "Ticket subject",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "Time tracking",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "Title or body",
+      "files": [
+        "pages/KnowledgeBasePage.tsx"
+      ]
+    },
+    {
+      "text": "to accept:",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Toggle navigation",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "text": "Token label (e.g. Okta production)",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "Top viewed",
+      "files": [
+        "pages/KnowledgeBasePage.tsx"
+      ]
+    },
+    {
+      "text": "Total keys",
+      "files": [
+        "pages/ApiKeysPage.tsx"
+      ]
+    },
+    {
+      "text": "Track response speed, CSAT, staffing pressure, and team output trends.",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Transcript and file saved",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Transparent plans for teams at every growth stage",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Trigger type",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Trusted by teams that treat support as a growth engine",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Two-factor authentication",
+      "files": [
+        "pages/AuthPages.tsx",
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "URL (crawl + extract)",
+      "files": [
+        "pages/KnowledgeSourcesPage.tsx"
+      ]
+    },
+    {
+      "text": "URL contains",
+      "files": [
+        "pages/ChatbotPage.tsx"
+      ]
+    },
+    {
+      "text": "Use this format when the widget is hosted on your CDN.",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Use this while testing with Docker Compose on your machine.",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Use webhooks and APIs for custom workflows, event pipelines, and enterprise sync jobs.",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Users are responsible for lawful use of messaging channels, data processing, and customer communication practices.",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Uses Web Push + VAPID for new chats and mentions.",
+      "files": [
+        "pages/NotificationPreferencesPage.tsx"
+      ]
+    },
+    {
+      "text": "Verify & enable",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "View original chat",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "View product tour",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Views (30d)",
+      "files": [
+        "pages/KnowledgeBasePage.tsx"
+      ]
+    },
+    {
+      "text": "Visitor bans",
+      "files": [
+        "pages/SecurityPage.tsx"
+      ]
+    },
+    {
+      "text": "Visitor from pricing page",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Visitor is typing now",
+      "files": [
+        "pages/ChatPage.tsx"
+      ]
+    },
+    {
+      "text": "Visitor traffic",
+      "files": [
+        "pages/EngagePages.tsx"
+      ]
+    },
+    {
+      "text": "void; addNotification: (notification: Omit",
+      "files": [
+        "stores/notificationStore.ts"
+      ]
+    },
+    {
+      "text": "void; t: (key: string, vars?: Record",
+      "files": [
+        "components/AgentLayout.tsx",
+        "i18n/I18nProvider.tsx"
+      ]
+    },
+    {
+      "text": "void; updateMessage: (chatId: string, messageId: string, patch: Partial",
+      "files": [
+        "stores/chatStore.ts"
+      ]
+    },
+    {
+      "text": "void) | null = null; const recentNotificationKeys = new Map",
+      "files": [
+        "socket/index.ts"
+      ]
+    },
+    {
+      "text": "Was this article helpful?",
+      "files": [
+        "pages/PublicKBPage.tsx"
+      ]
+    },
+    {
+      "text": "What every plan includes",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "White-label & dashboard branding",
+      "files": [
+        "pages/Phase15OpsPage.tsx"
+      ]
+    },
+    {
+      "text": "Widget CDN",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Widget deployment and customization",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Widget embed snippets, API endpoints, and environment templates for production rollout.",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Work email",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Work note",
+      "files": [
+        "pages/TicketsPage.tsx"
+      ]
+    },
+    {
+      "text": "Workspace & Billing",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Workspace name",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Workspace slug",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "x.id === selectedWebhookId) ?? null, [list.data, selectedWebhookId]); if (!me.data) return",
+      "files": [
+        "pages/WebhooksPage.tsx"
+      ]
+    },
+    {
+      "text": "Yes. FlowLyra routes by team, stores chat history, and supports secure attachments.",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "You don't have permission to view the audit log.",
+      "files": [
+        "pages/AuditLogsPage.tsx"
+      ]
+    },
+    {
+      "text": "You don&apos;t have permission to manage API keys.",
+      "files": [
+        "pages/ApiKeysPage.tsx"
+      ]
+    },
+    {
+      "text": "You don&apos;t have permission to manage webhooks.",
+      "files": [
+        "pages/WebhooksPage.tsx"
+      ]
+    },
+    {
+      "text": "You don&apos;t have permission to view integrations.",
+      "files": [
+        "pages/IntegrationsMarketplacePage.tsx"
+      ]
+    },
+    {
+      "text": "you@company.com",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    },
+    {
+      "text": "Your current IP:",
+      "files": [
+        "pages/AdminPages.tsx"
+      ]
+    },
+    {
+      "text": "Your full name",
+      "files": [
+        "pages/AuthPages.tsx"
+      ]
+    },
+    {
+      "text": "Your name",
+      "files": [
+        "pages/PublicPages.tsx"
+      ]
+    }
+  ]
+}

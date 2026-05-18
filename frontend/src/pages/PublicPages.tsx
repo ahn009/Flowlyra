@@ -1,7 +1,7 @@
 import { CheckCircle2, ChevronRight, Globe2, Headphones, Layers3, LifeBuoy, LineChart, Lock, MessageSquareText, Network, ShieldCheck, Sparkles, Users, Workflow } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate, useParams } from "react-router-dom";
 import { Button, Card, Pill, cx } from "../components/ui";
 import flowlyraLogo from "../assets/flowlyra-logo.svg";
 import flowlyraMark from "../assets/flowlyra-mark.svg";
@@ -14,6 +14,7 @@ const topNav = [
   { to: "/solutions/customer-support", label: "Solutions" },
   { to: "/integrations", label: "Integrations" },
   { to: "/customers", label: "Customers" },
+  { to: "/blog", label: "Blog" },
   { to: "/help", label: "Help" }
 ];
 
@@ -104,6 +105,28 @@ const audienceCards = [
   { label: "Sales", title: "Turn high-intent traffic into demos", body: "Trigger page-specific greetings, capture leads before chat starts, and hand off qualified prospects without losing context.", metric: "3.1x more qualified chats" },
   { label: "Ops", title: "Control the whole workflow", body: "Use archives, transcripts, routing, files, tickets, and analytics in one operator-ready command center.", metric: "1 workspace for every team" }
 ];
+
+interface PublicIncident {
+  id: string;
+  title: string;
+  body: string;
+  status: string;
+  impact: string;
+  components: string[];
+  started_at?: string | null;
+  resolved_at?: string | null;
+}
+
+interface PublicBlogPost {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  content_markdown: string;
+  cover_image_url?: string | null;
+  tags: string[];
+  published_at?: string | null;
+}
 
 function PublicLayout({ title, subtitle, children }: { title: string; subtitle: string; children: JSX.Element | JSX.Element[] }): JSX.Element {
   return (
@@ -709,6 +732,31 @@ export function ContactPage(): JSX.Element {
 }
 
 export function StatusPage(): JSX.Element {
+  const [incidents, setIncidents] = useState<PublicIncident[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+    void api.get<{ items: PublicIncident[] }>("/public/status/incidents")
+      .then(({ data }) => {
+        if (!alive) return;
+        setIncidents(data.items || []);
+      })
+      .catch(() => {
+        if (!alive) return;
+        setIncidents([]);
+      })
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const active = incidents.filter((item) => item.status !== "resolved");
+  const stateText = loading ? "Checking..." : active.length ? `${active.length} active incident${active.length === 1 ? "" : "s"}` : "All systems operational";
+
   return (
     <PublicLayout
       title="System status"
@@ -717,8 +765,8 @@ export function StatusPage(): JSX.Element {
       <>
         <section className="mx-auto w-full max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
           <Card className="p-6">
-            <div className="inline-flex items-center gap-2 rounded-lg bg-green-50 px-3 py-2 text-sm font-semibold text-green-700">
-              <CheckCircle2 size={16} /> All systems operational
+            <div className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold ${active.length ? "bg-amber-50 text-amber-800" : "bg-green-50 text-green-700"}`}>
+              <CheckCircle2 size={16} /> {stateText}
             </div>
             <div className="mt-5 grid gap-3 text-sm">
               <Metric label="Realtime chat" value="Operational" />
@@ -726,7 +774,121 @@ export function StatusPage(): JSX.Element {
               <Metric label="REST API" value="Operational" />
               <Metric label="Agent dashboard" value="Operational" />
             </div>
+            <div className="mt-6 grid gap-3">
+              {incidents.length === 0 && !loading ? <div className="text-sm text-slate-500">No incidents published recently.</div> : null}
+              {incidents.map((incident) => (
+                <div key={incident.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm font-black text-slate-900">{incident.title}</span>
+                    <span className="rounded-full bg-slate-900 px-2 py-1 text-[11px] font-black uppercase text-white">{incident.status}</span>
+                    <span className="rounded-full border border-slate-300 px-2 py-1 text-[11px] font-black uppercase text-slate-600">{incident.impact}</span>
+                  </div>
+                  {incident.body ? <p className="mt-2 text-sm leading-6 text-slate-700">{incident.body}</p> : null}
+                  {incident.components.length ? <div className="mt-2 text-xs font-semibold text-slate-500">Components: {incident.components.join(", ")}</div> : null}
+                </div>
+              ))}
+            </div>
           </Card>
+        </section>
+      </>
+    </PublicLayout>
+  );
+}
+
+export function BlogPage(): JSX.Element {
+  const [posts, setPosts] = useState<PublicBlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+    void api.get<{ items: PublicBlogPost[] }>("/public/blog/posts")
+      .then(({ data }) => {
+        if (!alive) return;
+        setPosts(data.items || []);
+      })
+      .catch(() => {
+        if (!alive) return;
+        setPosts([]);
+      })
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  return (
+    <PublicLayout
+      title="FlowLyra blog"
+      subtitle="Product updates, operational playbooks, and support/sales best practices."
+    >
+      <>
+        <section className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
+          <div className="grid gap-4">
+            {loading ? <Card className="p-6 text-sm text-slate-500">Loading posts...</Card> : null}
+            {!loading && posts.length === 0 ? <Card className="p-6 text-sm text-slate-500">No posts published yet.</Card> : null}
+            {posts.map((post) => (
+              <Card key={post.id} className="p-6">
+                <div className="text-xs font-black uppercase text-slate-500">{post.published_at ? formatDate(post.published_at) : "Draft"}</div>
+                <h2 className="mt-2 text-2xl font-black text-slate-950"><Link to={`/blog/${post.slug}`} className="hover:underline">{post.title}</Link></h2>
+                <p className="mt-2 text-sm leading-7 text-slate-600">{post.excerpt || "No excerpt provided."}</p>
+                {post.tags.length ? <div className="mt-3 flex flex-wrap gap-2">{post.tags.map((tag) => <span key={tag} className="rounded-full border border-slate-200 px-2 py-1 text-xs font-bold text-slate-600">{tag}</span>)}</div> : null}
+              </Card>
+            ))}
+          </div>
+        </section>
+      </>
+    </PublicLayout>
+  );
+}
+
+export function BlogPostPage(): JSX.Element {
+  const { slug = "" } = useParams();
+  const [post, setPost] = useState<PublicBlogPost | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+    if (!slug) return () => {
+      alive = false;
+    };
+    void api.get<{ item: PublicBlogPost }>(`/public/blog/posts/${slug}`)
+      .then(({ data }) => {
+        if (!alive) return;
+        setPost(data.item ?? null);
+      })
+      .catch(() => {
+        if (!alive) return;
+        setPost(null);
+      })
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [slug]);
+
+  return (
+    <PublicLayout
+      title={post?.title || "Blog article"}
+      subtitle={post?.excerpt || "Latest updates from the FlowLyra team."}
+    >
+      <>
+        <section className="mx-auto w-full max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
+          {loading ? <Card className="p-6 text-sm text-slate-500">Loading article...</Card> : null}
+          {!loading && !post ? <Card className="p-6 text-sm text-slate-500">Article not found.</Card> : null}
+          {post ? (
+            <Card className="p-6 sm:p-8">
+              <div className="text-xs font-black uppercase text-slate-500">{post.published_at ? formatDate(post.published_at) : "Draft"}</div>
+              <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">{post.title}</h1>
+              {post.tags.length ? <div className="mt-3 flex flex-wrap gap-2">{post.tags.map((tag) => <span key={tag} className="rounded-full border border-slate-200 px-2 py-1 text-xs font-bold text-slate-600">{tag}</span>)}</div> : null}
+              <div className="prose prose-slate mt-6 max-w-none">
+                {renderMarkdownAsParagraphs(post.content_markdown)}
+              </div>
+            </Card>
+          ) : null}
         </section>
       </>
     </PublicLayout>
@@ -845,6 +1007,25 @@ export function SignupPage(): JSX.Element {
       </>
     </PublicLayout>
   );
+}
+
+function renderMarkdownAsParagraphs(markdown: string): JSX.Element[] {
+  return markdown
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line, index) => {
+      if (line.startsWith("### ")) return <h3 key={`${index}:${line}`} className="mt-6 text-xl font-black">{line.slice(4)}</h3>;
+      if (line.startsWith("## ")) return <h2 key={`${index}:${line}`} className="mt-8 text-2xl font-black">{line.slice(3)}</h2>;
+      if (line.startsWith("# ")) return <h1 key={`${index}:${line}`} className="mt-8 text-3xl font-black">{line.slice(2)}</h1>;
+      return <p key={`${index}:${line}`}>{line}</p>;
+    });
+}
+
+function formatDate(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(date);
 }
 
 export function NotFoundPage(): JSX.Element {

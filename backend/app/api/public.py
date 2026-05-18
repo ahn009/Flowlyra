@@ -3,8 +3,8 @@ import json
 import secrets
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings
@@ -13,6 +13,7 @@ from app.db.session import get_db
 from app.models.analytics_event import AnalyticsEvent
 from app.models.contact import Contact
 from app.models.organization import Organization
+from app.models.polish import MarketingPost, StatusIncident
 from app.models.ticket import Ticket, TicketComment, TicketPortalToken
 from app.schemas.public import ContactRequest
 from app.schemas.ticket import InboundEmailPayload, PortalTicketCreate, PortalTicketReply, TicketOut
@@ -29,6 +30,34 @@ PIXEL_GIF = (
     b",\x00\x00\x00\x00\x01\x00\x01\x00\x00"
     b"\x02\x02D\x01\x00;"
 )
+
+
+def _incident_out(row: StatusIncident) -> dict:
+    return {
+        "id": str(row.id),
+        "title": row.title,
+        "body": row.body,
+        "status": row.status,
+        "impact": row.impact,
+        "components": list((row.components or {}).get("items") or []),
+        "started_at": row.started_at.isoformat() if row.started_at else None,
+        "resolved_at": row.resolved_at.isoformat() if row.resolved_at else None,
+        "updated_at": row.updated_at.isoformat() if row.updated_at else None,
+    }
+
+
+def _post_out(row: MarketingPost) -> dict:
+    return {
+        "id": str(row.id),
+        "slug": row.slug,
+        "title": row.title,
+        "excerpt": row.excerpt,
+        "content_markdown": row.content_markdown,
+        "cover_image_url": row.cover_image_url,
+        "tags": list((row.tags or {}).get("items") or []),
+        "published_at": row.published_at.isoformat() if row.published_at else None,
+        "updated_at": row.updated_at.isoformat() if row.updated_at else None,
+    }
 
 
 @router.post("/contact")
@@ -50,6 +79,80 @@ async def contact(payload: ContactRequest) -> dict:
 @router.get("/client-ip")
 async def client_ip(request: Request) -> dict:
     return {"ip": request.client.host if request.client else None}
+
+
+@router.get("/status/incidents")
+async def public_status_incidents(
+    db: AsyncSession = Depends(get_db),
+    org_slug: str | None = None,
+    limit: int = Query(30, ge=1, le=200),
+) -> dict:
+    org_id: uuid.UUID | None = None
+    if org_slug:
+        org = (
+            await db.execute(select(Organization).where(Organization.slug == org_slug, Organization.is_active.is_(True)))
+        ).scalar_one_or_none()
+        if org is not None:
+            org_id = org.id
+    stmt = select(StatusIncident).where(StatusIncident.is_public.is_(True))
+    if org_id is not None:
+        stmt = stmt.where(StatusIncident.organization_id == org_id)
+    rows = (
+        await db.execute(stmt.order_by(StatusIncident.started_at.desc(), StatusIncident.created_at.desc()).limit(limit))
+    ).scalars().all()
+    return {"items": [_incident_out(row) for row in rows]}
+
+
+@router.get("/blog/posts")
+async def public_blog_posts(
+    db: AsyncSession = Depends(get_db),
+    org_slug: str | None = None,
+    q: str | None = None,
+    limit: int = Query(30, ge=1, le=200),
+) -> dict:
+    org_id: uuid.UUID | None = None
+    if org_slug:
+        org = (
+            await db.execute(select(Organization).where(Organization.slug == org_slug, Organization.is_active.is_(True)))
+        ).scalar_one_or_none()
+        if org is not None:
+            org_id = org.id
+    stmt = select(MarketingPost).where(MarketingPost.is_published.is_(True))
+    if org_id is not None:
+        stmt = stmt.where(MarketingPost.organization_id == org_id)
+    if q:
+        like = f"%{q.strip()}%"
+        stmt = stmt.where(
+            or_(
+                MarketingPost.title.ilike(like),
+                MarketingPost.excerpt.ilike(like),
+                MarketingPost.content_markdown.ilike(like),
+            )
+        )
+    rows = (
+        await db.execute(
+            stmt.order_by(MarketingPost.published_at.desc().nullslast(), MarketingPost.created_at.desc()).limit(limit)
+        )
+    ).scalars().all()
+    return {"items": [_post_out(row) for row in rows]}
+
+
+@router.get("/blog/posts/{slug}")
+async def public_blog_post(slug: str, db: AsyncSession = Depends(get_db), org_slug: str | None = None) -> dict:
+    org_id: uuid.UUID | None = None
+    if org_slug:
+        org = (
+            await db.execute(select(Organization).where(Organization.slug == org_slug, Organization.is_active.is_(True)))
+        ).scalar_one_or_none()
+        if org is not None:
+            org_id = org.id
+    stmt = select(MarketingPost).where(MarketingPost.slug == slug, MarketingPost.is_published.is_(True))
+    if org_id is not None:
+        stmt = stmt.where(MarketingPost.organization_id == org_id)
+    row = (await db.execute(stmt.order_by(MarketingPost.created_at.desc()))).scalars().first()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return {"item": _post_out(row)}
 
 
 @router.get("/pixel.gif")

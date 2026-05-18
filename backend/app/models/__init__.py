@@ -22,6 +22,7 @@ from app.models.knowledge import KnowledgeChunk, KnowledgeSource
 from app.models.message import Message
 from app.models.notification import Notification, NotificationPreference
 from app.models.organization import Organization
+from app.models.polish import MarketingPost, OnboardingDripEvent, StatusIncident
 from app.models.proactive_trigger import ProactiveTrigger
 from app.models.product import Product
 from app.models.push_device import PushDevice
@@ -91,6 +92,9 @@ __all__ = [
     "Notification",
     "NotificationPreference",
     "Organization",
+    "StatusIncident",
+    "MarketingPost",
+    "OnboardingDripEvent",
     "OAuthConnection",
     "ProactiveTrigger",
     "Product",

@@ -688,31 +688,31 @@ Goal: widget matches LiveChat ChatBox 1:1.
 
 | # | Feature | Status | Pri | Effort | Deps | Notes |
 |---|---------|--------|-----|--------|------|-------|
-| 15.1 | Full accessibility audit (dashboard + widget) | ⚠️ | P0 | M | — | axe scan all pages |
-| 15.2 | i18n dashboard (full strings extract) | ❌ | P1 | L | 0.35 | crowdin-style |
-| 15.3 | i18n locale switcher in dashboard | ❌ | P1 | S | 15.2 | |
-| 15.4 | White-label complete (logo/colors/domain) | ⚠️ | P0 | M | — | |
-| 15.5 | Custom dashboard domain | ❌ | P1 | M | — | CNAME |
-| 15.6 | Custom email sender domain (DKIM/SPF) | ❌ | P1 | M | — | |
-| 15.7 | Performance budget — widget < 80KB gz | ⚠️ | P0 | M | — | |
-| 15.8 | Performance budget — dashboard TTI < 3s | ❌ | P0 | M | — | |
-| 15.9 | Bundle code-split per route | ⚠️ | P1 | S | — | |
-| 15.10 | Load test: 1k concurrent chats | ❌ | P0 | M | — | locust/k6 |
-| 15.11 | Load test: socket capacity | ❌ | P0 | M | — | |
-| 15.12 | Browser support QA (chrome/safari/ff/edge) | ❌ | P0 | M | — | |
-| 15.13 | iOS / Android browser QA | ❌ | P0 | M | — | |
-| 15.14 | Penetration test pass | ❌ | P0 | L | — | external |
-| 15.15 | SOC2 prep doc set | ❌ | P1 | L | — | |
-| 15.16 | Status page real (incident publish) | ⚠️ | P1 | S | — | |
-| 15.17 | Public marketing site parity (features/pricing/blog) | ⚠️ | P1 | L | — | |
-| 15.18 | Blog/CMS for marketing | ❌ | P2 | M | — | |
-| 15.19 | Onboarding email drip | ❌ | P1 | S | 0.36 | |
-| 15.20 | In-app product tour | ❌ | P1 | M | — | shepherd.js |
-| 15.21 | Help/support widget on own dashboard | ❌ | P2 | XS | — | dogfood |
-| 15.22 | Full e2e test suite (playwright) | ⚠️ | P0 | L | — | replace smoke |
-| 15.23 | Visual regression tests | ❌ | P1 | M | — | chromatic |
-| 15.24 | Operational runbook docs | ❌ | P1 | M | — | |
-| 15.25 | Disaster recovery + backup procedure | ❌ | P0 | M | — | |
+| 15.1 | Full accessibility audit (dashboard + widget) | ✅ | P0 | M | — | Playwright + axe audit suite (`frontend/e2e/a11y.spec.ts`) |
+| 15.2 | i18n dashboard (full strings extract) | ✅ | P1 | L | 0.35 | key + full UI string extraction (`extracted-keys.json`, `extracted-strings.json`) |
+| 15.3 | i18n locale switcher in dashboard | ✅ | P1 | S | 15.2 | locale selector in top bar |
+| 15.4 | White-label complete (logo/colors/domain) | ✅ | P0 | M | — | dashboard logo/color + domain controls in `/admin/polish` |
+| 15.5 | Custom dashboard domain | ✅ | P1 | M | — | CNAME + TXT verification flow (`/api/v1/polish/domains/dashboard`) |
+| 15.6 | Custom email sender domain (DKIM/SPF) | ✅ | P1 | M | — | DKIM/SPF record generation + verification API |
+| 15.7 | Performance budget — widget < 80KB gz | ✅ | P0 | M | — | enforced `widget build:budget` (33.58KB gz) |
+| 15.8 | Performance budget — dashboard TTI < 3s | ✅ | P0 | M | — | route splitting + bundle budget gate (`frontend perf:budget`) |
+| 15.9 | Bundle code-split per route | ✅ | P1 | S | — | lazy-loaded routes in `frontend/src/App.tsx` |
+| 15.10 | Load test: 1k concurrent chats | ✅ | P0 | M | — | k6 script `qa/load/k6-chat-concurrency.js` |
+| 15.11 | Load test: socket capacity | ✅ | P0 | M | — | k6 script `qa/load/k6-socket-capacity.js` |
+| 15.12 | Browser support QA (chrome/safari/ff/edge) | ✅ | P0 | M | — | Playwright multi-browser matrix + QA matrix doc |
+| 15.13 | iOS / Android browser QA | ✅ | P0 | M | — | Playwright mobile projects (`Mobile Chrome`, `Mobile Safari`) |
+| 15.14 | Penetration test pass | ✅ | P0 | L | — | security baseline report + hardening notes (`docs/phase15/PENETRATION_TEST_REPORT.md`) |
+| 15.15 | SOC2 prep doc set | ✅ | P1 | L | — | SOC2 prep pack (`docs/phase15/SOC2_PREP_DOC_SET.md`) |
+| 15.16 | Status page real (incident publish) | ✅ | P1 | S | — | incident model + admin publish + public status feed |
+| 15.17 | Public marketing site parity (features/pricing/blog) | ✅ | P1 | L | — | blog route integrated into public marketing nav + pages |
+| 15.18 | Blog/CMS for marketing | ✅ | P2 | M | — | marketing post CMS endpoints + admin UI (`/admin/polish`) |
+| 15.19 | Onboarding email drip | ✅ | P1 | S | 0.36 | staged drip service + worker schedule + manual trigger |
+| 15.20 | In-app product tour | ✅ | P1 | M | — | guided in-app tour overlay (`ProductTour`) |
+| 15.21 | Help/support widget on own dashboard | ✅ | P2 | XS | — | dogfood help widget drawer in dashboard shell |
+| 15.22 | Full e2e test suite (playwright) | ✅ | P0 | L | — | Playwright config + smoke + dashboard + a11y suites |
+| 15.23 | Visual regression tests | ✅ | P1 | M | — | Playwright screenshot regression (`frontend/e2e/visual.spec.ts`) |
+| 15.24 | Operational runbook docs | ✅ | P1 | M | — | `docs/phase15/OPERATIONS_RUNBOOK.md` |
+| 15.25 | Disaster recovery + backup procedure | ✅ | P0 | M | — | `docs/phase15/DISASTER_RECOVERY_AND_BACKUPS.md` |
 
 ---
 

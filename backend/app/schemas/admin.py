@@ -28,9 +28,18 @@ class OrgUpdate(BaseModel):
     widget_default_locale: str | None = None
     widget_supported_locales: dict | None = None
     widget_giphy_api_key: str | None = None
+    dashboard_logo_url: str | None = None
+    dashboard_primary_color: str | None = Field(default=None, pattern=r"^#[0-9A-Fa-f]{6}$")
+    dashboard_custom_domain: str | None = None
+    dashboard_domain_verification: dict | None = None
+    email_sender_domain: str | None = None
+    email_sender_verification: dict | None = None
+    status_page_public: bool | None = None
+    help_widget_enabled: bool | None = None
     operating_hours: dict | None = None
     sla_config: dict | None = None
     timezone: str | None = None
+    feature_flags: dict | None = None
 
 
 class TeamCreate(BaseModel):

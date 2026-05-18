@@ -1,51 +1,82 @@
+import { lazy, Suspense, useEffect, useState } from "react";
+import type { ComponentType } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { AgentLayout } from "./components/AgentLayout";
-import { ArchivesPage } from "./pages/ArchivesPage";
-import { AcceptInvitePage, LoginPage, OauthCallbackPage, ResetPasswordPage } from "./pages/AuthPages";
-import { ChatPage } from "./pages/ChatPage";
-import { PublicChatPage } from "./pages/PublicChatPage";
-import { ContactsPage } from "./pages/ContactsPage";
-import { InboxPage } from "./pages/InboxPage";
-import { TicketDetailPage, TicketsPage } from "./pages/TicketsPage";
-import { AgentsPage, AnalyticsPage, BillingPage, CannedResponsesPage, InstallPage, RoutingRulesPage, TeamsPage, TriggersPage, WidgetConfigPage } from "./pages/AdminPages";
-import { AuditLogsPage } from "./pages/AuditLogsPage";
-import { SecurityPage } from "./pages/SecurityPage";
-import { NotificationPreferencesPage } from "./pages/NotificationPreferencesPage";
-import { SettingsOverviewPage } from "./pages/SettingsOverviewPage";
-import { TagsPage } from "./pages/TagsPage";
-import { KnowledgeBasePage } from "./pages/KnowledgeBasePage";
-import { ChatbotPage } from "./pages/ChatbotPage";
-import { KnowledgeSourcesPage } from "./pages/KnowledgeSourcesPage";
-import { ChannelsPage } from "./pages/ChannelsPage";
-import { EngageCampaignsPage, EngageGoalsPage, EngageTrafficPage } from "./pages/EngagePages";
-import { PublicKBArticlePage, PublicKBIndexPage } from "./pages/PublicKBPage";
-import { WebhooksPage } from "./pages/WebhooksPage";
-import { ApiKeysPage } from "./pages/ApiKeysPage";
-import { ApiChangelogPage, ApiDocsPage, ApiStatusPage } from "./pages/ApiPlatformPages";
-import { IntegrationsMarketplacePage } from "./pages/IntegrationsMarketplacePage";
-import {
-  ContactPage,
-  CustomersPage,
-  FeaturesPage,
-  HelpPage,
-  HomePage,
-  IntegrationsPage,
-  NotFoundPage,
-  PricingPage,
-  PrivacyPage,
-  ProductTourPage,
-  SignupPage,
-  SolutionEnterprisePage,
-  SolutionSalesPage,
-  SolutionSupportPage,
-  StatusPage,
-  TermsPage
-} from "./pages/PublicPages";
-import { useAuthStore } from "./stores/authStore";
+
+import { useI18n } from "./i18n/I18nProvider";
 import { registerNotificationSoundUnlock } from "./lib/notificationSound";
+import { useAuthStore } from "./stores/authStore";
+
+function lazyNamed(loader: () => Promise<Record<string, unknown>>, key: string) {
+  return lazy(async () => ({ default: (await loader())[key] as ComponentType<object> }));
+}
+
+const AgentLayout = lazyNamed(() => import("./components/AgentLayout"), "AgentLayout");
+const ArchivesPage = lazyNamed(() => import("./pages/ArchivesPage"), "ArchivesPage");
+const AcceptInvitePage = lazyNamed(() => import("./pages/AuthPages"), "AcceptInvitePage");
+const LoginPage = lazyNamed(() => import("./pages/AuthPages"), "LoginPage");
+const OauthCallbackPage = lazyNamed(() => import("./pages/AuthPages"), "OauthCallbackPage");
+const ResetPasswordPage = lazyNamed(() => import("./pages/AuthPages"), "ResetPasswordPage");
+const ChatPage = lazyNamed(() => import("./pages/ChatPage"), "ChatPage");
+const PublicChatPage = lazyNamed(() => import("./pages/PublicChatPage"), "PublicChatPage");
+const ContactsPage = lazyNamed(() => import("./pages/ContactsPage"), "ContactsPage");
+const InboxPage = lazyNamed(() => import("./pages/InboxPage"), "InboxPage");
+const TicketDetailPage = lazyNamed(() => import("./pages/TicketsPage"), "TicketDetailPage");
+const TicketsPage = lazyNamed(() => import("./pages/TicketsPage"), "TicketsPage");
+const AgentsPage = lazyNamed(() => import("./pages/AdminPages"), "AgentsPage");
+const AnalyticsPage = lazyNamed(() => import("./pages/AdminPages"), "AnalyticsPage");
+const BillingPage = lazyNamed(() => import("./pages/AdminPages"), "BillingPage");
+const CannedResponsesPage = lazyNamed(() => import("./pages/AdminPages"), "CannedResponsesPage");
+const InstallPage = lazyNamed(() => import("./pages/AdminPages"), "InstallPage");
+const RoutingRulesPage = lazyNamed(() => import("./pages/AdminPages"), "RoutingRulesPage");
+const TeamsPage = lazyNamed(() => import("./pages/AdminPages"), "TeamsPage");
+const TriggersPage = lazyNamed(() => import("./pages/AdminPages"), "TriggersPage");
+const WidgetConfigPage = lazyNamed(() => import("./pages/AdminPages"), "WidgetConfigPage");
+const AuditLogsPage = lazyNamed(() => import("./pages/AuditLogsPage"), "AuditLogsPage");
+const SecurityPage = lazyNamed(() => import("./pages/SecurityPage"), "SecurityPage");
+const NotificationPreferencesPage = lazyNamed(() => import("./pages/NotificationPreferencesPage"), "NotificationPreferencesPage");
+const SettingsOverviewPage = lazyNamed(() => import("./pages/SettingsOverviewPage"), "SettingsOverviewPage");
+const TagsPage = lazyNamed(() => import("./pages/TagsPage"), "TagsPage");
+const KnowledgeBasePage = lazyNamed(() => import("./pages/KnowledgeBasePage"), "KnowledgeBasePage");
+const ChatbotPage = lazyNamed(() => import("./pages/ChatbotPage"), "ChatbotPage");
+const KnowledgeSourcesPage = lazyNamed(() => import("./pages/KnowledgeSourcesPage"), "KnowledgeSourcesPage");
+const ChannelsPage = lazyNamed(() => import("./pages/ChannelsPage"), "ChannelsPage");
+const EngageCampaignsPage = lazyNamed(() => import("./pages/EngagePages"), "EngageCampaignsPage");
+const EngageGoalsPage = lazyNamed(() => import("./pages/EngagePages"), "EngageGoalsPage");
+const EngageTrafficPage = lazyNamed(() => import("./pages/EngagePages"), "EngageTrafficPage");
+const PublicKBArticlePage = lazyNamed(() => import("./pages/PublicKBPage"), "PublicKBArticlePage");
+const PublicKBIndexPage = lazyNamed(() => import("./pages/PublicKBPage"), "PublicKBIndexPage");
+const WebhooksPage = lazyNamed(() => import("./pages/WebhooksPage"), "WebhooksPage");
+const ApiKeysPage = lazyNamed(() => import("./pages/ApiKeysPage"), "ApiKeysPage");
+const ApiChangelogPage = lazyNamed(() => import("./pages/ApiPlatformPages"), "ApiChangelogPage");
+const ApiDocsPage = lazyNamed(() => import("./pages/ApiPlatformPages"), "ApiDocsPage");
+const ApiStatusPage = lazyNamed(() => import("./pages/ApiPlatformPages"), "ApiStatusPage");
+const IntegrationsMarketplacePage = lazyNamed(() => import("./pages/IntegrationsMarketplacePage"), "IntegrationsMarketplacePage");
+const BlogPage = lazyNamed(() => import("./pages/PublicPages"), "BlogPage");
+const BlogPostPage = lazyNamed(() => import("./pages/PublicPages"), "BlogPostPage");
+const ContactPage = lazyNamed(() => import("./pages/PublicPages"), "ContactPage");
+const CustomersPage = lazyNamed(() => import("./pages/PublicPages"), "CustomersPage");
+const FeaturesPage = lazyNamed(() => import("./pages/PublicPages"), "FeaturesPage");
+const HelpPage = lazyNamed(() => import("./pages/PublicPages"), "HelpPage");
+const HomePage = lazyNamed(() => import("./pages/PublicPages"), "HomePage");
+const IntegrationsPage = lazyNamed(() => import("./pages/PublicPages"), "IntegrationsPage");
+const NotFoundPage = lazyNamed(() => import("./pages/PublicPages"), "NotFoundPage");
+const PricingPage = lazyNamed(() => import("./pages/PublicPages"), "PricingPage");
+const PrivacyPage = lazyNamed(() => import("./pages/PublicPages"), "PrivacyPage");
+const ProductTourPage = lazyNamed(() => import("./pages/PublicPages"), "ProductTourPage");
+const SignupPage = lazyNamed(() => import("./pages/PublicPages"), "SignupPage");
+const SolutionEnterprisePage = lazyNamed(() => import("./pages/PublicPages"), "SolutionEnterprisePage");
+const SolutionSalesPage = lazyNamed(() => import("./pages/PublicPages"), "SolutionSalesPage");
+const SolutionSupportPage = lazyNamed(() => import("./pages/PublicPages"), "SolutionSupportPage");
+const StatusPage = lazyNamed(() => import("./pages/PublicPages"), "StatusPage");
+const TermsPage = lazyNamed(() => import("./pages/PublicPages"), "TermsPage");
+const Phase15OpsPage = lazyNamed(() => import("./pages/Phase15OpsPage"), "Phase15OpsPage");
+
+function ScreenFallback(): JSX.Element {
+  return <div className="grid min-h-[40vh] place-items-center text-sm font-semibold text-slate-500">Loading...</div>;
+}
 
 function AuthGuard(): JSX.Element {
+  const { t } = useI18n();
   const user = useAuthStore((state) => state.user);
   const accessToken = useAuthStore((state) => state.accessToken);
   const refreshTokenValue = useAuthStore((state) => state.refreshTokenValue);
@@ -79,7 +110,7 @@ function AuthGuard(): JSX.Element {
     };
   }, [logout, refreshToken, refreshTokenValue, user]);
 
-  if (!checked) return <div className="grid min-h-screen place-items-center bg-surface text-sm font-semibold text-slate-500">Checking session...</div>;
+  if (!checked) return <div className="grid min-h-screen place-items-center bg-surface text-sm font-semibold text-slate-500">{t("auth.checkingSession")}</div>;
   if (!user || !accessToken) return <Navigate to="/login" replace />;
   return <AgentLayout />;
 }
@@ -90,67 +121,72 @@ export function App(): JSX.Element {
   }, []);
 
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/features" element={<FeaturesPage />} />
-      <Route path="/pricing" element={<PricingPage />} />
-      <Route path="/solutions/customer-support" element={<SolutionSupportPage />} />
-      <Route path="/solutions/sales-marketing" element={<SolutionSalesPage />} />
-      <Route path="/solutions/enterprise" element={<SolutionEnterprisePage />} />
-      <Route path="/integrations" element={<IntegrationsPage />} />
-      <Route path="/customers" element={<CustomersPage />} />
-      <Route path="/product-tour" element={<ProductTourPage />} />
-      <Route path="/help" element={<HelpPage />} />
-      <Route path="/contact" element={<ContactPage />} />
-      <Route path="/status" element={<StatusPage />} />
-      <Route path="/privacy" element={<PrivacyPage />} />
-      <Route path="/terms" element={<TermsPage />} />
-      <Route path="/signup" element={<SignupPage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/invite/:token" element={<AcceptInvitePage />} />
-      <Route path="/reset-password" element={<ResetPasswordPage />} />
-      <Route path="/auth/callback" element={<OauthCallbackPage />} />
-      <Route path="/chat/:wsId" element={<PublicChatPage />} />
-      <Route path="/api-docs" element={<ApiDocsPage />} />
-      <Route path="/api-changelog" element={<ApiChangelogPage />} />
-      <Route path="/api-status" element={<ApiStatusPage />} />
-      <Route path="/kb/:orgSlug" element={<PublicKBIndexPage />} />
-      <Route path="/kb/:orgSlug/:slug" element={<PublicKBArticlePage />} />
-      <Route element={<AuthGuard />}>
-        <Route path="/app" element={<Navigate to="/inbox" replace />} />
-        <Route path="/inbox" element={<InboxPage />} />
-        <Route path="/archives" element={<ArchivesPage />} />
-        <Route path="/inbox/chat/:id" element={<ChatPage />} />
-        <Route path="/tickets" element={<TicketsPage />} />
-        <Route path="/ticket/:id" element={<TicketDetailPage />} />
-        <Route path="/contacts" element={<ContactsPage />} />
-        <Route path="/admin/agents" element={<AgentsPage />} />
-        <Route path="/admin/teams" element={<TeamsPage />} />
-        <Route path="/admin/widget" element={<WidgetConfigPage />} />
-        <Route path="/admin/install" element={<InstallPage />} />
-        <Route path="/admin/routing" element={<RoutingRulesPage />} />
-        <Route path="/admin/triggers" element={<TriggersPage />} />
-        <Route path="/admin/canned" element={<CannedResponsesPage />} />
-        <Route path="/admin/kb" element={<KnowledgeBasePage />} />
-        <Route path="/admin/chatbot" element={<ChatbotPage />} />
-        <Route path="/admin/ai-knowledge" element={<KnowledgeSourcesPage />} />
-        <Route path="/admin/channels" element={<ChannelsPage />} />
-        <Route path="/admin/analytics" element={<AnalyticsPage />} />
-        <Route path="/engage/traffic" element={<EngageTrafficPage />} />
-        <Route path="/engage/campaigns" element={<EngageCampaignsPage />} />
-        <Route path="/engage/campaigns/new" element={<EngageCampaignsPage />} />
-        <Route path="/engage/goals" element={<EngageGoalsPage />} />
-        <Route path="/admin/billing" element={<BillingPage />} />
-        <Route path="/settings" element={<SettingsOverviewPage />} />
-        <Route path="/settings/audit" element={<AuditLogsPage />} />
-        <Route path="/settings/security" element={<SecurityPage />} />
-        <Route path="/settings/webhooks" element={<WebhooksPage />} />
-        <Route path="/settings/api" element={<ApiKeysPage />} />
-        <Route path="/settings/integrations" element={<IntegrationsMarketplacePage />} />
-        <Route path="/settings/tags" element={<TagsPage />} />
-        <Route path="/settings/notifications" element={<NotificationPreferencesPage />} />
-      </Route>
-      <Route path="*" element={<NotFoundPage />} />
-    </Routes>
+    <Suspense fallback={<ScreenFallback />}>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/features" element={<FeaturesPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/solutions/customer-support" element={<SolutionSupportPage />} />
+        <Route path="/solutions/sales-marketing" element={<SolutionSalesPage />} />
+        <Route path="/solutions/enterprise" element={<SolutionEnterprisePage />} />
+        <Route path="/integrations" element={<IntegrationsPage />} />
+        <Route path="/customers" element={<CustomersPage />} />
+        <Route path="/product-tour" element={<ProductTourPage />} />
+        <Route path="/help" element={<HelpPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/status" element={<StatusPage />} />
+        <Route path="/blog" element={<BlogPage />} />
+        <Route path="/blog/:slug" element={<BlogPostPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/invite/:token" element={<AcceptInvitePage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/auth/callback" element={<OauthCallbackPage />} />
+        <Route path="/chat/:wsId" element={<PublicChatPage />} />
+        <Route path="/api-docs" element={<ApiDocsPage />} />
+        <Route path="/api-changelog" element={<ApiChangelogPage />} />
+        <Route path="/api-status" element={<ApiStatusPage />} />
+        <Route path="/kb/:orgSlug" element={<PublicKBIndexPage />} />
+        <Route path="/kb/:orgSlug/:slug" element={<PublicKBArticlePage />} />
+        <Route element={<AuthGuard />}>
+          <Route path="/app" element={<Navigate to="/inbox" replace />} />
+          <Route path="/inbox" element={<InboxPage />} />
+          <Route path="/archives" element={<ArchivesPage />} />
+          <Route path="/inbox/chat/:id" element={<ChatPage />} />
+          <Route path="/tickets" element={<TicketsPage />} />
+          <Route path="/ticket/:id" element={<TicketDetailPage />} />
+          <Route path="/contacts" element={<ContactsPage />} />
+          <Route path="/admin/agents" element={<AgentsPage />} />
+          <Route path="/admin/teams" element={<TeamsPage />} />
+          <Route path="/admin/widget" element={<WidgetConfigPage />} />
+          <Route path="/admin/install" element={<InstallPage />} />
+          <Route path="/admin/routing" element={<RoutingRulesPage />} />
+          <Route path="/admin/triggers" element={<TriggersPage />} />
+          <Route path="/admin/canned" element={<CannedResponsesPage />} />
+          <Route path="/admin/kb" element={<KnowledgeBasePage />} />
+          <Route path="/admin/chatbot" element={<ChatbotPage />} />
+          <Route path="/admin/ai-knowledge" element={<KnowledgeSourcesPage />} />
+          <Route path="/admin/channels" element={<ChannelsPage />} />
+          <Route path="/admin/analytics" element={<AnalyticsPage />} />
+          <Route path="/admin/polish" element={<Phase15OpsPage />} />
+          <Route path="/engage/traffic" element={<EngageTrafficPage />} />
+          <Route path="/engage/campaigns" element={<EngageCampaignsPage />} />
+          <Route path="/engage/campaigns/new" element={<EngageCampaignsPage />} />
+          <Route path="/engage/goals" element={<EngageGoalsPage />} />
+          <Route path="/admin/billing" element={<BillingPage />} />
+          <Route path="/settings" element={<SettingsOverviewPage />} />
+          <Route path="/settings/audit" element={<AuditLogsPage />} />
+          <Route path="/settings/security" element={<SecurityPage />} />
+          <Route path="/settings/webhooks" element={<WebhooksPage />} />
+          <Route path="/settings/api" element={<ApiKeysPage />} />
+          <Route path="/settings/integrations" element={<IntegrationsMarketplacePage />} />
+          <Route path="/settings/tags" element={<TagsPage />} />
+          <Route path="/settings/notifications" element={<NotificationPreferencesPage />} />
+        </Route>
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </Suspense>
   );
 }

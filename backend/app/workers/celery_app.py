@@ -30,6 +30,10 @@ celery_app.conf.beat_schedule = {
         "task": "app.workers.system_tasks.dispatch_scheduled_reports",
         "schedule": 300.0,
     },
+    "run-onboarding-drip": {
+        "task": "app.workers.system_tasks.run_onboarding_drip",
+        "schedule": 3600.0,
+    },
     "dispatch-channel-outbound": {
         "task": "app.workers.channel_worker.dispatch_pending_outbound",
         "schedule": 10.0,

@@ -14,8 +14,10 @@ from app.models.user import User
 from app.models.webhook import WebhookDelivery
 from app.models.report_schedule import ReportSchedule
 from app.models.ecommerce import Cart
+from app.models.organization import Organization
 from app.services.email_service import send_email
 from app.services.notification_service import dispatch_due_email_digests, notify
+from app.services.onboarding_drip_service import run_onboarding_drip_for_org
 from app.workers.celery_app import celery_app
 
 logger = logging.getLogger(__name__)
@@ -144,6 +146,20 @@ def dispatch_notification_digests() -> dict[str, int]:
             hourly = await dispatch_due_email_digests(db, "hourly")
             daily = await dispatch_due_email_digests(db, "daily")
             return {"hourly": hourly, "daily": daily}
+
+    return asyncio.run(_run())
+
+
+@celery_app.task(name="app.workers.system_tasks.run_onboarding_drip")
+def run_onboarding_drip() -> dict[str, int]:
+    async def _run() -> dict[str, int]:
+        async with AsyncSessionLocal() as db:
+            org_ids = (await db.execute(select(Organization.id).where(Organization.is_active.is_(True)))).scalars().all()
+            sent = 0
+            for org_id in org_ids:
+                sent += await run_onboarding_drip_for_org(db, organization_id=org_id)
+            await db.commit()
+            return {"organizations": len(org_ids), "sent": sent}
 
     return asyncio.run(_run())
 

@@ -1,0 +1,114 @@
+{
+  "generated_at": "2026-05-18T15:43:47.962Z",
+  "total_keys": 18,
+  "keys": [
+    {
+      "key": "auth.checkingSession",
+      "files": [
+        "App.tsx"
+      ]
+    },
+    {
+      "key": "layout.command.noResults",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "key": "layout.commandPalette",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "key": "layout.language",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "key": "layout.logout",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "key": "layout.notifications.clear",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "key": "layout.notifications.emptySubtitle",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "key": "layout.notifications.emptyTitle",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "key": "layout.notifications.read",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "key": "layout.notifications.recent",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "key": "layout.notifications.subtitle",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "key": "layout.notifications.testSound",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "key": "layout.notifications.title",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "key": "layout.searchPlaceholder",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "key": "layout.status.away",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "key": "layout.status.busy",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "key": "layout.status.offline",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    },
+    {
+      "key": "layout.status.online",
+      "files": [
+        "components/AgentLayout.tsx"
+      ]
+    }
+  ]
+}

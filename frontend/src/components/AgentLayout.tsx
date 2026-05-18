@@ -1,4 +1,4 @@
-import { Bell, Bot, BrainCircuit, CheckCheck, ChevronLeft, ClipboardList, Code2, Contact, Inbox, LayoutDashboard, LifeBuoy, Lock, LogOut, Menu, Plug, Search, Send, Settings, Sparkles, Tag, Ticket, Trash2, UserPlus, Users, X } from "lucide-react";
+import { Bell, Bot, BrainCircuit, CheckCheck, ChevronLeft, ClipboardList, Code2, Contact, Inbox, LayoutDashboard, LifeBuoy, Lock, LogOut, Menu, Plug, Search, Send, Settings, Sparkles, Tag, Ticket, Trash2, UserPlus, Users, WandSparkles, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
@@ -12,6 +12,8 @@ import { Button, Pill, ThemeToggle } from "./ui";
 import flowlyraMark from "../assets/flowlyra-mark.svg";
 import type { Notification } from "../types";
 import { playIncomingChatSound, unlockNotificationSound } from "../lib/notificationSound";
+import { useI18n } from "../i18n/I18nProvider";
+import { ProductTour } from "./ProductTour";
 
 const nav = [
   { section: "Conversations", items: [
@@ -41,6 +43,9 @@ const nav = [
     { to: "/settings/api", label: "API Keys", icon: Lock },
     { to: "/settings/webhooks", label: "Webhooks", icon: Plug },
     { to: "/settings/integrations", label: "Integrations", icon: Plug }
+  ] },
+  { section: "Phase 15", items: [
+    { to: "/admin/polish", label: "Polish QA", icon: WandSparkles }
   ] }
 ];
 
@@ -59,6 +64,7 @@ interface NotificationListResponse {
 }
 
 export function AgentLayout(): JSX.Element {
+  const { locale, setLocale, supportedLocales, t } = useI18n();
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const unread = useNotificationStore((state) => state.unread);
@@ -73,11 +79,27 @@ export function AgentLayout(): JSX.Element {
   const [commandOpen, setCommandOpen] = useState(false);
   const [commandQuery, setCommandQuery] = useState("");
   const [commandResults, setCommandResults] = useState<Array<{ type: "chat" | "ticket" | "contact" | "nav"; id: string; label: string; href: string }>>([]);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
   const notificationPanelRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const sidebarWidth = collapsed ? "md:w-16" : "md:w-64";
   const contentOffset = collapsed ? "pl-0 md:pl-16" : "pl-0 md:pl-64";
+  const orgQuery = useQuery({
+    queryKey: ["org", "layout"],
+    queryFn: async () => (await api.get("/admin/org")).data as {
+      slug: string;
+      dashboard_logo_url?: string | null;
+      dashboard_primary_color?: string | null;
+      help_widget_enabled?: boolean;
+    },
+    staleTime: 60000,
+  });
+  const dashboardLogo = orgQuery.data?.dashboard_logo_url || flowlyraMark;
+  const dashboardColor = orgQuery.data?.dashboard_primary_color || "#0f172a";
+  const helpWidgetEnabled = orgQuery.data?.help_widget_enabled !== false;
+  const helpChatUrl = orgQuery.data?.slug ? `/chat/${orgQuery.data.slug}` : "/help";
   const notificationsQuery = useQuery({
     queryKey: ["notifications", "center"],
     queryFn: async () => (await api.get<NotificationListResponse>("/notifications", { params: { limit: 50 } })).data,
@@ -153,6 +175,12 @@ export function AgentLayout(): JSX.Element {
   }, []);
 
   useEffect(() => {
+    const key = "flowlyra.productTour.dismissed";
+    const dismissed = window.localStorage.getItem(key);
+    if (!dismissed) setTourOpen(true);
+  }, []);
+
+  useEffect(() => {
     if (!commandOpen) return;
     const query = commandQuery.trim();
     if (!query) {
@@ -216,7 +244,7 @@ export function AgentLayout(): JSX.Element {
       <Toaster position="top-right" />
       <aside className={`fixed inset-y-0 left-0 z-20 hidden border-r border-border bg-white/95 text-slate-800 shadow-[0_1px_2px_rgba(16,24,40,0.04)] backdrop-blur dark:bg-slate-950/95 dark:text-slate-100 md:block ${sidebarWidth}`}>
         <div className="flex h-16 items-center justify-center border-b border-border px-2 md:justify-between md:px-4">
-          {!collapsed && <div className="hidden items-center gap-3 md:flex"><img src={flowlyraMark} alt="FlowLyra logo" className="h-9 w-9 rounded-xl" /><span className="font-extrabold tracking-tight">FlowLyra</span></div>}
+          {!collapsed && <div className="hidden items-center gap-3 md:flex"><img src={dashboardLogo} alt="FlowLyra logo" className="h-9 w-9 rounded-xl" /><span className="font-extrabold tracking-tight">FlowLyra</span></div>}
           <button aria-label="Toggle navigation" className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white" onClick={() => setCollapsed((value) => !value)}>
             {collapsed ? <Menu size={18} /> : <ChevronLeft size={18} />}
           </button>
@@ -253,7 +281,7 @@ export function AgentLayout(): JSX.Element {
           <button type="button" className="absolute inset-0 bg-slate-900/50" aria-label="Close navigation drawer" onClick={() => setMobileNavOpen(false)} />
           <aside className="absolute inset-y-0 left-0 w-72 border-r border-border bg-white text-slate-800 shadow-2xl dark:bg-slate-950 dark:text-slate-100">
             <div className="flex h-16 items-center justify-between border-b border-border px-4">
-              <div className="flex items-center gap-3"><img src={flowlyraMark} alt="FlowLyra logo" className="h-9 w-9 rounded-xl" /><span className="font-extrabold tracking-tight">FlowLyra</span></div>
+              <div className="flex items-center gap-3"><img src={dashboardLogo} alt="FlowLyra logo" className="h-9 w-9 rounded-xl" /><span className="font-extrabold tracking-tight">FlowLyra</span></div>
               <button aria-label="Close navigation" className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white" onClick={() => setMobileNavOpen(false)}><X size={18} /></button>
             </div>
             <nav className="grid gap-4 p-3">
@@ -292,25 +320,42 @@ export function AgentLayout(): JSX.Element {
               <Search size={16} />
               <input
                 className="w-full bg-transparent outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500 dark:text-slate-200"
-                placeholder="Search chats, tickets, contacts (Cmd/Ctrl+K)"
+                placeholder={t("layout.searchPlaceholder")}
                 value={commandQuery}
                 onFocus={() => setCommandOpen(true)}
                 onChange={(event) => setCommandQuery(event.target.value)}
               />
             </label>
             <select className="max-w-[112px] rounded-xl border border-border bg-white px-2 py-2 text-sm font-semibold sm:max-w-none sm:px-3 dark:bg-slate-900 dark:text-slate-200">
-              <option>online</option>
-              <option>busy</option>
-              <option>away</option>
-              <option>offline</option>
+              <option>{t("layout.status.online")}</option>
+              <option>{t("layout.status.busy")}</option>
+              <option>{t("layout.status.away")}</option>
+              <option>{t("layout.status.offline")}</option>
+            </select>
+            <label className="sr-only" htmlFor="dashboard-locale">{t("layout.language")}</label>
+            <select
+              id="dashboard-locale"
+              className="max-w-[116px] rounded-xl border border-border bg-white px-2 py-2 text-sm font-semibold uppercase sm:max-w-none sm:px-3 dark:bg-slate-900 dark:text-slate-200"
+              value={locale}
+              onChange={(event) => setLocale(event.target.value as "en" | "es")}
+            >
+              {supportedLocales.map((code) => (
+                <option key={code} value={code}>{code}</option>
+              ))}
             </select>
           </div>
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             <ThemeToggle />
+            <button
+              className="rounded-xl border border-border bg-white px-3 py-2 text-xs font-black text-slate-700 shadow-sm hover:bg-slate-50 focus-ring dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+              onClick={() => setTourOpen(true)}
+            >
+              Tour
+            </button>
             <div ref={notificationPanelRef} className="relative">
               <button
                 className="relative rounded-xl border border-border bg-white p-2 text-slate-700 shadow-sm hover:bg-slate-50 focus-ring dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
-                aria-label="Notifications"
+                aria-label={t("layout.notifications.title")}
                 aria-expanded={notificationsOpen}
                 onClick={() => {
                   const nextOpen = !notificationsOpen;
@@ -327,6 +372,7 @@ export function AgentLayout(): JSX.Element {
                   onClose={() => setNotificationsOpen(false)}
                   onClear={handleClearNotifications}
                   onRemove={handleRemoveNotification}
+                  t={t}
                 />
               )}
             </div>
@@ -339,7 +385,7 @@ export function AgentLayout(): JSX.Element {
               onClick={() => {
                 void logout().then(() => navigate("/login"));
               }}
-              aria-label="Logout"
+              aria-label={t("layout.logout")}
             >
               <LogOut size={18} />
             </button>
@@ -355,7 +401,7 @@ export function AgentLayout(): JSX.Element {
       {commandOpen ? (
         <div className="fixed inset-0 z-50 grid place-items-start bg-black/35 p-4 pt-24" onClick={() => setCommandOpen(false)}>
           <div className="w-full max-w-2xl rounded-2xl border border-border bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="border-b border-border px-4 py-3 text-xs font-black uppercase tracking-wide text-slate-500">Command Palette</div>
+            <div className="border-b border-border px-4 py-3 text-xs font-black uppercase tracking-wide text-slate-500">{t("layout.commandPalette")}</div>
             <div className="max-h-[420px] overflow-y-auto p-2">
               {commandResults.length ? commandResults.map((row) => (
                 <button
@@ -370,22 +416,51 @@ export function AgentLayout(): JSX.Element {
                   <span className="text-sm font-semibold text-slate-800">{row.label}</span>
                   <span className="text-xs uppercase text-slate-400">{row.type}</span>
                 </button>
-              )) : <div className="p-3 text-sm text-slate-500">No results</div>}
+              )) : <div className="p-3 text-sm text-slate-500">{t("layout.command.noResults")}</div>}
             </div>
           </div>
         </div>
       ) : null}
+      {helpWidgetEnabled ? (
+        <>
+          <button
+            className="fixed bottom-5 right-5 z-40 inline-flex items-center gap-2 rounded-full px-4 py-3 text-sm font-black text-white shadow-xl"
+            style={{ backgroundColor: dashboardColor }}
+            onClick={() => setHelpOpen(true)}
+          >
+            <LifeBuoy size={16} /> Help
+          </button>
+          {helpOpen ? (
+            <div className="fixed inset-0 z-[70] bg-black/45 p-4" onClick={() => setHelpOpen(false)}>
+              <div className="ml-auto h-full w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl" onClick={(event) => event.stopPropagation()}>
+                <div className="flex items-center justify-between border-b border-border px-4 py-3">
+                  <div className="text-sm font-black text-slate-900">Support Widget (Dogfood)</div>
+                  <button className="rounded-lg p-2 text-slate-500 hover:bg-slate-100" onClick={() => setHelpOpen(false)} aria-label="Close help"><X size={16} /></button>
+                </div>
+                <iframe title="Help widget" src={helpChatUrl} className="h-[calc(100%-53px)] w-full" />
+              </div>
+            </div>
+          ) : null}
+        </>
+      ) : null}
+      <ProductTour
+        open={tourOpen}
+        onClose={() => {
+          window.localStorage.setItem("flowlyra.productTour.dismissed", "1");
+          setTourOpen(false);
+        }}
+      />
     </div>
   );
 }
 
-function NotificationCenter({ notifications, onClose, onClear, onRemove }: { notifications: Notification[]; onClose: () => void; onClear: () => void; onRemove: (id: string) => void }): JSX.Element {
+function NotificationCenter({ notifications, onClose, onClear, onRemove, t }: { notifications: Notification[]; onClose: () => void; onClear: () => void; onRemove: (id: string) => void; t: (key: string, vars?: Record<string, string | number>) => string }): JSX.Element {
   return (
     <div className="absolute right-0 top-12 z-50 w-[min(92vw,420px)] overflow-hidden rounded-3xl border border-border bg-white shadow-2xl shadow-slate-950/15 ring-1 ring-slate-950/5 dark:border-slate-700 dark:bg-slate-950 dark:shadow-black/40 dark:ring-white/10">
       <div className="flex items-start justify-between gap-3 border-b border-border bg-gradient-to-br from-blue-50 via-white to-slate-50 px-4 py-4 dark:from-slate-900 dark:via-slate-950 dark:to-blue-950/30">
         <div>
-          <div className="flex items-center gap-2 text-base font-black text-slate-950 dark:text-white"><Bell size={17} className="text-blue-600 dark:text-blue-300" /> Notifications</div>
-          <p className="mt-1 text-xs font-semibold text-slate-500 dark:text-slate-400">New chats, visitor messages, assignments, and system alerts.</p>
+          <div className="flex items-center gap-2 text-base font-black text-slate-950 dark:text-white"><Bell size={17} className="text-blue-600 dark:text-blue-300" /> {t("layout.notifications.title")}</div>
+          <p className="mt-1 text-xs font-semibold text-slate-500 dark:text-slate-400">{t("layout.notifications.subtitle")}</p>
         </div>
         <div className="flex items-center gap-1">
           <button
@@ -394,22 +469,22 @@ function NotificationCenter({ notifications, onClose, onClear, onRemove }: { not
               void unlockNotificationSound().then(() => playIncomingChatSound());
             }}
           >
-            Test sound
+            {t("layout.notifications.testSound")}
           </button>
           <button aria-label="Close notifications" className="rounded-xl p-2 text-slate-500 hover:bg-white hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white" onClick={onClose}><X size={17} /></button>
         </div>
       </div>
       <div className="flex items-center justify-between border-b border-border px-4 py-2">
-        <span className="text-xs font-black uppercase tracking-wide text-slate-500 dark:text-slate-400">{notifications.length} recent</span>
+        <span className="text-xs font-black uppercase tracking-wide text-slate-500 dark:text-slate-400">{t("layout.notifications.recent", { count: notifications.length })}</span>
         <div className="flex items-center gap-2">
-          <button className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold text-blue-700 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-blue-950/40" onClick={onClose}><CheckCheck size={14} /> Read</button>
-          <button className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold text-red-700 hover:bg-red-50 disabled:opacity-40 dark:text-red-300 dark:hover:bg-red-950/40" onClick={onClear} disabled={!notifications.length}><Trash2 size={14} /> Clear</button>
+          <button className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold text-blue-700 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-blue-950/40" onClick={onClose}><CheckCheck size={14} /> {t("layout.notifications.read")}</button>
+          <button className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold text-red-700 hover:bg-red-50 disabled:opacity-40 dark:text-red-300 dark:hover:bg-red-950/40" onClick={onClear} disabled={!notifications.length}><Trash2 size={14} /> {t("layout.notifications.clear")}</button>
         </div>
       </div>
       <div className="max-h-[420px] overflow-y-auto p-2">
         {notifications.length ? notifications.map((notification) => (
           <NotificationRow key={notification.id} notification={notification} onRemove={() => onRemove(notification.id)} />
-        )) : <div className="grid min-h-48 place-items-center px-6 py-8 text-center"><div><div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300"><Bell size={20} /></div><div className="font-black text-slate-900 dark:text-white">No notifications yet</div><p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">When a visitor messages the admin, it will appear here with the sound alert.</p></div></div>}
+        )) : <div className="grid min-h-48 place-items-center px-6 py-8 text-center"><div><div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300"><Bell size={20} /></div><div className="font-black text-slate-900 dark:text-white">{t("layout.notifications.emptyTitle")}</div><p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">{t("layout.notifications.emptySubtitle")}</p></div></div>}
       </div>
     </div>
   );

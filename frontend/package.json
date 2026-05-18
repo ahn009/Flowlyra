@@ -6,7 +6,14 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "i18n:extract": "node scripts/extract-i18n-keys.mjs",
+    "i18n:extract:full": "node scripts/extract-i18n-strings.mjs",
+    "perf:budget": "node scripts/dashboard-bundle-budget.mjs",
+    "e2e": "playwright test",
+    "e2e:mobile": "playwright test --project=\"Mobile Chrome\" --project=\"Mobile Safari\"",
+    "a11y:audit": "playwright test e2e/a11y.spec.ts",
+    "visual:test": "playwright test e2e/visual.spec.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "5.51.21",
@@ -31,6 +38,8 @@
     "@types/react": "18.3.3",
     "@types/react-dom": "18.3.0",
     "@types/react-window": "1.8.8",
+    "@axe-core/playwright": "^4.10.2",
+    "@playwright/test": "^1.55.0",
     "@vitejs/plugin-react": "4.3.1",
     "autoprefixer": "10.4.19",
     "postcss": "8.4.40",
