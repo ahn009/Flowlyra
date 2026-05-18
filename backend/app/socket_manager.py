@@ -10,7 +10,9 @@ from app.db.session import AsyncSessionLocal
 from app.middleware.auth import verify_socket_token
 from app.models.chat import Chat
 from app.models.contact import Contact
+from app.models.analytics_event import AnalyticsEvent
 from app.models.message import Message
+from app.models.session import Session
 from app.models.user import User
 from app.services.chat_service import add_message, get_chat, start_chat
 
@@ -315,6 +317,53 @@ async def join_chat(sid: str, data: dict) -> None:
 @sio.on("agent:leave:chat")
 async def leave_chat(sid: str, data: dict) -> None:
     await sio.leave_room(sid, f"chat:{data.get('chat_id')}")
+
+
+@sio.on("visitor:url:update")
+async def visitor_url_update(sid: str, data: dict) -> None:
+    session = await sio.get_session(sid)
+    if session.get("kind") != "widget":
+        return
+    chat_id_raw = data.get("chat_id") or session.get("chat_id")
+    if not chat_id_raw:
+        return
+    try:
+        chat_id = _to_uuid(chat_id_raw)
+    except Exception:
+        return
+    url = str(data.get("url") or "").strip()
+    if not url:
+        return
+    title = str(data.get("title") or "").strip() or None
+    async with AsyncSessionLocal() as db:
+        chat = await _chat_for_session(db, session, chat_id)
+        sess = (
+            await db.execute(
+                select(Session).where(Session.id == chat.session_id, Session.organization_id == chat.organization_id)
+            )
+        ).scalar_one_or_none()
+        if sess is None:
+            return
+        sess.current_url = url
+        sess.page_views = int(sess.page_views or 0) + 1
+        history = list((sess.page_history or {}).get("items") or [])
+        history.append({"url": url, "title": title, "ts": datetime.now(UTC).isoformat()})
+        sess.page_history = {"items": history[-100:]}
+        db.add(
+            AnalyticsEvent(
+                organization_id=chat.organization_id,
+                event_type="page.view",
+                contact_id=chat.contact_id,
+                chat_id=chat.id,
+                metadata_={"session_id": str(sess.id), "url": url, "title": title},
+            )
+        )
+        await db.commit()
+        await sio.emit(
+            "visitor:page:view",
+            {"chat_id": str(chat.id), "session_id": str(sess.id), "url": url, "title": title},
+            room=f"org:{chat.organization_id}",
+        )
 
 
 @sio.on("agent:status")

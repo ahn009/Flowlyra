@@ -83,6 +83,16 @@ export interface WidgetInitResponse {
   } | null;
 }
 
+export interface ProactiveTrigger {
+  id: string;
+  name: string;
+  trigger_type: string;
+  conditions: Record<string, unknown>;
+  message: string;
+  sent_count?: number;
+  is_returning?: boolean;
+}
+
 export interface MessageMetadata {
   card?: { title?: string; subtitle?: string; image_url?: string; buttons?: { label: string; url?: string; payload?: string }[] };
   carousel?: { items: MessageMetadata["card"][] };

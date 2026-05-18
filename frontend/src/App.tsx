@@ -17,6 +17,7 @@ import { KnowledgeBasePage } from "./pages/KnowledgeBasePage";
 import { ChatbotPage } from "./pages/ChatbotPage";
 import { KnowledgeSourcesPage } from "./pages/KnowledgeSourcesPage";
 import { ChannelsPage } from "./pages/ChannelsPage";
+import { EngageCampaignsPage, EngageGoalsPage, EngageTrafficPage } from "./pages/EngagePages";
 import { PublicKBArticlePage, PublicKBIndexPage } from "./pages/PublicKBPage";
 import { WebhooksPage } from "./pages/WebhooksPage";
 import {
@@ -127,6 +128,10 @@ export function App(): JSX.Element {
         <Route path="/admin/ai-knowledge" element={<KnowledgeSourcesPage />} />
         <Route path="/admin/channels" element={<ChannelsPage />} />
         <Route path="/admin/analytics" element={<AnalyticsPage />} />
+        <Route path="/engage/traffic" element={<EngageTrafficPage />} />
+        <Route path="/engage/campaigns" element={<EngageCampaignsPage />} />
+        <Route path="/engage/campaigns/new" element={<EngageCampaignsPage />} />
+        <Route path="/engage/goals" element={<EngageGoalsPage />} />
         <Route path="/admin/billing" element={<BillingPage />} />
         <Route path="/settings" element={<SettingsOverviewPage />} />
         <Route path="/settings/audit" element={<AuditLogsPage />} />

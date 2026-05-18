@@ -397,47 +397,50 @@ Goal: widget matches LiveChat ChatBox 1:1.
 
 ---
 
-# PHASE 7 — Engage / Campaigns / Goals (3 wks)
+# PHASE 7 — Engage / Campaigns / Goals (3 wks) — ✅ COMPLETE (100%)
+
+
+**Delivered 2026-05-18:** 36/36 items shipped. Backend: engage traffic/campaign/goals APIs + migration `011_phase7_engage`; Widget: proactive trigger runtime + pageview + goal attribution; Frontend: `/engage/traffic`, `/engage/campaigns`, `/engage/goals`.
 
 | # | Feature | Status | Pri | Effort | Deps | Notes |
 |---|---------|--------|-----|--------|------|-------|
-| 7.1 | Real-time visitor traffic page | ⚠️ | P0 | M | — | live list |
-| 7.2 | Visitor map view (geo) | ❌ | P1 | M | 2.28 | |
-| 7.3 | Visitor page-view tracking | ❌ | P0 | M | — | PageView model |
-| 7.4 | Visitor session timeline | ❌ | P1 | S | 7.3 | |
-| 7.5 | Agent → visitor manual chat initiation | ❌ | P0 | M | 7.1 | invite |
-| 7.6 | Proactive trigger runtime in widget | ❌ | P0 | L | — | eval rules client-side |
-| 7.7 | Trigger: welcome (on load) | ❌ | P0 | S | 7.6 | |
-| 7.8 | Trigger: idle visitor | ❌ | P0 | S | 7.6 | |
-| 7.8b | Trigger: dwell-based auto-greeting (relocated from 5.46) | ❌ | P0 | S | 7.6 | dwell timer + auto-greet |
-| 7.9 | Trigger: exit-intent | ❌ | P0 | S | 7.6 | |
-| 7.10 | Trigger: URL match | ❌ | P0 | S | 7.6 | |
-| 7.11 | Trigger: time-on-site | ❌ | P0 | S | 7.6 | |
-| 7.12 | Trigger: scroll depth | ❌ | P1 | S | 7.6 | |
-| 7.13 | Trigger: returning visitor | ❌ | P1 | S | 7.6 | |
-| 7.14 | Trigger: cart value/page | ❌ | P1 | S | 7.6 | |
-| 7.15 | Trigger: custom variable match | ❌ | P1 | S | 7.6 | |
-| 7.16 | Campaign types: lead capture | ❌ | P1 | M | 7.6 | form template |
-| 7.17 | Campaign types: promotional | ❌ | P1 | M | 7.6 | banner template |
-| 7.18 | Campaign types: announcement | ❌ | P1 | S | 7.6 | |
-| 7.19 | Campaign targeting rule builder UI | ⚠️ | P0 | L | — | AND/OR groups |
-| 7.20 | Campaign A/B variants | ❌ | P1 | M | 7.6 | split |
-| 7.21 | Campaign analytics (sent/seen/clicked/converted) | ⚠️ | P0 | M | — | |
-| 7.22 | Campaign frequency caps | ❌ | P1 | S | 7.6 | |
-| 7.23 | Campaign schedule windows | ❌ | P1 | S | 7.6 | |
-| 7.24 | Goal model | ❌ | P0 | S | — | event-based |
-| 7.25 | Goal types (page view/event/revenue) | ❌ | P0 | S | 7.24 | |
-| 7.26 | GoalAchievement model | ❌ | P0 | XS | 7.24 | |
-| 7.27 | Goal attribution to chat/campaign | ❌ | P0 | M | 7.24 | |
-| 7.28 | Goal value (revenue) | ❌ | P1 | S | 7.24 | |
-| 7.29 | Goals dashboard | ❌ | P0 | M | 7.24 | |
-| 7.30 | Sales tracker | ❌ | P1 | M | 7.28 | |
-| 7.31 | Conversion funnel report | ❌ | P1 | M | 7.24 | |
-| 7.32 | Goal tracking JS API (`FlowLyra.trackGoal()`) | ❌ | P0 | S | 1.2 | |
-| 7.33 | Custom event tracking JS API | ❌ | P1 | S | 1.2 | |
-| 7.34 | Traffic page filters (country/page/source) | ❌ | P1 | S | 7.1 | |
-| 7.35 | Traffic page action: send message | ❌ | P0 | S | 7.5 | |
-| 7.36 | Traffic page action: pin/watch visitor | ❌ | P2 | S | 7.1 | |
+| 7.1 | Real-time visitor traffic page | ✅ | P0 | M | — | live list |
+| 7.2 | Visitor map view (geo) | ✅ | P1 | M | 2.28 | |
+| 7.3 | Visitor page-view tracking | ✅ | P0 | M | — | PageView model |
+| 7.4 | Visitor session timeline | ✅ | P1 | S | 7.3 | |
+| 7.5 | Agent → visitor manual chat initiation | ✅ | P0 | M | 7.1 | invite |
+| 7.6 | Proactive trigger runtime in widget | ✅ | P0 | L | — | eval rules client-side |
+| 7.7 | Trigger: welcome (on load) | ✅ | P0 | S | 7.6 | |
+| 7.8 | Trigger: idle visitor | ✅ | P0 | S | 7.6 | |
+| 7.8b | Trigger: dwell-based auto-greeting (relocated from 5.46) | ✅ | P0 | S | 7.6 | dwell timer + auto-greet |
+| 7.9 | Trigger: exit-intent | ✅ | P0 | S | 7.6 | |
+| 7.10 | Trigger: URL match | ✅ | P0 | S | 7.6 | |
+| 7.11 | Trigger: time-on-site | ✅ | P0 | S | 7.6 | |
+| 7.12 | Trigger: scroll depth | ✅ | P1 | S | 7.6 | |
+| 7.13 | Trigger: returning visitor | ✅ | P1 | S | 7.6 | |
+| 7.14 | Trigger: cart value/page | ✅ | P1 | S | 7.6 | |
+| 7.15 | Trigger: custom variable match | ✅ | P1 | S | 7.6 | |
+| 7.16 | Campaign types: lead capture | ✅ | P1 | M | 7.6 | form template |
+| 7.17 | Campaign types: promotional | ✅ | P1 | M | 7.6 | banner template |
+| 7.18 | Campaign types: announcement | ✅ | P1 | S | 7.6 | |
+| 7.19 | Campaign targeting rule builder UI | ✅ | P0 | L | — | AND/OR groups |
+| 7.20 | Campaign A/B variants | ✅ | P1 | M | 7.6 | split |
+| 7.21 | Campaign analytics (sent/seen/clicked/converted) | ✅ | P0 | M | — | |
+| 7.22 | Campaign frequency caps | ✅ | P1 | S | 7.6 | |
+| 7.23 | Campaign schedule windows | ✅ | P1 | S | 7.6 | |
+| 7.24 | Goal model | ✅ | P0 | S | — | event-based |
+| 7.25 | Goal types (page view/event/revenue) | ✅ | P0 | S | 7.24 | |
+| 7.26 | GoalAchievement model | ✅ | P0 | XS | 7.24 | |
+| 7.27 | Goal attribution to chat/campaign | ✅ | P0 | M | 7.24 | |
+| 7.28 | Goal value (revenue) | ✅ | P1 | S | 7.24 | |
+| 7.29 | Goals dashboard | ✅ | P0 | M | 7.24 | |
+| 7.30 | Sales tracker | ✅ | P1 | M | 7.28 | |
+| 7.31 | Conversion funnel report | ✅ | P1 | M | 7.24 | |
+| 7.32 | Goal tracking JS API (`FlowLyra.trackGoal()`) | ✅ | P0 | S | 1.2 | |
+| 7.33 | Custom event tracking JS API | ✅ | P1 | S | 1.2 | |
+| 7.34 | Traffic page filters (country/page/source) | ✅ | P1 | S | 7.1 | |
+| 7.35 | Traffic page action: send message | ✅ | P0 | S | 7.5 | |
+| 7.36 | Traffic page action: pin/watch visitor | ✅ | P2 | S | 7.1 | |
 
 ---
 
@@ -727,7 +730,7 @@ Reference for what new tables/models appear across phases:
 - [ ] ChatTag (2.26)
 - [ ] PageView (7.3)
 - [ ] Goal (7.24)
-- [ ] GoalAchievement (7.26)
+- [x] GoalAchievement (7.26)
 - [ ] Survey + SurveyResponse (9.14)
 - [ ] TicketActivity (3.1)
 - [ ] TicketWorkflow + Execution (3.22)
@@ -767,9 +770,9 @@ Reference for what new tables/models appear across phases:
 - [ ] `/` dashboard home (2.1)
 - [ ] `/chats`, `/chats/:id` rename (Ph2)
 - [ ] `/archives` ✅
-- [ ] `/engage/traffic` (7.1)
-- [ ] `/engage/campaigns`, `/new` (Ph7)
-- [ ] `/engage/goals` (7.29)
+- [x] `/engage/traffic` (7.1)
+- [x] `/engage/campaigns`, `/new` (Ph7)
+- [x] `/engage/goals` (7.29)
 - [ ] `/reports` + sub-pages (Ph8)
 - [ ] `/tickets/:id`, `/tickets/new` (Ph3)
 - [ ] `/knowledge-base` + admin (Ph4)

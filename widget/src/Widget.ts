@@ -1,7 +1,7 @@
 import { ChatPanel } from "./ChatPanel";
 import { SocketClient } from "./SocketClient";
 import { styles } from "./styles";
-import type { FlowLyraInstance, Message, PreChatData, SuggestedArticle, VisitorPayload, WidgetHistoryResponse, WidgetInitResponse, WidgetState } from "./types";
+import type { FlowLyraInstance, Message, PreChatData, ProactiveTrigger, SuggestedArticle, VisitorPayload, WidgetHistoryResponse, WidgetInitResponse, WidgetState } from "./types";
 import { I18n, detectLocale } from "./i18n";
 import { play as playSound } from "./sound";
 import { debounce, sessionToken, setSessionToken, trackRouteChanges } from "./utils";
@@ -29,6 +29,13 @@ export class Widget implements FlowLyraInstance {
   private rtcPeer: RTCPeerConnection | null = null;
   private rtcLocal: MediaStream | null = null;
   private rtcRemoteVideo: HTMLVideoElement | null = null;
+  private proactiveTriggers: ProactiveTrigger[] = [];
+  private firedTriggers = new Set<string>();
+  private scrollDepth = 0;
+  private bootedAt = Date.now();
+  private lastActivityAt = Date.now();
+  private idleTimer: number | null = null;
+  private lastCampaignId: string | null = null;
 
   constructor(config: typeof window.FlowLyraConfig) {
     if (!config?.orgSlug) throw new Error("FlowLyraConfig.orgSlug is required");
@@ -90,8 +97,13 @@ export class Widget implements FlowLyraInstance {
     this.applyChatButtonsScanner();
     this.applyCustomJs();
     await this.maybeConsumeMagicLink();
-    trackRouteChanges(() => this.socket?.sendMessage({ type: "url:update", url: location.href }));
+    trackRouteChanges(() => {
+      void this.reportPageView(location.href, document.title);
+      this.evaluateTriggers("url_match");
+      this.evaluateTriggers("cart_value");
+    });
     this.markReady();
+    void this.loadProactiveTriggers();
     if (config.autoOpen) this.open();
   }
 
@@ -270,7 +282,215 @@ export class Widget implements FlowLyraInstance {
   }
 
   async trackGoal(name: string, value?: number): Promise<void> {
-    return this.trackEvent(`goal:${name}`, {}, value);
+    const properties: Record<string, unknown> = {};
+    if (this.lastCampaignId) properties.campaign_id = this.lastCampaignId;
+    await this.trackEvent(`goal:${name}`, properties, value);
+    if (this.lastCampaignId) {
+      await this.trackEvent("campaign.converted", { campaign_id: this.lastCampaignId, goal_name: name }, value);
+    }
+  }
+
+  private async loadProactiveTriggers(): Promise<void> {
+    if (!this.initData) return;
+    try {
+      const response = await fetch(`${this.apiUrl}/api/v1/widget/triggers`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ org_slug: this.orgSlug, session_token: this.initData.session_token }),
+      });
+      if (!response.ok) return;
+      const payload = (await response.json()) as { items?: ProactiveTrigger[] };
+      this.proactiveTriggers = payload.items ?? [];
+      const visits = Number(localStorage.getItem("flowlyra:visit_count") || "0");
+      localStorage.setItem("flowlyra:visit_count", String(visits + 1));
+      this.bootedAt = Date.now();
+      this.lastActivityAt = Date.now();
+      this.bindProactiveListeners();
+      this.evaluateTriggers("welcome");
+      this.evaluateTriggers("returning_visitor");
+      this.evaluateTriggers("url_match");
+      this.evaluateTriggers("cart_value");
+    } catch (err) {
+      console.warn("[FlowLyra] proactive trigger load failed", err);
+    }
+  }
+
+  private bindProactiveListeners(): void {
+    const touch = () => {
+      this.lastActivityAt = Date.now();
+      if (this.idleTimer) window.clearTimeout(this.idleTimer);
+      this.idleTimer = window.setTimeout(() => this.evaluateTriggers("idle"), 45_000);
+    };
+    const onMouseLeave = (event: MouseEvent) => {
+      if (event.clientY <= 0) this.evaluateTriggers("exit_intent");
+    };
+    const onScroll = () => {
+      const documentHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight, 1);
+      const winHeight = window.innerHeight || 0;
+      const top = window.scrollY || window.pageYOffset || 0;
+      const depth = Math.round(((top + winHeight) / documentHeight) * 100);
+      this.scrollDepth = Math.max(this.scrollDepth, Math.min(100, depth));
+      this.evaluateTriggers("scroll_depth");
+    };
+    window.addEventListener("mousemove", touch, { passive: true });
+    window.addEventListener("keydown", touch);
+    window.addEventListener("touchstart", touch, { passive: true });
+    document.addEventListener("mouseout", onMouseLeave);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    touch();
+    window.setInterval(() => {
+      this.evaluateTriggers("time_on_site");
+      this.evaluateTriggers("dwell");
+      this.evaluateTriggers("idle");
+    }, 5000);
+  }
+
+  private evaluateTriggers(triggerType: string): void {
+    if (!this.proactiveTriggers.length) return;
+    for (const trigger of this.proactiveTriggers) {
+      if (this.firedTriggers.has(trigger.id)) continue;
+      const rawType = String(trigger.trigger_type || "").toLowerCase();
+      const mapped = rawType === "time_on_page" ? "time_on_site" : rawType;
+      const typeMatches = mapped === triggerType || (triggerType === "dwell" && mapped === "dwell");
+      if (!typeMatches) continue;
+      if (!this.triggerConditionsPass(trigger)) continue;
+      this.fireTrigger(trigger);
+    }
+  }
+
+  private triggerConditionsPass(trigger: ProactiveTrigger): boolean {
+    const conditions = trigger.conditions || {};
+    const schedule = (conditions.schedule as Record<string, unknown> | undefined) ?? undefined;
+    if (schedule && !this.schedulePass(schedule)) return false;
+
+    const cap = Number((conditions.frequency_cap as Record<string, unknown> | undefined)?.per_day ?? conditions.frequency_cap_per_day ?? 0);
+    if (cap > 0) {
+      const key = `flowlyra:trigger:${trigger.id}:${new Date().toISOString().slice(0, 10)}`;
+      const fired = Number(localStorage.getItem(key) || "0");
+      if (fired >= cap) return false;
+    }
+
+    const requiredUrl = String(conditions.url_contains ?? "").trim();
+    if (requiredUrl && !location.href.includes(requiredUrl)) return false;
+
+    const minSeconds = Number(conditions.seconds ?? conditions.dwell_seconds ?? 0);
+    if (minSeconds > 0) {
+      const elapsed = Math.floor((Date.now() - this.bootedAt) / 1000);
+      if (elapsed < minSeconds) return false;
+    }
+
+    const idleSeconds = Number(conditions.idle_seconds ?? 0);
+    if (idleSeconds > 0) {
+      const idleFor = Math.floor((Date.now() - this.lastActivityAt) / 1000);
+      if (idleFor < idleSeconds) return false;
+    }
+
+    const minScroll = Number(conditions.scroll_percent ?? 0);
+    if (minScroll > 0 && this.scrollDepth < minScroll) return false;
+
+    const returningOnly = Boolean(conditions.returning_only ?? false);
+    if (returningOnly) {
+      const returning = Boolean(this.initData?.visitor?.id) || Number(localStorage.getItem("flowlyra:visit_count") || "0") > 1;
+      if (!returning) return false;
+    }
+
+    const cartMin = Number(conditions.cart_min_value ?? 0);
+    if (cartMin > 0) {
+      const vars = this.initData?.visitor?.custom_variables || {};
+      const cartValue = Number(vars.cart_value ?? 0);
+      if (cartValue < cartMin) return false;
+    }
+
+    const customMatch = (conditions.custom_variable_match as Record<string, unknown> | undefined) ?? undefined;
+    if (customMatch) {
+      const key = String(customMatch.key ?? "").trim();
+      const expected = customMatch.equals;
+      if (key) {
+        const vars = this.initData?.visitor?.custom_variables || {};
+        if ((vars as Record<string, unknown>)[key] !== expected) return false;
+      }
+    }
+    return true;
+  }
+
+  private schedulePass(schedule: Record<string, unknown>): boolean {
+    const now = new Date();
+    const allowedDays = Array.isArray(schedule.days) ? schedule.days.map((d) => Number(d)) : null;
+    if (allowedDays && allowedDays.length > 0 && !allowedDays.includes(now.getDay())) return false;
+    const hour = now.getHours();
+    const startHour = Number(schedule.start_hour ?? 0);
+    const endHour = Number(schedule.end_hour ?? 24);
+    return hour >= startHour && hour < endHour;
+  }
+
+  private fireTrigger(trigger: ProactiveTrigger): void {
+    this.firedTriggers.add(trigger.id);
+    this.lastCampaignId = trigger.id;
+    const conditions = trigger.conditions || {};
+    const variants = Array.isArray(conditions.variants) ? conditions.variants as Array<Record<string, unknown>> : [];
+    let message = trigger.message;
+    if (variants.length > 0) {
+      const total = variants.reduce((sum, item) => sum + Math.max(1, Number(item.weight ?? 1)), 0);
+      let pick = Math.random() * total;
+      for (const item of variants) {
+        pick -= Math.max(1, Number(item.weight ?? 1));
+        if (pick <= 0) {
+          message = String(item.message ?? message);
+          break;
+        }
+      }
+    }
+
+    const cap = Number((conditions.frequency_cap as Record<string, unknown> | undefined)?.per_day ?? conditions.frequency_cap_per_day ?? 0);
+    if (cap > 0) {
+      const key = `flowlyra:trigger:${trigger.id}:${new Date().toISOString().slice(0, 10)}`;
+      const fired = Number(localStorage.getItem(key) || "0");
+      localStorage.setItem(key, String(fired + 1));
+    }
+    const autoOpen = conditions.auto_open !== false;
+    if (autoOpen) this.open();
+    if (this.panel) {
+      this.panel.addMessage({
+        id: `trigger-${trigger.id}-${Date.now()}`,
+        chat_id: this.chatId ?? "trigger",
+        sender_type: "bot",
+        content: message,
+        content_type: "text",
+        is_internal: false,
+        created_at: new Date().toISOString(),
+      });
+    }
+    void this.trackEvent("campaign.sent", {
+      campaign_id: trigger.id,
+      campaign_name: trigger.name,
+      campaign_type: String(conditions.campaign_type ?? "announcement"),
+      trigger_type: trigger.trigger_type,
+    });
+    void this.trackEvent("campaign.seen", {
+      campaign_id: trigger.id,
+      campaign_name: trigger.name,
+      campaign_type: String(conditions.campaign_type ?? "announcement"),
+      trigger_type: trigger.trigger_type,
+    });
+  }
+
+  private async reportPageView(url: string, title?: string): Promise<void> {
+    if (!this.initData) return;
+    try {
+      await fetch(`${this.apiUrl}/api/v1/widget/pageview`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          org_slug: this.orgSlug,
+          session_token: this.initData.session_token,
+          url,
+          title: title ?? document.title,
+        }),
+      });
+      if (this.chatId) this.socket?.updateUrl(this.chatId, url, title ?? document.title);
+    } catch {
+      // Ignore non-critical pageview tracking failures.
+    }
   }
 
   private async applyLocale(locale: string, emit: boolean): Promise<void> {

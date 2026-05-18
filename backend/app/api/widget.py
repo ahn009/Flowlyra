@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from urllib.parse import urlparse
 import logging
 import random
@@ -13,8 +14,10 @@ from app.models.analytics_event import AnalyticsEvent
 from app.models.chat import Chat
 from app.models.chat_widget import ChatWidget
 from app.models.contact import Contact
+from app.models.engage import Goal, GoalAchievement
 from app.models.message import Message
 from app.models.organization import Organization
+from app.models.proactive_trigger import ProactiveTrigger
 from app.models.product import Product
 from app.models.session import Session
 from app.models.user import User
@@ -30,6 +33,7 @@ from app.schemas.widget import (
     WidgetMagicLinkRequest,
     WidgetKbSuggestRequest,
     WidgetOfflineRequest,
+    WidgetPageViewRequest,
     WidgetProductSearchRequest,
     WidgetTrackEventRequest,
 )
@@ -326,6 +330,14 @@ async def identify(payload: WidgetIdentifyRequest, db: AsyncSession = Depends(ge
 async def track_event(payload: WidgetTrackEventRequest, db: AsyncSession = Depends(get_db)) -> dict:
     org = await _get_org(db, payload.org_slug)
     session = await _get_session_or_404(db, org.id, payload.session_token)
+    properties = dict(payload.properties or {})
+    campaign_id_raw = properties.get("campaign_id")
+    campaign_id: uuid.UUID | None = None
+    if campaign_id_raw:
+        try:
+            campaign_id = uuid.UUID(str(campaign_id_raw))
+        except ValueError:
+            campaign_id = None
     event = AnalyticsEvent(
         organization_id=org.id,
         event_type=payload.event,
@@ -333,13 +345,109 @@ async def track_event(payload: WidgetTrackEventRequest, db: AsyncSession = Depen
         metadata_={
             "session_id": str(session.id),
             "value": payload.value,
-            "properties": payload.properties or {},
+            "properties": properties,
+            "campaign_id": str(campaign_id) if campaign_id else None,
             "url": session.current_url,
         },
     )
     db.add(event)
+    if payload.event == "campaign.sent" and campaign_id:
+        trigger = (
+            await db.execute(
+                select(ProactiveTrigger).where(ProactiveTrigger.id == campaign_id, ProactiveTrigger.organization_id == org.id)
+            )
+        ).scalar_one_or_none()
+        if trigger is not None:
+            trigger.sent_count = (trigger.sent_count or 0) + 1
+
+    goal_name = None
+    if payload.event.startswith("goal:"):
+        goal_name = payload.event.split(":", 1)[1].strip()
+    elif payload.event.startswith("event:"):
+        goal_name = payload.event.split(":", 1)[1].strip()
+    elif payload.event == "goal.achieved":
+        goal_name = str(properties.get("goal_name") or properties.get("goal") or "").strip() or None
+    if goal_name:
+        goal = (
+            await db.execute(
+                select(Goal).where(
+                    Goal.organization_id == org.id,
+                    Goal.is_active.is_(True),
+                    or_(Goal.name.ilike(goal_name), Goal.event_name.ilike(goal_name)),
+                )
+            )
+        ).scalars().first()
+        if goal is not None:
+            chat_id: uuid.UUID | None = None
+            chat_id_raw = properties.get("chat_id")
+            if chat_id_raw:
+                try:
+                    chat_id = uuid.UUID(str(chat_id_raw))
+                except ValueError:
+                    chat_id = None
+            db.add(
+                GoalAchievement(
+                    organization_id=org.id,
+                    goal_id=goal.id,
+                    session_id=session.id,
+                    chat_id=chat_id,
+                    campaign_id=campaign_id,
+                    value=payload.value if payload.value is not None else goal.default_value,
+                    metadata_={"event": payload.event, "properties": properties},
+                )
+            )
     await db.commit()
     return {"ok": True, "event_id": str(event.id)}
+
+
+@router.post("/pageview")
+async def pageview(payload: WidgetPageViewRequest, db: AsyncSession = Depends(get_db)) -> dict:
+    org = await _get_org(db, payload.org_slug)
+    session = await _get_session_or_404(db, org.id, payload.session_token)
+    session.current_url = payload.url
+    session.page_views = int(session.page_views or 0) + 1
+    history = list((session.page_history or {}).get("items") or [])
+    history.append({"url": payload.url, "title": payload.title, "ts": datetime.now(UTC).isoformat()})
+    session.page_history = {"items": history[-100:]}
+    db.add(
+        AnalyticsEvent(
+            organization_id=org.id,
+            event_type="page.view",
+            contact_id=session.contact_id,
+            metadata_={"session_id": str(session.id), "url": payload.url, "title": payload.title},
+        )
+    )
+    await db.commit()
+    return {"ok": True}
+
+
+@router.post("/triggers")
+async def widget_triggers(payload: dict, db: AsyncSession = Depends(get_db)) -> dict:
+    org_slug = str(payload.get("org_slug") or "")
+    session_token = str(payload.get("session_token") or "")
+    org = await _get_org(db, org_slug)
+    session = await _get_session_or_404(db, org.id, session_token)
+    rows = (
+        await db.execute(
+            select(ProactiveTrigger)
+            .where(ProactiveTrigger.organization_id == org.id, ProactiveTrigger.is_active.is_(True))
+            .order_by(ProactiveTrigger.created_at.asc())
+        )
+    ).scalars().all()
+    return {
+        "items": [
+            {
+                "id": str(row.id),
+                "name": row.name,
+                "trigger_type": row.trigger_type,
+                "conditions": row.conditions or {},
+                "message": row.message,
+                "sent_count": row.sent_count,
+                "is_returning": bool((session.page_views or 0) > 1),
+            }
+            for row in rows
+        ]
+    }
 
 
 @router.post("/magic-link/request")

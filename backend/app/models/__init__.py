@@ -6,6 +6,7 @@ from app.models.chat import Chat
 from app.models.chat_widget import ChatWidget
 from app.models.chatbot import ChatbotFlow, ChatbotSession
 from app.models.contact import Contact
+from app.models.engage import Goal, GoalAchievement, VisitorWatch
 from app.models.kb import (
     KBArticle,
     KBArticleComment,
@@ -55,6 +56,8 @@ __all__ = [
     "ChatbotFlow",
     "ChatbotSession",
     "Contact",
+    "Goal",
+    "GoalAchievement",
     "KBArticle",
     "KBArticleComment",
     "KBArticleFeedback",
@@ -86,6 +89,7 @@ __all__ = [
     "TicketRelation",
     "TicketPortalToken",
     "User",
+    "VisitorWatch",
     "Webhook",
     "WebhookDelivery",
     "WorkspaceMembership",

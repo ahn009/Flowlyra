@@ -89,6 +89,13 @@ class WidgetTrackEventRequest(BaseModel):
     properties: dict = Field(default_factory=dict)
 
 
+class WidgetPageViewRequest(BaseModel):
+    org_slug: str
+    session_token: str
+    url: str
+    title: str | None = None
+
+
 class WidgetMagicLinkRequest(BaseModel):
     org_slug: str
     email: EmailStr

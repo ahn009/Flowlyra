@@ -33,6 +33,10 @@ export class SocketClient {
     this.socket?.emit("chat:message", payload);
   }
 
+  updateUrl(chatId: string, url: string, title?: string): void {
+    this.socket?.emit("visitor:url:update", { chat_id: chatId, url, title });
+  }
+
   typingPreview(chatId: string, text: string): void {
     this.socket?.emit("chat:typing:preview", { chat_id: chatId, text });
   }

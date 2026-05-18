@@ -21,6 +21,9 @@ const nav = [
   ] },
   { section: "Workspace", items: [
     { to: "/admin/analytics", label: "Reports", icon: LayoutDashboard },
+    { to: "/engage/traffic", label: "Traffic", icon: Search },
+    { to: "/engage/campaigns", label: "Campaigns", icon: Send },
+    { to: "/engage/goals", label: "Goals", icon: CheckCheck },
     { to: "/admin/canned", label: "Canned", icon: ClipboardList },
     { to: "/admin/kb", label: "Knowledge", icon: LifeBuoy },
     { to: "/settings/tags", label: "Tags", icon: Tag },
