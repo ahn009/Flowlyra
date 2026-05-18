@@ -22,6 +22,15 @@ class Settings(BaseSettings):
     frontend_base_url: str = "http://localhost:5173"
     openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
+    anthropic_api_key: str = ""
+    anthropic_model: str = "claude-haiku-4-5-20251001"
+    ai_provider: str = "openai"
+    ai_embedding_model: str = "text-embedding-3-small"
+    ai_embedding_dimensions: int = 1536
+    ai_request_timeout: int = 30
+    ai_max_context_messages: int = 30
+    rag_top_k: int = 5
+    chatbot_session_ttl_seconds: int = 1800
     aws_access_key_id: str = ""
     aws_secret_access_key: str = ""
     aws_s3_bucket: str = "flowlyra-uploads"

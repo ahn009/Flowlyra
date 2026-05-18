@@ -1,8 +1,10 @@
 from app.models.analytics_event import AnalyticsEvent
 from app.models.audit_log import AuditLog
 from app.models.canned_response import CannedResponse
+from app.models.channel import ChannelConnection, ChannelOutbound, ChannelTemplate, ContactIdentity
 from app.models.chat import Chat
 from app.models.chat_widget import ChatWidget
+from app.models.chatbot import ChatbotFlow, ChatbotSession
 from app.models.contact import Contact
 from app.models.kb import (
     KBArticle,
@@ -12,6 +14,7 @@ from app.models.kb import (
     KBArticleView,
     KBCategory,
 )
+from app.models.knowledge import KnowledgeChunk, KnowledgeSource
 from app.models.message import Message
 from app.models.notification import Notification, NotificationPreference
 from app.models.organization import Organization
@@ -43,8 +46,14 @@ __all__ = [
     "AnalyticsEvent",
     "AuditLog",
     "CannedResponse",
+    "ChannelConnection",
+    "ChannelOutbound",
+    "ChannelTemplate",
+    "ContactIdentity",
     "Chat",
     "ChatWidget",
+    "ChatbotFlow",
+    "ChatbotSession",
     "Contact",
     "KBArticle",
     "KBArticleComment",
@@ -52,6 +61,8 @@ __all__ = [
     "KBArticleRevision",
     "KBArticleView",
     "KBCategory",
+    "KnowledgeChunk",
+    "KnowledgeSource",
     "Message",
     "Notification",
     "NotificationPreference",

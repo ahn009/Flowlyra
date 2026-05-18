@@ -8,9 +8,11 @@ from fastapi.responses import JSONResponse
 from app.api import (
     admin,
     agents,
+    ai,
     analytics,
     audit,
     auth,
+    chatbot,
     chats,
     contacts,
     kb,
@@ -133,6 +135,8 @@ def create_fastapi_app() -> FastAPI:
         webhooks.router,
         kb.admin_router,
         kb.public_router,
+        ai.router,
+        chatbot.router,
     ):
         app.include_router(router, prefix="/api/v1")
     return app

@@ -14,6 +14,8 @@ import { NotificationPreferencesPage } from "./pages/NotificationPreferencesPage
 import { SettingsOverviewPage } from "./pages/SettingsOverviewPage";
 import { TagsPage } from "./pages/TagsPage";
 import { KnowledgeBasePage } from "./pages/KnowledgeBasePage";
+import { ChatbotPage } from "./pages/ChatbotPage";
+import { KnowledgeSourcesPage } from "./pages/KnowledgeSourcesPage";
 import { PublicKBArticlePage, PublicKBIndexPage } from "./pages/PublicKBPage";
 import { WebhooksPage } from "./pages/WebhooksPage";
 import {
@@ -120,6 +122,8 @@ export function App(): JSX.Element {
         <Route path="/admin/triggers" element={<TriggersPage />} />
         <Route path="/admin/canned" element={<CannedResponsesPage />} />
         <Route path="/admin/kb" element={<KnowledgeBasePage />} />
+        <Route path="/admin/chatbot" element={<ChatbotPage />} />
+        <Route path="/admin/ai-knowledge" element={<KnowledgeSourcesPage />} />
         <Route path="/admin/analytics" element={<AnalyticsPage />} />
         <Route path="/admin/billing" element={<BillingPage />} />
         <Route path="/settings" element={<SettingsOverviewPage />} />

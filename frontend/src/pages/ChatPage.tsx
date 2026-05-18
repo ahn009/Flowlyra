@@ -2,6 +2,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+
+import { CopilotPanel } from "../components/CopilotPanel";
+import { AIToolsMenu } from "../components/AIToolsMenu";
 import {
   ArrowLeft,
   Bold,
@@ -87,6 +90,8 @@ export function ChatPage(): JSX.Element {
   const [assignModal, setAssignModal] = useState(false);
   const [assignId, setAssignId] = useState("");
   const [snoozeMinutes, setSnoozeMinutes] = useState(30);
+  const [copilotOpen, setCopilotOpen] = useState(false);
+  const [ghostText, setGhostText] = useState("");
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -432,6 +437,13 @@ export function ChatPage(): JSX.Element {
                 <label htmlFor="agent-chat-upload" className="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-black text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"><FileUp size={14} />Upload</label>
                 <button className="inline-flex shrink-0 items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-black text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"><Plus size={14} />More</button>
                 {canned.slice(0, 6).map((item) => <button key={item.id} onClick={() => void useCanned(item)} className="shrink-0 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-black text-slate-600 hover:bg-slate-50 dark:bg-slate-800/50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">/{item.shortcut}</button>)}
+                <AIToolsMenu value={reply} onApply={(text) => setReply(text)} />
+                <button
+                  onClick={() => setCopilotOpen(true)}
+                  className="inline-flex shrink-0 items-center gap-2 rounded-full bg-purple-600 px-3 py-1.5 text-xs font-black text-white hover:bg-purple-700"
+                >
+                  <Sparkles size={14} /> Copilot
+                </button>
               </div>
               {slashResults.length > 0 && (
                 <div className="mb-2 rounded-lg border border-blue-200 bg-blue-50 p-2 text-xs">
@@ -441,16 +453,39 @@ export function ChatPage(): JSX.Element {
                 </div>
               )}
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-                <textarea
-                  ref={textareaRef}
-                  className="min-h-24 flex-1 resize-none rounded-2xl border-0 bg-slate-50 p-4 text-sm leading-6 outline-none ring-1 ring-border transition focus:bg-white focus:ring-4 focus:ring-blue-100 dark:bg-slate-800 dark:text-slate-100 dark:focus:bg-slate-800"
-                  placeholder={noteMode ? "Write an internal note. Customers cannot see this." : "Type your reply..."}
-                  value={reply}
-                  onChange={(event) => setReply(event.target.value)}
-                  onPaste={onPaste}
-                  onDrop={onDrop}
-                  onDragOver={(event) => event.preventDefault()}
-                />
+                <div className="flex-1">
+                  <textarea
+                    ref={textareaRef}
+                    className="min-h-24 w-full resize-none rounded-2xl border-0 bg-slate-50 p-4 text-sm leading-6 outline-none ring-1 ring-border transition focus:bg-white focus:ring-4 focus:ring-blue-100 dark:bg-slate-800 dark:text-slate-100 dark:focus:bg-slate-800"
+                    placeholder={noteMode ? "Write an internal note. Customers cannot see this." : "Type your reply..."}
+                    value={reply}
+                    onChange={(event) => {
+                      const v = event.target.value;
+                      setReply(v);
+                      if (ghostText) setGhostText("");
+                      if (!noteMode && v.length >= 8 && v.length % 12 === 0) {
+                        void api.post<{ suggestion: string }>("/ai/ghost", { chat_id: id, prefix: v })
+                          .then(({ data }) => { if (data.suggestion) setGhostText(data.suggestion); })
+                          .catch(() => undefined);
+                      }
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === "Tab" && ghostText) {
+                        event.preventDefault();
+                        setReply((v) => `${v} ${ghostText}`);
+                        setGhostText("");
+                      }
+                    }}
+                    onPaste={onPaste}
+                    onDrop={onDrop}
+                    onDragOver={(event) => event.preventDefault()}
+                  />
+                  {ghostText && (
+                    <div className="mt-1 px-2 text-xs text-slate-500">
+                      <span className="font-bold text-purple-600">Tab</span> to accept: <span className="italic">{ghostText}</span>
+                    </div>
+                  )}
+                </div>
                 <button onClick={send} className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-slate-950 px-6 text-sm font-black text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 sm:w-auto"><Send size={17} />Send</button>
               </div>
               <div className="mt-2 text-center text-[11px] font-semibold text-slate-400 dark:text-slate-500">Ctrl/Cmd + Enter send • R reply • A assign • T tag • N note • ? shortcuts</div>
@@ -461,6 +496,7 @@ export function ChatPage(): JSX.Element {
         <VisitorPanel chat={currentChat} />
       </div>
 
+      <CopilotPanel chatId={id} open={copilotOpen} onClose={() => setCopilotOpen(false)} onInsert={(t) => setReply((v) => (v ? `${v}\n\n${t}` : t))} />
       {shortcutOpen ? <ShortcutsModal onClose={() => setShortcutOpen(false)} /> : null}
       {assignModal ? (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4" onClick={() => setAssignModal(false)}>

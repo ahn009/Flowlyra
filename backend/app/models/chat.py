@@ -1,8 +1,8 @@
 from datetime import datetime
 import uuid
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, SmallInteger, String, Text, func
-from sqlalchemy.dialects.postgresql import ARRAY, UUID
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, SmallInteger, String, Text, func
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.session import Base
@@ -30,5 +30,12 @@ class Chat(UUIDPkMixin, Base):
     first_response_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     is_missed: Mapped[bool] = mapped_column(Boolean, default=False)
+    ai_summary: Mapped[str | None] = mapped_column(Text)
+    ai_tags: Mapped[list[str]] = mapped_column(JSONB, default=list)
+    ai_sentiment: Mapped[str | None] = mapped_column(String(20))
+    ai_qa_score: Mapped[float | None] = mapped_column(Float)
+    ai_qa_notes: Mapped[str | None] = mapped_column(Text)
+    channel_connection_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    external_thread_id: Mapped[str | None] = mapped_column(String(255), index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), index=True)

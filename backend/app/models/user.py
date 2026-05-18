@@ -2,7 +2,7 @@ from datetime import datetime
 import uuid
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, func
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.session import Base
@@ -22,6 +22,9 @@ class User(UUIDPkMixin, Base):
     is_online: Mapped[bool] = mapped_column(Boolean, default=False)
     status: Mapped[str] = mapped_column(String(20), default="offline")
     max_chats: Mapped[int] = mapped_column(Integer, default=5)
+    max_concurrent_chats: Mapped[int] = mapped_column(Integer, default=5)
+    skills: Mapped[list[str]] = mapped_column(JSONB, default=list)
+    is_vip_handler: Mapped[bool] = mapped_column(Boolean, default=False)
     invite_token: Mapped[str | None] = mapped_column(String(128))
     invite_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

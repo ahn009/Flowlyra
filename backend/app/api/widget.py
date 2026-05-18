@@ -436,6 +436,80 @@ async def search_products(payload: WidgetProductSearchRequest, db: AsyncSession 
     }
 
 
+@router.post("/chatbot/start")
+async def chatbot_start(
+    request: Request,
+    payload: dict,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    from app.services import chatbot_service
+    from app.models.chatbot import ChatbotSession
+
+    org_slug = payload.get("org_slug")
+    session_token = payload.get("session_token")
+    page_url = payload.get("page_url")
+    widget_id_raw = payload.get("widget_id")
+    if not org_slug or not session_token:
+        raise HTTPException(400, "org_slug and session_token required")
+    org = await _get_org(db, org_slug)
+    sess = await _get_session_or_404(db, org.id, session_token)
+    widget_uuid = uuid.UUID(widget_id_raw) if widget_id_raw else None
+    chat = (
+        await db.execute(
+            select(Chat).where(Chat.session_id == sess.id, Chat.organization_id == org.id)
+            .order_by(Chat.created_at.desc())
+        )
+    ).scalars().first()
+    if not chat:
+        chat = Chat(organization_id=org.id, session_id=sess.id, status="waiting", channel="web")
+        db.add(chat)
+        await db.flush()
+    flow = await chatbot_service.find_active_flow(db, org.id, widget_id=widget_uuid, url=page_url)
+    if not flow:
+        await db.commit()
+        return {"active": False, "chat_id": str(chat.id)}
+    bot_session = await chatbot_service.start_session(db, flow=flow, chat=chat)
+    outputs = await chatbot_service.advance(db, bot_session, None)
+    await db.commit()
+    return {
+        "active": True,
+        "chat_id": str(chat.id),
+        "session_id": str(bot_session.id),
+        "flow_id": str(flow.id),
+        "messages": outputs,
+        "completed": bot_session.completed,
+        "handed_off": bot_session.handed_off,
+    }
+
+
+@router.post("/chatbot/message")
+async def chatbot_message(
+    payload: dict,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    from app.services import chatbot_service
+    from app.models.chatbot import ChatbotSession
+
+    session_id = payload.get("session_id")
+    text = (payload.get("text") or "").strip()
+    if not session_id:
+        raise HTTPException(400, "session_id required")
+    bot_session = (
+        await db.execute(select(ChatbotSession).where(ChatbotSession.id == uuid.UUID(session_id)))
+    ).scalar_one_or_none()
+    if not bot_session:
+        raise HTTPException(404, "session not found")
+    if bot_session.status != "active":
+        return {"completed": bot_session.completed, "handed_off": bot_session.handed_off, "messages": []}
+    outputs = await chatbot_service.advance(db, bot_session, text)
+    await db.commit()
+    return {
+        "messages": outputs,
+        "completed": bot_session.completed,
+        "handed_off": bot_session.handed_off,
+    }
+
+
 @router.post("/kb/suggest")
 async def suggest_kb(payload: WidgetKbSuggestRequest, db: AsyncSession = Depends(get_db)) -> dict:
     from app.services.kb_service import search_articles
