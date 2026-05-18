@@ -174,6 +174,24 @@ async def add_message(
     chat.updated_at = datetime.now(UTC)
     await log_event(db, chat.organization_id, "message_created", chat_id=chat.id, user_id=sender_id if sender_type == "agent" else None)
     await db.flush()
+    if (
+        sender_type == "agent"
+        and not is_internal
+        and chat.channel_connection_id
+        and content
+    ):
+        try:
+            from app.services import channel_service
+
+            out = await channel_service.send_message_to_chat(db, chat, content, message.id)
+            if out:
+                from app.workers.channel_worker import send_outbound_now
+
+                send_outbound_now.delay(str(out.id))
+        except Exception:  # noqa: BLE001
+            import logging
+
+            logging.getLogger(__name__).exception("channel outbound queue failed chat=%s", chat.id)
     return message
 
 

@@ -1,4 +1,4 @@
-import { Bell, Bot, BrainCircuit, CheckCheck, ChevronLeft, ClipboardList, Code2, Contact, Inbox, LayoutDashboard, LifeBuoy, LogOut, Menu, Search, Send, Settings, Sparkles, Tag, Ticket, Trash2, UserPlus, Users, X } from "lucide-react";
+import { Bell, Bot, BrainCircuit, CheckCheck, ChevronLeft, ClipboardList, Code2, Contact, Inbox, LayoutDashboard, LifeBuoy, LogOut, Menu, Plug, Search, Send, Settings, Sparkles, Tag, Ticket, Trash2, UserPlus, Users, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
@@ -27,7 +27,8 @@ const nav = [
     { to: "/admin/routing", label: "Routing", icon: Tag },
     { to: "/admin/triggers", label: "Triggers", icon: Bot },
     { to: "/admin/chatbot", label: "Chatbot", icon: Sparkles },
-    { to: "/admin/ai-knowledge", label: "AI Knowledge", icon: BrainCircuit }
+    { to: "/admin/ai-knowledge", label: "AI Knowledge", icon: BrainCircuit },
+    { to: "/admin/channels", label: "Channels", icon: Plug }
   ] },
   { section: "Settings", items: [
     { to: "/admin/agents", label: "Agents", icon: Users },

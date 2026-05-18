@@ -58,3 +58,18 @@ async def missed(user: Annotated[TokenUser, Depends(current_user)], db: AsyncSes
 async def tags(user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db)) -> list[dict]:
     rows = (await db.execute(select(func.unnest(Chat.tags).label("tag"), func.count()).where(Chat.organization_id == user.organization_id).group_by("tag"))).all()
     return [{"tag": row[0], "count": row[1]} for row in rows]
+
+
+@router.get("/channels")
+async def channels_breakdown(user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db)) -> list[dict]:
+    rows = (
+        await db.execute(
+            select(Chat.channel, func.count(Chat.id), func.avg(Chat.csat_score))
+            .where(Chat.organization_id == user.organization_id)
+            .group_by(Chat.channel)
+        )
+    ).all()
+    return [
+        {"channel": r[0], "chats": int(r[1] or 0), "csat": float(r[2]) if r[2] is not None else None}
+        for r in rows
+    ]

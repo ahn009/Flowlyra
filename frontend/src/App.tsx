@@ -16,6 +16,7 @@ import { TagsPage } from "./pages/TagsPage";
 import { KnowledgeBasePage } from "./pages/KnowledgeBasePage";
 import { ChatbotPage } from "./pages/ChatbotPage";
 import { KnowledgeSourcesPage } from "./pages/KnowledgeSourcesPage";
+import { ChannelsPage } from "./pages/ChannelsPage";
 import { PublicKBArticlePage, PublicKBIndexPage } from "./pages/PublicKBPage";
 import { WebhooksPage } from "./pages/WebhooksPage";
 import {
@@ -124,6 +125,7 @@ export function App(): JSX.Element {
         <Route path="/admin/kb" element={<KnowledgeBasePage />} />
         <Route path="/admin/chatbot" element={<ChatbotPage />} />
         <Route path="/admin/ai-knowledge" element={<KnowledgeSourcesPage />} />
+        <Route path="/admin/channels" element={<ChannelsPage />} />
         <Route path="/admin/analytics" element={<AnalyticsPage />} />
         <Route path="/admin/billing" element={<BillingPage />} />
         <Route path="/settings" element={<SettingsOverviewPage />} />

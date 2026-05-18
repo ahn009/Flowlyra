@@ -13,6 +13,7 @@ from app.api import (
     audit,
     auth,
     chatbot,
+    channels as channels_api,
     chats,
     contacts,
     kb,
@@ -137,6 +138,8 @@ def create_fastapi_app() -> FastAPI:
         kb.public_router,
         ai.router,
         chatbot.router,
+        channels_api.router,
+        channels_api.webhook_router,
     ):
         app.include_router(router, prefix="/api/v1")
     return app

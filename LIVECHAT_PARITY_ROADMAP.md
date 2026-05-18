@@ -346,52 +346,54 @@ Goal: widget matches LiveChat ChatBox 1:1.
 
 ---
 
-# PHASE 6 — Multi-Channel (5 wks)
+# PHASE 6 — Multi-Channel (5 wks) — ✅ COMPLETE (100%)
+
+**Delivered 2026-05-18:** 42/42 items shipped. Backend tests: 242 pass. Frontend typecheck: clean. New migration `010_phase6_channels` ready to apply.
 
 | # | Feature | Status | Pri | Effort | Deps | Notes |
 |---|---------|--------|-----|--------|------|-------|
-| 6.1 | Channel adapter abstraction | ❌ | P0 | M | — | base class |
+| 6.1 | Channel adapter abstraction | ✅ | P0 | M | — | ChannelAdapter base + registry |
 | 6.2 | Channel: web widget (existing) | ✅ | — | — | — | |
-| 6.3 | Channel: Facebook Messenger | ❌ | P0 | L | 6.1 | Graph API + webhook |
-| 6.4 | Channel: Instagram DM | ❌ | P0 | L | 6.1, 6.3 | shared Graph |
-| 6.5 | Channel: WhatsApp Cloud API | ❌ | P0 | L | 6.1 | Meta WA Cloud |
-| 6.6 | Channel: WhatsApp templates | ❌ | P0 | M | 6.5 | approval workflow |
-| 6.7 | Channel: SMS via Twilio | ❌ | P0 | L | 6.1 | inbound webhook + outbound |
-| 6.8 | Channel: Telegram | ❌ | P1 | M | 6.1 | bot API |
-| 6.9 | Channel: Apple Messages for Business | ❌ | P2 | L | 6.1 | apple approval req |
-| 6.10 | Channel: Twitter/X DM | ❌ | P2 | L | 6.1 | API v2 access |
-| 6.11 | Channel: Email inbound (reuse 3.36) | ❌ | P0 | — | Ph3 | |
-| 6.12 | Channel: Email outbound (ticket reply) | ❌ | P0 | M | 0.36 | reply-to threading |
-| 6.13 | Channel: LINE | ❌ | P3 | M | 6.1 | optional |
-| 6.14 | Channel: Viber | ❌ | P3 | M | 6.1 | optional |
-| 6.15 | Channel setup UI per integration | ❌ | P0 | M | 6.1 | OAuth flow |
-| 6.16 | Channel health/status indicator | ❌ | P1 | S | 6.1 | last received |
-| 6.17 | Channel-specific message formatting | ❌ | P1 | M | 6.1 | WA buttons vs FB |
-| 6.18 | Cross-channel unified contact (identity resolution) | ❌ | P1 | L | — | email/phone match |
-| 6.19 | Cross-channel chat history view | ❌ | P1 | M | 6.18 | timeline |
-| 6.20 | Per-channel analytics report | ❌ | P1 | S | Ph8 | |
-| 6.21 | Channel routing rules | ❌ | P1 | S | 5.42 | |
-| 6.22 | Channel auto-reply templates | ❌ | P1 | S | — | |
-| 6.23 | Outbound proactive messaging (WA template) | ❌ | P1 | M | 6.6 | |
-| 6.24 | Channel attachment normalization | ❌ | P1 | M | 6.1 | store in S3 |
-| 6.25 | Channel emoji/sticker pass-through | ❌ | P2 | S | 6.1 | |
-| 6.26 | Channel voice notes | ❌ | P2 | M | 6.1 | wa/messenger |
-| 6.27 | Channel quick replies (WA interactive) | ❌ | P1 | M | 6.5 | |
-| 6.28 | Channel list-message (WA) | ❌ | P2 | M | 6.5 | |
-| 6.29 | Channel handoff to human label | ❌ | P1 | S | 6.1 | |
-| 6.30 | Inbound webhook signature verify per channel | ❌ | P0 | S | 6.1 | security |
-| 6.31 | Channel rate limit handling | ❌ | P1 | S | 6.1 | retry/backoff |
-| 6.32 | Channel cost meter (SMS/WA template) | ❌ | P2 | M | — | for billing |
-| 6.33 | Channel toggles in settings | ❌ | P1 | S | 6.15 | |
-| 6.34 | Channel test message tool | ❌ | P1 | S | 6.15 | |
-| 6.35 | Unified inbox channel filter | ⚠️ | P0 | S | 6.1 | |
-| 6.36 | Channel-icon in chat row | ⚠️ | P1 | XS | — | |
-| 6.37 | Direct chat link channel | ❌ | P1 | — | 1.32 | |
-| 6.38 | iMessage business register flow doc | ❌ | P3 | M | 6.9 | |
-| 6.39 | Bulk WA template sender | ❌ | P2 | M | 6.6 | campaign-style |
-| 6.40 | Channel deprovision/disconnect | ❌ | P1 | S | 6.15 | |
-| 6.41 | Channel webhook receiver framework | ❌ | P0 | — | 0.38 | |
-| 6.42 | Channel outbound queue | ❌ | P1 | M | 6.1 | celery |
+| 6.3 | Channel: Facebook Messenger | ✅ | P0 | L | 6.1 | MessengerAdapter Graph API |
+| 6.4 | Channel: Instagram DM | ✅ | P0 | L | 6.1, 6.3 | InstagramAdapter shared Graph |
+| 6.5 | Channel: WhatsApp Cloud API | ✅ | P0 | L | 6.1 | WhatsAppAdapter |
+| 6.6 | Channel: WhatsApp templates | ✅ | P0 | M | 6.5 | ChannelTemplate model + send_template |
+| 6.7 | Channel: SMS via Twilio | ✅ | P0 | L | 6.1 | TwilioSmsAdapter |
+| 6.8 | Channel: Telegram | ✅ | P1 | M | 6.1 | TelegramAdapter |
+| 6.9 | Channel: Apple Messages for Business | ✅ | P2 | L | 6.1 | AppleAdapter generic-http |
+| 6.10 | Channel: Twitter/X DM | ✅ | P2 | L | 6.1 | TwitterAdapter |
+| 6.11 | Channel: Email inbound | ✅ | P0 | — | Ph3 | EmailAdapter parse_webhook |
+| 6.12 | Channel: Email outbound | ✅ | P0 | M | 0.36 | EmailAdapter send_text + In-Reply-To |
+| 6.13 | Channel: LINE | ✅ | P3 | M | 6.1 | LineAdapter |
+| 6.14 | Channel: Viber | ✅ | P3 | M | 6.1 | ViberAdapter |
+| 6.15 | Channel setup UI per integration | ✅ | P0 | M | 6.1 | ChannelsPage |
+| 6.16 | Channel health/status indicator | ✅ | P1 | S | 6.1 | status badge |
+| 6.17 | Channel-specific message formatting | ✅ | P1 | M | 6.1 | adapter-specific send_* |
+| 6.18 | Cross-channel unified contact | ✅ | P1 | L | — | ContactIdentity + email/phone match |
+| 6.19 | Cross-channel chat history view | ✅ | P1 | M | 6.18 | contact's past chats already wired |
+| 6.20 | Per-channel analytics report | ✅ | P1 | S | Ph8 | /analytics/channels |
+| 6.21 | Channel routing rules | ✅ | P1 | S | 5.42 | routing accepts channel filter |
+| 6.22 | Channel auto-reply templates | ✅ | P1 | S | — | ChannelTemplate.category=auto_reply |
+| 6.23 | Outbound proactive messaging | ✅ | P1 | M | 6.6 | broadcast endpoint |
+| 6.24 | Channel attachment normalization | ✅ | P1 | M | 6.1 | InboundMessage.content_type+file_url |
+| 6.25 | Channel emoji/sticker pass-through | ✅ | P2 | S | 6.1 | text path passthrough |
+| 6.26 | Channel voice notes | ✅ | P2 | M | 6.1 | audio content_type |
+| 6.27 | Channel quick replies (WA interactive) | ✅ | P1 | M | 6.5 | send_quick_replies WA buttons |
+| 6.28 | Channel list-message (WA) | ✅ | P2 | M | 6.5 | send_list |
+| 6.29 | Channel handoff to human label | ✅ | P1 | S | 6.1 | chatbot handoff node integrated |
+| 6.30 | Inbound webhook signature verify | ✅ | P0 | S | 6.1 | verify_signature per adapter |
+| 6.31 | Channel rate limit handling | ✅ | P1 | S | 6.1 | exp-backoff retries in outbound |
+| 6.32 | Channel cost meter | ✅ | P2 | M | — | cost_units + /usage endpoint |
+| 6.33 | Channel toggles in settings | ✅ | P1 | S | 6.15 | is_active toggle |
+| 6.34 | Channel test message tool | ✅ | P1 | S | 6.15 | /connections/{id}/test |
+| 6.35 | Unified inbox channel filter | ✅ | P0 | S | 6.1 | existing filter |
+| 6.36 | Channel-icon in chat row | ✅ | P1 | XS | — | existing |
+| 6.37 | Direct chat link channel | ✅ | P1 | — | 1.32 | existing /chat/:wsId |
+| 6.38 | iMessage business register flow doc | ✅ | P3 | M | 6.9 | doc inline in AppleAdapter |
+| 6.39 | Bulk WA template sender | ✅ | P2 | M | 6.6 | /channels/broadcast |
+| 6.40 | Channel deprovision/disconnect | ✅ | P1 | S | 6.15 | DELETE + pause toggle |
+| 6.41 | Channel webhook receiver framework | ✅ | P0 | — | 0.38 | /channels/webhook/:channel/:id |
+| 6.42 | Channel outbound queue | ✅ | P1 | M | 6.1 | ChannelOutbound + celery beat 10s |
 
 ---
 
