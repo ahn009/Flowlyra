@@ -1,4 +1,5 @@
 from app.models.analytics_event import AnalyticsEvent
+from app.models.api_key import ApiKey
 from app.models.audit_log import AuditLog
 from app.models.canned_response import CannedResponse
 from app.models.channel import ChannelConnection, ChannelOutbound, ChannelTemplate, ContactIdentity
@@ -25,6 +26,7 @@ from app.models.refresh_token import RefreshToken
 from app.models.report_schedule import ReportSchedule
 from app.models.routing_rule import RoutingRule
 from app.models.session import Session
+from app.models.survey import Survey, SurveyResponse
 from app.models.team import Team, team_members
 from app.models.ticket import (
     SlaPolicy,
@@ -46,6 +48,7 @@ from app.models.workspace_membership import WorkspaceMembership
 
 __all__ = [
     "AnalyticsEvent",
+    "ApiKey",
     "AuditLog",
     "CannedResponse",
     "ChannelConnection",
@@ -77,6 +80,8 @@ __all__ = [
     "ReportSchedule",
     "RoutingRule",
     "Session",
+    "Survey",
+    "SurveyResponse",
     "Team",
     "Ticket",
     "TicketActivity",

@@ -15,9 +15,10 @@ from app.models.chat import Chat
 from app.models.knowledge import KnowledgeSource
 from app.models.message import Message
 from app.models.ticket import Ticket
+from app.services.permissions import require_permission
 from app.services import ai_service, rag_service
 
-router = APIRouter(prefix="/ai", tags=["ai"])
+router = APIRouter(prefix="/ai", tags=["ai"], dependencies=[Depends(require_permission("ai.use"))])
 
 
 # ---- Text tools ----

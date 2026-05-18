@@ -162,8 +162,13 @@ export interface FlowLyraInstance {
   destroy(): void;
   identify(visitor: VisitorPayload): Promise<void>;
   setVisitor(visitor: VisitorPayload): Promise<void>;
+  setName(name: string): Promise<void>;
+  setEmail(email: string): Promise<void>;
+  setPhone(phone: string): Promise<void>;
+  setCustomVariables(vars: Record<string, string | number | boolean | null>): Promise<void>;
   set(key: string, value: string | number | boolean | null): Promise<void>;
   setLocale(locale: string): Promise<void>;
+  track(name: string, properties?: Record<string, unknown>, value?: number): Promise<void>;
   trackEvent(name: string, properties?: Record<string, unknown>, value?: number): Promise<void>;
   trackGoal(name: string, value?: number): Promise<void>;
   on(event: string, handler: (payload: unknown) => void): void;
@@ -177,6 +182,8 @@ declare global {
   interface Window {
     FlowLyraConfig?: FlowLyraConfig;
     FlowLyra?: FlowLyraInstance;
+    LiveChat?: FlowLyraInstance;
     FlowLyraQueue?: Array<[keyof FlowLyraInstance, unknown[]]>;
+    LiveChatQueue?: Array<[keyof FlowLyraInstance, unknown[]]>;
   }
 }

@@ -12,6 +12,9 @@ from app.models.contact import Contact
 from app.models.message import Message
 from app.models.session import Session
 from app.models.ticket import Ticket
+from app.services.permissions import require_permission
+from app.services.webhook_events import CONTACT_CREATED, CONTACT_UPDATED
+from app.services.webhook_service import dispatch_event
 
 router = APIRouter(prefix="/contacts", tags=["contacts"])
 
@@ -59,6 +62,63 @@ async def list_contacts(
         }
         for contact in contacts
     ]
+
+
+@router.post("/")
+async def create_contact(
+    payload: dict[str, Any],
+    user: Annotated[TokenUser, Depends(require_permission("contacts.write"))],
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, Any]:
+    email = str(payload.get("email") or "").strip() or None
+    full_name = str(payload.get("full_name") or "").strip() or None
+    if not email and not full_name:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="email or full_name is required")
+    row = Contact(
+        organization_id=user.organization_id,
+        email=email,
+        full_name=full_name,
+        phone=str(payload.get("phone") or "").strip() or None,
+        country=str(payload.get("country") or "").strip() or None,
+        timezone=str(payload.get("timezone") or "").strip() or None,
+        custom_attrs=dict(payload.get("custom_attrs") or {}),
+        is_vip=bool(payload.get("is_vip", False)),
+    )
+    db.add(row)
+    await db.flush()
+    await dispatch_event(
+        organization_id=user.organization_id,
+        event=CONTACT_CREATED,
+        payload={"contact_id": str(row.id), "email": row.email, "full_name": row.full_name, "phone": row.phone},
+        db=db,
+    )
+    await db.commit()
+    return {"id": str(row.id)}
+
+
+@router.patch("/{contact_id}")
+async def update_contact(
+    contact_id: uuid.UUID,
+    payload: dict[str, Any],
+    user: Annotated[TokenUser, Depends(require_permission("contacts.write"))],
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, Any]:
+    row = (await db.execute(select(Contact).where(Contact.id == contact_id, Contact.organization_id == user.organization_id))).scalar_one_or_none()
+    if row is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found")
+    for key in ("email", "full_name", "phone", "country", "timezone", "is_vip"):
+        if key in payload:
+            setattr(row, key, payload[key])
+    if "custom_attrs" in payload and isinstance(payload["custom_attrs"], dict):
+        row.custom_attrs = {**(row.custom_attrs or {}), **payload["custom_attrs"]}
+    await dispatch_event(
+        organization_id=user.organization_id,
+        event=CONTACT_UPDATED,
+        payload={"contact_id": str(row.id), "email": row.email, "full_name": row.full_name, "phone": row.phone},
+        db=db,
+    )
+    await db.commit()
+    return {"ok": True}
 
 
 @router.delete("/{contact_id}")

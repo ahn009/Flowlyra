@@ -1,0 +1,10 @@
+{
+  "name": "@flowlyra/sdk",
+  "version": "0.1.0",
+  "description": "Official FlowLyra API SDK for Node.js",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node -e \"console.log('sdk ok')\""
+  }
+}

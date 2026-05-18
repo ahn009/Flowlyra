@@ -19,7 +19,19 @@ EMBED_DIM = 1536
 
 
 def upgrade() -> None:
-    op.execute("CREATE EXTENSION IF NOT EXISTS vector")
+    vector_enabled = True
+    op.execute(
+        """
+        DO $$
+        BEGIN
+          CREATE EXTENSION IF NOT EXISTS vector;
+        EXCEPTION WHEN OTHERS THEN
+          RAISE NOTICE 'pgvector extension unavailable; falling back to JSONB embeddings';
+        END $$;
+        """
+    )
+    bind = op.get_bind()
+    vector_enabled = bool(bind.execute(sa.text("SELECT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'vector')")).scalar())
 
     op.create_table(
         "knowledge_sources",
@@ -51,14 +63,18 @@ def upgrade() -> None:
         sa.Column("meta", postgresql.JSONB(), nullable=False, server_default="{}"),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
     )
-    op.execute(f"ALTER TABLE knowledge_chunks ADD COLUMN embedding vector({EMBED_DIM})")
+    if vector_enabled:
+        op.execute(f"ALTER TABLE knowledge_chunks ADD COLUMN embedding vector({EMBED_DIM})")
+    else:
+        op.add_column("knowledge_chunks", sa.Column("embedding", postgresql.JSONB(), nullable=True, server_default="[]"))
     op.create_index("ix_knowledge_chunks_org", "knowledge_chunks", ["organization_id"])
     op.create_index("ix_knowledge_chunks_source", "knowledge_chunks", ["source_id"])
     op.create_index("ix_knowledge_chunks_article", "knowledge_chunks", ["kb_article_id"])
-    op.execute(
-        "CREATE INDEX ix_knowledge_chunks_embedding ON knowledge_chunks "
-        "USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100)"
-    )
+    if vector_enabled:
+        op.execute(
+            "CREATE INDEX ix_knowledge_chunks_embedding ON knowledge_chunks "
+            "USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100)"
+        )
 
     # Message sentiment
     op.add_column("messages", sa.Column("sentiment", sa.String(length=20), nullable=True))

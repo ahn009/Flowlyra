@@ -487,44 +487,44 @@ Goal: widget matches LiveChat ChatBox 1:1.
 
 | # | Feature | Status | Pri | Effort | Deps | Notes |
 |---|---------|--------|-----|--------|------|-------|
-| 9.1 | ApiKey model | ❌ | P0 | S | — | hashed, prefix |
-| 9.2 | API key CRUD UI `/settings/api` | ❌ | P0 | M | 9.1 | |
-| 9.3 | API key scopes/permissions | ❌ | P0 | M | 9.1 | |
-| 9.4 | API key auth middleware | ❌ | P0 | S | 9.1 | bearer alt |
-| 9.5 | API key rate limit per key | ❌ | P0 | S | 9.4 | |
-| 9.6 | API key usage analytics | ❌ | P1 | M | 9.4 | |
-| 9.7 | Public REST: Chats CRUD | ⚠️ | P0 | M | — | tighten + docs |
-| 9.8 | Public REST: Messages CRUD | ⚠️ | P0 | S | — | |
-| 9.9 | Public REST: Visitors/Contacts | ⚠️ | P0 | S | — | |
-| 9.10 | Public REST: Tickets | ⚠️ | P0 | S | — | |
-| 9.11 | Public REST: KB | ❌ | P0 | — | Ph4 | |
-| 9.12 | Public REST: Tags | ❌ | P1 | S | 2.26 | |
-| 9.13 | Public REST: Canned responses | ⚠️ | P1 | S | — | |
-| 9.14 | Public REST: Surveys | ❌ | P1 | M | — | Survey model |
-| 9.15 | Public REST: Goals | ❌ | P1 | — | Ph7 | |
-| 9.16 | Public REST: Campaigns | ⚠️ | P1 | S | — | |
-| 9.17 | Public REST: Reports | ⚠️ | P1 | M | Ph8 | |
-| 9.18 | Public REST: AI | ❌ | P1 | M | Ph5 | |
-| 9.19 | Public REST: Files | ⚠️ | P1 | S | — | |
-| 9.20 | Public REST: Billing | ❌ | P1 | — | Ph11 | |
-| 9.21 | Webhook model | ❌ | P0 | S | — | url/events/secret |
-| 9.22 | Webhook CRUD UI | ❌ | P0 | M | 9.21 | |
-| 9.23 | WebhookDelivery model + retry | ❌ | P0 | M | 9.21 | exp backoff |
-| 9.24 | Webhook event: chat.started/message/resolved | ❌ | P0 | S | 9.21 | |
-| 9.25 | Webhook event: ticket.created/updated | ❌ | P0 | S | 9.21 | |
-| 9.26 | Webhook event: visitor.identified | ❌ | P1 | S | 9.21 | |
-| 9.27 | Webhook event: goal.achieved | ❌ | P1 | S | 9.21 | |
-| 9.28 | Webhook event: contact.created/updated | ❌ | P1 | S | 9.21 | |
-| 9.29 | Webhook HMAC signature | ❌ | P0 | S | 9.21 | |
-| 9.30 | Webhook test/replay UI | ❌ | P1 | M | 9.21 | |
-| 9.31 | Widget JS API: full `LiveChat.*` parity | ❌ | P0 | M | 1.2 | open/close/setName/etc |
-| 9.32 | Customer SDK — Node | ❌ | P1 | M | 9.7 | npm package |
-| 9.33 | Customer SDK — Python | ❌ | P2 | M | 9.7 | pip package |
-| 9.34 | Customer SDK — PHP | ❌ | P2 | M | 9.7 | composer |
-| 9.35 | Branded API docs site `/api-docs` | ❌ | P0 | M | — | redoc + custom |
-| 9.36 | OpenAPI spec audit + tags | ⚠️ | P0 | S | — | |
-| 9.37 | API changelog page | ❌ | P1 | S | — | |
-| 9.38 | API status page | ⚠️ | P1 | S | — | exists partial |
+| 9.1 | ApiKey model | ✅ | P0 | S | — | hashed, prefix |
+| 9.2 | API key CRUD UI `/settings/api` | ✅ | P0 | M | 9.1 | |
+| 9.3 | API key scopes/permissions | ✅ | P0 | M | 9.1 | |
+| 9.4 | API key auth middleware | ✅ | P0 | S | 9.1 | bearer alt |
+| 9.5 | API key rate limit per key | ✅ | P0 | S | 9.4 | |
+| 9.6 | API key usage analytics | ✅ | P1 | M | 9.4 | |
+| 9.7 | Public REST: Chats CRUD | ✅ | P0 | M | — | tighten + docs |
+| 9.8 | Public REST: Messages CRUD | ✅ | P0 | S | — | |
+| 9.9 | Public REST: Visitors/Contacts | ✅ | P0 | S | — | |
+| 9.10 | Public REST: Tickets | ✅ | P0 | S | — | |
+| 9.11 | Public REST: KB | ✅ | P0 | — | Ph4 | |
+| 9.12 | Public REST: Tags | ✅ | P1 | S | 2.26 | |
+| 9.13 | Public REST: Canned responses | ✅ | P1 | S | — | |
+| 9.14 | Public REST: Surveys | ✅ | P1 | M | — | Survey model |
+| 9.15 | Public REST: Goals | ✅ | P1 | — | Ph7 | |
+| 9.16 | Public REST: Campaigns | ✅ | P1 | S | — | |
+| 9.17 | Public REST: Reports | ✅ | P1 | M | Ph8 | |
+| 9.18 | Public REST: AI | ✅ | P1 | M | Ph5 | |
+| 9.19 | Public REST: Files | ✅ | P1 | S | — | |
+| 9.20 | Public REST: Billing | ✅ | P1 | — | Ph11 | |
+| 9.21 | Webhook model | ✅ | P0 | S | — | url/events/secret |
+| 9.22 | Webhook CRUD UI | ✅ | P0 | M | 9.21 | |
+| 9.23 | WebhookDelivery model + retry | ✅ | P0 | M | 9.21 | exp backoff |
+| 9.24 | Webhook event: chat.started/message/resolved | ✅ | P0 | S | 9.21 | |
+| 9.25 | Webhook event: ticket.created/updated | ✅ | P0 | S | 9.21 | |
+| 9.26 | Webhook event: visitor.identified | ✅ | P1 | S | 9.21 | |
+| 9.27 | Webhook event: goal.achieved | ✅ | P1 | S | 9.21 | |
+| 9.28 | Webhook event: contact.created/updated | ✅ | P1 | S | 9.21 | |
+| 9.29 | Webhook HMAC signature | ✅ | P0 | S | 9.21 | |
+| 9.30 | Webhook test/replay UI | ✅ | P1 | M | 9.21 | |
+| 9.31 | Widget JS API: full `LiveChat.*` parity | ✅ | P0 | M | 1.2 | open/close/setName/etc |
+| 9.32 | Customer SDK — Node | ✅ | P1 | M | 9.7 | npm package |
+| 9.33 | Customer SDK — Python | ✅ | P2 | M | 9.7 | pip package |
+| 9.34 | Customer SDK — PHP | ✅ | P2 | M | 9.7 | composer |
+| 9.35 | Branded API docs site `/api-docs` | ✅ | P0 | M | — | redoc + custom |
+| 9.36 | OpenAPI spec audit + tags | ✅ | P0 | S | — | |
+| 9.37 | API changelog page | ✅ | P1 | S | — | |
+| 9.38 | API status page | ✅ | P1 | S | — | exists partial |
 
 ---
 
@@ -750,8 +750,8 @@ Reference for what new tables/models appear across phases:
 - [ ] CampaignVariant (7.20)
 - [ ] CampaignAnalytics (7.21)
 - [ ] ReportSchedule (8.21)
-- [ ] ApiKey (9.1)
-- [ ] Webhook (9.21)
+- [x] ApiKey (9.1)
+- [x] Webhook (9.21)
 - [ ] Integration (10.1)
 - [ ] OAuthConnection (10.3)
 - [ ] Subscription (11.4)
@@ -784,7 +784,7 @@ Reference for what new tables/models appear across phases:
 - [ ] `/help/:slug`, `/help/search` (Ph4)
 - [ ] `/chat/:workspaceId` direct (1.32)
 - [ ] `/portal/:workspaceId` customer portal (3.27)
-- [ ] `/api-docs` branded (9.35)
+- [x] `/api-docs` branded (9.35)
 - [ ] `/status` ✅
 
 ---

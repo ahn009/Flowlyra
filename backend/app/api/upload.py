@@ -10,13 +10,14 @@ from app.middleware.auth import TokenUser, current_user
 from app.models.chat import Chat
 from app.models.organization import Organization
 from app.models.session import Session
+from app.services.permissions import require_permission
 from app.services.upload_service import upload_file
 
 router = APIRouter(prefix="/upload", tags=["upload"])
 
 
 @router.post("/")
-async def upload(file: Annotated[UploadFile, File()], user: Annotated[TokenUser, Depends(current_user)]) -> dict:
+async def upload(file: Annotated[UploadFile, File()], user: Annotated[TokenUser, Depends(require_permission("uploads.write"))]) -> dict:
     return await upload_file(file, user.organization_id)
 
 

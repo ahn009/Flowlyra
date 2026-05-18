@@ -15,6 +15,8 @@ from app.models.session import Session
 from app.models.ticket import Ticket
 from app.services.analytics_service import log_event
 from app.services.routing_service import route_chat
+from app.services.webhook_events import CHAT_MESSAGE_NEW, CHAT_STARTED, CONTACT_CREATED, CONTACT_UPDATED
+from app.services.webhook_service import dispatch_event
 
 CARD_RE = re.compile(r"(?<!\d)(?:\d[ -]?){13,19}(?!\d)")
 
@@ -102,12 +104,14 @@ async def start_chat(
     if session is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Session not found")
     contact = None
+    contact_created = False
     if email:
         contact = (await db.execute(select(Contact).where(Contact.organization_id == organization_id, Contact.email == email))).scalar_one_or_none()
         if contact is None:
             contact = Contact(organization_id=organization_id, email=email, full_name=name, phone=phone)
             db.add(contact)
             await db.flush()
+            contact_created = True
         else:
             contact.full_name = name or contact.full_name
             contact.phone = phone or contact.phone
@@ -132,6 +136,41 @@ async def start_chat(
         db.add(message)
         await log_event(db, organization_id, "message_created", chat_id=chat.id, contact_id=session.contact_id)
     await log_event(db, organization_id, "chat_started", chat_id=chat.id, contact_id=session.contact_id)
+    await dispatch_event(
+        organization_id=organization_id,
+        event=CHAT_STARTED,
+        payload={
+            "chat_id": str(chat.id),
+            "session_id": str(session.id),
+            "contact_id": str(chat.contact_id) if chat.contact_id else None,
+            "subject": chat.subject,
+        },
+        db=db,
+    )
+    if contact is not None:
+        await dispatch_event(
+            organization_id=organization_id,
+            event=CONTACT_CREATED if contact_created else CONTACT_UPDATED,
+            payload={
+                "contact_id": str(contact.id),
+                "email": contact.email,
+                "full_name": contact.full_name,
+                "phone": contact.phone,
+            },
+            db=db,
+        )
+    if message is not None and not message.is_internal:
+        await dispatch_event(
+            organization_id=organization_id,
+            event=CHAT_MESSAGE_NEW,
+            payload={
+                "chat_id": str(chat.id),
+                "message_id": str(message.id),
+                "sender_type": message.sender_type,
+                "content": message.content,
+            },
+            db=db,
+        )
     await db.commit()
     await db.refresh(chat)
     return chat, message
@@ -174,6 +213,18 @@ async def add_message(
     chat.updated_at = datetime.now(UTC)
     await log_event(db, chat.organization_id, "message_created", chat_id=chat.id, user_id=sender_id if sender_type == "agent" else None)
     await db.flush()
+    if not is_internal:
+        await dispatch_event(
+            organization_id=chat.organization_id,
+            event=CHAT_MESSAGE_NEW,
+            payload={
+                "chat_id": str(chat.id),
+                "message_id": str(message.id),
+                "sender_type": sender_type,
+                "content": message.content,
+            },
+            db=db,
+        )
     if (
         sender_type == "agent"
         and not is_internal

@@ -21,7 +21,7 @@ _BASE_AGENT = {
     "chats.read", "chats.write", "chats.assign_self", "chats.transfer", "chats.resolve",
     "chats.tag", "chats.note", "chats.export_transcript",
     "messages.read", "messages.write",
-    "contacts.read",
+    "contacts.read", "contacts.write",
     "tickets.read", "tickets.write", "tickets.comment", "tickets.resolve",
     "canned.read", "canned.use",
     "tags.read",
@@ -56,6 +56,8 @@ _BASE_ADMIN = _BASE_SUPERVISOR | {
     "channels.write",
     "billing.read",
     "notifications.preferences",
+    "goals.read", "goals.write",
+    "campaigns.read", "campaigns.write",
 }
 _BASE_OWNER = _BASE_ADMIN | {
     "billing.write",

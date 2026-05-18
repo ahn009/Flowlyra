@@ -20,6 +20,8 @@ from app.models.ticket import (
 from app.models.user import User
 from app.services.analytics_service import log_event
 from app.services.notification_service import notify
+from app.services.webhook_events import TICKET_CREATED, TICKET_RESOLVED, TICKET_UPDATED
+from app.services.webhook_service import dispatch_event
 
 MENTION_RE = re.compile(r"@([a-zA-Z0-9_.+-]+)")
 
@@ -238,6 +240,18 @@ async def create_ticket(
         body=ticket.subject,
         meta={"workflow_executed": executed},
     )
+    await dispatch_event(
+        organization_id=organization_id,
+        event=TICKET_CREATED,
+        payload={
+            "ticket_id": str(ticket.id),
+            "ticket_number": ticket.ticket_number,
+            "subject": ticket.subject,
+            "status": ticket.status,
+            "priority": ticket.priority,
+        },
+        db=db,
+    )
     return ticket
 
 
@@ -279,6 +293,21 @@ async def update_ticket(
         actor_user_id=actor_user_id,
         title=f"Ticket #{ticket.ticket_number} updated",
         body=ticket.subject,
+    )
+    event_name = TICKET_RESOLVED if _status_is_closed(ticket.status) and not _status_is_closed(old_status) else TICKET_UPDATED
+    await dispatch_event(
+        organization_id=ticket.organization_id,
+        event=event_name,
+        payload={
+            "ticket_id": str(ticket.id),
+            "ticket_number": ticket.ticket_number,
+            "subject": ticket.subject,
+            "old_status": old_status,
+            "status": ticket.status,
+            "priority": ticket.priority,
+            "assigned_user_id": str(ticket.assigned_user_id) if ticket.assigned_user_id else None,
+        },
+        db=db,
     )
     return ticket
 

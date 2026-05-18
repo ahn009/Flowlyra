@@ -262,8 +262,28 @@ export class Widget implements FlowLyraInstance {
     return this.setVisitor({ custom_variables: { [key]: value } });
   }
 
+  async setName(name: string): Promise<void> {
+    await this.setVisitor({ name });
+  }
+
+  async setEmail(email: string): Promise<void> {
+    await this.setVisitor({ email });
+  }
+
+  async setPhone(phone: string): Promise<void> {
+    await this.setVisitor({ phone });
+  }
+
+  async setCustomVariables(vars: Record<string, string | number | boolean | null>): Promise<void> {
+    await this.setVisitor({ custom_variables: vars });
+  }
+
   async setLocale(locale: string): Promise<void> {
     await this.applyLocale(locale, true);
+  }
+
+  async track(name: string, properties: Record<string, unknown> = {}, value?: number): Promise<void> {
+    await this.trackEvent(name, properties, value);
   }
 
   async trackEvent(name: string, properties: Record<string, unknown> = {}, value?: number): Promise<void> {
@@ -955,8 +975,9 @@ function safeToken(value: string): string {
 }
 
 function flushQueue(instance: FlowLyraInstance): void {
-  const queue = window.FlowLyraQueue ?? [];
+  const queue = [...(window.FlowLyraQueue ?? []), ...(window.LiveChatQueue ?? [])];
   window.FlowLyraQueue = [];
+  window.LiveChatQueue = [];
   for (const [method, args] of queue) {
     try {
       const fn = (instance as unknown as Record<string, (...args: unknown[]) => unknown>)[method as string];
@@ -973,6 +994,7 @@ function bootWidget(): void {
   window.FlowLyra?.destroy();
   const instance = new Widget(config);
   window.FlowLyra = instance;
+  window.LiveChat = instance;
   flushQueue(instance);
 }
 

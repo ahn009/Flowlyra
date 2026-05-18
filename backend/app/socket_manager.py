@@ -15,6 +15,8 @@ from app.models.message import Message
 from app.models.session import Session
 from app.models.user import User
 from app.services.chat_service import add_message, get_chat, start_chat
+from app.services.webhook_events import CHAT_RESOLVED
+from app.services.webhook_service import dispatch_event
 
 settings = get_settings()
 manager = socketio.AsyncRedisManager(settings.redis_url)
@@ -430,6 +432,12 @@ async def chat_resolve(sid: str, data: dict) -> None:
         chat = await _chat_for_session(db, session, _to_uuid(data["chat_id"]))
         chat.status = "resolved"
         chat.resolved_at = datetime.now(UTC)
+        await dispatch_event(
+            organization_id=chat.organization_id,
+            event=CHAT_RESOLVED,
+            payload={"chat_id": str(chat.id), "resolved_at": chat.resolved_at.isoformat()},
+            db=db,
+        )
         await db.commit()
         await sio.emit("chat:resolved", {"chat_id": str(chat.id)}, room=f"chat:{chat.id}")
         await sio.emit("analytics:update", {"organization_id": str(chat.organization_id)}, room=f"org:{chat.organization_id}")

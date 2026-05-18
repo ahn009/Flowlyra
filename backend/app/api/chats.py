@@ -29,6 +29,8 @@ from app.schemas.chat import (
     TransferRequest,
 )
 from app.services.chat_service import add_message, convert_to_ticket, get_chat, search_chats
+from app.services.webhook_events import CHAT_RESOLVED
+from app.services.webhook_service import dispatch_event
 
 router = APIRouter(prefix="/chats", tags=["chats"])
 
@@ -498,6 +500,16 @@ async def resolve(chat_id: uuid.UUID, user: Annotated[TokenUser, Depends(current
     chat = await get_chat(db, user.organization_id, chat_id)
     chat.status = "resolved"
     chat.resolved_at = datetime.now(UTC)
+    await dispatch_event(
+        organization_id=user.organization_id,
+        event=CHAT_RESOLVED,
+        payload={
+            "chat_id": str(chat.id),
+            "resolved_by_user_id": str(user.id),
+            "resolved_at": chat.resolved_at.isoformat() if chat.resolved_at else None,
+        },
+        db=db,
+    )
     await db.commit()
     await db.refresh(chat)
     return chat

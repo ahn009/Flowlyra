@@ -20,6 +20,8 @@ import { ChannelsPage } from "./pages/ChannelsPage";
 import { EngageCampaignsPage, EngageGoalsPage, EngageTrafficPage } from "./pages/EngagePages";
 import { PublicKBArticlePage, PublicKBIndexPage } from "./pages/PublicKBPage";
 import { WebhooksPage } from "./pages/WebhooksPage";
+import { ApiKeysPage } from "./pages/ApiKeysPage";
+import { ApiChangelogPage, ApiDocsPage, ApiStatusPage } from "./pages/ApiPlatformPages";
 import {
   ContactPage,
   CustomersPage,
@@ -106,6 +108,9 @@ export function App(): JSX.Element {
       <Route path="/invite/:token" element={<AcceptInvitePage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/chat/:wsId" element={<PublicChatPage />} />
+      <Route path="/api-docs" element={<ApiDocsPage />} />
+      <Route path="/api-changelog" element={<ApiChangelogPage />} />
+      <Route path="/api-status" element={<ApiStatusPage />} />
       <Route path="/kb/:orgSlug" element={<PublicKBIndexPage />} />
       <Route path="/kb/:orgSlug/:slug" element={<PublicKBArticlePage />} />
       <Route element={<AuthGuard />}>
@@ -136,6 +141,7 @@ export function App(): JSX.Element {
         <Route path="/settings" element={<SettingsOverviewPage />} />
         <Route path="/settings/audit" element={<AuditLogsPage />} />
         <Route path="/settings/webhooks" element={<WebhooksPage />} />
+        <Route path="/settings/api" element={<ApiKeysPage />} />
         <Route path="/settings/tags" element={<TagsPage />} />
         <Route path="/settings/notifications" element={<NotificationPreferencesPage />} />
       </Route>

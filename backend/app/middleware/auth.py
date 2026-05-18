@@ -12,8 +12,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import get_settings
 from app.db.redis import get_redis
 from app.db.session import AsyncSessionLocal, get_db
+from app.models.api_key import ApiKey
 from app.models.user import User
 from app.models.workspace_membership import WorkspaceMembership
+from app.services.api_keys import hash_key, parse_prefix
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12)
 ALGORITHM = "HS256"
@@ -82,17 +84,62 @@ async def current_user(
     request: Request,
     db: Annotated[AsyncSession, Depends(get_db)],
     authorization: Annotated[str | None, Header()] = None,
+    x_api_key: Annotated[str | None, Header()] = None,
 ) -> TokenUser:
-    token: str | None = None
-    if authorization and authorization.startswith("Bearer "):
-        token = authorization.removeprefix("Bearer ").strip()
+    async def _from_api_key(raw_key: str) -> TokenUser:
+        prefix = parse_prefix(raw_key)
+        key = (
+            await db.execute(
+                select(ApiKey).where(
+                    ApiKey.key_prefix == prefix,
+                    ApiKey.is_active.is_(True),
+                )
+            )
+        ).scalar_one_or_none()
+        if key is None or key.revoked_at is not None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid API key")
+        if key.expires_at and key.expires_at <= datetime.now(UTC):
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="API key expired")
+        if key.key_hash != hash_key(raw_key):
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid API key")
+
+        key.usage_count = int(key.usage_count or 0) + 1
+        key.last_used_at = datetime.now(UTC)
+        key.last_used_ip = request.client.host if request.client else None
+        await db.commit()
+
+        scopes = list((key.scopes or {}).get("items") or [])
+        request.state.organization_id = key.organization_id
+        request.state.user_id = key.created_by_user_id or key.id
+        request.state.user_email = f"api-key:{key.name}"
+        request.state.user_role = "api_key"
+        request.state.api_key_id = key.id
+        return TokenUser(
+            id=key.created_by_user_id or key.id,
+            organization_id=key.organization_id,
+            email=f"api-key:{key.name}",
+            role="api_key",
+            full_name=key.name,
+            granted_permissions=scopes,
+            denied_permissions=[],
+            membership_id=None,
+        )
+
+    bearer = authorization.removeprefix("Bearer ").strip() if authorization and authorization.startswith("Bearer ") else None
+    if x_api_key:
+        return await _from_api_key(x_api_key.strip())
+
+    if bearer:
+        try:
+            payload = await decode_token(bearer)
+        except HTTPException:
+            return await _from_api_key(bearer)
     else:
         cookie_token = request.cookies.get("flowlyra_access")
-        if cookie_token:
-            token = cookie_token
-    if not token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing bearer token")
-    payload = await decode_token(token)
+        if not cookie_token:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing bearer token")
+        payload = await decode_token(cookie_token)
+
     user_id = uuid.UUID(str(payload["sub"]))
     org_id = uuid.UUID(str(payload["org"]))
     result = await db.execute(

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from typing import Annotated
 import secrets
 import uuid
@@ -17,6 +18,7 @@ from app.models.webhook import Webhook, WebhookDelivery
 from app.services.permissions import require_permission
 from app.services.plan_service import assert_under_limit
 from app.services.webhook_events import ALL_EVENTS
+from app.services.webhook_service import deliver_one, dispatch_event
 
 router = APIRouter(prefix="/webhooks", tags=["webhooks"])
 
@@ -156,6 +158,7 @@ async def list_deliveries(
                 "event": r.event,
                 "status": r.status,
                 "status_code": r.status_code,
+                "response_body": r.response_body,
                 "attempt": r.attempt,
                 "next_retry_at": r.next_retry_at.isoformat() if r.next_retry_at else None,
                 "delivered_at": r.delivered_at.isoformat() if r.delivered_at else None,
@@ -164,3 +167,66 @@ async def list_deliveries(
             for r in rows
         ]
     }
+
+
+@router.post("/{webhook_id}/test")
+async def test_webhook(
+    webhook_id: uuid.UUID,
+    user: Annotated[TokenUser, Depends(require_permission("webhooks.write"))],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    wh = (
+        await db.execute(select(Webhook).where(Webhook.id == webhook_id, Webhook.organization_id == user.organization_id))
+    ).scalar_one_or_none()
+    if wh is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Webhook not found")
+    await dispatch_event(
+        organization_id=user.organization_id,
+        event="webhook.test",
+        payload={"webhook_id": str(wh.id), "sent_by": str(user.id)},
+        db=db,
+    )
+    await db.commit()
+    delivery = (
+        await db.execute(
+            select(WebhookDelivery)
+            .where(WebhookDelivery.webhook_id == wh.id, WebhookDelivery.organization_id == user.organization_id)
+            .order_by(desc(WebhookDelivery.created_at))
+            .limit(1)
+        )
+    ).scalar_one_or_none()
+    if delivery is not None:
+        await deliver_one(delivery.id)
+    return {"ok": True, "delivery_id": str(delivery.id) if delivery else None}
+
+
+@router.post("/deliveries/{delivery_id}/replay")
+async def replay_delivery(
+    delivery_id: uuid.UUID,
+    user: Annotated[TokenUser, Depends(require_permission("webhooks.write"))],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    original = (
+        await db.execute(
+            select(WebhookDelivery).where(
+                WebhookDelivery.id == delivery_id,
+                WebhookDelivery.organization_id == user.organization_id,
+            )
+        )
+    ).scalar_one_or_none()
+    if original is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Delivery not found")
+    replay = WebhookDelivery(
+        webhook_id=original.webhook_id,
+        organization_id=original.organization_id,
+        event=original.event,
+        payload=original.payload,
+        status="pending",
+        attempt=0,
+        next_retry_at=datetime.now(UTC),
+    )
+    db.add(replay)
+    await db.commit()
+    await db.refresh(replay)
+    await deliver_one(replay.id)
+    return {"ok": True, "delivery_id": str(replay.id)}

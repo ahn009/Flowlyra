@@ -42,6 +42,8 @@ from app.services.email_service import send_email
 from app.services import magic_link
 from app.services.offline_ticket import create_from_offline_form
 from app.services.operating_hours import is_open, next_open_at
+from app.services.webhook_events import CONTACT_CREATED, CONTACT_UPDATED, GOAL_ACHIEVED, VISITOR_IDENTIFIED
+from app.services.webhook_service import dispatch_event
 from app.services.widget_i18n import catalog as widget_catalog, normalize as normalize_locale
 
 logger = logging.getLogger(__name__)
@@ -294,10 +296,12 @@ async def identify(payload: WidgetIdentifyRequest, db: AsyncSession = Depends(ge
         contact = (await db.execute(select(Contact).where(Contact.id == session.contact_id))).scalar_one_or_none()
     if contact is None and payload.email:
         contact = (await db.execute(select(Contact).where(Contact.organization_id == org.id, Contact.email == payload.email))).scalar_one_or_none()
+    created = False
     if contact is None and (payload.email or payload.name):
         contact = Contact(organization_id=org.id, email=payload.email, full_name=payload.name)
         db.add(contact)
         await db.flush()
+        created = True
     if contact is not None:
         if payload.name:
             contact.full_name = payload.name
@@ -314,6 +318,29 @@ async def identify(payload: WidgetIdentifyRequest, db: AsyncSession = Depends(ge
             else:
                 merged[key] = value
         session.custom_variables = merged
+    await dispatch_event(
+        organization_id=org.id,
+        event=VISITOR_IDENTIFIED,
+        payload={
+            "session_id": str(session.id),
+            "contact_id": str(contact.id) if contact else None,
+            "email": contact.email if contact else None,
+            "name": contact.full_name if contact else None,
+        },
+        db=db,
+    )
+    if contact is not None:
+        await dispatch_event(
+            organization_id=org.id,
+            event=CONTACT_CREATED if created else CONTACT_UPDATED,
+            payload={
+                "contact_id": str(contact.id),
+                "email": contact.email,
+                "full_name": contact.full_name,
+                "phone": contact.phone,
+            },
+            db=db,
+        )
     await db.commit()
     return {
         "ok": True,
@@ -395,6 +422,19 @@ async def track_event(payload: WidgetTrackEventRequest, db: AsyncSession = Depen
                     value=payload.value if payload.value is not None else goal.default_value,
                     metadata_={"event": payload.event, "properties": properties},
                 )
+            )
+            await dispatch_event(
+                organization_id=org.id,
+                event=GOAL_ACHIEVED,
+                payload={
+                    "goal_id": str(goal.id),
+                    "goal_name": goal.name,
+                    "session_id": str(session.id),
+                    "chat_id": str(chat_id) if chat_id else None,
+                    "campaign_id": str(campaign_id) if campaign_id else None,
+                    "value": payload.value if payload.value is not None else float(goal.default_value or 0),
+                },
+                db=db,
             )
     await db.commit()
     return {"ok": True, "event_id": str(event.id)}

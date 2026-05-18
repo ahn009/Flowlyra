@@ -13,6 +13,7 @@ import logging
 import time
 import uuid
 from collections.abc import Awaitable, Callable
+from datetime import UTC, datetime
 
 from fastapi import Request, Response
 from sqlalchemy import select
@@ -20,8 +21,10 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.db.redis import get_redis
 from app.db.session import AsyncSessionLocal
+from app.models.api_key import ApiKey
 from app.models.organization import Organization
 from app.models.plan_limit import get_plan
+from app.services.api_keys import hash_key, parse_prefix
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +63,42 @@ async def _plan_limits_for_token(authorization_header: str | None) -> tuple[int,
     return plan.api_requests_per_min, plan.auth_requests_per_min, str(org_id)
 
 
+async def _limits_for_api_key(raw_key: str) -> tuple[int, int, str] | None:
+    try:
+        prefix = parse_prefix(raw_key)
+    except Exception:  # noqa: BLE001
+        return None
+    try:
+        async with AsyncSessionLocal() as session:
+            row = (
+                await session.execute(
+                    select(ApiKey).where(
+                        ApiKey.key_prefix == prefix,
+                        ApiKey.is_active.is_(True),
+                    )
+                )
+            ).scalar_one_or_none()
+            if row is None or row.revoked_at is not None:
+                return None
+            if row.expires_at and row.expires_at <= datetime.now(UTC):
+                return None
+            if row.key_hash != hash_key(raw_key):
+                return None
+            if row.rate_limit_per_min:
+                return row.rate_limit_per_min, DEFAULT_AUTH_LIMIT, f"api-key:{row.id}"
+            plan_name = (
+                await session.execute(
+                    select(Organization.plan).where(Organization.id == row.organization_id)
+                )
+            ).scalar_one_or_none()
+            if not plan_name:
+                return None
+            plan = get_plan(plan_name)
+            return plan.api_requests_per_min, plan.auth_requests_per_min, f"api-key:{row.id}"
+    except Exception:  # noqa: BLE001
+        return None
+
+
 class RateLimitMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
         if request.url.path in SKIP_PATHS:
@@ -71,7 +110,10 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         try:
             redis = get_redis()
             auth = request.headers.get("authorization", "")
-            plan_limits = await _plan_limits_for_token(auth)
+            x_api_key = request.headers.get("x-api-key", "")
+            bearer = auth.removeprefix("Bearer ").strip() if auth.startswith("Bearer ") else ""
+            key_limits = await _limits_for_api_key(x_api_key or bearer) if (x_api_key or bearer) else None
+            plan_limits = key_limits or await _plan_limits_for_token(auth)
             is_auth_path = request.url.path.startswith(AUTH_PATH_PREFIX)
             if plan_limits is not None:
                 api_limit, auth_limit, principal_id = plan_limits

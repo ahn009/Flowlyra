@@ -10,6 +10,7 @@ from app.api import (
     agents,
     ai,
     analytics,
+    api_keys,
     audit,
     auth,
     chatbot,
@@ -19,6 +20,7 @@ from app.api import (
     engage,
     kb,
     notifications,
+    platform,
     public,
     tickets,
     upload,
@@ -48,7 +50,20 @@ if settings.sentry_dsn:
 
 
 def create_fastapi_app() -> FastAPI:
-    app = FastAPI(title="FlowLyra API", version="1.0.0")
+    app = FastAPI(
+        title="FlowLyra API",
+        version="1.0.0",
+        openapi_tags=[
+            {"name": "api-keys", "description": "Create and manage scoped API keys."},
+            {"name": "platform", "description": "Public REST platform endpoints for external clients."},
+            {"name": "webhooks", "description": "Outbound webhook subscriptions and deliveries."},
+            {"name": "chats", "description": "Chat inbox, messages, and live conversation controls."},
+            {"name": "tickets", "description": "Ticketing lifecycle, comments, SLA, and workflow APIs."},
+            {"name": "contacts", "description": "Contact directory and customer profile management."},
+            {"name": "analytics", "description": "Reporting, exports, and analytics APIs."},
+            {"name": "ai", "description": "AI assistants, summarization, sentiment, and knowledge search."},
+        ],
+    )
 
     # Middlewares run in reverse insertion order; insert outer-most last.
     app.add_middleware(RateLimitMiddleware)
@@ -135,7 +150,9 @@ def create_fastapi_app() -> FastAPI:
         upload.router,
         audit.router,
         notifications.router,
+        api_keys.router,
         webhooks.router,
+        platform.router,
         kb.admin_router,
         kb.public_router,
         ai.router,

@@ -20,6 +20,7 @@ const CARDS: Card[] = [
   { title: "Triggers", description: "Proactive engagement & campaigns.", href: "/admin/triggers", permission: "triggers.write" },
   { title: "Analytics", description: "Dashboards & reports.", href: "/admin/analytics", permission: "reports.read" },
   { title: "Webhooks", description: "Receive real-time events into your own services.", href: "/settings/webhooks", permission: "webhooks.write" },
+  { title: "API keys", description: "Scoped credentials for public REST and server integrations.", href: "/settings/api", permission: "api_keys.write" },
   { title: "Notifications", description: "Per-user delivery preferences.", href: "/settings/notifications" },
   { title: "Audit log", description: "Every action taken on your workspace.", href: "/settings/audit", permission: "audit.read" },
   { title: "Billing", description: "Plan, seats, invoices.", href: "/admin/billing", permission: "billing.read" }
