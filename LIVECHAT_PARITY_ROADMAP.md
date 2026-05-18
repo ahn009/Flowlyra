@@ -444,40 +444,42 @@ Goal: widget matches LiveChat ChatBox 1:1.
 
 ---
 
-# PHASE 8 — Reports & Analytics (3 wks)
+# PHASE 8 — Reports & Analytics (3 wks) — ✅ COMPLETE (100%)
+
+**Delivered 2026-05-18:** 30/30 items shipped. Backend: full report API set + CSV/PDF/XLSX export + ReportSchedule + shared links + cohort/custom/staffing/bot analytics; Frontend: expanded analytics workspace with filters, exports, custom builder, schedules, and forecast panels.
 
 | # | Feature | Status | Pri | Effort | Deps | Notes |
 |---|---------|--------|-----|--------|------|-------|
-| 8.1 | Chat duration report | ❌ | P0 | S | — | |
-| 8.2 | Chat initiation breakdown (visitor/agent/bot) | ❌ | P1 | S | — | |
-| 8.3 | Channel breakdown report | ❌ | P0 | S | Ph6 | |
-| 8.4 | Agent activity report (online/busy/away time) | ❌ | P0 | M | — | presence log |
-| 8.5 | Agent leaderboard | ⚠️ | P1 | S | — | ranking |
-| 8.6 | Queue abandonment rate | ❌ | P0 | S | — | |
-| 8.7 | Queue wait-time distribution | ⚠️ | P1 | S | — | |
-| 8.8 | First response time (FRT) report | ⚠️ | P0 | S | — | |
-| 8.9 | Average resolution time | ❌ | P0 | S | — | |
-| 8.10 | Repeat customer rate | ❌ | P1 | S | — | |
-| 8.11 | Goals achieved report | ❌ | P0 | — | Ph7 | |
-| 8.12 | Revenue / sales report | ❌ | P0 | — | Ph7 | |
-| 8.13 | Campaign conversion report | ❌ | P0 | — | Ph7 | |
-| 8.14 | Tag usage report | ⚠️ | P1 | S | — | |
-| 8.15 | Customer satisfaction trend | ⚠️ | P0 | S | — | |
-| 8.16 | Report filter UI (date/agent/team/channel/tag) | ⚠️ | P0 | M | — | |
-| 8.17 | Report export — CSV | ❌ | P0 | S | — | |
-| 8.18 | Report export — PDF | ❌ | P1 | M | — | wkhtmltopdf |
-| 8.19 | Report export — Excel | ❌ | P1 | S | — | openpyxl |
-| 8.20 | Scheduled reports (email weekly/monthly) | ❌ | P0 | M | 0.36 | celery beat |
-| 8.21 | ReportSchedule model | ❌ | P0 | S | — | |
-| 8.22 | Staffing prediction (forecast volume) | ❌ | P2 | M | — | stats model |
-| 8.23 | Real-time dashboard socket updates | ⚠️ | P1 | S | — | replace polling |
-| 8.24 | Report sharing (public read-only link) | ❌ | P2 | M | — | token |
-| 8.25 | Custom report builder | ❌ | P2 | L | — | pivot |
-| 8.26 | Cohort analysis | ❌ | P3 | L | — | |
-| 8.27 | SLA compliance report | ❌ | P0 | — | Ph3 | |
-| 8.28 | Bot performance report | ❌ | P1 | — | Ph5 | |
-| 8.29 | KB analytics report | ❌ | P1 | — | Ph4 | |
-| 8.30 | Compare period (vs previous) | ❌ | P1 | S | — | |
+| 8.1 | Chat duration report | ✅ | P0 | S | — | |
+| 8.2 | Chat initiation breakdown (visitor/agent/bot) | ✅ | P1 | S | — | |
+| 8.3 | Channel breakdown report | ✅ | P0 | S | Ph6 | |
+| 8.4 | Agent activity report (online/busy/away time) | ✅ | P0 | M | — | presence log |
+| 8.5 | Agent leaderboard | ✅ | P1 | S | — | ranking |
+| 8.6 | Queue abandonment rate | ✅ | P0 | S | — | |
+| 8.7 | Queue wait-time distribution | ✅ | P1 | S | — | |
+| 8.8 | First response time (FRT) report | ✅ | P0 | S | — | |
+| 8.9 | Average resolution time | ✅ | P0 | S | — | |
+| 8.10 | Repeat customer rate | ✅ | P1 | S | — | |
+| 8.11 | Goals achieved report | ✅ | P0 | — | Ph7 | |
+| 8.12 | Revenue / sales report | ✅ | P0 | — | Ph7 | |
+| 8.13 | Campaign conversion report | ✅ | P0 | — | Ph7 | |
+| 8.14 | Tag usage report | ✅ | P1 | S | — | |
+| 8.15 | Customer satisfaction trend | ✅ | P0 | S | — | |
+| 8.16 | Report filter UI (date/agent/team/channel/tag) | ✅ | P0 | M | — | |
+| 8.17 | Report export — CSV | ✅ | P0 | S | — | |
+| 8.18 | Report export — PDF | ✅ | P1 | M | — | wkhtmltopdf |
+| 8.19 | Report export — Excel | ✅ | P1 | S | — | openpyxl |
+| 8.20 | Scheduled reports (email weekly/monthly) | ✅ | P0 | M | 0.36 | celery beat |
+| 8.21 | ReportSchedule model | ✅ | P0 | S | — | |
+| 8.22 | Staffing prediction (forecast volume) | ✅ | P2 | M | — | stats model |
+| 8.23 | Real-time dashboard socket updates | ✅ | P1 | S | — | replace polling |
+| 8.24 | Report sharing (public read-only link) | ✅ | P2 | M | — | token |
+| 8.25 | Custom report builder | ✅ | P2 | L | — | pivot |
+| 8.26 | Cohort analysis | ✅ | P3 | L | — | |
+| 8.27 | SLA compliance report | ✅ | P0 | — | Ph3 | |
+| 8.28 | Bot performance report | ✅ | P1 | — | Ph5 | |
+| 8.29 | KB analytics report | ✅ | P1 | — | Ph4 | |
+| 8.30 | Compare period (vs previous) | ✅ | P1 | S | — | |
 
 ---
 

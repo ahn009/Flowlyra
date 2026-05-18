@@ -26,6 +26,10 @@ celery_app.conf.beat_schedule = {
         "task": "app.workers.system_tasks.publish_scheduled_kb_articles",
         "schedule": 60.0,
     },
+    "dispatch-scheduled-reports": {
+        "task": "app.workers.system_tasks.dispatch_scheduled_reports",
+        "schedule": 300.0,
+    },
     "dispatch-channel-outbound": {
         "task": "app.workers.channel_worker.dispatch_pending_outbound",
         "schedule": 10.0,

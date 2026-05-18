@@ -1,11 +1,14 @@
 from datetime import UTC, datetime, timedelta
+import json
 import secrets
+import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings
+from app.db.redis import get_redis, ns
 from app.db.session import get_db
 from app.models.contact import Contact
 from app.models.organization import Organization
@@ -250,3 +253,24 @@ async def portal_reply(payload: PortalTicketReply, db: AsyncSession = Depends(ge
     )
     await db.commit()
     return {"ok": True, "ticket_id": str(ticket.id)}
+
+
+@router.get("/reports/share/{token}")
+async def shared_report(token: str, db: AsyncSession = Depends(get_db)) -> dict:
+    raw = await get_redis().get(ns("report_share", token))
+    if not raw:
+        raise HTTPException(status_code=404, detail="Shared report not found or expired")
+    payload = json.loads(raw)
+    report = str(payload.get("report") or "channels")
+    org_id_raw = str(payload.get("organization_id") or "")
+    if not org_id_raw:
+        raise HTTPException(status_code=404, detail="Shared report is invalid")
+    from app.api.analytics import _report_rows_for_org  # local import to avoid circular dependency at module load
+
+    rows = await _report_rows_for_org(report, uuid.UUID(org_id_raw), db)
+    return {
+        "report": report,
+        "rows": rows,
+        "filters": payload.get("filters") or {},
+        "created_at": payload.get("created_at"),
+    }

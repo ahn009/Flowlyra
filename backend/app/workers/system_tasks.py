@@ -8,6 +8,8 @@ from app.db.session import AsyncSessionLocal
 from app.models.ticket import Ticket, TicketFollower
 from app.models.user import User
 from app.models.webhook import WebhookDelivery
+from app.models.report_schedule import ReportSchedule
+from app.services.email_service import send_email
 from app.services.notification_service import notify
 from app.workers.celery_app import celery_app
 
@@ -128,3 +130,46 @@ def publish_scheduled_kb_articles() -> dict[str, int]:
 
     promoted = asyncio.run(_run())
     return {"promoted": promoted}
+
+
+@celery_app.task(name="app.workers.system_tasks.dispatch_scheduled_reports")
+def dispatch_scheduled_reports(batch_size: int = 100) -> dict[str, int]:
+    async def _run() -> dict[str, int]:
+        now = datetime.now(UTC)
+        sent = 0
+        async with AsyncSessionLocal() as db:
+            schedules = (
+                await db.execute(
+                    select(ReportSchedule)
+                    .where(
+                        ReportSchedule.is_active.is_(True),
+                        ReportSchedule.next_run_at.is_not(None),
+                        ReportSchedule.next_run_at <= now,
+                    )
+                    .order_by(ReportSchedule.next_run_at.asc())
+                    .limit(batch_size)
+                )
+            ).scalars().all()
+            for schedule in schedules:
+                recipients = list((schedule.recipients or {}).get("emails") or [])
+                if not recipients:
+                    continue
+                # Keep payload compact; downloadable CSV remains available via API endpoint.
+                report_url = f"/api/v1/analytics/export.csv?report={schedule.report_type}"
+                html = (
+                    f"<p>Your scheduled report <b>{schedule.name}</b> is ready.</p>"
+                    f"<p>Report type: <code>{schedule.report_type}</code></p>"
+                    f"<p>Download: <code>{report_url}</code></p>"
+                )
+                for email in recipients:
+                    await send_email(email, f"FlowLyra report: {schedule.name}", html)
+                schedule.last_sent_at = now
+                if schedule.frequency == "monthly":
+                    schedule.next_run_at = now + timedelta(days=30)
+                else:
+                    schedule.next_run_at = now + timedelta(days=7)
+                sent += 1
+            await db.commit()
+        return {"processed": len(schedules), "sent": sent}
+
+    return asyncio.run(_run())

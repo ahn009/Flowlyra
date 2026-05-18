@@ -151,6 +151,7 @@ async def chat_start(sid: str, data: dict) -> None:
                 },
                 room=f"org:{chat.organization_id}",
             )
+            await sio.emit("analytics:update", {"organization_id": str(chat.organization_id)}, room=f"org:{chat.organization_id}")
             if chat.assigned_user_id and message:
                 from app.workers.ai_worker import get_agent_suggestions
 
@@ -206,6 +207,7 @@ async def chat_message(sid: str, data: dict) -> None:
                 if chat.assigned_user_id:
                     rooms.append(f"agent:{chat.assigned_user_id}")
                 await emit_to_rooms("chat:message:new", payload, rooms)
+                await sio.emit("analytics:update", {"organization_id": str(chat.organization_id)}, room=f"org:{chat.organization_id}")
                 if sender_type == "customer":
                     await sio.emit(
                         "notification",
@@ -430,6 +432,7 @@ async def chat_resolve(sid: str, data: dict) -> None:
         chat.resolved_at = datetime.now(UTC)
         await db.commit()
         await sio.emit("chat:resolved", {"chat_id": str(chat.id)}, room=f"chat:{chat.id}")
+        await sio.emit("analytics:update", {"organization_id": str(chat.organization_id)}, room=f"org:{chat.organization_id}")
 
 
 @sio.on("chat:read")

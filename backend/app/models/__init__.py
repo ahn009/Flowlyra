@@ -22,6 +22,7 @@ from app.models.organization import Organization
 from app.models.proactive_trigger import ProactiveTrigger
 from app.models.product import Product
 from app.models.refresh_token import RefreshToken
+from app.models.report_schedule import ReportSchedule
 from app.models.routing_rule import RoutingRule
 from app.models.session import Session
 from app.models.team import Team, team_members
@@ -73,6 +74,7 @@ __all__ = [
     "ProactiveTrigger",
     "Product",
     "RefreshToken",
+    "ReportSchedule",
     "RoutingRule",
     "Session",
     "Team",

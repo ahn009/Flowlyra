@@ -633,10 +633,26 @@ export function BillingPage(): JSX.Element {
 }
 
 export function AnalyticsPage(): JSX.Element {
+  const queryClient = useQueryClient();
   const theme = useThemeStore((state) => state.theme);
   const axisColor = theme === "dark" ? "#9aacbf" : "#64748b";
   const gridColor = theme === "dark" ? "#243244" : "#dbe3ee";
   const tooltipStyle = theme === "dark" ? { backgroundColor: "#111b2e", border: "1px solid #243244", color: "#e6edf7" } : { backgroundColor: "#ffffff", border: "1px solid #dbe3ee", color: "#0f172a" };
+  const [exportReport, setExportReport] = useState("channels");
+  const [scheduleName, setScheduleName] = useState("Weekly channels report");
+  const [scheduleType, setScheduleType] = useState("channels");
+  const [scheduleEmail, setScheduleEmail] = useState("");
+  const [filterDateFrom, setFilterDateFrom] = useState("");
+  const [filterDateTo, setFilterDateTo] = useState("");
+  const [filterChannel, setFilterChannel] = useState("");
+  const [filterTag, setFilterTag] = useState("");
+  const [filterAgent, setFilterAgent] = useState("");
+  const [filterTeam, setFilterTeam] = useState("");
+  const [customSource, setCustomSource] = useState("chats");
+  const [customDimensions, setCustomDimensions] = useState("channel,status");
+  const [customMetric, setCustomMetric] = useState("count");
+  const [sharedLink, setSharedLink] = useState("");
+
   const { data: overview } = useQuery({
     queryKey: ["analytics", "overview"],
     queryFn: async () => (await api.get<{
@@ -646,38 +662,134 @@ export function AnalyticsPage(): JSX.Element {
       avg_wait_seconds: number;
       todays_resolved: number;
       todays_csat: number | null;
-    }>("/analytics/overview")).data,
-    refetchInterval: 5000
+    }>("/analytics/overview")).data
   });
   const { data: volume = [] } = useQuery({
     queryKey: ["analytics", "chat-volume"],
-    queryFn: async () => (await api.get<Array<{ bucket: string; count: number }>>("/analytics/chat-volume")).data,
-    refetchInterval: 5000
+    queryFn: async () => (await api.get<Array<{ bucket: string; count: number }>>("/analytics/chat-volume")).data
   });
   const { data: csat = [] } = useQuery({
     queryKey: ["analytics", "csat"],
-    queryFn: async () => (await api.get<Array<{ bucket: string; score: number }>>("/analytics/csat")).data,
-    refetchInterval: 5000
+    queryFn: async () => (await api.get<Array<{ bucket: string; score: number }>>("/analytics/csat")).data
   });
   const { data: responseTime } = useQuery({
     queryKey: ["analytics", "response-time"],
-    queryFn: async () => (await api.get<{ p50: number; p90: number; p99: number }>("/analytics/response-time")).data,
-    refetchInterval: 5000
+    queryFn: async () => (await api.get<{ p50: number; p90: number; p99: number }>("/analytics/response-time")).data
   });
   const { data: agentStats = [] } = useQuery({
     queryKey: ["analytics", "agent-stats"],
-    queryFn: async () => (await api.get<Array<{ agent_id: string; name: string; chats: number; csat: number | null }>>("/analytics/agent-stats")).data,
-    refetchInterval: 5000
+    queryFn: async () => (await api.get<Array<{ agent_id: string; name: string; chats: number; csat: number | null }>>("/analytics/agent-stats")).data
   });
   const { data: missed = [] } = useQuery({
     queryKey: ["analytics", "missed-chats"],
-    queryFn: async () => (await api.get<Array<{ id: string }>>("/analytics/missed-chats")).data,
-    refetchInterval: 5000
+    queryFn: async () => (await api.get<Array<{ id: string }>>("/analytics/missed-chats")).data
+  });
+  const { data: channels = [] } = useQuery({
+    queryKey: ["analytics", "channels"],
+    queryFn: async () => (await api.get<Array<{ channel: string; chats: number; csat: number | null }>>("/analytics/channels")).data
+  });
+  const { data: chatDuration } = useQuery({
+    queryKey: ["analytics", "chat-duration"],
+    queryFn: async () => (await api.get<{ avg_seconds: number; p50_seconds: number; p90_seconds: number; series: Array<{ bucket: string; avg_seconds: number }> }>("/analytics/chat-duration")).data
+  });
+  const { data: queueAbandonment } = useQuery({
+    queryKey: ["analytics", "queue-abandonment"],
+    queryFn: async () => (await api.get<{ total: number; abandoned: number; rate: number }>("/analytics/queue-abandonment")).data
+  });
+  const { data: avgResolution } = useQuery({
+    queryKey: ["analytics", "avg-resolution-time"],
+    queryFn: async () => (await api.get<{ avg_seconds: number }>("/analytics/avg-resolution-time")).data
+  });
+  const { data: repeatCustomer } = useQuery({
+    queryKey: ["analytics", "repeat-customer-rate"],
+    queryFn: async () => (await api.get<{ total_contacts: number; repeat_contacts: number; rate: number }>("/analytics/repeat-customer-rate")).data
+  });
+  const { data: goalsAchieved } = useQuery({
+    queryKey: ["analytics", "goals-achieved"],
+    queryFn: async () => (await api.get<{ total: number; items: Array<{ goal: string; achieved: number; value: number }> }>("/analytics/goals-achieved")).data
+  });
+  const { data: revenue } = useQuery({
+    queryKey: ["analytics", "revenue"],
+    queryFn: async () => (await api.get<{ total: number; series: Array<{ bucket: string; revenue: number }> }>("/analytics/revenue")).data
+  });
+  const { data: campaignConversion } = useQuery({
+    queryKey: ["analytics", "campaign-conversion"],
+    queryFn: async () => (await api.get<{ items: Array<{ campaign_id: string; sent: number; converted: number; conversion_rate: number }> }>("/analytics/campaign-conversion")).data
+  });
+  const { data: slaCompliance } = useQuery({
+    queryKey: ["analytics", "sla-compliance"],
+    queryFn: async () => (await api.get<{ first_response_compliance: number; resolution_compliance: number }>("/analytics/sla-compliance")).data
+  });
+  const { data: kbReport } = useQuery({
+    queryKey: ["analytics", "kb"],
+    queryFn: async () => (await api.get<{ total_views: number; top_articles: Array<{ title: string; views: number }> }>("/analytics/kb")).data
+  });
+  const { data: comparePeriod } = useQuery({
+    queryKey: ["analytics", "compare-period"],
+    queryFn: async () => (await api.get<{ current: number; previous: number; delta: number; delta_ratio: number }>("/analytics/compare-period", { params: { days: 7 } })).data
+  });
+  const { data: staffingPrediction } = useQuery({
+    queryKey: ["analytics", "staffing-prediction"],
+    queryFn: async () => (await api.get<{ avg_handle_minutes: number; peak_hour: number; peak_agents: number; series: Array<{ hour: number; avg_chats_per_hour: number; recommended_agents: number }> }>("/analytics/staffing-prediction")).data
+  });
+  const { data: cohorts } = useQuery({
+    queryKey: ["analytics", "cohorts"],
+    queryFn: async () => (await api.get<{ months: number; cohorts: Array<Record<string, number | string>> }>("/analytics/cohorts", { params: { months: 6 } })).data
+  });
+  const { data: botPerformance } = useQuery({
+    queryKey: ["analytics", "bot-performance"],
+    queryFn: async () => (await api.get<{ items: Array<{ flow_id: string; flow_name: string; total_sessions: number; completion_rate: number; handoff_rate: number }> }>("/analytics/bot-performance")).data
+  });
+  const customReport = useMutation({
+    mutationFn: async () => (await api.post<{ rows: Array<Record<string, unknown>> }>("/analytics/custom-report", {
+      source: customSource,
+      dimensions: customDimensions.split(",").map((item) => item.trim()).filter(Boolean),
+      metric: customMetric,
+      limit: 200
+    })).data
+  });
+  const { data: schedules = [] } = useQuery({
+    queryKey: ["analytics", "report-schedules"],
+    queryFn: async () => (await api.get<Array<{ id: string; name: string; report_type: string; frequency: string; recipients: { emails?: string[] }; is_active: boolean }>>("/analytics/report-schedules")).data
+  });
+  const shareReport = useMutation({
+    mutationFn: async () => (await api.post<{ url: string }>("/analytics/share-link", {
+      report: exportReport,
+      filters: { date_from: filterDateFrom || null, date_to: filterDateTo || null, channel: filterChannel || null, tag: filterTag || null, agent: filterAgent || null, team: filterTeam || null },
+      ttl_hours: 72
+    })).data,
+    onSuccess: (data) => {
+      setSharedLink(data.url);
+      toast.success("Share link created");
+    },
+    onError: () => toast.error("Could not create share link")
   });
   const { data: viewerIp } = useQuery({
     queryKey: ["viewer-ip"],
     queryFn: async () => (await api.get<{ ip: string | null }>("/public/client-ip")).data,
     refetchInterval: 30000
+  });
+  const createSchedule = useMutation({
+    mutationFn: async () => api.post("/analytics/report-schedules", {
+      name: scheduleName,
+      report_type: scheduleType,
+      frequency: "weekly",
+      report_format: "csv",
+      recipients: { emails: scheduleEmail.trim() ? [scheduleEmail.trim()] : [] },
+      filters: { date_from: filterDateFrom || null, date_to: filterDateTo || null, channel: filterChannel || null, tag: filterTag || null, agent: filterAgent || null, team: filterTeam || null },
+    }),
+    onSuccess: async () => {
+      toast.success("Report schedule created");
+      await queryClient.invalidateQueries({ queryKey: ["analytics", "report-schedules"] });
+    },
+    onError: () => toast.error("Could not create schedule")
+  });
+  const toggleSchedule = useMutation({
+    mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => api.patch(`/analytics/report-schedules/${id}`, { is_active: isActive }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["analytics", "report-schedules"] });
+    },
+    onError: () => toast.error("Could not update schedule")
   });
 
   const todayChats = volume.reduce((total, point) => (isToday(point.bucket) ? total + point.count : total), 0);
@@ -689,23 +801,94 @@ export function AnalyticsPage(): JSX.Element {
     .map((row) => ({ agent: row.name, chats: row.chats }));
   const csatValue = overview?.todays_csat ?? null;
   const avgResponseSeconds = overview?.avg_wait_seconds ?? responseTime?.p50 ?? 0;
+  const chatDurationSeries = (chatDuration?.series || []).slice(-7).map((row) => ({ bucket: shortDate(row.bucket), avg: Number((row.avg_seconds / 60).toFixed(1)) }));
+  const channelSeries = channels.map((row) => ({ name: row.channel, chats: row.chats }));
+  const campaignSeries = (campaignConversion?.items || []).slice(0, 7).map((row) => ({ campaign: row.campaign_id.slice(0, 8), rate: Number((row.conversion_rate * 100).toFixed(1)) }));
+  const revenueSeries = (revenue?.series || []).slice(-7).map((row) => ({ bucket: shortDate(row.bucket), revenue: row.revenue }));
+  const exportCsv = async (): Promise<void> => {
+    try {
+      const response = await api.get("/analytics/export.csv", { params: { report: exportReport }, responseType: "blob" });
+      const blob = new Blob([response.data], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `analytics_${exportReport}.csv`;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      toast.error("Could not export CSV");
+    }
+  };
+  const exportBinary = async (kind: "pdf" | "xlsx"): Promise<void> => {
+    try {
+      const response = await api.get(`/analytics/export.${kind}`, { params: { report: exportReport }, responseType: "blob" });
+      const mime = kind === "pdf" ? "application/pdf" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+      const blob = new Blob([response.data], { type: mime });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `analytics_${exportReport}.${kind}`;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      toast.error(`Could not export ${kind.toUpperCase()}`);
+    }
+  };
   return (
     <PageShell>
       <PageHeader title="Analytics" />
       <div className="grid gap-4 p-4 sm:p-6">
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-6">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-8">
           <MetricCard label="Chats today" value={todayChats} tone="blue" />
           <MetricCard label="Resolved" value={overview?.todays_resolved ?? 0} tone="green" />
           <MetricCard label="Waiting" value={overview?.queue_length ?? 0} tone="yellow" />
           <MetricCard label="CSAT" value={csatValue == null ? "-" : csatValue.toFixed(1)} tone="slate" />
           <MetricCard label="Avg response" value={formatDuration(avgResponseSeconds)} tone="slate" />
           <MetricCard label="Missed" value={missed.length} tone={missed.length > 0 ? "red" : "slate"} />
+          <MetricCard label="Abandon rate" value={`${((queueAbandonment?.rate || 0) * 100).toFixed(1)}%`} tone="red" />
+          <MetricCard label="Avg resolution" value={formatDuration(avgResolution?.avg_seconds || 0)} tone="blue" />
         </div>
+        <Card className="p-4">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <Field label="Date from"><TextInput type="date" value={filterDateFrom} onChange={(event) => setFilterDateFrom(event.target.value)} /></Field>
+            <Field label="Date to"><TextInput type="date" value={filterDateTo} onChange={(event) => setFilterDateTo(event.target.value)} /></Field>
+            <Field label="Channel"><TextInput placeholder="web/whatsapp" value={filterChannel} onChange={(event) => setFilterChannel(event.target.value)} /></Field>
+            <Field label="Tag"><TextInput placeholder="vip" value={filterTag} onChange={(event) => setFilterTag(event.target.value)} /></Field>
+            <Field label="Agent"><TextInput placeholder="agent id" value={filterAgent} onChange={(event) => setFilterAgent(event.target.value)} /></Field>
+            <Field label="Team"><TextInput placeholder="team id" value={filterTeam} onChange={(event) => setFilterTeam(event.target.value)} /></Field>
+            <Field label="CSV report type">
+              <SelectInput value={exportReport} onChange={(event) => setExportReport(event.target.value)}>
+                <option value="channels">channels</option>
+                <option value="tags">tags</option>
+                <option value="leaderboard">leaderboard</option>
+                <option value="csat">csat</option>
+                <option value="chat_volume">chat_volume</option>
+                <option value="goals_achieved">goals_achieved</option>
+                <option value="revenue">revenue</option>
+                <option value="campaign_conversion">campaign_conversion</option>
+                <option value="sla_compliance">sla_compliance</option>
+                <option value="kb">kb</option>
+                <option value="bot_performance">bot_performance</option>
+              </SelectInput>
+            </Field>
+            <div className="flex items-end gap-2">
+              <Button variant="secondary" onClick={() => void exportCsv()}>CSV</Button>
+              <Button variant="secondary" onClick={() => void exportBinary("pdf")}>PDF</Button>
+              <Button variant="secondary" onClick={() => void exportBinary("xlsx")}>Excel</Button>
+              <Button variant="primary" onClick={() => shareReport.mutate()} disabled={shareReport.isPending}>{shareReport.isPending ? "Sharing..." : "Share link"}</Button>
+            </div>
+          </div>
+          {sharedLink ? <div className="mt-3 text-sm text-slate-600 dark:text-slate-300">Public read-only link: <span className="font-semibold break-all">{sharedLink}</span></div> : null}
+        </Card>
         <Card className="p-4 text-sm text-slate-600 dark:text-slate-400">
           <div className="font-bold text-slate-900 dark:text-slate-100">Admin session</div>
           <div className="mt-1">Your current IP: <span className="font-semibold">{viewerIp?.ip ?? "Unavailable"}</span></div>
         </Card>
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-4">
           <Chart title="Chat volume">
             <AreaChart data={chatSeries}>
               <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
@@ -733,7 +916,147 @@ export function AnalyticsPage(): JSX.Element {
               <Line dataKey="csat" stroke="#16A34A" />
             </LineChart>
           </Chart>
+          <Chart title="Duration trend (mins)">
+            <LineChart data={chatDurationSeries}>
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+              <XAxis dataKey="bucket" stroke={axisColor} />
+              <YAxis stroke={axisColor} />
+              <Tooltip contentStyle={tooltipStyle} />
+              <Line dataKey="avg" stroke="#0EA5E9" />
+            </LineChart>
+          </Chart>
         </div>
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+          <Chart title="Channel breakdown">
+            <BarChart data={channelSeries}>
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+              <XAxis dataKey="name" stroke={axisColor} />
+              <YAxis stroke={axisColor} allowDecimals={false} />
+              <Tooltip contentStyle={tooltipStyle} />
+              <Bar dataKey="chats" fill="#2563EB" />
+            </BarChart>
+          </Chart>
+          <Chart title="Campaign conversion %">
+            <BarChart data={campaignSeries}>
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+              <XAxis dataKey="campaign" stroke={axisColor} />
+              <YAxis stroke={axisColor} />
+              <Tooltip contentStyle={tooltipStyle} />
+              <Bar dataKey="rate" fill="#14B8A6" />
+            </BarChart>
+          </Chart>
+          <Chart title="Revenue trend">
+            <AreaChart data={revenueSeries}>
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+              <XAxis dataKey="bucket" stroke={axisColor} />
+              <YAxis stroke={axisColor} />
+              <Tooltip contentStyle={tooltipStyle} />
+              <Area dataKey="revenue" stroke="#F59E0B" fill="#FEF3C7" />
+            </AreaChart>
+          </Chart>
+        </div>
+        <div className="grid grid-cols-2 gap-3 xl:grid-cols-6">
+          <MetricCard label="Goals achieved" value={goalsAchieved?.total ?? 0} tone="green" />
+          <MetricCard label="Revenue" value={`$${(revenue?.total || 0).toFixed(2)}`} tone="yellow" />
+          <MetricCard label="Repeat rate" value={`${((repeatCustomer?.rate || 0) * 100).toFixed(1)}%`} tone="blue" />
+          <MetricCard label="SLA 1st resp" value={`${((slaCompliance?.first_response_compliance || 0) * 100).toFixed(1)}%`} tone="slate" />
+          <MetricCard label="SLA resolve" value={`${((slaCompliance?.resolution_compliance || 0) * 100).toFixed(1)}%`} tone="slate" />
+          <MetricCard label="KB views" value={kbReport?.total_views || 0} tone="blue" />
+        </div>
+        <Card className="p-4">
+          <PanelHeader title="Compare period (7d)" description="Current period vs previous period chat volume." />
+          <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
+            <MetricCard label="Current" value={comparePeriod?.current || 0} tone="blue" />
+            <MetricCard label="Previous" value={comparePeriod?.previous || 0} tone="slate" />
+            <MetricCard label="Delta" value={comparePeriod?.delta || 0} tone={(comparePeriod?.delta || 0) >= 0 ? "green" : "red"} />
+            <MetricCard label="Delta %" value={`${((comparePeriod?.delta_ratio || 0) * 100).toFixed(1)}%`} tone="yellow" />
+          </div>
+        </Card>
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+          <Chart title="Staffing prediction">
+            <LineChart data={(staffingPrediction?.series || []).map((item) => ({ hour: String(item.hour), agents: item.recommended_agents }))}>
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+              <XAxis dataKey="hour" stroke={axisColor} />
+              <YAxis stroke={axisColor} allowDecimals={false} />
+              <Tooltip contentStyle={tooltipStyle} />
+              <Line dataKey="agents" stroke="#9333EA" />
+            </LineChart>
+          </Chart>
+          <Card className="p-4">
+            <PanelHeader title="Cohort analysis" description="Retention by month from first-seen cohort." />
+            <div className="mt-3 overflow-x-auto">
+              <table className="w-full min-w-[520px] text-left text-xs">
+                <thead><tr className="border-b border-border"><th className="py-2 pr-2">Cohort</th><th className="py-2 pr-2">Size</th><th className="py-2 pr-2">M0</th><th className="py-2 pr-2">M1</th><th className="py-2 pr-2">M2</th><th className="py-2 pr-2">M3</th><th className="py-2 pr-2">M4</th><th className="py-2 pr-2">M5</th></tr></thead>
+                <tbody>
+                  {(cohorts?.cohorts || []).slice(0, 10).map((row, index) => (
+                    <tr key={`${row.cohort}-${index}`} className="border-b border-border">
+                      <td className="py-2 pr-2 font-semibold">{String(row.cohort || "")}</td>
+                      <td className="py-2 pr-2">{Number(row.size || 0)}</td>
+                      <td className="py-2 pr-2">{`${(Number(row.m0 || 0) * 100).toFixed(0)}%`}</td>
+                      <td className="py-2 pr-2">{`${(Number(row.m1 || 0) * 100).toFixed(0)}%`}</td>
+                      <td className="py-2 pr-2">{`${(Number(row.m2 || 0) * 100).toFixed(0)}%`}</td>
+                      <td className="py-2 pr-2">{`${(Number(row.m3 || 0) * 100).toFixed(0)}%`}</td>
+                      <td className="py-2 pr-2">{`${(Number(row.m4 || 0) * 100).toFixed(0)}%`}</td>
+                      <td className="py-2 pr-2">{`${(Number(row.m5 || 0) * 100).toFixed(0)}%`}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </div>
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+          <Card className="p-4">
+            <PanelHeader title="Custom report builder" description="Build ad-hoc pivot-like reports by source, dimensions, and metric." />
+            <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-4">
+              <Field label="Source"><TextInput value={customSource} onChange={(event) => setCustomSource(event.target.value)} /></Field>
+              <Field label="Dimensions (csv)"><TextInput value={customDimensions} onChange={(event) => setCustomDimensions(event.target.value)} /></Field>
+              <Field label="Metric"><TextInput value={customMetric} onChange={(event) => setCustomMetric(event.target.value)} /></Field>
+              <div className="flex items-end"><Button variant="primary" onClick={() => customReport.mutate()} disabled={customReport.isPending}>{customReport.isPending ? "Running..." : "Run"}</Button></div>
+            </div>
+            <div className="mt-4 overflow-x-auto rounded-xl border border-border">
+              <pre className="p-3 text-xs text-slate-700 dark:text-slate-300">{JSON.stringify(customReport.data?.rows || [], null, 2)}</pre>
+            </div>
+          </Card>
+          <Card className="p-4">
+            <PanelHeader title="Bot performance" description="Completion and handoff rates by chatbot flow." />
+            <div className="mt-3 overflow-x-auto">
+              <table className="w-full min-w-[520px] text-left text-xs">
+                <thead><tr className="border-b border-border"><th className="py-2 pr-2">Flow</th><th className="py-2 pr-2">Sessions</th><th className="py-2 pr-2">Completion</th><th className="py-2 pr-2">Handoff</th></tr></thead>
+                <tbody>
+                  {(botPerformance?.items || []).map((item) => (
+                    <tr key={item.flow_id} className="border-b border-border">
+                      <td className="py-2 pr-2 font-semibold">{item.flow_name}</td>
+                      <td className="py-2 pr-2">{item.total_sessions}</td>
+                      <td className="py-2 pr-2">{`${(item.completion_rate * 100).toFixed(1)}%`}</td>
+                      <td className="py-2 pr-2">{`${(item.handoff_rate * 100).toFixed(1)}%`}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </div>
+        <Card className="p-4">
+          <PanelHeader title="Scheduled reports" description="Email weekly/monthly report exports." />
+          <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-5">
+            <Field label="Name"><TextInput value={scheduleName} onChange={(event) => setScheduleName(event.target.value)} /></Field>
+            <Field label="Report type"><TextInput value={scheduleType} onChange={(event) => setScheduleType(event.target.value)} /></Field>
+            <Field label="Recipient email"><TextInput type="email" placeholder="ops@company.com" value={scheduleEmail} onChange={(event) => setScheduleEmail(event.target.value)} /></Field>
+            <div className="md:col-span-2 flex items-end"><Button variant="primary" disabled={!scheduleName.trim() || !scheduleType.trim() || createSchedule.isPending} onClick={() => createSchedule.mutate()}>{createSchedule.isPending ? "Saving..." : "Create schedule"}</Button></div>
+          </div>
+          <div className="mt-4 divide-y divide-border rounded-xl border border-border">
+            {schedules.length ? schedules.map((item) => (
+              <div key={item.id} className="flex items-center justify-between p-3">
+                <div>
+                  <div className="font-semibold text-slate-900 dark:text-slate-100">{item.name}</div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400">{item.report_type} • {item.frequency} • {(item.recipients?.emails || []).join(", ") || "no recipients"}</div>
+                </div>
+                <Button size="sm" variant={item.is_active ? "secondary" : "primary"} onClick={() => toggleSchedule.mutate({ id: item.id, isActive: !item.is_active })}>{item.is_active ? "Pause" : "Resume"}</Button>
+              </div>
+            )) : <div className="p-3 text-sm text-slate-500">No schedules configured.</div>}
+          </div>
+        </Card>
         <Card className="overflow-x-auto">
           {agentStats.length ? (
             <table className="w-full min-w-[560px] text-left text-sm">

@@ -72,6 +72,7 @@ function registerListeners(instance: Socket): void {
   instance.on("visitor:page:view", () => onRealtimeUpdate?.());
   instance.on("campaign:sent", () => onRealtimeUpdate?.());
   instance.on("campaign:converted", () => onRealtimeUpdate?.());
+  instance.on("analytics:update", () => onRealtimeUpdate?.());
   instance.on("chat:new", (payload: { chat: Chat; message?: Message | null }) => {
     useChatStore.getState().addChat(payload.message ? { ...payload.chat, last_message: { content: payload.message.content, sender_type: payload.message.sender_type, created_at: payload.message.created_at } } : payload.chat);
     if (payload.message) useChatStore.getState().addMessage(payload.message);
