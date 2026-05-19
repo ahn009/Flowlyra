@@ -73,12 +73,21 @@ export function AgentsPage(): JSX.Element {
   );
 }
 
+interface TeamMember { user_id: string; name: string; email: string; status: string; priority: number; priority_label: string; }
+
 export function TeamsPage(): JSX.Element {
   const queryClient = useQueryClient();
   const { data = [] } = useQuery({ queryKey: ["teams"], queryFn: async () => (await api.get("/admin/teams")).data });
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [routingMode, setRoutingMode] = useState("round_robin");
+  const [expandedTeam, setExpandedTeam] = useState<string | null>(null);
+
+  const { data: teamMembers = [] } = useQuery({
+    queryKey: ["team-members", expandedTeam],
+    queryFn: async () => expandedTeam ? (await api.get<TeamMember[]>(`/gaps/teams/${expandedTeam}/members`)).data : [],
+    enabled: Boolean(expandedTeam),
+  });
 
   const createTeam = useMutation({
     mutationFn: async () => api.post("/admin/teams", { name, description: description || undefined, routing_mode: routingMode }),
@@ -97,6 +106,16 @@ export function TeamsPage(): JSX.Element {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["teams"] });
     }
+  });
+
+  const setPriority = useMutation({
+    mutationFn: async ({ teamId, userId, priority }: { teamId: string; userId: string; priority: number }) =>
+      api.patch(`/gaps/teams/${teamId}/members/${userId}/priority`, { priority }),
+    onSuccess: async () => {
+      toast.success("Priority updated");
+      await queryClient.invalidateQueries({ queryKey: ["team-members", expandedTeam] });
+    },
+    onError: () => toast.error("Could not update priority"),
   });
 
   return (
@@ -118,25 +137,61 @@ export function TeamsPage(): JSX.Element {
             <Button variant="primary" disabled={createTeam.isPending || !name.trim()} onClick={() => createTeam.mutate()}>{createTeam.isPending ? "Saving..." : "Create team"}</Button>
           </div>
         </Card>
-        <Card className="overflow-hidden">
-          <PanelHeader title="Active teams" />
-          {data.length ? (
-            <div className="divide-y divide-border">
-              {data.map((team: { id: string; name: string; description: string | null; routing_mode: string }) => (
-                <div key={team.id} className="flex items-center justify-between gap-3 p-4">
-                  <div>
-                    <div className="font-bold text-slate-900 dark:text-slate-100">{team.name}</div>
-                    <div className="text-sm text-slate-600 dark:text-slate-400">{team.description || "No description"}</div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400">Mode: {team.routing_mode}</div>
+        <div className="grid gap-4">
+          <Card className="overflow-hidden">
+            <PanelHeader title="Active teams" />
+            {data.length ? (
+              <div className="divide-y divide-border">
+                {data.map((team: { id: string; name: string; description: string | null; routing_mode: string }) => (
+                  <div key={team.id}>
+                    <div className="flex items-center justify-between gap-3 p-4">
+                      <div>
+                        <div className="font-bold text-slate-900 dark:text-slate-100">{team.name}</div>
+                        <div className="text-sm text-slate-600 dark:text-slate-400">{team.description || "No description"}</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">Mode: {team.routing_mode}</div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="secondary" onClick={() => setExpandedTeam(expandedTeam === team.id ? null : team.id)}>
+                          {expandedTeam === team.id ? "Hide members" : "Manage priority"}
+                        </Button>
+                        <Button size="sm" variant="danger" onClick={() => deleteTeam.mutate(team.id)}>Delete</Button>
+                      </div>
+                    </div>
+                    {expandedTeam === team.id && (
+                      <div className="border-t border-border bg-slate-50/50 dark:bg-slate-800/30 px-4 pb-4">
+                        <div className="pt-3 text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Agent Priority</div>
+                        {teamMembers.length === 0 ? (
+                          <div className="text-sm text-slate-400 py-2">No members. Add agents to this team first.</div>
+                        ) : (
+                          <div className="grid gap-2">
+                            {teamMembers.map((member) => (
+                              <div key={member.user_id} className="flex items-center justify-between rounded-lg border border-border bg-white dark:bg-slate-900 px-3 py-2">
+                                <div>
+                                  <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">{member.name}</span>
+                                  <span className="ml-2 text-xs text-slate-400">{member.email}</span>
+                                </div>
+                                <SelectInput
+                                  className="w-36"
+                                  value={String(member.priority)}
+                                  onChange={(e) => setPriority.mutate({ teamId: team.id, userId: member.user_id, priority: Number(e.target.value) })}
+                                >
+                                  <option value="0">Primary</option>
+                                  <option value="1">Secondary</option>
+                                </SelectInput>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  <Button size="sm" variant="danger" onClick={() => deleteTeam.mutate(team.id)}>Delete</Button>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <EmptyPanel title="No teams configured" description="Create teams to organize routing and ownership." />
-          )}
-        </Card>
+                ))}
+              </div>
+            ) : (
+              <EmptyPanel title="No teams configured" description="Create teams to organize routing and ownership." />
+            )}
+          </Card>
+        </div>
       </div>
     </PageShell>
   );
@@ -169,6 +224,9 @@ export function WidgetConfigPage(): JSX.Element {
   const [giphyApiKey, setGiphyApiKey] = useState("");
   const [ohEnabled, setOhEnabled] = useState(false);
   const [ohTimezone, setOhTimezone] = useState("UTC");
+  const [inactivityEnabled, setInactivityEnabled] = useState(false);
+  const [inactivityDelay, setInactivityDelay] = useState(60);
+  const [inactivityText, setInactivityText] = useState("Still there? Can I help you with anything?");
 
   const parsePreChatFields = (raw: string): Array<string | Record<string, unknown>> => {
     const text = raw.trim();
@@ -207,7 +265,8 @@ export function WidgetConfigPage(): JSX.Element {
         widget_supported_locales: { locales: supportedLocales.split(",").map((s) => s.trim()).filter(Boolean) },
         widget_custom_js: customJs || null,
         widget_giphy_api_key: giphyApiKey || null,
-        operating_hours: { enabled: ohEnabled, timezone: ohTimezone, schedule: data?.operating_hours?.schedule ?? {} }
+        operating_hours: { enabled: ohEnabled, timezone: ohTimezone, schedule: data?.operating_hours?.schedule ?? {} },
+        widget_inactivity_message: { enabled: inactivityEnabled, delay_seconds: inactivityDelay, text: inactivityText },
       });
     },
     onSuccess: async () => {
@@ -245,6 +304,9 @@ export function WidgetConfigPage(): JSX.Element {
     setGiphyApiKey(String(data.widget_giphy_api_key ?? ""));
     setOhEnabled(Boolean(data.operating_hours?.enabled));
     setOhTimezone(String(data.operating_hours?.timezone ?? "UTC"));
+    setInactivityEnabled(Boolean(data.widget_inactivity_message?.enabled));
+    setInactivityDelay(Number(data.widget_inactivity_message?.delay_seconds ?? 60));
+    setInactivityText(String(data.widget_inactivity_message?.text ?? "Still there? Can I help you with anything?"));
   }, [data]);
 
   return (
@@ -270,6 +332,23 @@ export function WidgetConfigPage(): JSX.Element {
             <FeatureToggle icon={<Sparkles size={16} />} title="Quick topics" />
             <FeatureToggle icon={<ShieldCheck size={16} />} title="Human only" />
             <FeatureToggle icon={<Palette size={16} />} title="Brand theme" />
+          </div>
+          <div className="rounded-lg border border-border bg-slate-50 dark:bg-slate-800/40 p-4 grid gap-3">
+            <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">Inactivity Message</div>
+            <label className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
+              <input type="checkbox" checked={inactivityEnabled} onChange={(e) => setInactivityEnabled(e.target.checked)} />
+              Send message when visitor is inactive
+            </label>
+            {inactivityEnabled && (
+              <>
+                <Field label="Delay (seconds)">
+                  <TextInput type="number" value={String(inactivityDelay)} onChange={(e) => setInactivityDelay(Number(e.target.value))} />
+                </Field>
+                <Field label="Message text">
+                  <TextInput value={inactivityText} onChange={(e) => setInactivityText(e.target.value)} />
+                </Field>
+              </>
+            )}
           </div>
           <Button variant="primary" type="submit" disabled={saveWidget.isPending}>{saveWidget.isPending ? "Saving..." : "Save"}</Button>
           </form>

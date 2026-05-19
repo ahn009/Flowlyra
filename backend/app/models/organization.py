@@ -45,6 +45,8 @@ class Organization(UUIDPkMixin, Base):
     email_sender_verification: Mapped[JsonDict] = mapped_column(JSONB, default=lambda: {"status": "unconfigured", "dkim": {}, "spf": {}, "last_checked_at": None})
     status_page_public: Mapped[bool] = mapped_column(Boolean, default=True)
     help_widget_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    widget_inactivity_message: Mapped[JsonDict] = mapped_column(JSONB, default=lambda: {"enabled": False, "delay_seconds": 60, "text": "Still there? Can I help you with anything?"})
+    widget_voice_video_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
     operating_hours: Mapped[JsonDict] = mapped_column(JSONB, default=lambda: {"enabled": False, "timezone": "UTC", "schedule": {}})
     sla_config: Mapped[JsonDict] = mapped_column(JSONB, default=lambda: {"enabled": False})
     cors_origin_allowlist: Mapped[JsonDict] = mapped_column(JSONB, default=lambda: {"origins": []})

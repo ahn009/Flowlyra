@@ -70,6 +70,11 @@ const SolutionSupportPage = lazyNamed(() => import("./pages/PublicPages"), "Solu
 const StatusPage = lazyNamed(() => import("./pages/PublicPages"), "StatusPage");
 const TermsPage = lazyNamed(() => import("./pages/PublicPages"), "TermsPage");
 const Phase15OpsPage = lazyNamed(() => import("./pages/Phase15OpsPage"), "Phase15OpsPage");
+const BenchmarkPage = lazyNamed(() => import("./pages/GapsPage"), "BenchmarkPage");
+const ChatAvailabilityPage = lazyNamed(() => import("./pages/GapsPage"), "ChatAvailabilityPage");
+const GreetingsConversionPage = lazyNamed(() => import("./pages/GapsPage"), "GreetingsConversionPage");
+const MomentsPage = lazyNamed(() => import("./pages/GapsPage"), "MomentsPage");
+const VoiceVideoPage = lazyNamed(() => import("./pages/GapsPage"), "VoiceVideoPage");
 
 function ScreenFallback(): JSX.Element {
   return <div className="grid min-h-[40vh] place-items-center text-sm font-semibold text-slate-500">Loading...</div>;
@@ -184,6 +189,11 @@ export function App(): JSX.Element {
           <Route path="/settings/integrations" element={<IntegrationsMarketplacePage />} />
           <Route path="/settings/tags" element={<TagsPage />} />
           <Route path="/settings/notifications" element={<NotificationPreferencesPage />} />
+          <Route path="/admin/benchmark" element={<BenchmarkPage />} />
+          <Route path="/admin/availability" element={<ChatAvailabilityPage />} />
+          <Route path="/admin/greetings-conversion" element={<GreetingsConversionPage />} />
+          <Route path="/admin/moments" element={<MomentsPage />} />
+          <Route path="/settings/voice-video" element={<VoiceVideoPage />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

@@ -11,6 +11,7 @@ from app.middleware.auth import verify_socket_token
 from app.models.chat import Chat
 from app.models.contact import Contact
 from app.models.analytics_event import AnalyticsEvent
+from app.models.gaps import AgentAvailabilityLog, ChatMoment
 from app.models.message import Message
 from app.models.session import Session
 from app.models.user import User
@@ -417,7 +418,15 @@ async def agent_status(sid: str, data: dict) -> None:
     session = await sio.get_session(sid)
     user = session.get("user")
     if user:
-        await sio.emit("agent:status:changed", {"user_id": user["id"], "status": data.get("status")}, room=f"org:{user['organization_id']}")
+        new_status = data.get("status", "online")
+        await sio.emit("agent:status:changed", {"user_id": user["id"], "status": new_status}, room=f"org:{user['organization_id']}")
+        async with AsyncSessionLocal() as db:
+            db.add(AgentAvailabilityLog(
+                organization_id=uuid.UUID(user["organization_id"]),
+                user_id=uuid.UUID(user["id"]),
+                status=new_status,
+            ))
+            await db.commit()
 
 
 @sio.on("chat:assign")
@@ -621,6 +630,62 @@ async def whisper(sid: str, data: dict) -> None:
         "whisper:new",
         {"from_user_id": user["id"], "message": data.get("message", "")},
         room=f"agent:{target_user_id}",
+    )
+
+
+@sio.on("moment:open")
+async def moment_open(sid: str, data: dict) -> None:
+    """Agent sends a Moment (in-chat app) to a visitor."""
+    session = await sio.get_session(sid)
+    if session.get("kind") != "agent":
+        await emit_error(sid, "Only agents can open moments")
+        return
+    user = session.get("user") or {}
+    async with AsyncSessionLocal() as db:
+        chat = await _chat_for_session(db, session, _to_uuid(data["chat_id"]))
+        moment = ChatMoment(
+            organization_id=_to_uuid(user["organization_id"]),
+            chat_id=chat.id,
+            created_by_user_id=_to_uuid(user["id"]),
+            title=str(data.get("title", "Action Required")),
+            url=str(data["url"]),
+            moment_type=str(data.get("type", "custom")),
+            config=data.get("config") or {},
+        )
+        db.add(moment)
+        await db.commit()
+        await db.refresh(moment)
+    await sio.emit(
+        "moment:open",
+        {
+            "moment_id": str(moment.id),
+            "chat_id": str(chat.id),
+            "title": moment.title,
+            "url": moment.url,
+            "type": moment.moment_type,
+            "config": moment.config,
+        },
+        room=f"chat:{chat.id}",
+    )
+
+
+@sio.on("moment:complete")
+async def moment_complete(sid: str, data: dict) -> None:
+    """Visitor signals they completed the Moment."""
+    async with AsyncSessionLocal() as db:
+        moment_id = _to_uuid(data["moment_id"])
+        moment = (await db.execute(select(ChatMoment).where(ChatMoment.id == moment_id))).scalar_one_or_none()
+        if moment is None:
+            await emit_error(sid, "Moment not found")
+            return
+        moment.visitor_completed = True
+        moment.visitor_completed_at = datetime.now(UTC)
+        moment.status = "completed"
+        await db.commit()
+    await sio.emit(
+        "moment:completed",
+        {"moment_id": str(moment_id), "chat_id": str(moment.chat_id)},
+        room=f"chat:{moment.chat_id}",
     )
 
 

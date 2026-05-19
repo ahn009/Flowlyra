@@ -154,6 +154,8 @@ def _widget_config(org: Organization, locale: str, *, is_returning: bool = False
             ),
         },
         "cookie_consent": org.cookie_consent or {"enabled": False, "text": None},
+        "inactivity_message": org.widget_inactivity_message or {"enabled": False, "delay_seconds": 60, "text": "Still there?"},
+        "voice_video_enabled": bool(org.widget_voice_video_enabled),
     }
 
 

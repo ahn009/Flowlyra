@@ -1,4 +1,5 @@
 from app.models.analytics_event import AnalyticsEvent
+from app.models.gaps import AgentAvailabilityLog, ChatMoment
 from app.models.api_key import ApiKey
 from app.models.audit_log import AuditLog
 from app.models.canned_response import CannedResponse
@@ -61,7 +62,9 @@ from app.models.webhook import Webhook, WebhookDelivery
 from app.models.workspace_membership import WorkspaceMembership
 
 __all__ = [
+    "AgentAvailabilityLog",
     "AnalyticsEvent",
+    "ChatMoment",
     "ApiKey",
     "AuditLog",
     "CannedResponse",

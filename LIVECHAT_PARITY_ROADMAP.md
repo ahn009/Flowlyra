@@ -828,11 +828,32 @@ Each item must satisfy before phase closure:
 
 ---
 
+# PARITY GAP CLOSURE — ✅ COMPLETE (2026-05-19)
+
+Post-roadmap audit against livechat.com identified 8 features present in LiveChat but missing from FlowLyra. All 8 implemented.
+
+| # | Gap | Files | Status |
+|---|-----|-------|--------|
+| G1 | **Moments (in-chat apps)** | `models/gaps.py` `api/gaps.py` `socket_manager.py` `GapsPage.tsx` | ✅ |
+| G2 | **Agent Priority in Groups** | `models/team.py` `api/gaps.py` `AdminPages.tsx` migration `019` | ✅ |
+| G3 | **Inactivity Messages** | `models/organization.py` `api/widget.py` `AdminPages.tsx` migration `019` | ✅ |
+| G4 | **Local Benchmark / Industry Comparison** | `api/gaps.py /reports/benchmark` `GapsPage.tsx BenchmarkPage` | ✅ |
+| G5 | **Chat Availability Report** | `models/gaps.py AgentAvailabilityLog` `socket_manager.py` `api/gaps.py` `GapsPage.tsx` | ✅ |
+| G6 | **Greetings Conversion Report** | `api/gaps.py /reports/greetings-conversion` + `greeting.seen/converted` events `GapsPage.tsx` | ✅ |
+| G7 | **Voice / Video / Screen Share** | `socket_manager.py` already had `webrtc:signal` + `cobrowse:request`. Added org toggle + `GapsPage.tsx VoiceVideoPage` | ✅ |
+| G8 | **HIPAA Readiness** | `docs/phase15/HIPAA_READINESS.md` (BAA template, breach procedure, control matrix) | ✅ |
+
+**New routes:** `/admin/benchmark` `/admin/availability` `/admin/greetings-conversion` `/admin/moments` `/settings/voice-video`
+
+**New migration:** `019_parity_gaps` — adds `team_members.priority`, `organizations.widget_inactivity_message`, `organizations.widget_voice_video_enabled`, `chat_moments` table, `agent_availability_log` table.
+
+---
+
 # Tracking
 
 Recommend converting this doc into GitHub Issues (one per row) grouped by Phase milestone, or import into Linear/Jira. Each row is sized and dependency-mapped for direct sprint planning.
 
-**Total open items: 468.**
+**Total open items: 468 (roadmap) + 0 parity gaps.**
 **Total estimated solo-dev weeks: ~55.**
 **Team-of-3 estimate: ~18–22 weeks.**
 **Team-of-5 estimate: ~12–14 weeks.**

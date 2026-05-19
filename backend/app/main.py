@@ -19,6 +19,7 @@ from app.api import (
     contacts,
     ecommerce,
     engage,
+    gaps,
     integrations,
     kb,
     notifications,
@@ -170,6 +171,7 @@ def create_fastapi_app() -> FastAPI:
         channels_api.webhook_router,
         security.router,
         scim.router,
+        gaps.router,
     ):
         app.include_router(router, prefix="/api/v1")
     return app
