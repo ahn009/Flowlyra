@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@livechat/design-system-icons": "^2.38.1",
+    "@livechat/design-system-react-components": "^2.38.1"
+  }
+}

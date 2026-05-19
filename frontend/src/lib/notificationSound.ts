@@ -4,7 +4,7 @@ let lastPlayedAt = 0;
 let audioUnlocked = false;
 let unlockRegistered = false;
 
-const MASTER_VOLUME = 0.92;
+const MASTER_VOLUME = 1.0;
 
 type BrowserWindowWithWebkitAudio = Window & {
   webkitAudioContext?: typeof AudioContext;
@@ -84,20 +84,18 @@ async function playIncomingChatSoundAsync(): Promise<void> {
 
   const start = context.currentTime + 0.015;
 
-  // High-intensity new visitor alert: bright double-ping with bell harmonics.
-  // Designed to cut through laptop speakers without becoming painfully clipped.
-  playTone(context, start, 988, 0.18, 0.28, "square");
-  playTone(context, start, 1976, 0.13, 0.08, "sine");
-  playTone(context, start + 0.16, 1318.51, 0.2, 0.31, "triangle");
-  playTone(context, start + 0.16, 2637.02, 0.14, 0.075, "sine");
+  // Ascending 3-note bell chime: C5 → E5 → G5
+  playTone(context, start,        523.25, 0.40, 0.50, "sine");
+  playTone(context, start,        1046.5, 0.28, 0.14, "sine");
+  playNoiseClick(context, start,  0.03, 0.045);
 
-  playNoiseClick(context, start, 0.045, 0.055);
-  playNoiseClick(context, start + 0.16, 0.045, 0.052);
+  playTone(context, start + 0.15, 659.25, 0.38, 0.48, "sine");
+  playTone(context, start + 0.15, 1318.5, 0.26, 0.12, "sine");
+  playNoiseClick(context, start + 0.15, 0.03, 0.04);
 
-  playTone(context, start + 0.37, 880, 0.15, 0.2, "square");
-  playTone(context, start + 0.37, 1760, 0.1, 0.055, "sine");
-  playTone(context, start + 0.5, 1174.66, 0.24, 0.24, "triangle");
-  playTone(context, start + 0.5, 2349.32, 0.16, 0.065, "sine");
+  playTone(context, start + 0.30, 783.99, 0.44, 0.55, "sine");
+  playTone(context, start + 0.30, 1567.98, 0.30, 0.15, "sine");
+  playNoiseClick(context, start + 0.30, 0.03, 0.05);
 }
 
 function playTone(

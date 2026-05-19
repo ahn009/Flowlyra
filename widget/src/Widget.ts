@@ -5,6 +5,8 @@ import type { FlowLyraInstance, Message, PreChatData, ProactiveTrigger, Suggeste
 import { I18n, detectLocale } from "./i18n";
 import { play as playSound } from "./sound";
 import { debounce, sessionToken, setSessionToken, trackRouteChanges } from "./utils";
+import { getVisitorInfo } from "./geoService";
+import { trackPageVisit, startChatSession, getSessionSummary } from "./sessionTracker";
 
 export class Widget implements FlowLyraInstance {
   private state: WidgetState = "HIDDEN";
@@ -62,6 +64,50 @@ export class Widget implements FlowLyraInstance {
   async boot(config: NonNullable<typeof window.FlowLyraConfig>): Promise<void> {
     const detectedLocale = config.locale ?? detectLocale(undefined) ?? "en";
     const visitor = config.visitor;
+
+    // Collect geo + session data in parallel with the init request
+    trackPageVisit(location.href, document.title);
+    const session = getSessionSummary();
+
+    // Kick off geo fetch — non-blocking, merge into visitor custom_variables
+    const geoPromise = getVisitorInfo({ requestPreciseLocation: Boolean(config.requestPreciseLocation) });
+    const geo = await geoPromise.catch(() => null);
+
+    const geoVars: Record<string, string | number | boolean | null> = {};
+    if (geo) {
+      geoVars["_geo_latitude"] = geo.latitude;
+      geoVars["_geo_longitude"] = geo.longitude;
+      geoVars["_geo_city"] = geo.city;
+      geoVars["_geo_region"] = geo.region;
+      geoVars["_geo_country"] = geo.country;
+      geoVars["_geo_timezone"] = geo.timezone;
+      geoVars["_geo_local_time"] = geo.localTime;
+      geoVars["_geo_isp"] = geo.isp;
+      geoVars["_geo_source"] = geo.source;
+      geoVars["_geo_accuracy_m"] = geo.accuracyMeters;
+      geoVars["_ua_os"] = geo.os;
+      geoVars["_ua_browser"] = geo.browser;
+      geoVars["_ua_device"] = geo.device;
+    }
+    const sessionVars: Record<string, string | number | boolean | null> = {
+      "_session_visit_count": session.visitCount,
+      "_session_chat_count": session.chatCount,
+      "_session_last_seen": session.lastSeen ?? "",
+    };
+    // Encode visited pages as JSON string for custom_variables
+    sessionVars["_session_pages"] = JSON.stringify(
+      session.visitedPages.slice(-10).map((p) => ({ url: p.url, title: p.title, timeSpent: p.timeSpent }))
+    );
+
+    const mergedVisitor: VisitorPayload = {
+      ...visitor,
+      custom_variables: {
+        ...geoVars,
+        ...sessionVars,
+        ...(visitor?.custom_variables ?? {}),
+      },
+    };
+
     const response = await fetch(`${this.apiUrl}/api/v1/widget/init`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -73,7 +119,7 @@ export class Widget implements FlowLyraInstance {
         referrer: document.referrer,
         user_agent: navigator.userAgent,
         locale: detectedLocale,
-        visitor,
+        visitor: mergedVisitor,
         page_title: document.title,
       }),
     });
@@ -539,6 +585,7 @@ export class Widget implements FlowLyraInstance {
       this.chatId = payload.chat.id;
       this.socket?.joinChat(payload.chat.id);
       this.socket?.markRead(payload.chat.id);
+      startChatSession();
       this.setState("CHATTING");
       if (payload.message) this.panel?.addMessage(payload.message);
       this.emit("chat:started", payload);

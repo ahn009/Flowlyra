@@ -141,8 +141,8 @@ export function ChannelsPage(): JSX.Element {
         <Plug size={20} /> Channels
       </div>
 
-      <div className="rounded-xl border border-border bg-white p-4 dark:bg-slate-900">
-        <div className="mb-3 text-sm font-black uppercase text-slate-500">Connect channel</div>
+      <div className="rounded-xl border border-navy-100 dark:border-navy-700 bg-white p-4 dark:bg-navy-900">
+        <div className="mb-3 text-sm font-black uppercase text-navy-400">Connect channel</div>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           <select
             value={channel}
@@ -150,7 +150,7 @@ export function ChannelsPage(): JSX.Element {
               setChannel(e.target.value);
               setCreds({});
             }}
-            className="rounded border border-border bg-slate-50 px-3 py-2 text-sm dark:bg-slate-800"
+            className="rounded border border-navy-100 dark:border-navy-700 bg-navy-50 px-3 py-2 text-sm dark:bg-navy-800"
           >
             {avail.items.map((o) => (
               <option key={o.channel} value={o.channel}>
@@ -162,13 +162,13 @@ export function ChannelsPage(): JSX.Element {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Name"
-            className="rounded border border-border bg-slate-50 px-3 py-2 text-sm dark:bg-slate-800"
+            className="rounded border border-navy-100 dark:border-navy-700 bg-navy-50 px-3 py-2 text-sm dark:bg-navy-800"
           />
           <input
             value={externalId}
             onChange={(e) => setExternalId(e.target.value)}
             placeholder="External ID (page_id / phone_id / chat_id)"
-            className="rounded border border-border bg-slate-50 px-3 py-2 text-sm dark:bg-slate-800"
+            className="rounded border border-navy-100 dark:border-navy-700 bg-navy-50 px-3 py-2 text-sm dark:bg-navy-800"
           />
         </div>
         <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -179,7 +179,7 @@ export function ChannelsPage(): JSX.Element {
               value={creds[field] ?? ""}
               onChange={(e) => setCreds({ ...creds, [field]: e.target.value })}
               placeholder={field}
-              className="rounded border border-border bg-slate-50 px-3 py-2 text-xs font-mono dark:bg-slate-800"
+              className="rounded border border-navy-100 dark:border-navy-700 bg-navy-50 px-3 py-2 text-xs font-mono dark:bg-navy-800"
             />
           ))}
         </div>
@@ -192,15 +192,15 @@ export function ChannelsPage(): JSX.Element {
         </button>
       </div>
 
-      <div className="rounded-xl border border-border bg-white p-4 dark:bg-slate-900">
-        <div className="mb-3 text-sm font-black uppercase text-slate-500">
+      <div className="rounded-xl border border-navy-100 dark:border-navy-700 bg-white p-4 dark:bg-navy-900">
+        <div className="mb-3 text-sm font-black uppercase text-navy-400">
           Connections ({connections.length})
         </div>
         <div className="space-y-2">
           {connections.map((c) => (
-            <div key={c.id} className="rounded border border-border p-3 text-sm">
+            <div key={c.id} className="rounded border border-navy-100 dark:border-navy-700 p-3 text-sm">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded bg-slate-100 px-2 py-1 text-[11px] font-black uppercase dark:bg-slate-800">
+                <span className="rounded bg-navy-100 px-2 py-1 text-[11px] font-black uppercase dark:bg-navy-800">
                   {ICONS[c.channel] ?? <Plug size={12} />} {c.channel}
                 </span>
                 <div className="font-bold">{c.name}</div>
@@ -215,12 +215,12 @@ export function ChannelsPage(): JSX.Element {
                 >
                   {c.status}
                 </span>
-                <span className="ml-auto text-[11px] text-slate-500">
+                <span className="ml-auto text-[11px] text-navy-400">
                   {c.is_active ? "active" : "paused"}
                 </span>
                 <button
                   onClick={() => toggle.mutate(c)}
-                  className="rounded border border-border px-2 py-1 text-[11px] font-bold"
+                  className="rounded border border-navy-100 dark:border-navy-700 px-2 py-1 text-[11px] font-bold"
                 >
                   {c.is_active ? "Pause" : "Resume"}
                 </button>
@@ -231,16 +231,16 @@ export function ChannelsPage(): JSX.Element {
                   <Trash2 size={13} />
                 </button>
               </div>
-              <div className="mt-1 text-[11px] text-slate-500">
+              <div className="mt-1 text-[11px] text-navy-400">
                 external_id <span className="font-mono">{c.external_id}</span>
                 {c.last_error && <span className="ml-2 text-red-600">err: {c.last_error}</span>}
               </div>
-              <div className="mt-1 flex items-center gap-1 text-[11px] text-slate-500">
+              <div className="mt-1 flex items-center gap-1 text-[11px] text-navy-400">
                 <Webhook size={11} />
-                <code className="rounded bg-slate-100 px-2 py-0.5 dark:bg-slate-800">{webhookUrl(c)}</code>
+                <code className="rounded bg-navy-100 px-2 py-0.5 dark:bg-navy-800">{webhookUrl(c)}</code>
                 <button
                   onClick={() => navigator.clipboard.writeText(webhookUrl(c))}
-                  className="ml-1 rounded border border-border px-1 text-[10px]"
+                  className="ml-1 rounded border border-navy-100 dark:border-navy-700 px-1 text-[10px]"
                 >
                   copy
                 </button>
@@ -250,19 +250,19 @@ export function ChannelsPage(): JSX.Element {
                   value={testRecipient}
                   onChange={(e) => setTestRecipient(e.target.value)}
                   placeholder="Test recipient (psid / phone)"
-                  className="h-8 flex-1 rounded border border-border bg-slate-50 px-2 text-xs dark:bg-slate-800"
+                  className="h-8 flex-1 rounded border border-navy-100 dark:border-navy-700 bg-navy-50 px-2 text-xs dark:bg-navy-800"
                 />
                 <button
                   disabled={!testRecipient.trim()}
                   onClick={() => test.mutate(c)}
-                  className="rounded bg-slate-900 px-2 py-1 text-[11px] font-bold text-white dark:bg-white dark:text-slate-900"
+                  className="rounded bg-navy-900 px-2 py-1 text-[11px] font-bold text-white dark:bg-white dark:text-navy-700"
                 >
                   Send test
                 </button>
               </div>
             </div>
           ))}
-          {connections.length === 0 && <div className="px-2 text-xs text-slate-500">No channels connected yet.</div>}
+          {connections.length === 0 && <div className="px-2 text-xs text-navy-400">No channels connected yet.</div>}
         </div>
       </div>
     </div>

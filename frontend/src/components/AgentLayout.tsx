@@ -1,4 +1,4 @@
-import { Bell, Bot, BrainCircuit, CheckCheck, ChevronLeft, ClipboardList, Code2, Contact, Inbox, LayoutDashboard, LifeBuoy, Lock, LogOut, Menu, Plug, Search, Send, Settings, Sparkles, Tag, Ticket, Trash2, UserPlus, Users, WandSparkles, X } from "lucide-react";
+import { Bell, Bot, BrainCircuit, CheckCheck, ChevronLeft, ClipboardList, Code2, Contact, CreditCard, FileText, Inbox, LayoutDashboard, LifeBuoy, Lock, LogOut, Menu, Plug, Search, Send, Settings, Shield, Sparkles, Tag, Ticket, Trash2, UserPlus, Users, WandSparkles, X, Zap } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
@@ -29,7 +29,7 @@ const nav = [
     { to: "/admin/canned", label: "Canned", icon: ClipboardList },
     { to: "/admin/kb", label: "Knowledge", icon: LifeBuoy },
     { to: "/settings/tags", label: "Tags", icon: Tag },
-    { to: "/admin/routing", label: "Routing", icon: Tag },
+    { to: "/admin/routing", label: "Routing", icon: Zap },
     { to: "/admin/triggers", label: "Triggers", icon: Bot },
     { to: "/admin/chatbot", label: "Chatbot", icon: Sparkles },
     { to: "/admin/ai-knowledge", label: "AI Knowledge", icon: BrainCircuit },
@@ -42,10 +42,13 @@ const nav = [
     { to: "/admin/install", label: "Install", icon: Code2 },
     { to: "/settings/api", label: "API Keys", icon: Lock },
     { to: "/settings/webhooks", label: "Webhooks", icon: Plug },
-    { to: "/settings/integrations", label: "Integrations", icon: Plug }
+    { to: "/settings/integrations", label: "Integrations", icon: Plug },
+    { to: "/settings/security", label: "Security", icon: Shield }
   ] },
-  { section: "Phase 15", items: [
-    { to: "/admin/polish", label: "Polish QA", icon: WandSparkles }
+  { section: "System", items: [
+    { to: "/settings/billing", label: "Billing", icon: CreditCard },
+    { to: "/settings/notifications", label: "Notifications", icon: Bell },
+    { to: "/settings/audit", label: "Audit Log", icon: FileText }
   ] }
 ];
 
@@ -84,8 +87,8 @@ export function AgentLayout(): JSX.Element {
   const notificationPanelRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const sidebarWidth = collapsed ? "md:w-16" : "md:w-64";
-  const contentOffset = collapsed ? "pl-0 md:pl-16" : "pl-0 md:pl-64";
+  const sidebarWidth = collapsed ? "md:w-[68px]" : "md:w-[260px]";
+  const contentOffset = collapsed ? "pl-0 md:pl-[68px]" : "pl-0 md:pl-[260px]";
   const orgQuery = useQuery({
     queryKey: ["org", "layout"],
     queryFn: async () => (await api.get("/admin/org")).data as {
@@ -240,70 +243,102 @@ export function AgentLayout(): JSX.Element {
   }
 
   return (
-    <div className="min-h-screen bg-surface text-ink">
+    <div className="min-h-screen bg-white text-navy-700 dark:bg-navy-900 dark:text-navy-100">
       <Toaster position="top-right" />
-      <aside className={`fixed inset-y-0 left-0 z-20 hidden border-r border-border bg-white/95 text-slate-800 shadow-[0_1px_2px_rgba(16,24,40,0.04)] backdrop-blur dark:bg-slate-950/95 dark:text-slate-100 md:block ${sidebarWidth}`}>
-        <div className="flex h-16 items-center justify-center border-b border-border px-2 md:justify-between md:px-4">
-          {!collapsed && <div className="hidden items-center gap-3 md:flex"><img src={dashboardLogo} alt="FlowLyra logo" className="h-9 w-9 rounded-xl" /><span className="font-extrabold tracking-tight">FlowLyra</span></div>}
-          <button aria-label="Toggle navigation" className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white" onClick={() => setCollapsed((value) => !value)}>
-            {collapsed ? <Menu size={18} /> : <ChevronLeft size={18} />}
+      <aside className={`fixed inset-y-0 left-0 z-[200] hidden flex-col border-r border-navy-100 bg-white transition-all duration-300 dark:bg-navy-900 dark:border-navy-700 md:flex ${sidebarWidth}`}>
+        {/* Logo */}
+        <div className="flex h-16 items-center justify-between border-b border-navy-100 px-4 dark:border-navy-700">
+          {!collapsed && <div className="flex items-center gap-2"><img src={dashboardLogo} alt="FlowLyra" className="h-7 w-7 rounded-lg" /><span className="text-lg font-bold font-display text-brand-500">FlowLyra</span></div>}
+          <button aria-label="Toggle navigation" className="flex h-8 w-8 items-center justify-center rounded-md text-navy-400 hover:bg-navy-50 dark:hover:bg-navy-800" onClick={() => setCollapsed((v) => !v)}>
+            {collapsed ? <Menu size={17} /> : <ChevronLeft size={17} />}
           </button>
         </div>
-        <nav className="grid gap-4 p-2 md:p-3">
+        {/* Nav */}
+        <nav className="flex-1 overflow-y-auto py-2 px-2">
           {nav.map((group) => (
-            <div key={group.section} className="grid gap-1">
-              {!collapsed && <div className="hidden px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 md:block">{group.section}</div>}
-              {group.items.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    className={({ isActive }) =>
-                      `flex h-10 items-center justify-center gap-3 rounded-xl px-0 text-sm font-bold md:justify-start md:px-3 ${isActive ? "bg-slate-950 text-white shadow-sm dark:bg-white dark:text-slate-950" : "text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"}`
-                    }
-                  >
-                    <Icon size={18} className="shrink-0" />
-                    {!collapsed && <span className="hidden md:inline">{item.label}</span>}
-                  </NavLink>
-                );
-              })}
+            <div key={group.section} className="mb-4">
+              {!collapsed && <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-navy-300 dark:text-navy-500">{group.section}</div>}
+              <div className="flex flex-col gap-0.5">
+                {group.items.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      className={({ isActive }) =>
+                        `relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${
+                          isActive
+                            ? "bg-brand-50 text-brand-600 dark:bg-brand-950/30 dark:text-brand-400"
+                            : "text-navy-600 hover:bg-navy-50 dark:text-navy-400 dark:hover:bg-navy-800"
+                        } ${collapsed ? "justify-center px-0" : ""}`
+                      }
+                    >
+                      {({ isActive }) => (
+                        <>
+                          {isActive && !collapsed && (
+                            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-brand-500 rounded-r-full" />
+                          )}
+                          <Icon size={17} className={`shrink-0 ${collapsed ? "" : "ml-1"}`} />
+                          {!collapsed && <span>{item.label}</span>}
+                        </>
+                      )}
+                    </NavLink>
+                  );
+                })}
+              </div>
             </div>
           ))}
         </nav>
-        {!collapsed && <div className="absolute inset-x-3 bottom-3 hidden rounded-2xl border border-border bg-slate-50 p-3 dark:bg-slate-900 md:block">
-          <div className="flex items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-100"><LifeBuoy size={16} /> Human-first support</div>
-          <div className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">AI suggestions stay private to agents.</div>
-        </div>}
+        {/* User footer */}
+        <div className="border-t border-navy-100 p-3 dark:border-navy-700">
+          <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-navy-50 dark:hover:bg-navy-800 cursor-pointer">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-100 text-brand-600 text-sm font-medium dark:bg-brand-950 dark:text-brand-300">
+              {(user?.full_name ?? "A").charAt(0).toUpperCase()}
+            </div>
+            {!collapsed && (
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-medium text-navy-700 dark:text-navy-100 truncate">{user?.full_name ?? "Agent"}</div>
+                <div className="text-xs text-navy-400 capitalize">{user?.role ?? "agent"}</div>
+              </div>
+            )}
+          </div>
+        </div>
       </aside>
       {mobileNavOpen ? (
-        <div className="fixed inset-0 z-40 md:hidden">
-          <button type="button" className="absolute inset-0 bg-slate-900/50" aria-label="Close navigation drawer" onClick={() => setMobileNavOpen(false)} />
-          <aside className="absolute inset-y-0 left-0 w-72 border-r border-border bg-white text-slate-800 shadow-2xl dark:bg-slate-950 dark:text-slate-100">
-            <div className="flex h-16 items-center justify-between border-b border-border px-4">
-              <div className="flex items-center gap-3"><img src={dashboardLogo} alt="FlowLyra logo" className="h-9 w-9 rounded-xl" /><span className="font-extrabold tracking-tight">FlowLyra</span></div>
-              <button aria-label="Close navigation" className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white" onClick={() => setMobileNavOpen(false)}><X size={18} /></button>
+        <div className="fixed inset-0 z-[300] md:hidden">
+          <button type="button" className="absolute inset-0 bg-navy-950/60 backdrop-blur-sm" aria-label="Close navigation drawer" onClick={() => setMobileNavOpen(false)} />
+          <aside className="absolute inset-y-0 left-0 w-72 border-r border-navy-100 bg-white shadow-lift dark:bg-navy-900 dark:border-navy-700">
+            <div className="flex h-14 items-center justify-between border-b border-navy-100 px-4 dark:border-navy-700">
+              <div className="flex items-center gap-2"><img src={dashboardLogo} alt="FlowLyra logo" className="h-7 w-7 rounded-lg" /><span className="text-lg font-bold font-display text-brand-500">FlowLyra</span></div>
+              <button aria-label="Close navigation" className="flex h-8 w-8 items-center justify-center rounded-md text-navy-400 hover:bg-navy-50 dark:hover:bg-navy-800" onClick={() => setMobileNavOpen(false)}><X size={17} /></button>
             </div>
-            <nav className="grid gap-4 p-3">
+            <nav className="flex flex-col gap-4 p-2 py-3 overflow-y-auto">
               {nav.map((group) => (
-                <div key={group.section} className="grid gap-1">
-                  <div className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{group.section}</div>
-                  {group.items.map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <NavLink
-                        key={item.to}
-                        to={item.to}
-                        onClick={() => setMobileNavOpen(false)}
-                        className={({ isActive }) =>
-                          `flex h-10 items-center gap-3 rounded-xl px-3 text-sm font-bold ${isActive ? "bg-slate-950 text-white shadow-sm dark:bg-white dark:text-slate-950" : "text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"}`
-                        }
-                      >
-                        <Icon size={18} className="shrink-0" />
-                        <span>{item.label}</span>
-                      </NavLink>
-                    );
-                  })}
+                <div key={group.section}>
+                  <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-navy-300 dark:text-navy-500">{group.section}</div>
+                  <div className="flex flex-col gap-0.5">
+                    {group.items.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <NavLink
+                          key={item.to}
+                          to={item.to}
+                          onClick={() => setMobileNavOpen(false)}
+                          className={({ isActive }) =>
+                            `relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${isActive ? "bg-brand-50 text-brand-600 dark:bg-brand-950/30 dark:text-brand-400" : "text-navy-600 hover:bg-navy-50 dark:text-navy-400 dark:hover:bg-navy-800"}`
+                          }
+                        >
+                          {({ isActive }) => (
+                            <>
+                              {isActive && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-brand-500 rounded-r-full" />}
+                              <Icon size={17} className="shrink-0 ml-1" />
+                              <span>{item.label}</span>
+                            </>
+                          )}
+                        </NavLink>
+                      );
+                    })}
+                  </div>
                 </div>
               ))}
             </nav>
@@ -311,22 +346,24 @@ export function AgentLayout(): JSX.Element {
         </div>
       ) : null}
       <div className={contentOffset}>
-        <header className="sticky top-0 z-10 flex h-16 min-w-0 items-center justify-between gap-3 border-b border-border bg-white/85 px-3 shadow-sm backdrop-blur-xl sm:px-5 dark:bg-slate-950/85">
-          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-            <button aria-label="Open navigation drawer" className="rounded-xl border border-border bg-white p-2 text-slate-700 shadow-sm hover:bg-slate-50 focus-ring md:hidden dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800" onClick={() => setMobileNavOpen(true)}>
+        <header className="sticky top-0 z-[100] flex h-14 min-w-0 items-center justify-between gap-3 border-b border-navy-100 bg-white/80 px-3 backdrop-blur-md dark:bg-navy-900/80 dark:border-navy-700 sm:px-5">
+          <div className="flex min-w-0 items-center gap-2">
+            <button
+              aria-label="Open navigation drawer"
+              className="flex h-8 w-8 items-center justify-center rounded-md text-navy-500 hover:bg-navy-50 dark:text-navy-400 dark:hover:bg-navy-800 md:hidden"
+              onClick={() => setMobileNavOpen(true)}
+            >
               <Menu size={18} />
             </button>
-            <label className="hidden min-w-[220px] items-center gap-2 rounded-xl border border-border bg-slate-50 px-3 py-2 text-sm text-slate-500 md:flex lg:min-w-[320px] dark:bg-slate-900 dark:text-slate-400">
-              <Search size={16} />
-              <input
-                className="w-full bg-transparent outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500 dark:text-slate-200"
-                placeholder={t("layout.searchPlaceholder")}
-                value={commandQuery}
-                onFocus={() => setCommandOpen(true)}
-                onChange={(event) => setCommandQuery(event.target.value)}
-              />
-            </label>
-            <select className="max-w-[112px] rounded-xl border border-border bg-white px-2 py-2 text-sm font-semibold sm:max-w-none sm:px-3 dark:bg-slate-900 dark:text-slate-200">
+            <button
+              className="hidden md:flex items-center gap-2 min-w-[220px] lg:min-w-[300px] rounded-md border border-navy-100 bg-navy-50 px-3 py-1.5 text-sm text-navy-400 hover:border-navy-200 hover:bg-white transition-colors dark:bg-navy-800 dark:border-navy-700 dark:text-navy-500 dark:hover:bg-navy-700"
+              onClick={() => setCommandOpen(true)}
+            >
+              <Search size={15} className="shrink-0" />
+              <span className="flex-1 text-left">{t("layout.searchPlaceholder")}</span>
+              <kbd className="hidden lg:inline-flex items-center gap-0.5 rounded border border-navy-200 bg-white px-1.5 py-0.5 text-[10px] font-medium text-navy-400 dark:border-navy-600 dark:bg-navy-700 dark:text-navy-500">⌘K</kbd>
+            </button>
+            <select className="rounded-md border border-navy-100 bg-white px-2 py-1.5 text-sm font-medium text-navy-600 dark:bg-navy-800 dark:border-navy-700 dark:text-navy-300">
               <option>{t("layout.status.online")}</option>
               <option>{t("layout.status.busy")}</option>
               <option>{t("layout.status.away")}</option>
@@ -335,7 +372,7 @@ export function AgentLayout(): JSX.Element {
             <label className="sr-only" htmlFor="dashboard-locale">{t("layout.language")}</label>
             <select
               id="dashboard-locale"
-              className="max-w-[116px] rounded-xl border border-border bg-white px-2 py-2 text-sm font-semibold uppercase sm:max-w-none sm:px-3 dark:bg-slate-900 dark:text-slate-200"
+              className="rounded-md border border-navy-100 bg-white px-2 py-1.5 text-sm font-medium uppercase text-navy-600 dark:bg-navy-800 dark:border-navy-700 dark:text-navy-300"
               value={locale}
               onChange={(event) => setLocale(event.target.value as "en" | "es")}
             >
@@ -344,17 +381,18 @@ export function AgentLayout(): JSX.Element {
               ))}
             </select>
           </div>
-          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          <div className="flex shrink-0 items-center gap-1.5">
             <ThemeToggle />
             <button
-              className="rounded-xl border border-border bg-white px-3 py-2 text-xs font-black text-slate-700 shadow-sm hover:bg-slate-50 focus-ring dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+              className="flex h-8 w-8 items-center justify-center rounded-md text-xs font-semibold text-navy-500 hover:bg-navy-50 dark:text-navy-400 dark:hover:bg-navy-800"
               onClick={() => setTourOpen(true)}
+              title="Product Tour"
             >
-              Tour
+              <WandSparkles size={17} />
             </button>
             <div ref={notificationPanelRef} className="relative">
               <button
-                className="relative rounded-xl border border-border bg-white p-2 text-slate-700 shadow-sm hover:bg-slate-50 focus-ring dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+                className="relative flex h-8 w-8 items-center justify-center rounded-md text-navy-500 hover:bg-navy-50 dark:text-navy-400 dark:hover:bg-navy-800"
                 aria-label={t("layout.notifications.title")}
                 aria-expanded={notificationsOpen}
                 onClick={() => {
@@ -363,9 +401,9 @@ export function AgentLayout(): JSX.Element {
                   if (nextOpen) handleMarkAllRead();
                 }}
               >
-                <Bell size={18} />
+                <Bell size={17} />
+                {unread > 0 && <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-danger-500 px-0.5 text-[10px] font-semibold text-white leading-none">{unread > 9 ? "9+" : unread}</span>}
               </button>
-              {unread > 0 && <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-danger px-1 text-xs text-white">{unread}</span>}
               {notificationsOpen && (
                 <NotificationCenter
                   notifications={notifications}
@@ -376,22 +414,19 @@ export function AgentLayout(): JSX.Element {
                 />
               )}
             </div>
-            <div className="hidden text-right sm:block">
-              <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">{user?.full_name ?? "Agent"}</div>
-              <div className="text-xs text-slate-500 dark:text-slate-400">{user?.role ?? "agent"}</div>
-            </div>
             <button
-              className="rounded-xl border border-border bg-white p-2 text-slate-700 shadow-sm hover:bg-slate-50 focus-ring dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+              className="flex h-8 w-8 items-center justify-center rounded-md text-navy-500 hover:bg-navy-50 dark:text-navy-400 dark:hover:bg-navy-800"
               onClick={() => {
                 void logout().then(() => navigate("/login"));
               }}
               aria-label={t("layout.logout")}
+              title={t("layout.logout")}
             >
-              <LogOut size={18} />
+              <LogOut size={17} />
             </button>
           </div>
         </header>
-        <main className="min-h-[calc(100dvh-64px)] min-w-0">
+        <main className="min-h-[calc(100dvh-56px)] min-w-0">
           <Outlet />
         </main>
       </div>
@@ -399,24 +434,34 @@ export function AgentLayout(): JSX.Element {
         {notifications[0]?.title}
       </div>
       {commandOpen ? (
-        <div className="fixed inset-0 z-50 grid place-items-start bg-black/35 p-4 pt-24" onClick={() => setCommandOpen(false)}>
-          <div className="w-full max-w-2xl rounded-2xl border border-border bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="border-b border-border px-4 py-3 text-xs font-black uppercase tracking-wide text-slate-500">{t("layout.commandPalette")}</div>
+        <div className="fixed inset-0 z-[600] grid place-items-start bg-navy-950/60 backdrop-blur-sm p-4 pt-24" onClick={() => { setCommandOpen(false); setCommandQuery(""); }}>
+          <div className="w-full max-w-2xl rounded-2xl border border-navy-100 bg-white shadow-lift dark:bg-navy-900 dark:border-navy-700" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3 border-b border-navy-100 px-4 py-3 dark:border-navy-700">
+              <Search size={16} className="shrink-0 text-navy-400" />
+              <input
+                autoFocus
+                className="flex-1 bg-transparent text-sm text-navy-700 placeholder:text-navy-400 outline-none dark:text-navy-100"
+                placeholder={t("layout.searchPlaceholder")}
+                value={commandQuery}
+                onChange={(event) => setCommandQuery(event.target.value)}
+              />
+              <kbd className="rounded border border-navy-100 bg-navy-50 px-1.5 py-0.5 text-[10px] font-medium text-navy-400 dark:border-navy-700 dark:bg-navy-800 dark:text-navy-500">ESC</kbd>
+            </div>
             <div className="max-h-[420px] overflow-y-auto p-2">
               {commandResults.length ? commandResults.map((row) => (
                 <button
                   key={`${row.type}:${row.id}`}
-                  className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left hover:bg-slate-50"
+                  className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left hover:bg-navy-50 dark:hover:bg-navy-800"
                   onClick={() => {
                     setCommandOpen(false);
                     setCommandQuery("");
                     navigate(row.href);
                   }}
                 >
-                  <span className="text-sm font-semibold text-slate-800">{row.label}</span>
-                  <span className="text-xs uppercase text-slate-400">{row.type}</span>
+                  <span className="text-sm font-medium text-navy-700 dark:text-navy-100">{row.label}</span>
+                  <span className="rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide bg-navy-50 text-navy-400 dark:bg-navy-800 dark:text-navy-500">{row.type}</span>
                 </button>
-              )) : <div className="p-3 text-sm text-slate-500">{t("layout.command.noResults")}</div>}
+              )) : <div className="px-3 py-8 text-center text-sm text-navy-400">{t("layout.command.noResults")}</div>}
             </div>
           </div>
         </div>
@@ -433,9 +478,9 @@ export function AgentLayout(): JSX.Element {
           {helpOpen ? (
             <div className="fixed inset-0 z-[70] bg-black/45 p-4" onClick={() => setHelpOpen(false)}>
               <div className="ml-auto h-full w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl" onClick={(event) => event.stopPropagation()}>
-                <div className="flex items-center justify-between border-b border-border px-4 py-3">
-                  <div className="text-sm font-black text-slate-900">Support Widget (Dogfood)</div>
-                  <button className="rounded-lg p-2 text-slate-500 hover:bg-slate-100" onClick={() => setHelpOpen(false)} aria-label="Close help"><X size={16} /></button>
+                <div className="flex items-center justify-between border-b border-navy-100 dark:border-navy-700 px-4 py-3">
+                  <div className="text-sm font-black text-navy-700">Support Widget (Dogfood)</div>
+                  <button className="rounded-lg p-2 text-navy-400 hover:bg-navy-100" onClick={() => setHelpOpen(false)} aria-label="Close help"><X size={16} /></button>
                 </div>
                 <iframe title="Help widget" src={helpChatUrl} className="h-[calc(100%-53px)] w-full" />
               </div>
@@ -456,51 +501,51 @@ export function AgentLayout(): JSX.Element {
 
 function NotificationCenter({ notifications, onClose, onClear, onRemove, t }: { notifications: Notification[]; onClose: () => void; onClear: () => void; onRemove: (id: string) => void; t: (key: string, vars?: Record<string, string | number>) => string }): JSX.Element {
   return (
-    <div className="absolute right-0 top-12 z-50 w-[min(92vw,420px)] overflow-hidden rounded-3xl border border-border bg-white shadow-2xl shadow-slate-950/15 ring-1 ring-slate-950/5 dark:border-slate-700 dark:bg-slate-950 dark:shadow-black/40 dark:ring-white/10">
-      <div className="flex items-start justify-between gap-3 border-b border-border bg-gradient-to-br from-blue-50 via-white to-slate-50 px-4 py-4 dark:from-slate-900 dark:via-slate-950 dark:to-blue-950/30">
+    <div className="absolute right-0 top-12 z-50 w-[min(92vw,420px)] overflow-hidden rounded-2xl border border-navy-100 bg-white shadow-lift dark:border-navy-700 dark:bg-navy-900">
+      <div className="flex items-start justify-between gap-3 border-b border-navy-100 bg-gradient-to-br from-brand-50 via-white to-navy-50 px-4 py-4 dark:border-navy-700 dark:from-brand-950/30 dark:via-navy-900 dark:to-navy-800/50">
         <div>
-          <div className="flex items-center gap-2 text-base font-black text-slate-950 dark:text-white"><Bell size={17} className="text-blue-600 dark:text-blue-300" /> {t("layout.notifications.title")}</div>
-          <p className="mt-1 text-xs font-semibold text-slate-500 dark:text-slate-400">{t("layout.notifications.subtitle")}</p>
+          <div className="flex items-center gap-2 text-base font-semibold font-display text-navy-700 dark:text-white"><Bell size={17} className="text-brand-500" /> {t("layout.notifications.title")}</div>
+          <p className="mt-1 text-xs text-navy-400">{t("layout.notifications.subtitle")}</p>
         </div>
         <div className="flex items-center gap-1">
           <button
-            className="rounded-xl border border-blue-100 bg-white px-3 py-2 text-xs font-black text-blue-700 shadow-sm hover:bg-blue-50 dark:border-blue-900/50 dark:bg-blue-950/40 dark:text-blue-200 dark:hover:bg-blue-900/40"
+            className="rounded-md border border-brand-100 bg-white px-3 py-1.5 text-xs font-medium text-brand-600 shadow-xs hover:bg-brand-50 dark:border-brand-900/50 dark:bg-brand-950/40 dark:text-brand-300 dark:hover:bg-brand-900/40"
             onClick={() => {
               void unlockNotificationSound().then(() => playIncomingChatSound());
             }}
           >
             {t("layout.notifications.testSound")}
           </button>
-          <button aria-label="Close notifications" className="rounded-xl p-2 text-slate-500 hover:bg-white hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white" onClick={onClose}><X size={17} /></button>
+          <button aria-label="Close notifications" className="flex h-7 w-7 items-center justify-center rounded-md text-navy-400 hover:bg-navy-50 dark:text-navy-300 dark:hover:bg-navy-800" onClick={onClose}><X size={15} /></button>
         </div>
       </div>
-      <div className="flex items-center justify-between border-b border-border px-4 py-2">
-        <span className="text-xs font-black uppercase tracking-wide text-slate-500 dark:text-slate-400">{t("layout.notifications.recent", { count: notifications.length })}</span>
+      <div className="flex items-center justify-between border-b border-navy-100 dark:border-navy-700 px-4 py-2">
+        <span className="text-xs font-black uppercase tracking-wide text-navy-400 dark:text-navy-500">{t("layout.notifications.recent", { count: notifications.length })}</span>
         <div className="flex items-center gap-2">
-          <button className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold text-blue-700 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-blue-950/40" onClick={onClose}><CheckCheck size={14} /> {t("layout.notifications.read")}</button>
-          <button className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold text-red-700 hover:bg-red-50 disabled:opacity-40 dark:text-red-300 dark:hover:bg-red-950/40" onClick={onClear} disabled={!notifications.length}><Trash2 size={14} /> {t("layout.notifications.clear")}</button>
+          <button className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold text-brand-700 hover:bg-brand-50 dark:text-brand-300 dark:hover:bg-brand-950/40" onClick={onClose}><CheckCheck size={14} /> {t("layout.notifications.read")}</button>
+          <button className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold text-danger-600 hover:bg-danger-50 disabled:opacity-40 dark:text-danger-400 dark:hover:bg-danger-50/10" onClick={onClear} disabled={!notifications.length}><Trash2 size={14} /> {t("layout.notifications.clear")}</button>
         </div>
       </div>
       <div className="max-h-[420px] overflow-y-auto p-2">
         {notifications.length ? notifications.map((notification) => (
           <NotificationRow key={notification.id} notification={notification} onRemove={() => onRemove(notification.id)} />
-        )) : <div className="grid min-h-48 place-items-center px-6 py-8 text-center"><div><div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300"><Bell size={20} /></div><div className="font-black text-slate-900 dark:text-white">{t("layout.notifications.emptyTitle")}</div><p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">{t("layout.notifications.emptySubtitle")}</p></div></div>}
+        )) : <div className="grid min-h-48 place-items-center px-6 py-8 text-center"><div><div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-brand-50 text-brand-600 dark:bg-brand-950/40 dark:text-brand-300"><Bell size={20} /></div><div className="font-black font-display text-navy-900 dark:text-white">{t("layout.notifications.emptyTitle")}</div><p className="mt-1 text-sm leading-6 text-navy-400 dark:text-navy-400">{t("layout.notifications.emptySubtitle")}</p></div></div>}
       </div>
     </div>
   );
 }
 
 function NotificationRow({ notification, onRemove }: { notification: Notification; onRemove: () => void }): JSX.Element {
-  const tone = notification.level === "urgent" ? "bg-red-500" : notification.level === "warning" ? "bg-yellow-500" : "bg-blue-500";
+  const dot = notification.level === "urgent" ? "bg-danger-500" : notification.level === "warning" ? "bg-warning-500" : "bg-blue-500";
   return (
-    <div className="group flex gap-3 rounded-2xl px-3 py-3 hover:bg-slate-50 dark:hover:bg-slate-900">
-      <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${tone}`} />
+    <div className="group flex gap-3 rounded-lg px-3 py-3 hover:bg-navy-50 dark:hover:bg-navy-800">
+      <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${dot}`} />
       <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-black text-slate-900 dark:text-white">{notification.title}</div>
-        <p className="mt-1 line-clamp-2 text-sm leading-5 text-slate-500 dark:text-slate-400">{notification.body}</p>
-        <div className="mt-2 text-[11px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">{formatNotificationTime(notification.createdAt)}</div>
+        <div className="truncate text-sm font-semibold text-navy-700 dark:text-navy-100">{notification.title}</div>
+        <p className="mt-0.5 line-clamp-2 text-sm leading-5 text-navy-400 dark:text-navy-400">{notification.body}</p>
+        <div className="mt-1.5 text-[11px] font-medium text-navy-300 dark:text-navy-500">{formatNotificationTime(notification.createdAt)}</div>
       </div>
-      <button aria-label="Remove notification" className="h-8 w-8 rounded-lg text-slate-400 opacity-100 hover:bg-white hover:text-red-600 sm:opacity-0 sm:group-hover:opacity-100 dark:hover:bg-slate-800 dark:hover:text-red-300" onClick={onRemove}><X size={15} className="mx-auto" /></button>
+      <button aria-label="Remove notification" className="flex h-7 w-7 items-center justify-center rounded-md text-navy-300 opacity-0 transition-opacity hover:bg-navy-100 hover:text-danger-500 group-hover:opacity-100 dark:hover:bg-navy-700 dark:hover:text-danger-400" onClick={onRemove}><X size={14} /></button>
     </div>
   );
 }
@@ -517,9 +562,9 @@ function formatNotificationTime(value: string): string {
 
 export function PageHeader({ title, action }: { title: string; action?: ReactNode }): JSX.Element {
   return (
-    <div className="flex min-h-[64px] flex-col gap-3 border-b border-border bg-white/80 px-4 py-4 backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:px-6 dark:bg-slate-950/80">
+    <div className="flex min-h-[56px] flex-col gap-3 border-b border-navy-100 bg-white/80 px-4 py-4 backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between sm:px-6 dark:bg-navy-900/80 dark:border-navy-700">
       <div className="min-w-0">
-        <h1 className="truncate text-xl font-black tracking-tight text-ink">{title}</h1>
+        <h1 className="truncate text-xl font-semibold tracking-tight font-display text-navy-700 dark:text-navy-100">{title}</h1>
       </div>
       {action && <div className="flex shrink-0 items-center gap-2 overflow-x-auto">{action}</div>}
     </div>

@@ -57,10 +57,10 @@ interface SsoState {
 
 function Section({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section className="rounded-xl border border-navy-100 bg-white p-5 shadow-sm">
       <header className="mb-4">
-        <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
-        {description && <p className="mt-1 text-sm text-slate-500">{description}</p>}
+        <h2 className="text-lg font-semibold text-navy-700">{title}</h2>
+        {description && <p className="mt-1 text-sm text-navy-400">{description}</p>}
       </header>
       {children}
     </section>
@@ -119,7 +119,7 @@ function TwoFactorPanel() {
     <Section title="Two-factor authentication" description="Protects sign-in with a TOTP authenticator app.">
       {!enrolled && !setup && (
         <button
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+          className="rounded-md bg-navy-900 px-4 py-2 text-sm font-semibold text-white"
           onClick={() => startSetup.mutate()}
           disabled={startSetup.isPending}
         >
@@ -129,13 +129,13 @@ function TwoFactorPanel() {
 
       {setup && (
         <div className="space-y-3">
-          <img src={setup.qr_data_uri} alt="2FA QR" className="h-44 w-44 rounded-lg border border-slate-200 bg-white p-2" />
-          <p className="text-xs text-slate-500">Secret: <code className="rounded bg-slate-100 px-1 py-0.5">{setup.secret}</code></p>
+          <img src={setup.qr_data_uri} alt="2FA QR" className="h-44 w-44 rounded-lg border border-navy-100 bg-white p-2" />
+          <p className="text-xs text-navy-400">Secret: <code className="rounded bg-navy-100 px-1 py-0.5">{setup.secret}</code></p>
           <input
             value={code}
             onChange={(e) => setCode(e.target.value)}
             placeholder="Enter 6-digit code"
-            className="w-40 rounded-md border border-slate-200 px-3 py-2 text-sm"
+            className="w-40 rounded-md border border-navy-100 px-3 py-2 text-sm"
           />
           <button
             className="ml-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white"
@@ -159,25 +159,25 @@ function TwoFactorPanel() {
       {enrolled && (
         <div className="mt-5 space-y-3">
           <button
-            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+            className="rounded-md border border-navy-200 px-3 py-1.5 text-sm"
             onClick={() => regenerateCodes.mutate()}
             disabled={regenerateCodes.isPending}
           >
             {regenerateCodes.isPending ? "Generating…" : "Regenerate backup codes"}
           </button>
-          <div className="flex flex-wrap items-end gap-2 border-t border-slate-100 pt-3">
+          <div className="flex flex-wrap items-end gap-2 border-t border-navy-100 pt-3">
             <input
               type="password"
               value={disablePassword}
               onChange={(e) => setDisablePassword(e.target.value)}
               placeholder="Password"
-              className="w-44 rounded-md border border-slate-200 px-3 py-2 text-sm"
+              className="w-44 rounded-md border border-navy-100 px-3 py-2 text-sm"
             />
             <input
               value={code}
               onChange={(e) => setCode(e.target.value)}
               placeholder="2FA code (optional)"
-              className="w-44 rounded-md border border-slate-200 px-3 py-2 text-sm"
+              className="w-44 rounded-md border border-navy-100 px-3 py-2 text-sm"
             />
             <button
               className="rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white"
@@ -215,23 +215,23 @@ function SessionsPanel() {
   });
   return (
     <Section title="Active sessions" description="Sign out other browsers from this account.">
-      {isLoading && <p className="text-sm text-slate-500">Loading…</p>}
+      {isLoading && <p className="text-sm text-navy-400">Loading…</p>}
       <div className="mb-3">
         <button
-          className="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+          className="rounded-md border border-navy-200 px-3 py-1.5 text-sm"
           onClick={() => revokeOthers.mutate()}
         >
           Sign out all other sessions
         </button>
       </div>
-      <ul className="divide-y divide-slate-100 text-sm">
+      <ul className="divide-y divide-navy-100 text-sm">
         {(data?.items ?? []).map((s) => (
           <li key={s.id} className="flex items-center justify-between py-3">
             <div>
-              <p className="font-medium text-slate-800">
+              <p className="font-medium text-navy-700">
                 {s.browser ?? "Unknown browser"} on {s.os ?? "unknown OS"} {s.is_current && <span className="ml-2 rounded bg-emerald-100 px-2 py-0.5 text-xs text-emerald-700">current</span>}
               </p>
-              <p className="text-xs text-slate-500">{s.ip_address ?? "no ip"} · last used {s.last_used_at ? new Date(s.last_used_at).toLocaleString() : "—"}</p>
+              <p className="text-xs text-navy-400">{s.ip_address ?? "no ip"} · last used {s.last_used_at ? new Date(s.last_used_at).toLocaleString() : "—"}</p>
             </div>
             {!s.is_current && (
               <button className="rounded-md border border-red-200 px-3 py-1 text-xs text-red-600" onClick={() => revoke.mutate(s.id)}>
@@ -271,15 +271,15 @@ function IpAllowlistPanel() {
           <input type="checkbox" checked={enabled || !!data?.enabled} onChange={(e) => setEnabled(e.target.checked)} />
           Enabled
         </label>
-        <span className="text-xs text-slate-500">Current: {data?.enabled ? "ON" : "off"}, {data?.cidrs?.length ?? 0} CIDRs</span>
+        <span className="text-xs text-navy-400">Current: {data?.enabled ? "ON" : "off"}, {data?.cidrs?.length ?? 0} CIDRs</span>
       </div>
       <textarea
         defaultValue={(data?.cidrs ?? []).join("\n")}
         onChange={(e) => setText(e.target.value)}
         placeholder="One CIDR per line, e.g. 203.0.113.0/24"
-        className="h-32 w-full rounded-md border border-slate-200 p-2 font-mono text-xs"
+        className="h-32 w-full rounded-md border border-navy-100 p-2 font-mono text-xs"
       />
-      <button className="mt-3 rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white" onClick={() => update.mutate()}>
+      <button className="mt-3 rounded-md bg-navy-900 px-4 py-2 text-sm font-semibold text-white" onClick={() => update.mutate()}>
         Save allowlist
       </button>
     </Section>
@@ -305,35 +305,35 @@ function SsoPanel() {
     <Section title="SAML Single Sign-On" description="Connect your IdP to enable workspace SSO.">
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="text-sm">
-          <span className="block text-xs font-medium text-slate-600">IdP Entity ID</span>
+          <span className="block text-xs font-medium text-navy-500">IdP Entity ID</span>
           <input
             defaultValue={data?.idp_entity_id ?? ""}
             onChange={(e) => setForm((f) => ({ ...f, idp_entity_id: e.target.value }))}
-            className="mt-1 w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-md border border-navy-100 px-3 py-2 text-sm"
           />
         </label>
         <label className="text-sm">
-          <span className="block text-xs font-medium text-slate-600">IdP SSO URL</span>
+          <span className="block text-xs font-medium text-navy-500">IdP SSO URL</span>
           <input
             defaultValue={data?.idp_sso_url ?? ""}
             onChange={(e) => setForm((f) => ({ ...f, idp_sso_url: e.target.value }))}
-            className="mt-1 w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-md border border-navy-100 px-3 py-2 text-sm"
           />
         </label>
         <label className="text-sm sm:col-span-2">
-          <span className="block text-xs font-medium text-slate-600">IdP Certificate (PEM)</span>
+          <span className="block text-xs font-medium text-navy-500">IdP Certificate (PEM)</span>
           <textarea
             defaultValue={data?.idp_cert ?? ""}
             onChange={(e) => setForm((f) => ({ ...f, idp_cert: e.target.value }))}
-            className="mt-1 h-32 w-full rounded-md border border-slate-200 p-2 font-mono text-xs"
+            className="mt-1 h-32 w-full rounded-md border border-navy-100 p-2 font-mono text-xs"
           />
         </label>
         <label className="text-sm">
-          <span className="block text-xs font-medium text-slate-600">Default role for new users</span>
+          <span className="block text-xs font-medium text-navy-500">Default role for new users</span>
           <select
             defaultValue={data?.default_role ?? "agent"}
             onChange={(e) => setForm((f) => ({ ...f, default_role: e.target.value }))}
-            className="mt-1 w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-md border border-navy-100 px-3 py-2 text-sm"
           >
             <option>agent</option>
             <option>supervisor</option>
@@ -357,7 +357,7 @@ function SsoPanel() {
           Activate SSO
         </label>
       </div>
-      <button className="mt-3 rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white" onClick={() => save.mutate()}>
+      <button className="mt-3 rounded-md bg-navy-900 px-4 py-2 text-sm font-semibold text-white" onClick={() => save.mutate()}>
         Save SSO settings
       </button>
     </Section>
@@ -394,9 +394,9 @@ function ScimTokensPanel() {
           value={label}
           onChange={(e) => setLabel(e.target.value)}
           placeholder="Token label (e.g. Okta production)"
-          className="flex-1 rounded-md border border-slate-200 px-3 py-2 text-sm"
+          className="flex-1 rounded-md border border-navy-100 px-3 py-2 text-sm"
         />
-        <button className="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white" onClick={() => create.mutate()} disabled={!label}>
+        <button className="rounded-md bg-navy-900 px-4 py-2 text-sm font-semibold text-white" onClick={() => create.mutate()} disabled={!label}>
           Generate
         </button>
       </div>
@@ -405,12 +405,12 @@ function ScimTokensPanel() {
           One-time reveal: <code className="font-mono">{revealed}</code> — copy now.
         </div>
       )}
-      <ul className="divide-y divide-slate-100 text-sm">
+      <ul className="divide-y divide-navy-100 text-sm">
         {(data?.items ?? []).map((t) => (
           <li key={t.id} className="flex items-center justify-between py-2">
             <span>
               <span className="font-medium">{t.label}</span> ·{" "}
-              <span className="font-mono text-xs text-slate-500">{t.token_prefix}…</span>
+              <span className="font-mono text-xs text-navy-400">{t.token_prefix}…</span>
               {t.revoked_at && <span className="ml-2 text-xs text-red-600">revoked</span>}
             </span>
             {!t.revoked_at && (
@@ -453,25 +453,25 @@ function VisitorBansPanel() {
   return (
     <Section title="Visitor bans" description="Block visitors by IP/CIDR/email or session.">
       <div className="mb-3 grid gap-2 sm:grid-cols-[120px_1fr_1fr_auto]">
-        <select value={banType} onChange={(e) => setBanType(e.target.value)} className="rounded-md border border-slate-200 px-2 py-2 text-sm">
+        <select value={banType} onChange={(e) => setBanType(e.target.value)} className="rounded-md border border-navy-100 px-2 py-2 text-sm">
           <option value="ip">IP</option>
           <option value="cidr">CIDR</option>
           <option value="email">Email</option>
           <option value="session">Session</option>
         </select>
-        <input value={value} onChange={(e) => setValue(e.target.value)} placeholder="value" className="rounded-md border border-slate-200 px-3 py-2 text-sm" />
-        <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="reason (optional)" className="rounded-md border border-slate-200 px-3 py-2 text-sm" />
-        <button className="rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white" onClick={() => create.mutate()} disabled={!value}>
+        <input value={value} onChange={(e) => setValue(e.target.value)} placeholder="value" className="rounded-md border border-navy-100 px-3 py-2 text-sm" />
+        <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="reason (optional)" className="rounded-md border border-navy-100 px-3 py-2 text-sm" />
+        <button className="rounded-md bg-navy-900 px-3 py-2 text-sm font-semibold text-white" onClick={() => create.mutate()} disabled={!value}>
           Add
         </button>
       </div>
-      <ul className="divide-y divide-slate-100 text-sm">
+      <ul className="divide-y divide-navy-100 text-sm">
         {(data?.items ?? []).map((b) => (
           <li key={b.id} className="flex items-center justify-between py-2">
             <span>
-              <span className="rounded bg-slate-100 px-2 py-0.5 font-mono text-xs">{b.ban_type}</span>{" "}
+              <span className="rounded bg-navy-100 px-2 py-0.5 font-mono text-xs">{b.ban_type}</span>{" "}
               <span className="font-mono">{b.value}</span>
-              {b.reason && <span className="ml-2 text-xs text-slate-500">— {b.reason}</span>}
+              {b.reason && <span className="ml-2 text-xs text-navy-400">— {b.reason}</span>}
             </span>
             <button className="rounded-md border border-red-200 px-2 py-1 text-xs text-red-600" onClick={() => revoke.mutate(b.id)}>
               Remove
@@ -519,18 +519,18 @@ function RetentionPanel() {
       <div className="grid gap-3 sm:grid-cols-2">
         {["chat_days", "ticket_days", "audit_days", "session_days"].map((field) => (
           <label key={field} className="text-sm">
-            <span className="block text-xs font-medium text-slate-600">{field.replace("_", " ")}</span>
+            <span className="block text-xs font-medium text-navy-500">{field.replace("_", " ")}</span>
             <input
               type="number"
               min={1}
               defaultValue={(data as Record<string, number> | undefined)?.[field]}
               onChange={(e) => setForm((f) => ({ ...f, [field]: parseInt(e.target.value || "0", 10) }))}
-              className="mt-1 w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-md border border-navy-100 px-3 py-2 text-sm"
             />
           </label>
         ))}
       </div>
-      <button className="mt-3 rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white" onClick={() => save.mutate()}>
+      <button className="mt-3 rounded-md bg-navy-900 px-4 py-2 text-sm font-semibold text-white" onClick={() => save.mutate()}>
         Save retention
       </button>
     </Section>
@@ -545,7 +545,7 @@ export function SecurityPage(): JSX.Element {
     <div className="space-y-6 p-6">
       <header>
         <h1 className="text-2xl font-bold">Security</h1>
-        <p className="text-sm text-slate-500">Manage authentication, sessions, and data protection for your workspace.</p>
+        <p className="text-sm text-navy-400">Manage authentication, sessions, and data protection for your workspace.</p>
       </header>
 
       <TwoFactorPanel />

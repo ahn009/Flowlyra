@@ -29,10 +29,10 @@ export function ProductTour({ open, onClose }: ProductTourProps): JSX.Element | 
 
   return (
     <div className="fixed inset-0 z-[80] grid place-items-center bg-black/55 p-4" onClick={onClose}>
-      <div className="w-full max-w-lg rounded-2xl border border-slate-700 bg-slate-950 p-6 text-white shadow-2xl" onClick={(event) => event.stopPropagation()}>
+      <div className="w-full max-w-lg rounded-2xl border border-navy-700 bg-navy-950 p-6 text-white shadow-2xl" onClick={(event) => event.stopPropagation()}>
         <div className="text-xs font-black uppercase tracking-wide text-blue-300">Product Tour {index + 1}/{STEPS.length}</div>
         <h2 className="mt-2 text-2xl font-black">{step.title}</h2>
-        <p className="mt-3 text-sm leading-7 text-slate-200">{step.body}</p>
+        <p className="mt-3 text-sm leading-7 text-navy-200">{step.body}</p>
         <div className="mt-6 flex items-center justify-between">
           <Button variant="ghost" onClick={() => (index === 0 ? onClose() : setIndex((value) => Math.max(0, value - 1)))}>
             {index === 0 ? "Close" : "Back"}

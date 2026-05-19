@@ -1,6 +1,6 @@
-const CACHE_NAME = "flowlyra-shell-v1";
+const CACHE_NAME = "flowlyra-shell-v2";
 const OFFLINE_URL = "/offline.html";
-const APP_SHELL = ["/", "/index.html", "/manifest.webmanifest", "/favicon.svg", OFFLINE_URL];
+const APP_SHELL = ["/offline.html", "/manifest.webmanifest", "/favicon.svg"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -18,35 +18,40 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
+function isCacheable(request) {
+  const url = new URL(request.url);
+  // Only cache same-origin GET requests
+  if (url.origin !== self.location.origin) return false;
+  // Skip Vite dev server internals
+  if (url.pathname.startsWith("/@") || url.pathname.startsWith("/node_modules")) return false;
+  // Skip anything that looks like an API route
+  if (url.pathname.startsWith("/api/")) return false;
+  return request.method === "GET";
+}
+
 self.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET") return;
+  if (!isCacheable(event.request)) return;
 
   if (event.request.mode === "navigate") {
+    // Network-first for HTML — never serve stale page shell
     event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy)).catch(() => undefined);
-          return response;
-        })
-        .catch(async () => {
-          const cached = await caches.match(event.request);
-          return cached || caches.match(OFFLINE_URL);
-        })
+      fetch(event.request).catch(async () => {
+        const cached = await caches.match(event.request);
+        return cached || caches.match(OFFLINE_URL);
+      })
     );
     return;
   }
 
+  // Stale-while-revalidate for static assets
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      const networkFetch = fetch(event.request)
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy)).catch(() => undefined);
-          return response;
-        })
-        .catch(() => cached);
-      return cached || networkFetch;
+    caches.open(CACHE_NAME).then(async (cache) => {
+      const cached = await cache.match(event.request);
+      const networkPromise = fetch(event.request).then((response) => {
+        if (response.ok) cache.put(event.request, response.clone()).catch(() => undefined);
+        return response;
+      }).catch(() => cached);
+      return cached || networkPromise;
     })
   );
 });
@@ -56,9 +61,7 @@ self.addEventListener("push", (event) => {
   if (event.data) {
     try {
       payload = { ...payload, ...event.data.json() };
-    } catch (_) {
-      // Ignore malformed push payload.
-    }
+    } catch (_) {}
   }
   event.waitUntil(
     self.registration.showNotification(payload.title, {

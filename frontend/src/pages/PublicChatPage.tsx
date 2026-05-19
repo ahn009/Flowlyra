@@ -32,10 +32,10 @@ export function PublicChatPage(): JSX.Element {
   }, [wsId]);
 
   return (
-    <main className="grid min-h-screen place-items-center bg-slate-100 p-6 text-center dark:bg-slate-950">
-      <div className="max-w-xl rounded-2xl border border-border bg-white p-8 shadow-sm dark:bg-slate-900">
-        <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100">Live Chat</h1>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+    <main className="grid min-h-screen place-items-center bg-navy-100 p-6 text-center dark:bg-navy-950">
+      <div className="max-w-xl rounded-2xl border border-navy-100 dark:border-navy-700 bg-white p-8 shadow-sm dark:bg-navy-900">
+        <h1 className="text-2xl font-black tracking-tight text-navy-700 dark:text-navy-100">Live Chat</h1>
+        <p className="mt-2 text-sm text-navy-500 dark:text-navy-300">
           Chat workspace: <span className="font-mono font-bold">{wsId}</span>. The widget opens automatically.
         </p>
       </div>

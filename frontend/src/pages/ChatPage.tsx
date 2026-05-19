@@ -1,36 +1,34 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { VisitorMap as VisitorMapEmbed } from "../components/VisitorMap";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { CopilotPanel } from "../components/CopilotPanel";
-import { AIToolsMenu } from "../components/AIToolsMenu";
 import {
   ArrowLeft,
-  Bold,
   Check,
   CheckCheck,
+  ChevronDown,
   Clock,
-  FileUp,
-  Image,
-  Italic,
+  Globe2,
   Link2,
-  List,
-  Mail,
   MapPin,
+  MessageSquare,
   MoreHorizontal,
   Paperclip,
-  Search,
   Pin,
+  Search,
   Plus,
   ScreenShare,
-  Send,
-  ShieldCheck,
+  SendHorizontal,
+  SmilePlus,
   Sparkles,
+  StickyNote,
   Tag,
-  Trash2,
   UserRound,
   Video,
+  X,
   Zap,
 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -95,7 +93,22 @@ interface ProductCatalogItem {
   brand?: string | null;
 }
 
-const QUICK_EMOJIS = ["👍", "✅", "🙏", "🙂", "🔥", "🎉"];
+type ChatListView = "my" | "queued" | "supervised";
+
+const CHAT_LIST_LABELS: Record<ChatListView, string> = {
+  my: "My chats",
+  queued: "Queued",
+  supervised: "Supervised",
+};
+
+function numberFromCustomVariable(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string" && value.trim()) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
 
 export function ChatPage(): JSX.Element {
   const { id = "" } = useParams();
@@ -108,11 +121,9 @@ export function ChatPage(): JSX.Element {
   const [callMode, setCallMode] = useState<null | "video" | "screen">(null);
   const [callConnected, setCallConnected] = useState(false);
   const [shortcutOpen, setShortcutOpen] = useState(false);
-  const [gifUrl, setGifUrl] = useState("");
   const [tagText, setTagText] = useState("");
   const [assignModal, setAssignModal] = useState(false);
   const [assignId, setAssignId] = useState("");
-  const [snoozeMinutes, setSnoozeMinutes] = useState(30);
   const [copilotOpen, setCopilotOpen] = useState(false);
   const [ghostText, setGhostText] = useState("");
   const [productPanelOpen, setProductPanelOpen] = useState(false);
@@ -121,6 +132,8 @@ export function ChatPage(): JSX.Element {
   const [couponCode, setCouponCode] = useState("");
   const [couponDiscountText, setCouponDiscountText] = useState("");
   const [couponMessage, setCouponMessage] = useState("");
+  const [chatListView, setChatListView] = useState<ChatListView>("my");
+  const [chatListSearch, setChatListSearch] = useState("");
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -132,6 +145,11 @@ export function ChatPage(): JSX.Element {
     queryKey: ["chat", id],
     queryFn: async () => (await api.get<ChatDetail>(`/chats/${id}`)).data,
     enabled: Boolean(id),
+    refetchInterval: 2500,
+  });
+  const { data: chatListData = [] } = useQuery({
+    queryKey: ["chats", "agent-chat-list", chatListView, chatListSearch],
+    queryFn: async () => (await api.get<Chat[]>("/chats", { params: { view: chatListView, q: chatListSearch || undefined } })).data,
     refetchInterval: 2500,
   });
   const { data: agents = [] } = useQuery({ queryKey: ["agents", "chat"], queryFn: async () => (await api.get<User[]>("/agents")).data });
@@ -159,15 +177,18 @@ export function ChatPage(): JSX.Element {
   });
 
   const liveMessages = useChatStore((state) => state.messages[id]) ?? [];
-  const openChatTabs = useChatStore((state) => state.openChatTabs);
   const chatsById = useChatStore((state) => state.chats);
-  const closeChatTab = useChatStore((state) => state.closeChatTab);
+  const unreadCounts = useChatStore((state) => state.unreadCounts);
   const updateMessageInStore = useChatStore((state) => state.updateMessage);
   const setActiveChat = useChatStore((state) => state.setActiveChat);
   const preview = useChatStore((state) => state.typingPreview[id]);
   const suggestions = useChatStore((state) => state.aiSuggestions[id]) ?? [];
 
   const messages = useMemo(() => mergeMessages(data?.messages ?? [], liveMessages), [data?.messages, liveMessages]);
+  const chatListRows = useMemo(
+    () => mergeChatListRows(chatListData, Object.values(chatsById), data),
+    [chatListData, chatsById, data],
+  );
   const slashResults = useMemo(() => {
     const lines = reply.split("\n");
     const lastLine = lines[lines.length - 1] ?? "";
@@ -392,25 +413,6 @@ export function ChatPage(): JSX.Element {
     toast.success("File sent");
   }
 
-  const applyMarkdown = (type: "bold" | "italic" | "link" | "list"): void => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selected = reply.slice(start, end) || "text";
-    let insert = selected;
-    if (type === "bold") insert = `**${selected}**`;
-    if (type === "italic") insert = `_${selected}_`;
-    if (type === "link") insert = `[${selected}](https://)`;
-    if (type === "list") insert = `- ${selected}`;
-    const next = `${reply.slice(0, start)}${insert}${reply.slice(end)}`;
-    setReply(next);
-    requestAnimationFrame(() => {
-      textarea.focus();
-      textarea.setSelectionRange(start + insert.length, start + insert.length);
-    });
-  };
-
   const onPaste: React.ClipboardEventHandler<HTMLTextAreaElement> = (event) => {
     const file = Array.from(event.clipboardData.files)[0];
     if (file) {
@@ -428,260 +430,376 @@ export function ChatPage(): JSX.Element {
   const currentChat = data;
 
   return (
-    <section className="min-h-[calc(100dvh-64px)] premium-surface">
-      <OpenChatTabs
-        tabs={openChatTabs}
-        chatsById={chatsById}
-        activeChatId={id}
-        onOpen={(chatId) => navigate(`/inbox/chat/${chatId}`)}
-        onClose={(chatId) => closeChatTab(chatId)}
-      />
-      <div className="grid min-h-[calc(100dvh-108px)] grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="flex min-h-[calc(100dvh-108px)] min-w-0 flex-col xl:h-[calc(100dvh-108px)]">
-          <header className="border-b border-border bg-white/85 px-3 py-3 shadow-sm backdrop-blur-xl dark:bg-slate-950/85 sm:px-4 lg:px-6">
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex min-w-0 items-center gap-3">
-                <button type="button" onClick={() => navigate("/inbox")} className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-border bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700" aria-label="Back to inbox" title="Back to inbox"><ArrowLeft size={16} /></button>
-                <div className="relative grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-slate-950 font-black text-white shadow-sm dark:bg-white dark:text-slate-950">{initials(currentChat?.visitor_name || currentChat?.visitor_email || "Visitor")}<span className={`absolute -right-1 -top-1 h-3.5 w-3.5 rounded-full border-2 border-white ${currentChat?.visitor_status === "online" ? "bg-success" : "bg-slate-400"}`} /></div>
-                <div className="min-w-0">
-                  <div className="flex min-w-0 items-center gap-2">
-                    <h1 className="truncate text-base font-black tracking-tight text-ink sm:text-lg">{currentChat?.visitor_name || currentChat?.visitor_email || "Website visitor"}</h1>
-                    <span className={`rounded-lg px-2 py-1 text-[11px] font-black uppercase ${statusTone(currentChat?.status ?? "waiting")}`}>{currentChat?.status ?? "waiting"}</span>
-                    {currentChat?.is_pinned ? <Pin size={14} className="text-blue-700" /> : null}
-                  </div>
-                  <div className="mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
-                    <span className="truncate">{currentChat?.subject || "Live chat"}</span>
-                    <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:block" />
-                    <span>{messages.length} messages</span>
-                  </div>
+    <section className="flex min-h-[calc(100dvh-56px)] flex-col bg-[#f4f6f8] text-navy-700">
+      <div className="flex h-12 shrink-0 items-center justify-between border-b border-navy-100 bg-white px-4">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShortcutOpen(true)}
+            className="flex w-64 items-center gap-2 rounded-md border border-navy-100 bg-navy-50 px-3 py-1.5 text-sm text-navy-400 transition hover:border-navy-200 hover:bg-white"
+          >
+            <Search size={14} />
+            <span className="flex-1 text-left">Search chats, tickets, visitors</span>
+            <kbd className="rounded border border-navy-200 bg-white px-1.5 py-0.5 text-[10px] font-semibold leading-none text-navy-400">⌘K</kbd>
+          </button>
+          <div className="hidden items-center gap-2 text-xs font-medium text-navy-400 md:flex">
+            <span className="h-2 w-2 rounded-full bg-success-500" />
+            Chats workspace
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <button className="flex items-center gap-1.5 rounded-md border border-navy-200 bg-white px-3 py-1.5 text-sm font-medium text-navy-600 transition hover:bg-navy-50">
+            <Plus size={14} /> Invite
+          </button>
+          <div className="relative grid h-8 w-8 place-items-center rounded-full bg-brand-500 text-xs font-semibold text-white">
+            {initials(me?.full_name || "MT")}
+            <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-success-500" />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden xl:grid-cols-[320px_minmax(0,1fr)_360px]">
+        <ChatListPane
+          rows={chatListRows}
+          activeChatId={id}
+          unreadCounts={unreadCounts}
+          view={chatListView}
+          search={chatListSearch}
+          onViewChange={setChatListView}
+          onSearchChange={setChatListSearch}
+          onOpen={(chatId) => navigate(`/inbox/chat/${chatId}`)}
+        />
+
+        <div className="flex min-h-0 flex-col border-l border-navy-100 bg-white">
+          {/* Chat header */}
+          <header className="flex shrink-0 items-center justify-between border-b border-navy-100 bg-white px-5 py-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <button
+                type="button"
+                onClick={() => navigate("/inbox")}
+                className="flex shrink-0 items-center gap-1 text-sm font-semibold text-navy-400 transition hover:text-navy-600"
+              >
+                <ArrowLeft size={15} /> Back
+              </button>
+              <div className="relative shrink-0">
+                <div className="grid h-9 w-9 place-items-center rounded-full bg-brand-500 text-xs font-black text-white shadow-sm">
+                  {initials(currentChat?.visitor_name || currentChat?.visitor_email || "V")}
+                </div>
+                <span className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white ${currentChat?.visitor_status === "online" ? "bg-success-500" : "bg-navy-300"}`} />
+              </div>
+              <div className="min-w-0">
+                <h1 className="truncate text-sm font-semibold text-navy-700">
+                  {currentChat?.visitor_name || currentChat?.visitor_email || "Website visitor"}
+                </h1>
+                <div className="flex items-center gap-1.5 text-xs text-navy-400">
+                  <span className={`h-1.5 w-1.5 rounded-full ${currentChat?.visitor_status === "online" ? "bg-success-500" : "bg-navy-300"}`} />
+                  {currentChat?.visitor_status === "online" ? "Online" : "Offline"}
+                  <span className="h-1 w-1 rounded-full bg-navy-200" />
+                  <span>{currentChat?.created_at ? formatDate(currentChat.created_at) : "—"}</span>
                 </div>
               </div>
-              <div className="-mx-1 flex max-w-full shrink-0 items-center gap-2 overflow-x-auto px-1 pb-1">
-                <Action icon={<Video size={16} />} label="Video" onClick={() => void startCall("video")} />
-                <Action icon={<ScreenShare size={16} />} label="Share" onClick={() => void startCall("screen")} />
-                <Action icon={<ScreenShare size={16} />} label="Co-browse" onClick={() => activeSocket()?.emit("cobrowse:request", { chat_id: id, mode: "screen" })} />
-                {callMode ? <Action icon={<Trash2 size={16} />} label={callConnected ? "Hang up" : "Cancel"} onClick={endCall} /> : null}
-                <Action icon={<Pin size={16} />} label={currentChat?.is_pinned ? "Unpin" : "Pin"} onClick={() => quickAction.mutate({ path: `/chats/${id}/${currentChat?.is_pinned ? "unpin" : "pin"}` })} />
-                <Action icon={<Clock size={16} />} label="Snooze" onClick={() => quickAction.mutate({ path: `/chats/${id}/snooze`, payload: { minutes: snoozeMinutes } })} />
-                <Action icon={<Tag size={16} />} label="Assign" onClick={() => setAssignModal(true)} />
-                <button className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-bold text-white shadow-sm hover:bg-blue-800" onClick={() => quickAction.mutate({ path: `/chats/${id}/resolve` })}><Check size={16} />Resolve</button>
-              </div>
+            </div>
+            <div className="flex shrink-0 items-center gap-1">
+              <button className="flex h-8 w-8 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-50 hover:text-navy-600" title="Copy link"><Link2 size={15} /></button>
+              <button className="flex h-8 w-8 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-50 hover:text-navy-600" title="More options"><MoreHorizontal size={15} /></button>
+              <div className="mx-1 h-4 w-px bg-navy-100" />
+              <button className="flex h-8 w-8 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-50 hover:text-navy-600" onClick={() => void startCall("video")} title="Video call"><Video size={15} /></button>
+              <button className="flex h-8 w-8 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-50 hover:text-navy-600" onClick={() => void startCall("screen")} title="Screen share"><ScreenShare size={15} /></button>
+              <button className="flex h-8 w-8 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-50 hover:text-navy-600" onClick={() => setAssignModal(true)} title="Assign"><UserRound size={15} /></button>
+              <div className="mx-1 h-4 w-px bg-navy-100" />
+              <button
+                className="flex items-center gap-1.5 rounded-lg bg-success-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-success-700"
+                onClick={() => quickAction.mutate({ path: `/chats/${id}/resolve` })}
+              >
+                <Check size={13} /> Resolve
+              </button>
             </div>
           </header>
 
-          <div className="min-h-0 flex-1 overflow-hidden px-3 py-3 sm:px-4 lg:px-6 lg:py-5">
-            <div className="mx-auto flex h-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-sm dark:bg-slate-900">
-              <div className="border-b border-border bg-white px-5 py-3 dark:bg-slate-900">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-200"><ShieldCheck size={16} className="text-green-600" /> Human conversation</div>
-                  <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
-                    <button className="rounded border border-border px-2 py-1 hover:bg-slate-50" onClick={() => setShortcutOpen(true)}>Shortcuts (?)</button>
-                    <button className="rounded border border-border px-2 py-1 hover:bg-slate-50" onClick={() => quickAction.mutate({ path: `/chats/${id}/convert-ticket` })}>Convert to ticket</button>
-                    <button className="rounded border border-border px-2 py-1 hover:bg-slate-50" onClick={() => quickAction.mutate({ path: `/chats/${id}/spam` })}>Mark spam</button>
-                    <button className="rounded border border-border px-2 py-1 hover:bg-slate-50" onClick={() => quickAction.mutate({ path: `/chats/${id}/ban` })}>Ban visitor</button>
-                  </div>
-                </div>
+          {/* Typing preview */}
+          {preview && (
+            <div className="shrink-0 border-b border-brand-100 bg-brand-50/60 px-5 py-2">
+              <div className="flex items-center gap-2 text-xs font-semibold text-brand-600">
+                <Zap size={13} /> Visitor is typing...
               </div>
-
-              {preview && <div className="border-b border-blue-100 bg-blue-50 px-5 py-3 text-sm text-blue-950 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-200"><div className="mb-1 flex items-center gap-2 font-black"><Zap size={16} /> Visitor is typing now</div><div className="line-clamp-2 italic">{preview}</div></div>}
-              {callMode && (
-                <div className="border-b border-purple-100 bg-purple-50 px-5 py-3 dark:border-purple-900 dark:bg-purple-950/20">
-                  <div className="mb-2 text-xs font-black uppercase tracking-wide text-purple-800 dark:text-purple-300">{callMode} call {callConnected ? "connected" : "connecting..."}</div>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <video ref={localVideoRef} autoPlay muted playsInline className="w-full rounded-xl bg-slate-900" />
-                    <video ref={remoteVideoRef} autoPlay playsInline className="w-full rounded-xl bg-slate-900" />
-                  </div>
-                </div>
-              )}
-
-              <div className="min-h-[260px] flex-1 overflow-y-auto bg-slate-50 p-3 dark:bg-slate-950">
-                {messages.length > 0 ? messages.map((message) => (
-                  <MessageRow
-                    key={message.id}
-                    message={message}
-                    currentUserId={me?.id}
-                    onReact={(emoji) => reactMessage.mutate({ messageId: message.id, emoji })}
-                    onEdit={(content) => editMessage.mutate({ messageId: message.id, content })}
-                    onDelete={() => deleteMessage.mutate(message.id)}
-                  />
-                )) : <EmptyConversation />}
-              </div>
-
-              {suggestions.length > 0 && (
-                <div className="border-t border-blue-100 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-900">
-                  <div className="mb-2 flex items-center gap-2 text-sm font-black text-primary"><Sparkles size={16} /> Suggested replies</div>
-                  <div className="flex flex-wrap gap-2">{suggestions.map((item) => <button key={item} onClick={() => setReply(item)} className="rounded-full border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-bold text-primary hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-900/20 dark:hover:bg-blue-900/40">{item}</button>)}</div>
-                </div>
-              )}
+              <div className="mt-0.5 line-clamp-1 text-xs italic text-brand-400">{preview}</div>
             </div>
+          )}
+
+          {/* Call panel */}
+          {callMode && (
+            <div className="shrink-0 border-b border-purple-100 bg-purple-50 px-5 py-3">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wide text-purple-600">
+                  {callMode} call {callConnected ? "• connected" : "• connecting..."}
+                </span>
+                <button onClick={endCall} className="rounded-lg bg-danger-50 px-3 py-1 text-xs font-bold text-danger-600 hover:bg-danger-100">
+                  End call
+                </button>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <video ref={localVideoRef} autoPlay muted playsInline className="w-full rounded-xl bg-navy-100" />
+                <video ref={remoteVideoRef} autoPlay playsInline className="w-full rounded-xl bg-navy-100" />
+              </div>
+            </div>
+          )}
+
+          {/* Messages */}
+          <div className="min-h-0 flex-1 overflow-y-auto bg-navy-50/50 px-5 py-4">
+            {messages.length > 0 ? messages.map((message) => (
+              <MessageRow
+                key={message.id}
+                message={message}
+                currentUserId={me?.id}
+                onReact={(emoji) => reactMessage.mutate({ messageId: message.id, emoji })}
+                onEdit={(content) => editMessage.mutate({ messageId: message.id, content })}
+                onDelete={() => deleteMessage.mutate(message.id)}
+              />
+            )) : <EmptyConversation />}
           </div>
 
-          <div className="shrink-0 border-t border-slate-200 bg-white px-3 py-3 dark:border-slate-700 dark:bg-slate-900 sm:px-4 lg:px-6 lg:py-4">
-            <div className="mx-auto max-w-5xl rounded-2xl border border-border bg-white p-3 shadow-sm dark:bg-slate-900">
-              <div className="mb-2 flex flex-wrap gap-2">
-                <button onClick={() => setNoteMode(!noteMode)} className={`inline-flex shrink-0 items-center gap-2 rounded-full px-3 py-1.5 text-xs font-black ${noteMode ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300" : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"}`}><ShieldCheck size={14} /> {noteMode ? "Internal note" : "Public reply"}</button>
-                <button onClick={() => applyMarkdown("bold")} className="rounded-full border border-border px-3 py-1.5 text-xs font-black"><Bold size={14} /></button>
-                <button onClick={() => applyMarkdown("italic")} className="rounded-full border border-border px-3 py-1.5 text-xs font-black"><Italic size={14} /></button>
-                <button onClick={() => applyMarkdown("list")} className="rounded-full border border-border px-3 py-1.5 text-xs font-black"><List size={14} /></button>
-                <button onClick={() => applyMarkdown("link")} className="rounded-full border border-border px-3 py-1.5 text-xs font-black"><Link2 size={14} /></button>
-                {QUICK_EMOJIS.map((emoji) => <button key={emoji} onClick={() => setReply((v) => `${v}${emoji}`)} className="rounded-full border border-border px-2 py-1 text-xs">{emoji}</button>)}
-                <input id="chat-tag-input" value={tagText} onChange={(e) => setTagText(e.target.value)} placeholder="tag" className="h-8 w-24 rounded-full border border-border px-2 text-xs" />
-                <button className="rounded-full border border-border px-2 py-1 text-xs" onClick={() => tagText.trim() && quickAction.mutate({ path: `/chats/${id}/tag`, payload: { tag: tagText.trim() } })}>Tag</button>
-                <input value={gifUrl} onChange={(e) => setGifUrl(e.target.value)} placeholder="GIF URL" className="h-8 w-40 rounded-full border border-border px-2 text-xs" />
-                <button className="rounded-full border border-border px-2 py-1 text-xs" onClick={() => gifUrl.trim() && activeSocket()?.emit("chat:message", { organization_id: data?.organization_id, chat_id: id, content: gifUrl, sender_type: "agent", content_type: "image", file_url: gifUrl, file_name: "GIF" })}><Image size={13} /></button>
-                <input id="agent-chat-upload" className="hidden" type="file" onChange={(event) => {
-                  const file = event.target.files?.[0];
-                  if (file) void uploadFile(file);
-                  event.currentTarget.value = "";
-                }} />
-                <label htmlFor="agent-chat-upload" className="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-black text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"><Paperclip size={14} />Attach</label>
-                <label htmlFor="agent-chat-upload" className="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-black text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"><FileUp size={14} />Upload</label>
-                <button className="inline-flex shrink-0 items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-black text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"><Plus size={14} />More</button>
-                {canned.slice(0, 6).map((item) => <button key={item.id} onClick={() => void useCanned(item)} className="shrink-0 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-black text-slate-600 hover:bg-slate-50 dark:bg-slate-800/50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">/{item.shortcut}</button>)}
-                <AIToolsMenu value={reply} onApply={(text) => setReply(text)} />
-                <button
-                  onClick={() => {
-                    setProductPanelOpen((value) => !value);
-                    setCouponPanelOpen(false);
-                  }}
-                  className={`inline-flex shrink-0 items-center gap-2 rounded-full px-3 py-1.5 text-xs font-black ${productPanelOpen ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"}`}
-                >
-                  <Search size={14} /> Products
-                </button>
-                <button
-                  onClick={() => {
-                    setCouponPanelOpen((value) => !value);
-                    setProductPanelOpen(false);
-                  }}
-                  className={`inline-flex shrink-0 items-center gap-2 rounded-full px-3 py-1.5 text-xs font-black ${couponPanelOpen ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300" : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"}`}
-                >
-                  <Tag size={14} /> Coupon
-                </button>
-                <button
-                  onClick={() => checkoutAssist.mutate()}
-                  className="inline-flex shrink-0 items-center gap-2 rounded-full bg-teal-100 px-3 py-1.5 text-xs font-black text-teal-800 hover:bg-teal-200 dark:bg-teal-900/30 dark:text-teal-300 dark:hover:bg-teal-900/50"
-                >
-                  <Zap size={14} /> Checkout assist
-                </button>
-                <button
-                  onClick={() => setCopilotOpen(true)}
-                  className="inline-flex shrink-0 items-center gap-2 rounded-full bg-purple-600 px-3 py-1.5 text-xs font-black text-white hover:bg-purple-700"
-                >
-                  <Sparkles size={14} /> Copilot
-                </button>
+          {/* AI Suggestions */}
+          {suggestions.length > 0 && (
+            <div className="shrink-0 border-t border-navy-100 bg-white px-4 py-2.5">
+              <div className="mb-1.5 flex items-center gap-1.5">
+                <Sparkles size={12} className="text-purple-500" />
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-purple-500">AI suggestions</span>
               </div>
-              {productPanelOpen && (
-                <div className="mb-3 rounded-xl border border-green-200 bg-green-50 p-3 dark:border-green-900 dark:bg-green-950/20">
-                  <div className="mb-2 flex flex-col gap-2 sm:flex-row">
-                    <input
-                      value={productSearch}
-                      onChange={(event) => setProductSearch(event.target.value)}
-                      placeholder="Search products by name, SKU, category..."
-                      className="h-10 w-full rounded-lg border border-green-200 bg-white px-3 text-sm outline-none ring-2 ring-transparent focus:ring-green-100 dark:border-green-800 dark:bg-slate-900"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => void refetchRecommendations()}
-                      className="inline-flex h-10 shrink-0 items-center justify-center rounded-lg border border-green-200 bg-white px-3 text-xs font-black text-green-800 hover:bg-green-100 dark:border-green-800 dark:bg-slate-900 dark:text-green-300"
-                    >
-                      Refresh recommendations
-                    </button>
-                  </div>
-                  <div className="mb-2 text-xs font-semibold text-green-800 dark:text-green-300">
-                    {normalizedProductSearch ? "Search results" : "AI recommendations"}
-                  </div>
+              <div className="flex flex-wrap gap-2">
+                {suggestions.map((item) => (
+                  <button
+                    key={item}
+                    onClick={() => setReply(item)}
+                    className="max-w-[220px] truncate rounded-full border border-purple-200 bg-purple-50 px-3 py-1.5 text-xs font-medium text-purple-700 transition hover:border-purple-300 hover:bg-purple-100"
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Input area */}
+          <div className="shrink-0 border-t border-navy-100 bg-white">
+            {/* Product panel */}
+            {productPanelOpen && (
+              <div className="border-b border-navy-100 p-3">
+                <div className="mb-2 flex gap-2">
+                  <input
+                    value={productSearch}
+                    onChange={(event) => setProductSearch(event.target.value)}
+                    placeholder="Search products..."
+                    className="h-9 flex-1 rounded-lg border border-navy-200 bg-navy-50 px-3 text-sm text-navy-700 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500/30"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => void refetchRecommendations()}
+                    className="h-9 shrink-0 rounded-lg border border-navy-200 bg-white px-3 text-xs font-semibold text-navy-600 hover:bg-navy-50"
+                  >
+                    Refresh
+                  </button>
+                </div>
+                <div className="max-h-40 overflow-y-auto">
                   {searchingProducts || loadingRecommendations ? (
-                    <div className="text-xs font-semibold text-green-700 dark:text-green-400">Loading products...</div>
+                    <div className="py-2 text-xs text-navy-400">Loading...</div>
                   ) : (
-                    <div className="grid gap-2">
+                    <div className="grid gap-1.5">
                       {productItems.map((product) => (
                         <button
                           key={product.id}
                           type="button"
                           onClick={() => sendProductCard(product)}
-                          className="flex items-center justify-between rounded-lg border border-green-200 bg-white px-3 py-2 text-left hover:bg-green-100 dark:border-green-800 dark:bg-slate-900 dark:hover:bg-green-900/20"
+                          className="flex items-center justify-between rounded-lg border border-navy-100 bg-white px-3 py-2 text-left hover:bg-navy-50"
                         >
                           <div className="min-w-0">
-                            <div className="truncate text-sm font-bold text-slate-900 dark:text-slate-100">{product.name}</div>
-                            <div className="truncate text-xs text-slate-500 dark:text-slate-400">{product.sku || product.category || "No SKU"}</div>
+                            <div className="truncate text-sm font-semibold text-navy-700">{product.name}</div>
+                            <div className="truncate text-xs text-navy-400">{product.sku || product.category}</div>
                           </div>
-                          <div className="ml-3 shrink-0 text-xs font-black text-green-800 dark:text-green-300">
-                            {formatMoney(product.price, product.currency)}
-                          </div>
+                          <div className="ml-3 shrink-0 text-xs font-bold text-success-600">{formatMoney(product.price, product.currency)}</div>
                         </button>
                       ))}
-                      {productItems.length === 0 ? <div className="text-xs text-slate-500 dark:text-slate-400">No matching products found.</div> : null}
+                      {productItems.length === 0 && <div className="py-2 text-xs text-navy-400">No products found.</div>}
                     </div>
                   )}
                 </div>
-              )}
-              {couponPanelOpen && (
-                <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950/20">
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    <input value={couponCode} onChange={(event) => setCouponCode(event.target.value)} placeholder="Coupon code" className="h-10 rounded-lg border border-amber-200 bg-white px-3 text-sm outline-none ring-2 ring-transparent focus:ring-amber-100 dark:border-amber-800 dark:bg-slate-900" />
-                    <input value={couponDiscountText} onChange={(event) => setCouponDiscountText(event.target.value)} placeholder="Discount text (e.g. 20% off)" className="h-10 rounded-lg border border-amber-200 bg-white px-3 text-sm outline-none ring-2 ring-transparent focus:ring-amber-100 dark:border-amber-800 dark:bg-slate-900" />
-                  </div>
-                  <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-                    <input value={couponMessage} onChange={(event) => setCouponMessage(event.target.value)} placeholder="Optional coupon message" className="h-10 w-full rounded-lg border border-amber-200 bg-white px-3 text-sm outline-none ring-2 ring-transparent focus:ring-amber-100 dark:border-amber-800 dark:bg-slate-900" />
-                    <button
-                      type="button"
-                      disabled={!couponCode.trim() || sendCoupon.isPending}
-                      onClick={() => sendCoupon.mutate()}
-                      className="inline-flex h-10 shrink-0 items-center justify-center rounded-lg bg-amber-600 px-4 text-xs font-black text-white hover:bg-amber-700 disabled:opacity-60"
-                    >
-                      Send coupon
-                    </button>
-                  </div>
+              </div>
+            )}
+
+            {/* Coupon panel */}
+            {couponPanelOpen && (
+              <div className="border-b border-navy-100 p-3">
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <input value={couponCode} onChange={(e) => setCouponCode(e.target.value)} placeholder="Coupon code" className="h-9 rounded-lg border border-navy-200 bg-navy-50 px-3 text-sm text-navy-700 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500/30" />
+                  <input value={couponDiscountText} onChange={(e) => setCouponDiscountText(e.target.value)} placeholder="e.g. 20% off" className="h-9 rounded-lg border border-navy-200 bg-navy-50 px-3 text-sm text-navy-700 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500/30" />
                 </div>
-              )}
-              {slashResults.length > 0 && (
-                <div className="mb-2 rounded-lg border border-blue-200 bg-blue-50 p-2 text-xs">
+                <div className="mt-2 flex gap-2">
+                  <input value={couponMessage} onChange={(e) => setCouponMessage(e.target.value)} placeholder="Optional message" className="h-9 flex-1 rounded-lg border border-navy-200 bg-navy-50 px-3 text-sm text-navy-700 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500/30" />
+                  <button
+                    type="button"
+                    disabled={!couponCode.trim() || sendCoupon.isPending}
+                    onClick={() => sendCoupon.mutate()}
+                    className="h-9 rounded-lg bg-warning-600 px-4 text-xs font-semibold text-white hover:bg-warning-700 disabled:opacity-60"
+                  >
+                    Send
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Slash canned results */}
+            {slashResults.length > 0 && (
+              <div className="border-b border-navy-100 bg-navy-50/60 px-4 py-2">
+                <div className="flex flex-wrap gap-1.5">
                   {slashResults.map((item) => (
-                    <button key={item.id} onClick={() => void useCanned(item)} className="mr-2 rounded border border-blue-200 bg-white px-2 py-1 font-semibold">/{item.shortcut} - {item.title}</button>
+                    <button key={item.id} onClick={() => void useCanned(item)} className="rounded-md border border-navy-200 bg-white px-2 py-1 text-xs font-medium text-navy-600 hover:bg-navy-50 hover:border-navy-300">
+                      /{item.shortcut} — {item.title}
+                    </button>
                   ))}
                 </div>
-              )}
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-                <div className="flex-1">
-                  <textarea
-                    ref={textareaRef}
-                    className="min-h-24 w-full resize-none rounded-2xl border-0 bg-slate-50 p-4 text-sm leading-6 outline-none ring-1 ring-border transition focus:bg-white focus:ring-4 focus:ring-blue-100 dark:bg-slate-800 dark:text-slate-100 dark:focus:bg-slate-800"
-                    placeholder={noteMode ? "Write an internal note. Customers cannot see this." : "Type your reply..."}
-                    value={reply}
-                    onChange={(event) => {
-                      const v = event.target.value;
-                      setReply(v);
-                      if (ghostText) setGhostText("");
-                      if (!noteMode && v.length >= 8 && v.length % 12 === 0) {
-                        void api.post<{ suggestion: string }>("/ai/ghost", { chat_id: id, prefix: v })
-                          .then(({ data }) => { if (data.suggestion) setGhostText(data.suggestion); })
-                          .catch(() => undefined);
-                      }
-                    }}
-                    onKeyDown={(event) => {
-                      if (event.key === "Tab" && ghostText) {
-                        event.preventDefault();
-                        setReply((v) => `${v} ${ghostText}`);
-                        setGhostText("");
-                      }
-                    }}
-                    onPaste={onPaste}
-                    onDrop={onDrop}
-                    onDragOver={(event) => event.preventDefault()}
-                  />
-                  {ghostText && (
-                    <div className="mt-1 px-2 text-xs text-slate-500">
-                      <span className="font-bold text-purple-600">Tab</span> to accept: <span className="italic">{ghostText}</span>
-                    </div>
-                  )}
-                </div>
-                <button onClick={send} className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-slate-950 px-6 text-sm font-black text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 sm:w-auto"><Send size={17} />Send</button>
               </div>
-              <div className="mt-2 text-center text-[11px] font-semibold text-slate-400 dark:text-slate-500">Ctrl/Cmd + Enter send • R reply • A assign • T tag • N note • ? shortcuts</div>
+            )}
+
+            {/* Input container */}
+            <div className="mx-4 mt-3 mb-2 rounded-xl border border-navy-100 bg-navy-50/50 focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-500/20 transition-all duration-150">
+              {noteMode && (
+                <div className="flex items-center gap-1.5 border-b border-warning-100 bg-warning-50 px-4 py-1.5 rounded-t-xl">
+                  <StickyNote size={12} className="text-warning-600" />
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-warning-600">Private Note — not visible to visitor</span>
+                </div>
+              )}
+              <textarea
+                ref={textareaRef}
+                className="min-h-[56px] max-h-[120px] w-full resize-none bg-transparent px-4 py-2.5 text-sm leading-6 text-navy-700 outline-none placeholder:text-navy-300"
+                placeholder={noteMode ? "Write an internal note..." : "Reply to visitor... (Ctrl+K for quick actions)"}
+                value={reply}
+                onChange={(event) => {
+                  const v = event.target.value;
+                  setReply(v);
+                  if (ghostText) setGhostText("");
+                  if (!noteMode && v.length >= 8 && v.length % 12 === 0) {
+                    void api.post<{ suggestion: string }>("/ai/ghost", { chat_id: id, prefix: v })
+                      .then(({ data: d }) => { if (d.suggestion) setGhostText(d.suggestion); })
+                      .catch(() => undefined);
+                  }
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Tab" && ghostText) {
+                    event.preventDefault();
+                    setReply((v) => `${v} ${ghostText}`);
+                    setGhostText("");
+                  }
+                }}
+                onPaste={onPaste}
+                onDrop={onDrop}
+                onDragOver={(event) => event.preventDefault()}
+              />
+              {ghostText && (
+                <div className="px-4 pb-1 text-xs text-navy-400">
+                  <span className="font-semibold text-purple-500">Tab</span> to accept:{" "}
+                  <span className="italic">{ghostText}</span>
+                </div>
+              )}
+
+              {/* Toolbar inside input container */}
+              <div className="flex items-center justify-between px-3 py-2">
+                <div className="flex items-center gap-0.5">
+                  <button
+                    onClick={() => setNoteMode(!noteMode)}
+                    className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition ${noteMode ? "bg-warning-100 text-warning-700" : "text-navy-400 hover:bg-navy-100 hover:text-navy-600"}`}
+                  >
+                    {noteMode ? <StickyNote size={13} /> : <MessageSquare size={13} />}
+                    {noteMode ? "Note" : "Message"}
+                  </button>
+                  <div className="mx-1 h-4 w-px bg-navy-200" />
+                  <button className="flex h-8 w-8 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-100 hover:text-navy-600" title="Emoji"><SmilePlus size={15} /></button>
+                  <label htmlFor="agent-chat-upload" className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-100 hover:text-navy-600" title="Attach file">
+                    <Paperclip size={15} />
+                  </label>
+                  <input id="agent-chat-upload" className="hidden" type="file" onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) void uploadFile(file);
+                    event.currentTarget.value = "";
+                  }} />
+                  <button
+                    className="flex h-8 w-8 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-100 hover:text-navy-600"
+                    title="Add tag"
+                    onClick={() => document.getElementById("chat-tag-input")?.focus()}
+                  >
+                    <Tag size={15} />
+                  </button>
+                  <button className="flex h-8 w-8 items-center justify-center rounded-md text-xs font-bold text-navy-400 transition hover:bg-navy-100 hover:text-navy-600" title="Canned responses">#</button>
+                  <div className="mx-1 h-4 w-px bg-navy-200" />
+                  <button
+                    onClick={() => setCopilotOpen(true)}
+                    className="flex h-8 w-8 items-center justify-center rounded-md bg-purple-50 text-purple-500 transition hover:bg-purple-100"
+                    title="AI Copilot"
+                  >
+                    <Sparkles size={15} />
+                  </button>
+                  <button
+                    onClick={() => { setProductPanelOpen((v) => !v); setCouponPanelOpen(false); }}
+                    className={`flex h-8 w-8 items-center justify-center rounded-md transition ${productPanelOpen ? "bg-success-50 text-success-600" : "text-navy-400 hover:bg-navy-100 hover:text-navy-600"}`}
+                    title="Products"
+                  >
+                    <Search size={15} />
+                  </button>
+                  <button
+                    onClick={() => { setCouponPanelOpen((v) => !v); setProductPanelOpen(false); }}
+                    className={`flex h-8 w-8 items-center justify-center rounded-md transition ${couponPanelOpen ? "bg-warning-50 text-warning-600" : "text-navy-400 hover:bg-navy-100 hover:text-navy-600"}`}
+                    title="Coupon"
+                  >
+                    <Tag size={15} />
+                  </button>
+                  <button
+                    onClick={() => checkoutAssist.mutate()}
+                    className="flex h-8 w-8 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-100 hover:text-navy-600"
+                    title="Checkout assist"
+                  >
+                    <Zap size={15} />
+                  </button>
+                </div>
+                <button
+                  onClick={send}
+                  disabled={!reply.trim()}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500 text-white transition hover:bg-brand-600 disabled:bg-navy-200 disabled:text-navy-400"
+                  title="Send (Ctrl+Enter)"
+                >
+                  <SendHorizontal size={15} />
+                </button>
+              </div>
+            </div>
+
+            {/* Add tag row */}
+            <div className="flex items-center gap-2 border-t border-navy-100/60 px-4 py-2">
+              <Tag size={13} className="shrink-0 text-navy-400" />
+              <input
+                id="chat-tag-input"
+                value={tagText}
+                onChange={(e) => setTagText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && tagText.trim()) {
+                    quickAction.mutate({ path: `/chats/${id}/tag`, payload: { tag: tagText.trim() } });
+                    setTagText("");
+                  }
+                }}
+                placeholder="Add tag"
+                className="flex-1 bg-transparent text-xs text-navy-500 outline-none placeholder:text-navy-300"
+              />
+              {tagText.trim() && (
+                <button
+                  className="text-xs font-semibold text-brand-500 transition hover:text-brand-600"
+                  onClick={() => {
+                    quickAction.mutate({ path: `/chats/${id}/tag`, payload: { tag: tagText.trim() } });
+                    setTagText("");
+                  }}
+                >
+                  Add
+                </button>
+              )}
             </div>
           </div>
         </div>
 
+        {/* Right: Visitor panel */}
         <VisitorPanel chat={currentChat} />
       </div>
 
@@ -689,22 +807,36 @@ export function ChatPage(): JSX.Element {
       {shortcutOpen ? <ShortcutsModal onClose={() => setShortcutOpen(false)} /> : null}
       {assignModal ? (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4" onClick={() => setAssignModal(false)}>
-          <div className="w-full max-w-md rounded-2xl bg-white p-4" onClick={(e) => e.stopPropagation()}>
-            <div className="mb-2 text-sm font-black">Assign chat</div>
-            <select className="h-10 w-full rounded border border-border px-2" value={assignId} onChange={(e) => setAssignId(e.target.value)}>
+          <div className="w-full max-w-md rounded-xl border border-navy-100 bg-white p-5 shadow-lift" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-3 text-sm font-semibold text-navy-700">Assign chat</div>
+            <select
+              className="h-10 w-full rounded-lg border border-navy-200 bg-white px-3 text-sm text-navy-700 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500/30"
+              value={assignId}
+              onChange={(e) => setAssignId(e.target.value)}
+            >
               <option value="">Select agent</option>
               {agents.map((agent) => <option key={agent.id} value={agent.id}>{agent.full_name}</option>)}
             </select>
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              <input type="number" className="h-10 rounded border border-border px-2" value={String(snoozeMinutes)} onChange={(e) => setSnoozeMinutes(Number(e.target.value || 30))} />
-              <button className="rounded bg-slate-900 px-3 py-2 text-sm font-bold text-white" onClick={() => {
-                if (!assignId) return;
-                void api.post(`/chats/${id}/assign`, { assigned_user_id: assignId }).then(() => {
-                  setAssignModal(false);
-                  toast.success("Assigned");
-                  void refreshChat();
-                });
-              }}>Assign</button>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <button
+                className="rounded-lg border border-navy-200 bg-white px-3 py-2 text-sm font-medium text-navy-600 hover:bg-navy-50"
+                onClick={() => setAssignModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="rounded-lg bg-brand-500 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-600"
+                onClick={() => {
+                  if (!assignId) return;
+                  void api.post(`/chats/${id}/assign`, { assigned_user_id: assignId }).then(() => {
+                    setAssignModal(false);
+                    toast.success("Assigned");
+                    void refreshChat();
+                  });
+                }}
+              >
+                Assign
+              </button>
             </div>
           </div>
         </div>
@@ -713,34 +845,120 @@ export function ChatPage(): JSX.Element {
   );
 }
 
-function OpenChatTabs({
-  tabs,
-  chatsById,
+function ChatListPane({
+  rows,
   activeChatId,
+  unreadCounts,
+  view,
+  search,
+  onViewChange,
+  onSearchChange,
   onOpen,
-  onClose,
 }: {
-  tabs: string[];
-  chatsById: Record<string, Chat>;
+  rows: Chat[];
   activeChatId: string;
+  unreadCounts: Record<string, number>;
+  view: ChatListView;
+  search: string;
+  onViewChange: (view: ChatListView) => void;
+  onSearchChange: (value: string) => void;
   onOpen: (chatId: string) => void;
-  onClose: (chatId: string) => void;
 }): JSX.Element {
-  if (!tabs.length) return <div className="border-b border-border bg-white px-3 py-2 text-xs font-semibold text-slate-500">No open chat tabs</div>;
   return (
-    <div className="border-b border-border bg-white px-3 py-2">
-      <div className="flex gap-2 overflow-x-auto">
-        {tabs.map((tabId) => {
-          const chat = chatsById[tabId];
-          return (
-            <div key={tabId} className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs ${tabId === activeChatId ? "border-slate-950 bg-slate-950 text-white" : "border-border bg-slate-50"}`}>
-              <button onClick={() => onOpen(tabId)} className="font-bold">{chat?.visitor_name || chat?.visitor_email || `Chat ${tabId.slice(0, 6)}`}</button>
-              <button onClick={() => onClose(tabId)} className="opacity-80">x</button>
-            </div>
-          );
-        })}
+    <aside className="hidden min-h-0 flex-col border-r border-navy-100 bg-white xl:flex">
+      <div className="border-b border-navy-100 px-3 py-3">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="font-display text-base font-semibold text-navy-800">Chats</h2>
+          <span className="rounded-full bg-navy-50 px-2 py-0.5 text-[11px] font-semibold text-navy-400">{rows.length}</span>
+        </div>
+        <label className="flex h-9 items-center gap-2 rounded-md border border-navy-100 bg-navy-50 px-2 text-sm text-navy-400 focus-within:border-brand-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-brand-500/15">
+          <Search size={14} />
+          <input
+            value={search}
+            onChange={(event) => onSearchChange(event.target.value)}
+            placeholder="Search chats"
+            className="min-w-0 flex-1 border-0 bg-transparent p-0 text-sm text-navy-700 outline-none placeholder:text-navy-300 focus:ring-0"
+          />
+        </label>
+        <div className="mt-3 grid grid-cols-3 gap-1 rounded-md bg-navy-50 p-1">
+          {(Object.keys(CHAT_LIST_LABELS) as ChatListView[]).map((item) => (
+            <button
+              key={item}
+              onClick={() => onViewChange(item)}
+              className={`rounded px-2 py-1.5 text-[11px] font-semibold transition ${view === item ? "bg-white text-brand-600 shadow-xs" : "text-navy-400 hover:text-navy-600"}`}
+            >
+              {CHAT_LIST_LABELS[item].replace(" chats", "")}
+            </button>
+          ))}
+        </div>
       </div>
-    </div>
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {rows.length ? rows.map((chat) => (
+          <ChatListRow
+            key={chat.id}
+            chat={chat}
+            active={chat.id === activeChatId}
+            unreadCount={unreadCounts[chat.id] ?? 0}
+            onClick={() => onOpen(chat.id)}
+          />
+        )) : (
+          <div className="grid h-full place-items-center px-6 text-center">
+            <div>
+              <MessageSquare size={22} className="mx-auto mb-2 text-navy-300" />
+              <div className="text-sm font-semibold text-navy-500">No chats here</div>
+              <p className="mt-1 text-xs leading-5 text-navy-400">Queued and assigned conversations will appear in this list.</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </aside>
+  );
+}
+
+function ChatListRow({
+  chat,
+  active,
+  unreadCount,
+  onClick,
+}: {
+  chat: Chat;
+  active: boolean;
+  unreadCount: number;
+  onClick: () => void;
+}): JSX.Element {
+  const name = chat.visitor_name || chat.visitor_email || "Website visitor";
+  const preview = chat.last_message?.content || chat.subject || `${chat.channel} conversation`;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`relative flex w-full min-w-0 gap-3 border-b border-navy-100 px-3 py-3 text-left transition hover:bg-navy-50 ${active ? "bg-brand-50/70" : "bg-white"}`}
+    >
+      {active && <span className="absolute left-0 top-3 h-9 w-1 rounded-r-full bg-brand-500" />}
+      <div className="relative grid h-10 w-10 shrink-0 place-items-center rounded-full bg-navy-900 text-xs font-semibold text-white">
+        {initials(name)}
+        <span className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white ${chat.visitor_status === "online" ? "bg-success-500" : "bg-navy-300"}`} />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className={`truncate text-sm font-semibold ${active ? "text-brand-700" : "text-navy-800"}`}>{name}</span>
+          {chat.is_pinned ? <Pin size={11} className="shrink-0 text-brand-500" /> : null}
+        </div>
+        <div className="mt-1 truncate text-xs text-navy-400">
+          {chat.last_message?.sender_type === "agent" ? "You: " : ""}
+          {preview}
+        </div>
+        <div className="mt-1 flex items-center gap-1.5 text-[11px] font-medium text-navy-300">
+          <Globe2 size={11} />
+          <span>{chat.channel}</span>
+          <span className="h-1 w-1 rounded-full bg-navy-200" />
+          <span>{formatTime(chat.updated_at)}</span>
+        </div>
+      </div>
+      {unreadCount > 0 && (
+        <span className="grid h-5 min-w-5 shrink-0 place-items-center rounded-full bg-brand-500 px-1 text-[10px] font-bold text-white">{unreadCount}</span>
+      )}
+    </button>
   );
 }
 
@@ -749,6 +967,23 @@ function mergeMessages(serverMessages: Message[], liveMessages: Message[]): Mess
   for (const message of serverMessages) byId.set(message.id, message);
   for (const message of liveMessages) byId.set(message.id, { ...byId.get(message.id), ...message });
   return [...byId.values()].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+}
+
+function mergeChatListRows(serverChats: Chat[], realtimeChats: Chat[], activeChat?: ChatDetail): Chat[] {
+  const byId = new Map<string, Chat>();
+  for (const chat of serverChats) byId.set(chat.id, chat);
+  for (const chat of realtimeChats) byId.set(chat.id, { ...byId.get(chat.id), ...chat });
+  if (activeChat) byId.set(activeChat.id, { ...byId.get(activeChat.id), ...activeChat });
+
+  return [...byId.values()].sort((a, b) => {
+    if (a.status !== b.status) {
+      if (a.status === "waiting") return -1;
+      if (b.status === "waiting") return 1;
+    }
+    const pinnedDiff = Number(Boolean(b.is_pinned)) - Number(Boolean(a.is_pinned));
+    if (pinnedDiff !== 0) return pinnedDiff;
+    return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+  });
 }
 
 function MessageRow({
@@ -766,48 +1001,115 @@ function MessageRow({
 }): JSX.Element {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(message.content ?? "");
-  if (message.is_internal) return <div className="px-2 py-3 text-center text-sm text-amber-800 sm:px-8"><span className="inline-block max-w-full rounded-full border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20 px-3 py-2 font-semibold">Internal note: {message.content}</span></div>;
+
+  if (message.is_internal) {
+    return (
+      <div className="my-2 px-4 py-1.5 text-center">
+        <span className="inline-block rounded-full border border-warning-200 bg-warning-50 px-3 py-1.5 text-xs font-medium italic text-warning-700">
+          <span className="not-italic font-semibold uppercase tracking-wider text-[10px] text-warning-600 block mb-0.5">Private Note</span>
+          {message.content}
+        </span>
+      </div>
+    );
+  }
+
   const mine = message.sender_type === "agent";
   const canModify = mine && !!currentUserId && !message.deleted_at;
   const reactionEntries = Object.entries(message.reactions ?? {});
+
   return (
-    <div className={`group flex items-end gap-2 px-1 py-2 sm:gap-3 sm:px-5 sm:py-3 ${mine ? "justify-start" : "justify-end"}`}>
-      {mine && <div className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-blue-600 text-[10px] font-black text-white shadow-sm sm:h-8 sm:w-8 sm:rounded-xl sm:text-xs">AG</div>}
-      <div className={`max-w-[82%] overflow-hidden break-words rounded-xl px-3 py-2 text-sm leading-6 shadow-sm sm:max-w-[72%] sm:rounded-2xl sm:px-4 sm:py-3 ${mine ? "rounded-bl-md bg-blue-600 text-white" : "rounded-br-md border border-slate-200 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"}`}>
-        {mine && <div className="mb-1 text-[11px] font-black uppercase tracking-wide text-blue-100">Support agent</div>}
-        {editing ? (
-          <div>
-            <textarea className="w-full rounded bg-white/90 p-2 text-slate-900" value={draft} onChange={(e) => setDraft(e.target.value)} />
-            <div className="mt-1 flex gap-2">
-              <button className="rounded bg-white px-2 py-1 text-xs font-bold text-slate-900" onClick={() => {
-                onEdit(draft);
-                setEditing(false);
-              }}>Save</button>
-              <button className="rounded border border-white/70 px-2 py-1 text-xs" onClick={() => setEditing(false)}>Cancel</button>
-            </div>
-          </div>
-        ) : message.file_url ? (
-          <a className="font-black underline underline-offset-4" href={message.file_url} target="_blank" rel="noreferrer">📎 {message.file_name ?? message.content ?? "Attachment"}</a>
-        ) : (
-          <MessageContent message={message} />
-        )}
-        <div className={`mt-1 flex items-center gap-2 text-[10px] font-semibold ${mine ? "text-blue-100" : "text-slate-400 dark:text-slate-500"}`}>
-          <span>{formatTime(message.created_at)}</span>
-          {message.edited_at ? <span>edited</span> : null}
-          {mine ? <span className="inline-flex items-center gap-1">{message.is_read ? <CheckCheck size={12} /> : <Check size={12} />} {message.is_read ? "read" : "sent"}</span> : null}
-        </div>
-        <div className="mt-1 flex flex-wrap gap-1">
-          {reactionEntries.map(([emoji, users]) => <button key={emoji} onClick={() => onReact(emoji)} className="rounded-full border border-white/50 px-2 text-[11px]">{emoji} {users.length}</button>)}
-          {QUICK_EMOJIS.slice(0, 3).map((emoji) => <button key={emoji} onClick={() => onReact(emoji)} className="rounded-full border border-white/40 px-2 text-[11px] opacity-80">{emoji}</button>)}
-        </div>
+    <div className={`group mb-4 flex items-end gap-2.5 ${mine ? "flex-row-reverse" : "flex-row"}`}>
+      {/* Avatar */}
+      <div className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-[11px] font-bold mt-1 ${mine ? "bg-brand-100 text-brand-600" : "bg-navy-200 text-navy-600"}`}>
+        {mine ? initials(currentUserId || "AG") : "V"}
       </div>
-      {!mine && <div className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-slate-200 text-[10px] font-black text-slate-700 sm:h-8 sm:w-8 sm:rounded-xl sm:text-xs">V</div>}
-      {canModify && (
-        <div className="opacity-0 transition group-hover:opacity-100">
-          <button className="mr-1 rounded border border-border bg-white px-2 py-1 text-xs" onClick={() => setEditing(true)}>Edit</button>
-          <button className="rounded border border-red-300 bg-white px-2 py-1 text-xs text-red-600" onClick={onDelete}>Delete</button>
+
+      <div className={`max-w-[75%] space-y-1 ${mine ? "" : ""}`}>
+        <div
+          className={`overflow-hidden break-words px-4 py-2.5 text-sm leading-relaxed shadow-xs ${
+            mine
+              ? "rounded-2xl rounded-tr-md bg-brand-500 text-white"
+              : "rounded-2xl rounded-tl-md border border-navy-100 bg-white text-navy-700"
+          }`}
+        >
+          {editing ? (
+            <div>
+              <textarea
+                className="w-full rounded-lg border border-navy-200 bg-navy-50 p-2 text-sm text-navy-700 outline-none focus:border-brand-500"
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+              />
+              <div className="mt-1 flex gap-2">
+                <button
+                  className="rounded-lg bg-brand-500 px-2.5 py-1 text-xs font-semibold text-white hover:bg-brand-600"
+                  onClick={() => { onEdit(draft); setEditing(false); }}
+                >
+                  Save
+                </button>
+                <button
+                  className="rounded-lg border border-navy-200 px-2.5 py-1 text-xs text-navy-500 hover:text-navy-700"
+                  onClick={() => setEditing(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : message.file_url ? (
+            <a
+              className={`font-semibold underline underline-offset-4 ${mine ? "text-brand-500" : "text-white"}`}
+              href={message.file_url}
+              target="_blank"
+              rel="noreferrer"
+            >
+              📎 {message.file_name ?? message.content ?? "Attachment"}
+            </a>
+          ) : (
+            <MessageContent message={message} mine={mine} />
+          )}
         </div>
-      )}
+
+        <div className={`flex items-center gap-2 px-1 text-[10px] text-navy-300 ${mine ? "justify-end" : "justify-start"}`}>
+          <span>{formatTime(message.created_at)}</span>
+          {message.edited_at ? <span className="text-navy-300">edited</span> : null}
+          {mine && (
+            <span className="inline-flex items-center gap-1 text-navy-300">
+              {message.is_read ? <CheckCheck size={11} className="text-brand-400" /> : <Check size={11} />}
+              {message.is_read ? "Read" : "Sent"}
+            </span>
+          )}
+        </div>
+
+        {reactionEntries.length > 0 && (
+          <div className="flex flex-wrap gap-1 px-1">
+            {reactionEntries.map(([emoji, users]) => (
+              <button
+                key={emoji}
+                onClick={() => onReact(emoji)}
+                className="rounded-full border border-navy-200 bg-white px-2 py-0.5 text-[11px] text-navy-600 hover:bg-navy-50"
+              >
+                {emoji} {users.length}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {canModify && (
+          <div className="flex gap-1 px-1 opacity-0 transition group-hover:opacity-100">
+            <button
+              className="rounded border border-navy-200 bg-white px-2 py-0.5 text-xs text-navy-500 hover:text-navy-700"
+              onClick={() => setEditing(true)}
+            >
+              Edit
+            </button>
+            <button
+              className="rounded border border-danger-200 bg-white px-2 py-0.5 text-xs text-danger-500 hover:text-danger-700"
+              onClick={onDelete}
+            >
+              Delete
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -849,41 +1151,41 @@ type StructuredOrderPayload = {
 
 type StructuredChatMessage = StructuredProductPayload | StructuredCouponPayload | StructuredOrderPayload;
 
-function MessageContent({ message }: { message: Message }): JSX.Element {
+function MessageContent({ message, mine }: { message: Message; mine: boolean }): JSX.Element {
   const structured = parseStructuredMessage(message);
   if (structured?.type === "product_card") {
     const product = structured.product;
     return (
-      <div className="rounded-lg border border-slate-700 bg-slate-900 p-3 text-white">
-        <div className="text-xs font-black uppercase tracking-wide text-slate-300">Product</div>
-        <div className="mt-1 text-sm font-black">{product.name}</div>
-        {product.description ? <div className="mt-1 text-xs text-slate-200">{product.description}</div> : null}
+      <div className="rounded-lg border border-navy-100 bg-navy-50 p-3">
+        <div className="text-[10px] font-semibold uppercase tracking-wider text-navy-400">Product</div>
+        <div className="mt-1 text-sm font-semibold text-navy-700">{product.name}</div>
+        {product.description ? <div className="mt-1 text-xs text-navy-500">{product.description}</div> : null}
         <div className="mt-2 flex items-center justify-between gap-3">
-          <div className="text-xs font-black">{formatMoney(product.price, product.currency)}</div>
-          {product.product_url ? <a href={product.product_url} target="_blank" rel="noreferrer" className="text-xs font-black underline underline-offset-4">Open product</a> : null}
+          <div className="text-xs font-bold text-success-600">{formatMoney(product.price, product.currency)}</div>
+          {product.product_url ? <a href={product.product_url} target="_blank" rel="noreferrer" className="text-xs font-medium text-brand-500 underline underline-offset-4">View product</a> : null}
         </div>
       </div>
     );
   }
   if (structured?.type === "coupon") {
     return (
-      <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-amber-900">
-        <div className="text-xs font-black uppercase tracking-wide">Coupon</div>
-        <div className="mt-1 text-lg font-black">{structured.code}</div>
-        <div className="text-xs font-semibold">{structured.discount_text || "Special discount unlocked"}</div>
-        {structured.message ? <div className="mt-1 text-xs">{structured.message}</div> : null}
-        {structured.expires_at ? <div className="mt-1 text-[11px] font-semibold">Expires {formatDate(structured.expires_at)}</div> : null}
+      <div className="rounded-lg border border-warning-200 bg-warning-50 p-3">
+        <div className="text-[10px] font-semibold uppercase tracking-wider text-warning-600">Coupon</div>
+        <div className="mt-1 text-lg font-bold text-warning-700">{structured.code}</div>
+        <div className="text-xs font-medium text-warning-600">{structured.discount_text || "Special discount unlocked"}</div>
+        {structured.message ? <div className="mt-1 text-xs text-warning-600/80">{structured.message}</div> : null}
+        {structured.expires_at ? <div className="mt-1 text-[11px] font-medium text-warning-500">Expires {formatDate(structured.expires_at)}</div> : null}
       </div>
     );
   }
   if (structured?.type === "order_tracking") {
     return (
-      <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-blue-950">
-        <div className="text-xs font-black uppercase tracking-wide">Order update</div>
-        <div className="mt-1 text-sm font-black">Order #{structured.order_number}</div>
-        <div className="text-xs font-semibold">Status: {structured.status}</div>
-        {(structured.total ?? null) !== null ? <div className="mt-1 text-xs font-black">{formatMoney(structured.total, structured.currency)}</div> : null}
-        {structured.placed_at ? <div className="mt-1 text-[11px]">Placed {formatDate(structured.placed_at)}</div> : null}
+      <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
+        <div className="text-[10px] font-semibold uppercase tracking-wider text-blue-600">Order update</div>
+        <div className="mt-1 text-sm font-semibold text-blue-700">Order #{structured.order_number}</div>
+        <div className="text-xs text-blue-600">Status: {structured.status}</div>
+        {(structured.total ?? null) !== null ? <div className="mt-1 text-xs font-bold text-blue-700">{formatMoney(structured.total, structured.currency)}</div> : null}
+        {structured.placed_at ? <div className="mt-1 text-[11px] text-blue-500">Placed {formatDate(structured.placed_at)}</div> : null}
       </div>
     );
   }
@@ -891,86 +1193,320 @@ function MessageContent({ message }: { message: Message }): JSX.Element {
 }
 
 function EmptyConversation(): JSX.Element {
-  return <div className="grid min-h-full place-items-center px-4 py-10 text-center text-sm font-semibold text-slate-500 dark:text-slate-400">No messages yet.</div>;
-}
-
-function Action({ icon, label, onClick }: { icon: ReactNode; label: string; onClick?: () => void }): JSX.Element {
-  return <button onClick={onClick} className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-slate-200 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50">{icon}{label}</button>;
-}
-
-function VisitorPanel({ chat }: { chat?: ChatDetail }): JSX.Element {
-  const location = [chat?.visitor_session?.city, chat?.visitor_session?.country].filter(Boolean).join(", ");
-  const customVariables = chat?.visitor_session?.custom_variables ?? {};
-  const customAttrs = chat?.contact?.custom_attrs ?? {};
-  const pageTrail = (chat?.visitor_session?.page_history ?? []).slice(-10).reverse();
-
   return (
-    <aside className="border-t border-border bg-white p-3 dark:bg-slate-900 sm:p-5 xl:h-[calc(100dvh-108px)] xl:overflow-auto xl:border-l xl:border-t-0">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-black uppercase tracking-wide text-slate-500 dark:text-slate-400">Customer 360</h2>
-        <button className="rounded-lg border border-slate-200 p-2 text-slate-500 hover:bg-slate-50 dark:bg-slate-800/50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"><MoreHorizontal size={16} /></button>
-      </div>
-      <div className="mt-4 rounded-lg border border-border bg-gradient-to-b from-white to-slate-50 p-4 shadow-soft dark:from-slate-900 dark:to-slate-800">
-        <div className="flex items-center gap-3">
-          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-blue-50 text-primary ring-1 ring-blue-100 sm:h-14 sm:w-14"><UserRound size={24} /></div>
-          <div className="min-w-0">
-            <div className="truncate text-lg font-black">{chat?.visitor_name || chat?.visitor_email || "Website visitor"}</div>
-            <div className="mt-1"><VisitorPresence status={chat?.visitor_status ?? "offline"} /></div>
-          </div>
+    <div className="grid min-h-full place-items-center px-4 py-16 text-center">
+      <div>
+        <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-navy-100 text-navy-300 mx-auto">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         </div>
-        <div className="mt-5 grid gap-3 text-sm text-slate-600 dark:text-slate-300">
-          <InfoLine icon={<Mail size={15} />} value={chat?.visitor_email || "Email not provided"} />
-          <InfoLine icon={<MapPin size={15} />} value={chat?.visitor_ip || "IP unavailable"} />
-          {location ? <InfoLine icon={<MapPin size={15} />} value={location} /> : null}
-          <InfoLine icon={<UserRound size={15} />} value={`${chat?.visitor_session?.browser || "browser"} on ${chat?.visitor_session?.os || "OS"}`} />
-        </div>
-      </div>
-
-      <div className="mt-4 grid gap-3 text-sm text-slate-600 dark:text-slate-300">
-        <InfoCard title="Custom variables" lines={objectToLines(customVariables)} />
-        <InfoCard title="Contact attributes" lines={objectToLines(customAttrs)} />
-        <InfoCard title="Ecommerce" lines={objectToLines(chat?.ecommerce ?? {})} />
-        <InfoCard title="Past chats" lines={(chat?.past_chats ?? []).map((item) => `${item.status.toUpperCase()} · ${item.subject || "Live chat"}`)} />
-        <InfoCard title="Tickets" lines={(chat?.tickets ?? []).map((item) => `#${item.ticket_number} · ${item.status} · ${item.subject}`)} />
-        <InfoCard title="Page trail" lines={pageTrail.map((item) => `${item.url || "Unknown page"}${item.ts ? ` · ${formatDate(item.ts)}` : ""}`)} />
-      </div>
-    </aside>
-  );
-}
-
-function ShortcutsModal({ onClose }: { onClose: () => void }): JSX.Element {
-  const shortcuts = [
-    "? Open shortcut panel",
-    "R Focus reply box",
-    "A Assign chat",
-    "T Focus tag input",
-    "N Toggle note mode",
-    "Ctrl/Cmd + Enter Send",
-  ];
-  return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4" onClick={onClose}>
-      <div className="w-full max-w-md rounded-2xl bg-white p-4" onClick={(e) => e.stopPropagation()}>
-        <div className="mb-2 text-sm font-black">Keyboard shortcuts</div>
-        <div className="grid gap-2 text-sm">{shortcuts.map((item) => <div key={item} className="rounded border border-border px-3 py-2">{item}</div>)}</div>
+        <div className="text-sm font-semibold text-navy-500">No messages yet</div>
+        <div className="mt-1 text-xs text-navy-400">New messages will appear here.</div>
       </div>
     </div>
   );
 }
 
-function VisitorPresence({ status }: { status: "online" | "offline" }): JSX.Element {
-  return <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-black ${status === "online" ? "bg-green-100 text-green-800" : "bg-slate-100 text-slate-600 dark:text-slate-400"}`}><span className={`h-2 w-2 rounded-full ${status === "online" ? "bg-success" : "bg-slate-400"}`} />Visitor {status}</span>;
+function VisitorPanel({ chat }: { chat?: ChatDetail }): JSX.Element {
+  const [additionalOpen, setAdditionalOpen] = useState(true);
+  const [pagesOpen, setPagesOpen] = useState(true);
+  const [preChatOpen, setPreChatOpen] = useState(true);
+  const [technologyOpen, setTechnologyOpen] = useState(true);
+  const [integrationsOpen, setIntegrationsOpen] = useState(true);
+  const [ticketsOpen, setTicketsOpen] = useState(false);
+  const [, forceUpdate] = useState(0);
+
+  // Live chat duration timer — re-renders every second
+  useEffect(() => {
+    const t = setInterval(() => forceUpdate((n) => n + 1), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const customVariables = chat?.visitor_session?.custom_variables ?? {};
+  const customAttrs = chat?.contact?.custom_attrs ?? {};
+
+  const latitude = numberFromCustomVariable(customVariables["_geo_latitude"]);
+  const longitude = numberFromCustomVariable(customVariables["_geo_longitude"]);
+
+  const geoCity = (customVariables["_geo_city"] as string | undefined) || chat?.visitor_session?.city || "";
+  const geoCountry = (customVariables["_geo_country"] as string | undefined) || chat?.visitor_session?.country || "";
+  const geoIsp = customVariables["_geo_isp"] as string | undefined;
+  const geoLocalTime = customVariables["_geo_local_time"] as string | undefined;
+  const geoSource = customVariables["_geo_source"] as string | undefined;
+  const geoAccuracy = numberFromCustomVariable(customVariables["_geo_accuracy_m"]);
+  const uaOs = (customVariables["_ua_os"] as string | undefined) || chat?.visitor_session?.os || "";
+  const uaBrowser = (customVariables["_ua_browser"] as string | undefined)
+    || (chat?.visitor_session?.browser ? `${chat.visitor_session.browser}${chat.visitor_session.browser_version ? ` (${chat.visitor_session.browser_version})` : ""}` : "");
+  const uaDevice = (customVariables["_ua_device"] as string | undefined) || chat?.visitor_session?.device_type || "";
+
+  const sessionVisitCount = typeof customVariables["_session_visit_count"] === "number"
+    ? (customVariables["_session_visit_count"] as number)
+    : (chat?.visitor_session?.page_views ?? 0);
+  const sessionChatCount = typeof customVariables["_session_chat_count"] === "number"
+    ? (customVariables["_session_chat_count"] as number)
+    : ((chat?.past_chats?.length ?? 0) + 1);
+  const sessionLastSeen = (customVariables["_session_last_seen"] as string | undefined) || chat?.visitor_session?.last_seen_at || null;
+
+  const widgetPages = (() => {
+    const raw = customVariables["_session_pages"];
+    if (typeof raw !== "string") return null;
+    try {
+      return JSON.parse(raw) as Array<{ url: string; title: string; timeSpent: number }>;
+    } catch { return null; }
+  })();
+  const pageDurations = widgetPages
+    ? widgetPages.map((p) => ({ url: p.url, label: p.title || p.url, duration: formatDuration(p.timeSpent * 1000) })).reverse()
+    : computePageDurations(chat?.visitor_session?.page_history ?? []);
+
+  const location = [geoCity, geoCountry].filter(Boolean).join(", ");
+  const visitorName = chat?.visitor_name || chat?.visitor_email || "Website visitor";
+  const visitorInitials = initials(visitorName);
+  const chatDuration = chat?.created_at ? formatDuration(Math.max(0, Date.now() - new Date(chat.created_at).getTime())) : null;
+
+  const integrationsData: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries({ ...customVariables, ...customAttrs })) {
+    if (!k.startsWith("_geo_") && !k.startsWith("_ua_") && !k.startsWith("_session_")) {
+      integrationsData[k] = v;
+    }
+  }
+
+  return (
+    <aside className="hidden min-h-0 flex-col overflow-y-auto border-l border-navy-100 bg-white xl:flex">
+      {/* Panel header */}
+      <div className="flex shrink-0 items-center justify-between border-b border-navy-100 px-5 py-4">
+        <span className="text-sm font-semibold text-navy-700">Visitor Details</span>
+        <div className="flex items-center gap-1">
+          <button className="flex h-7 w-7 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-50 hover:text-navy-600" title="Contact info">
+            <UserRound size={15} />
+          </button>
+          <button className="flex h-7 w-7 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-50 hover:text-navy-600" title="Close panel">
+            <X size={15} />
+          </button>
+        </div>
+      </div>
+
+      {/* Avatar + Contact info */}
+      <div className="shrink-0 border-b border-navy-100 px-5 py-5 text-center">
+        <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-brand-100 text-xl font-bold text-brand-600">
+          {visitorInitials}
+        </div>
+        <div className="mt-3 text-base font-semibold text-navy-700">{visitorName}</div>
+        {chat?.visitor_email && (
+          <a href={`mailto:${chat.visitor_email}`} className="mt-1 block text-sm text-brand-500 hover:text-brand-600">{chat.visitor_email}</a>
+        )}
+        {location && (
+          <div className="mt-1.5 flex items-center justify-center gap-1 text-xs text-navy-400">
+            <MapPin size={11} /> {location}
+          </div>
+        )}
+        <div className="mt-1 flex items-center justify-center gap-1 text-xs text-navy-400">
+          <Clock size={11} />
+          {geoLocalTime
+            ? `${geoLocalTime} local time`
+            : `${new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit", hour12: true }).format(new Date())} local time`}
+        </div>
+        <div className="mt-3 flex items-center justify-center gap-1.5">
+          <span className={`h-2 w-2 rounded-full ${chat?.visitor_status === "online" ? "animate-pulse bg-success-500" : "bg-navy-300"}`} />
+          <span className="text-xs font-medium text-navy-500">
+            {chat?.visitor_status === "online" ? "Online now" : "Offline"}
+          </span>
+        </div>
+      </div>
+
+      {/* Map */}
+      <div className="shrink-0 border-b border-navy-100">
+        {latitude !== null && longitude !== null ? (
+          <VisitorMapEmbed latitude={latitude} longitude={longitude} city={geoCity} country={geoCountry} source={geoSource} accuracyMeters={geoAccuracy} />
+        ) : location ? (
+          <div className="flex h-24 items-center justify-center bg-navy-50">
+            <div className="text-center">
+              <MapPin size={18} className="mx-auto mb-1 text-danger-500" />
+              <div className="text-xs font-medium text-navy-500">{location}</div>
+              <div className="mt-0.5 text-[10px] text-navy-400">No coordinates available</div>
+            </div>
+          </div>
+        ) : null}
+      </div>
+
+      {/* Info sections */}
+      <div className="divide-y divide-navy-100">
+        <PanelSection title="Additional info" open={additionalOpen} onToggle={() => setAdditionalOpen((v) => !v)}>
+          <InfoRow
+            label="Returning visitor"
+            value={`${sessionVisitCount} visit${sessionVisitCount !== 1 ? "s" : ""}, ${sessionChatCount} chat${sessionChatCount !== 1 ? "s" : ""}`}
+          />
+          {sessionLastSeen && (
+            <InfoRow label="Last seen" value={formatRelative(sessionLastSeen)} />
+          )}
+          {chatDuration && (
+            <InfoRow label="Chat duration" value={String(chatDuration)} />
+          )}
+          <InfoRow label="Groups" value="General" />
+        </PanelSection>
+
+        <PanelSection title="Visited pages" open={pagesOpen} onToggle={() => setPagesOpen((v) => !v)}>
+          {pageDurations.length > 0 ? (
+            <div className="grid gap-3">
+              {pageDurations.slice(0, 8).map((page, i) => (
+                <div key={i}>
+                  <div className="truncate text-xs font-medium text-navy-600" title={page.url}>
+                    {page.label}
+                  </div>
+                  <div className="mt-0.5 text-[11px] text-navy-400">{page.duration}</div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-xs text-navy-400">No page history available.</div>
+          )}
+        </PanelSection>
+
+        <PanelSection title="Pre-chat form" open={preChatOpen} onToggle={() => setPreChatOpen((v) => !v)}>
+          {chat?.visitor_name && <InfoRow label="Name" value={chat.visitor_name} />}
+          {chat?.visitor_email && <InfoRow label="E-mail" value={chat.visitor_email} accent />}
+          {!chat?.visitor_name && !chat?.visitor_email && (
+            <div className="text-xs text-navy-400">No pre-chat form data.</div>
+          )}
+        </PanelSection>
+
+        <PanelSection title="Technology" open={technologyOpen} onToggle={() => setTechnologyOpen((v) => !v)}>
+          {chat?.visitor_session?.ip_address && (
+            <InfoRow label="IP address" value={chat.visitor_session.ip_address} />
+          )}
+          {uaOs && <InfoRow label="OS/Device" value={uaDevice ? `${uaOs} / ${uaDevice}` : uaOs} />}
+          {uaBrowser && <InfoRow label="Browser" value={uaBrowser} />}
+          {geoIsp && <InfoRow label="ISP" value={geoIsp} />}
+          {!chat?.visitor_session?.ip_address && !uaOs && !uaBrowser && (
+            <div className="text-xs text-navy-400">No technology data.</div>
+          )}
+        </PanelSection>
+
+        {Object.keys(integrationsData).length > 0 && (
+          <PanelSection title="Integrations data" open={integrationsOpen} onToggle={() => setIntegrationsOpen((v) => !v)}>
+            {Object.entries(integrationsData).slice(0, 15).map(([k, v]) => (
+              <InfoRow key={k} label={k} value={String(v ?? "")} />
+            ))}
+          </PanelSection>
+        )}
+
+        {(chat?.tickets?.length ?? 0) > 0 && (
+          <PanelSection title={`Tickets (${chat?.tickets?.length})`} open={ticketsOpen} onToggle={() => setTicketsOpen((v) => !v)}>
+            <div className="grid gap-2">
+              {(chat?.tickets ?? []).slice(0, 6).map((ticket) => (
+                <div key={ticket.id} className="flex items-start justify-between gap-2 text-xs">
+                  <span className="truncate text-navy-500">#{ticket.ticket_number} {ticket.subject}</span>
+                  <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold ${ticket.status === "resolved" ? "bg-success-50 text-success-600" : "bg-navy-50 text-navy-500"}`}>
+                    {ticket.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </PanelSection>
+        )}
+      </div>
+    </aside>
+  );
 }
 
-function InfoLine({ icon, value }: { icon: ReactNode; value: string }): JSX.Element {
-  return <div className="flex min-w-0 items-center gap-2">{icon}<span className="truncate">{value}</span></div>;
+function PanelSection({
+  title,
+  open,
+  onToggle,
+  children,
+}: {
+  title: string;
+  open: boolean;
+  onToggle: () => void;
+  children: ReactNode;
+}): JSX.Element {
+  return (
+    <div className="shrink-0">
+      <button
+        className="flex w-full items-center justify-between px-5 py-3 text-xs font-semibold uppercase tracking-wider text-navy-400 transition hover:bg-navy-50"
+        onClick={onToggle}
+      >
+        {title}
+        <ChevronDown
+          size={14}
+          className={`text-navy-300 transition-transform duration-200 ${open ? "" : "-rotate-90"}`}
+        />
+      </button>
+      {open && <div className="grid gap-2.5 px-5 pb-4 text-xs">{children}</div>}
+    </div>
+  );
 }
 
-function InfoCard({ title, lines }: { title: string; lines: string[] }): JSX.Element {
-  return <div className="rounded-lg border border-border bg-white p-4 shadow-sm dark:bg-slate-800 dark:shadow-none"><div className="font-black text-ink">{title}</div><div className="mt-2 grid gap-1.5 leading-6 text-slate-600 dark:text-slate-400">{lines.length ? lines.map((line) => <div key={line}>{line}</div>) : <div className="text-slate-400">No data</div>}</div></div>;
+function InfoRow({ label, value, accent }: { label: string; value: string; accent?: boolean }): JSX.Element {
+  return (
+    <div className="flex items-start justify-between gap-3">
+      <span className="shrink-0 text-navy-400">{label}</span>
+      <span className={`break-all text-right font-medium ${accent ? "text-brand-500" : "text-navy-700"}`}>{value}</span>
+    </div>
+  );
 }
 
-function objectToLines(value: Record<string, unknown>): string[] {
-  return Object.entries(value).slice(0, 10).map(([k, v]) => `${k}: ${String(v)}`);
+function ShortcutsModal({ onClose }: { onClose: () => void }): JSX.Element {
+  const shortcuts = [
+    ["?", "Open shortcut panel"],
+    ["R", "Focus reply box"],
+    ["A", "Assign chat"],
+    ["T", "Focus tag input"],
+    ["N", "Toggle note mode"],
+    ["Ctrl/Cmd + Enter", "Send message"],
+  ];
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4" onClick={onClose}>
+      <div className="w-full max-w-sm rounded-xl border border-navy-100 bg-white p-5 shadow-lift" onClick={(e) => e.stopPropagation()}>
+        <div className="mb-3 text-sm font-semibold text-navy-700">Keyboard shortcuts</div>
+        <div className="grid gap-2">
+          {shortcuts.map(([key, desc]) => (
+            <div key={key} className="flex items-center justify-between rounded-lg border border-navy-100 bg-navy-50 px-3 py-2">
+              <span className="text-sm text-navy-600">{desc}</span>
+              <kbd className="rounded border border-navy-200 bg-white px-2 py-0.5 text-xs font-semibold text-navy-500">{key}</kbd>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function computePageDurations(history: Array<{ url?: string; ts?: string }>): Array<{ url: string; label: string; duration: string }> {
+  const result: Array<{ url: string; label: string; duration: string }> = [];
+  for (let i = 0; i < history.length; i++) {
+    const page = history[i];
+    if (!page.url || !page.ts) continue;
+    const startMs = new Date(page.ts).getTime();
+    const endMs = history[i + 1]?.ts ? new Date(history[i + 1].ts!).getTime() : Date.now();
+    const diff = Math.max(0, endMs - startMs);
+    let label = page.url;
+    try {
+      const u = new URL(page.url);
+      const path = u.pathname.replace(/\/$/, "");
+      label = path ? decodeURIComponent(path.split("/").pop() ?? u.hostname).replace(/[-_]/g, " ") : u.hostname;
+    } catch {
+      label = page.url;
+    }
+    result.push({ url: page.url, label: label || page.url, duration: formatDuration(diff) });
+  }
+  return result.reverse();
+}
+
+function formatDuration(ms: number): string {
+  const total = Math.floor(ms / 1000);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  if (h > 0) return `${h}h ${m}m ${s}s`;
+  if (m > 0) return `${m}m ${s}s`;
+  return `${s}s`;
+}
+
+function formatRelative(value: string): string {
+  const diffMs = Date.now() - new Date(value).getTime();
+  const days = Math.floor(diffMs / 86400000);
+  if (days === 0) return "today";
+  if (days === 1) return "yesterday";
+  return `${days} days ago`;
 }
 
 function parseStructuredMessage(message: Message): StructuredChatMessage | null {
@@ -1029,13 +1565,6 @@ function parseStructuredMessage(message: Message): StructuredChatMessage | null 
     return null;
   }
   return null;
-}
-
-function statusTone(status: Chat["status"]): string {
-  if (status === "waiting") return "bg-yellow-100 text-yellow-800";
-  if (status === "active") return "bg-green-100 text-green-800";
-  if (status === "resolved" || status === "closed") return "bg-slate-100 text-slate-700 dark:text-slate-300";
-  return "bg-orange-100 text-orange-800";
 }
 
 function formatDate(value: string): string {

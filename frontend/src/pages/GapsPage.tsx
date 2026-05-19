@@ -28,7 +28,7 @@ export function BenchmarkPage(): JSX.Element {
     better: "text-emerald-600 dark:text-emerald-400",
     worse: "text-red-500 dark:text-red-400",
     on_par: "text-blue-600 dark:text-blue-400",
-    no_data: "text-slate-400",
+    no_data: "text-navy-400",
   };
   const STATUS_LABEL: Record<string, string> = {
     better: "Above industry",
@@ -61,17 +61,17 @@ export function BenchmarkPage(): JSX.Element {
           </Field>
         </div>
 
-        {isLoading && <Card className="p-6 text-center text-slate-500">Loading benchmark...</Card>}
+        {isLoading && <Card className="p-6 text-center text-navy-400">Loading benchmark...</Card>}
         {data && (
           <>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
               {Object.entries(data.comparison).map(([key, val]) => (
                 <Card key={key} className="p-4">
-                  <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">{key.replace(/_/g, " ")}</div>
-                  <div className="mt-1 text-2xl font-black text-slate-900 dark:text-slate-100">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-navy-400">{key.replace(/_/g, " ")}</div>
+                  <div className="mt-1 text-2xl font-black text-navy-700 dark:text-navy-100">
                     {val.your !== null ? String(val.your) : "—"}
                   </div>
-                  <div className="mt-0.5 text-xs text-slate-500">Industry: {val.industry}</div>
+                  <div className="mt-0.5 text-xs text-navy-400">Industry: {val.industry}</div>
                   <div className={`mt-1 text-xs font-semibold ${STATUS_COLOR[val.status]}`}>
                     {STATUS_LABEL[val.status]}
                   </div>
@@ -123,7 +123,7 @@ export function ChatAvailabilityPage(): JSX.Element {
           </Field>
         </div>
 
-        {isLoading && <Card className="p-6 text-center text-slate-500">Loading...</Card>}
+        {isLoading && <Card className="p-6 text-center text-navy-400">Loading...</Card>}
         {data && data.agents.length === 0 && (
           <EmptyPanel title="No availability data" description="Availability is logged when agents change their status. Data will appear here once agents start using the dashboard." />
         )}
@@ -135,20 +135,20 @@ export function ChatAvailabilityPage(): JSX.Element {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-border bg-slate-50 dark:bg-slate-800/50">
-                        <th className="px-4 py-2 text-left font-semibold text-slate-600 dark:text-slate-400">Date</th>
+                      <tr className="border-b border-navy-100 dark:border-navy-700 bg-navy-50 dark:bg-navy-800/50">
+                        <th className="px-4 py-2 text-left font-semibold text-navy-500 dark:text-navy-400">Date</th>
                         <th className="px-4 py-2 text-right font-semibold text-emerald-600">Online</th>
                         <th className="px-4 py-2 text-right font-semibold text-amber-600">Away</th>
-                        <th className="px-4 py-2 text-right font-semibold text-slate-500">Offline</th>
+                        <th className="px-4 py-2 text-right font-semibold text-navy-400">Offline</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
                       {Object.entries(agent.days).map(([day, counts]) => (
                         <tr key={day}>
-                          <td className="px-4 py-2 font-mono text-xs text-slate-700 dark:text-slate-300">{day}</td>
+                          <td className="px-4 py-2 font-mono text-xs text-navy-600 dark:text-navy-300">{day}</td>
                           <td className="px-4 py-2 text-right text-emerald-600 font-semibold">{counts.online}</td>
                           <td className="px-4 py-2 text-right text-amber-600 font-semibold">{counts.away}</td>
-                          <td className="px-4 py-2 text-right text-slate-500">{counts.offline}</td>
+                          <td className="px-4 py-2 text-right text-navy-400">{counts.offline}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -186,7 +186,7 @@ export function GreetingsConversionPage(): JSX.Element {
           </Field>
         </div>
 
-        {isLoading && <Card className="p-6 text-center text-slate-500">Loading...</Card>}
+        {isLoading && <Card className="p-6 text-center text-navy-400">Loading...</Card>}
         {data && (
           <>
             <div className="grid grid-cols-3 gap-3">
@@ -203,8 +203,8 @@ export function GreetingsConversionPage(): JSX.Element {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-border bg-slate-50 dark:bg-slate-800/50">
-                        <th className="px-4 py-2 text-left font-semibold text-slate-600 dark:text-slate-400">Greeting</th>
+                      <tr className="border-b border-navy-100 dark:border-navy-700 bg-navy-50 dark:bg-navy-800/50">
+                        <th className="px-4 py-2 text-left font-semibold text-navy-500 dark:text-navy-400">Greeting</th>
                         <th className="px-4 py-2 text-right font-semibold">Impressions</th>
                         <th className="px-4 py-2 text-right font-semibold">Conversions</th>
                         <th className="px-4 py-2 text-right font-semibold">Rate</th>
@@ -213,9 +213,9 @@ export function GreetingsConversionPage(): JSX.Element {
                     <tbody className="divide-y divide-border">
                       {data.items.map((item, i) => (
                         <tr key={i}>
-                          <td className="max-w-xs truncate px-4 py-2 text-slate-700 dark:text-slate-300">{item.greeting_text || item.greeting_id || "—"}</td>
-                          <td className="px-4 py-2 text-right text-slate-700 dark:text-slate-300">{item.impressions}</td>
-                          <td className="px-4 py-2 text-right text-slate-700 dark:text-slate-300">{item.conversions}</td>
+                          <td className="max-w-xs truncate px-4 py-2 text-navy-600 dark:text-navy-300">{item.greeting_text || item.greeting_id || "—"}</td>
+                          <td className="px-4 py-2 text-right text-navy-600 dark:text-navy-300">{item.impressions}</td>
+                          <td className="px-4 py-2 text-right text-navy-600 dark:text-navy-300">{item.conversions}</td>
                           <td className="px-4 py-2 text-right font-semibold text-blue-600 dark:text-blue-400">
                             {(item.conversion_rate * 100).toFixed(1)}%
                           </td>
@@ -271,8 +271,8 @@ export function MomentsPage(): JSX.Element {
       <PageHeader title="Moments" />
       <div className="grid grid-cols-1 gap-4 p-4 lg:grid-cols-[minmax(320px,420px)_minmax(0,1fr)] lg:gap-6 lg:p-6">
         <Card className="p-4">
-          <h2 className="text-lg font-black text-slate-950 dark:text-slate-100">Send a Moment</h2>
-          <p className="mt-1 text-sm text-slate-500">Open a temporary in-chat app overlay for a visitor — payment form, booking link, survey, or any custom URL.</p>
+          <h2 className="text-lg font-black text-navy-700 dark:text-navy-100">Send a Moment</h2>
+          <p className="mt-1 text-sm text-navy-400">Open a temporary in-chat app overlay for a visitor — payment form, booking link, survey, or any custom URL.</p>
           <div className="mt-4 grid gap-3">
             <Field label="Chat ID">
               <TextInput value={chatId} onChange={(e) => setChatId(e.target.value)} placeholder="Paste active chat UUID" />
@@ -300,7 +300,7 @@ export function MomentsPage(): JSX.Element {
 
         <Card className="overflow-hidden">
           <PanelHeader title="Recent moments" />
-          {isLoading && <div className="p-6 text-center text-slate-500 text-sm">Loading...</div>}
+          {isLoading && <div className="p-6 text-center text-navy-400 text-sm">Loading...</div>}
           {!isLoading && moments.length === 0 && (
             <EmptyPanel title="No moments sent yet" description="Send a Moment from the form to open an in-chat app overlay for a visitor." />
           )}
@@ -309,9 +309,9 @@ export function MomentsPage(): JSX.Element {
               {moments.map((m) => (
                 <div key={m.id} className="flex items-center justify-between gap-3 p-4">
                   <div className="min-w-0">
-                    <div className="truncate font-semibold text-slate-900 dark:text-slate-100">{m.title}</div>
-                    <div className="truncate text-xs text-slate-500">{m.url}</div>
-                    <div className="mt-0.5 flex gap-2 text-xs text-slate-400">
+                    <div className="truncate font-semibold text-navy-700 dark:text-navy-100">{m.title}</div>
+                    <div className="truncate text-xs text-navy-400">{m.url}</div>
+                    <div className="mt-0.5 flex gap-2 text-xs text-navy-400">
                       <span>{m.type}</span>
                       <span>·</span>
                       <span className={m.visitor_completed ? "text-emerald-600" : "text-amber-600"}>
@@ -319,7 +319,7 @@ export function MomentsPage(): JSX.Element {
                       </span>
                     </div>
                   </div>
-                  <div className="shrink-0 text-xs text-slate-400">{new Date(m.created_at).toLocaleDateString()}</div>
+                  <div className="shrink-0 text-xs text-navy-400">{new Date(m.created_at).toLocaleDateString()}</div>
                 </div>
               ))}
             </div>
@@ -359,18 +359,18 @@ export function VoiceVideoPage(): JSX.Element {
               <PhoneCall size={20} className="text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <h3 className="font-black text-slate-900 dark:text-slate-100">In-chat Voice, Video & Screen Share</h3>
-              <p className="mt-1 text-sm text-slate-500">
+              <h3 className="font-black text-navy-700 dark:text-navy-100">In-chat Voice, Video & Screen Share</h3>
+              <p className="mt-1 text-sm text-navy-400">
                 When enabled, agents and visitors can start voice/video calls and screen sharing directly inside the chat window. Uses WebRTC — no plugin required.
               </p>
-              <ul className="mt-3 grid gap-1.5 text-sm text-slate-600 dark:text-slate-400">
+              <ul className="mt-3 grid gap-1.5 text-sm text-navy-500 dark:text-navy-400">
                 <li>• Agent sees <strong>Voice</strong>, <strong>Video</strong>, <strong>Screen share</strong> buttons in chat header</li>
                 <li>• Visitor sees an <strong>Accept call</strong> button when agent initiates</li>
-                <li>• All signaling via <code className="rounded bg-slate-100 px-1 dark:bg-slate-800">webrtc:signal</code> socket event</li>
+                <li>• All signaling via <code className="rounded bg-navy-100 px-1 dark:bg-navy-800">webrtc:signal</code> socket event</li>
                 <li>• Works on Chrome, Firefox, Edge, Safari 15+</li>
               </ul>
               <div className="mt-4 flex items-center gap-3">
-                <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
+                <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-navy-600 dark:text-navy-300">
                   <input
                     type="checkbox"
                     checked={enabled}
@@ -387,12 +387,12 @@ export function VoiceVideoPage(): JSX.Element {
         </Card>
 
         <Card className="p-6">
-          <h3 className="font-black text-slate-900 dark:text-slate-100">How it works</h3>
-          <ol className="mt-3 grid gap-2 text-sm text-slate-600 dark:text-slate-400 list-decimal list-inside">
-            <li>Agent clicks <strong>Start call</strong> in chat — emits <code className="rounded bg-slate-100 px-1 dark:bg-slate-800">webrtc:signal</code> with <code>mode: "voice"</code></li>
+          <h3 className="font-black text-navy-700 dark:text-navy-100">How it works</h3>
+          <ol className="mt-3 grid gap-2 text-sm text-navy-500 dark:text-navy-400 list-decimal list-inside">
+            <li>Agent clicks <strong>Start call</strong> in chat — emits <code className="rounded bg-navy-100 px-1 dark:bg-navy-800">webrtc:signal</code> with <code>mode: "voice"</code></li>
             <li>Widget receives signal, shows <strong>Incoming call</strong> banner</li>
             <li>Visitor accepts → WebRTC peer connection established</li>
-            <li>For screen share: agent emits <code className="rounded bg-slate-100 px-1 dark:bg-slate-800">cobrowse:request</code></li>
+            <li>For screen share: agent emits <code className="rounded bg-navy-100 px-1 dark:bg-navy-800">cobrowse:request</code></li>
             <li>Call ends when either party closes the widget or clicks hang up</li>
           </ol>
         </Card>

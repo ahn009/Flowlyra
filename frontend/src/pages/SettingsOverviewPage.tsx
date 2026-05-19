@@ -35,9 +35,9 @@ export function SettingsOverviewPage(): JSX.Element {
   return (
     <div className="space-y-6 p-6">
       <header>
-        <h1 className="text-2xl font-bold">Settings</h1>
-        <p className="text-sm text-slate-500">
-          Plan: <span className="font-semibold capitalize">{me.data?.organization.plan ?? "—"}</span>
+        <h1 className="text-2xl font-semibold text-navy-700 dark:text-navy-100">Settings</h1>
+        <p className="mt-1 text-sm text-navy-400">
+          Plan: <span className="font-medium capitalize text-navy-600 dark:text-navy-300">{me.data?.organization.plan ?? "—"}</span>
           {me.data?.organization.trial_ends_at ? ` · trial ends ${new Date(me.data.organization.trial_ends_at).toLocaleDateString()}` : null}
         </p>
       </header>
@@ -46,10 +46,10 @@ export function SettingsOverviewPage(): JSX.Element {
           <Link
             key={card.href}
             to={card.href}
-            className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md"
+            className="rounded-lg border border-navy-100 bg-white p-5 shadow-xs transition-all hover:shadow-soft hover:border-navy-200 dark:bg-navy-800 dark:border-navy-700 dark:hover:border-navy-600"
           >
-            <h2 className="font-semibold">{card.title}</h2>
-            <p className="mt-1 text-sm text-slate-500">{card.description}</p>
+            <h2 className="font-semibold text-navy-700 dark:text-navy-100">{card.title}</h2>
+            <p className="mt-1 text-sm text-navy-400">{card.description}</p>
           </Link>
         ))}
       </div>

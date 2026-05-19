@@ -14,7 +14,7 @@ export function ArchivesPage(): JSX.Element {
 
   return (
     <PageShell>
-      <PageHeader title="Archives" action={<div className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500"><Filter size={16} /> Resolved chat history</div>} />
+      <PageHeader title="Archives" action={<div className="inline-flex items-center gap-2 text-sm font-semibold text-navy-400"><Filter size={16} /> Resolved chat history</div>} />
       <div className="grid gap-4 p-4 sm:p-6">
         <Card className="p-4">
           <div className="grid gap-3 md:grid-cols-4">
@@ -29,7 +29,7 @@ export function ArchivesPage(): JSX.Element {
           {data.length ? (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[820px] text-left text-sm">
-                <thead className="border-b border-border bg-slate-50 text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
+                <thead className="border-b border-navy-100 dark:border-navy-700 bg-navy-50 text-navy-400 dark:bg-navy-800/60 dark:text-navy-400">
                   <tr><th className="px-5 py-3 font-black">Visitor</th><th className="px-5 py-3 font-black">Subject</th><th className="px-5 py-3 font-black">Status</th><th className="px-5 py-3 font-black">Last message</th><th className="px-5 py-3 font-black">Updated</th><th className="px-5 py-3 font-black">Actions</th></tr>
                 </thead>
                 <tbody>
@@ -48,15 +48,15 @@ export function ArchivesPage(): JSX.Element {
 
 function ArchiveRow({ chat }: { chat: Chat }): JSX.Element {
   return (
-    <tr className="border-b border-border last:border-0 dark:text-slate-200">
-      <td className="px-5 py-4"><div className="font-black">{chat.visitor_name || "Website visitor"}</div><div className="text-xs text-slate-500">{chat.visitor_email || chat.visitor_ip || "Unknown contact"}</div></td>
+    <tr className="border-b border-navy-100 dark:border-navy-700 last:border-0 dark:text-navy-200">
+      <td className="px-5 py-4"><div className="font-black">{chat.visitor_name || "Website visitor"}</div><div className="text-xs text-navy-400">{chat.visitor_email || chat.visitor_ip || "Unknown contact"}</div></td>
       <td className="px-5 py-4">{chat.subject || "Live chat"}</td>
       <td className="px-5 py-4"><Pill tone={chat.status === "resolved" || chat.status === "closed" ? "slate" : "green"}>{chat.status}</Pill></td>
-      <td className="max-w-[280px] truncate px-5 py-4 text-slate-600 dark:text-slate-400">{chat.last_message?.content || "No public messages"}</td>
-      <td className="px-5 py-4 text-slate-500">{new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(chat.updated_at))}</td>
+      <td className="max-w-[280px] truncate px-5 py-4 text-navy-500 dark:text-navy-400">{chat.last_message?.content || "No public messages"}</td>
+      <td className="px-5 py-4 text-navy-400">{new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(chat.updated_at))}</td>
       <td className="px-5 py-4">
         <div className="flex items-center gap-2">
-          <Link className="rounded-lg border border-border px-3 py-2 text-xs font-black hover:bg-slate-50 dark:hover:bg-slate-800" to={`/inbox/chat/${chat.id}`}>View</Link>
+          <Link className="rounded-lg border border-navy-100 dark:border-navy-700 px-3 py-2 text-xs font-black hover:bg-navy-50 dark:hover:bg-navy-800" to={`/inbox/chat/${chat.id}`}>View</Link>
           <a className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-2 text-xs font-black text-white hover:bg-primary-hover" href={`${import.meta.env.VITE_API_URL ?? "http://localhost:8000"}/api/v1/chats/${chat.id}/transcript.txt`} target="_blank" rel="noreferrer"><Download size={14} /> TXT</a>
         </div>
       </td>

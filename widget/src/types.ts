@@ -8,6 +8,7 @@ export interface FlowLyraConfig {
   autoOpen?: boolean;
   visitor?: VisitorPayload;
   lazy?: boolean;
+  requestPreciseLocation?: boolean;
 }
 
 export interface VisitorPayload {

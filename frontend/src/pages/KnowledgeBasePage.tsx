@@ -207,25 +207,25 @@ export function KnowledgeBasePage(): JSX.Element {
           {filtered.length === 0 ? (
             <EmptyPanel title="No articles" description="Create your first article to start your knowledge base." />
           ) : (
-            <ul className="divide-y divide-slate-200 dark:divide-slate-800">
+            <ul className="divide-y divide-navy-200 dark:divide-navy-800">
               {filtered.map((row) => (
                 <li
                   key={row.id}
                   onClick={() => setActiveArticleId(row.id)}
-                  className={`cursor-pointer p-4 hover:bg-slate-50 dark:hover:bg-slate-900 ${
-                    activeArticleId === row.id ? "bg-slate-50 dark:bg-slate-900" : ""
+                  className={`cursor-pointer p-4 hover:bg-navy-50 dark:hover:bg-navy-900 ${
+                    activeArticleId === row.id ? "bg-navy-50 dark:bg-navy-900" : ""
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">{row.title}</p>
-                      <p className="truncate text-xs text-slate-500 dark:text-slate-400">/{row.slug}</p>
+                      <p className="truncate text-sm font-semibold text-navy-700 dark:text-navy-100">{row.title}</p>
+                      <p className="truncate text-xs text-navy-400 dark:text-navy-400">/{row.slug}</p>
                     </div>
                     <Pill tone={row.status === "published" ? "green" : row.status === "archived" ? "slate" : "yellow"}>
                       {row.status}
                     </Pill>
                   </div>
-                  <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+                  <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-navy-400 dark:text-navy-400">
                     <span>{row.view_count} views</span>
                     <span>
                       {row.helpful_count} 👍 / {row.not_helpful_count} 👎
@@ -241,30 +241,30 @@ export function KnowledgeBasePage(): JSX.Element {
         <div className="space-y-4">
           {analytics && (
             <Card className="p-4">
-              <p className="text-xs font-semibold uppercase text-slate-500">KB analytics (30d)</p>
+              <p className="text-xs font-semibold uppercase text-navy-400">KB analytics (30d)</p>
               <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
                 <div>
-                  <p className="text-slate-500">Articles</p>
+                  <p className="text-navy-400">Articles</p>
                   <p className="font-semibold">
                     {analytics.published_articles} / {analytics.total_articles}
                   </p>
                 </div>
                 <div>
-                  <p className="text-slate-500">Views (30d)</p>
+                  <p className="text-navy-400">Views (30d)</p>
                   <p className="font-semibold">{analytics.total_views_30d}</p>
                 </div>
                 <div>
-                  <p className="text-slate-500">Feedback</p>
+                  <p className="text-navy-400">Feedback</p>
                   <p className="font-semibold">{analytics.total_feedback_30d}</p>
                 </div>
                 <div>
-                  <p className="text-slate-500">Helpful ratio</p>
+                  <p className="text-navy-400">Helpful ratio</p>
                   <p className="font-semibold">{Math.round(analytics.helpful_ratio * 100)}%</p>
                 </div>
               </div>
               {analytics.top_viewed.length > 0 && (
                 <div className="mt-3">
-                  <p className="text-xs font-semibold uppercase text-slate-500">Top viewed</p>
+                  <p className="text-xs font-semibold uppercase text-navy-400">Top viewed</p>
                   <ul className="mt-1 space-y-1 text-xs">
                     {analytics.top_viewed.slice(0, 5).map((row) => (
                       <li key={row.id} className="flex justify-between">
@@ -386,8 +386,8 @@ function ArticleEditor(props: {
           placeholder="2026-05-20T09:00:00Z"
         />
       </Field>
-      <details className="rounded border border-slate-200 dark:border-slate-800 p-2 text-sm">
-        <summary className="cursor-pointer text-xs font-semibold uppercase text-slate-500">SEO</summary>
+      <details className="rounded border border-navy-100 dark:border-navy-800 p-2 text-sm">
+        <summary className="cursor-pointer text-xs font-semibold uppercase text-navy-400">SEO</summary>
         <div className="mt-2 space-y-2">
           <Field label="SEO title">
             <TextInput value={seoTitle} onChange={(event) => setSeoTitle(event.target.value)} />
@@ -434,7 +434,7 @@ function ArticleEditor(props: {
       </div>
       {revisions.length > 0 && (
         <div>
-          <p className="text-xs font-semibold uppercase text-slate-500">Revision history</p>
+          <p className="text-xs font-semibold uppercase text-navy-400">Revision history</p>
           <ul className="mt-2 space-y-1 text-xs">
             {revisions.slice(0, 10).map((rev) => (
               <li key={rev.id} className="flex items-center justify-between gap-2">
@@ -442,7 +442,7 @@ function ArticleEditor(props: {
                   r{rev.revision_number} — {rev.change_summary || "(no summary)"}
                 </span>
                 <button
-                  className="text-xs text-indigo-600 hover:underline"
+                  className="text-xs font-semibold text-brand-600 hover:text-brand-700"
                   onClick={() => onRestore(rev.id)}
                 >
                   Restore
@@ -472,7 +472,7 @@ function CategoryManager({ categories }: { categories: KBCategory[] }): JSX.Elem
   });
   return (
     <Card className="p-3">
-      <p className="text-xs font-semibold uppercase text-slate-500">Categories</p>
+      <p className="text-xs font-semibold uppercase text-navy-400">Categories</p>
       <div className="mt-2 flex gap-2">
         <TextInput value={name} onChange={(event) => setName(event.target.value)} placeholder="New category" />
         <Button onClick={() => name.trim() && create.mutate()} variant="secondary">

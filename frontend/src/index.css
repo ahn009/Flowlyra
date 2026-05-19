@@ -2,47 +2,61 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --color-surface: #f8fafc;
-  --color-surface-muted: #f1f5f9;
-  --color-ink: #101828;
-  --color-muted: #667085;
-  --color-border: #e2e8f0;
-  --color-card: #ffffff;
-  --color-card-hover: #f8fafc;
-  --color-heading: #0f172a;
-  --color-body: #475569;
+/* ============================================
+   FlowLyra Design System — Global Styles
+   ============================================ */
 
-  color: #0f172a;
-  background: #f8fafc;
-  font-family: Inter, system-ui, sans-serif;
+:root {
+  --color-surface: #F8F9FA;
+  --color-surface-muted: #F1F5F9;
+  --color-surface-hover: #EBEEF2;
+  --color-ink: #1E232A;
+  --color-muted: #6B7280;
+  --color-text-primary: #1E232A;
+  --color-text-secondary: #6B7280;
+  --color-border: #E5E7EB;
+  --color-card: #FFFFFF;
+  --color-card-hover: #F8F9FA;
+  --color-heading: #1E232A;
+  --color-body: #4B5563;
+
+  color: #1E232A;
+  background: #F8F9FA;
+  font-family: 'Inter', system-ui, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 html.dark {
-  --color-surface: #0f172a;
-  --color-surface-muted: #111827;
-  --color-ink: #f8fafc;
-  --color-muted: #94a3b8;
-  --color-border: #263244;
-  --color-card: #111827;
-  --color-card-hover: #172033;
-  --color-heading: #f8fafc;
-  --color-body: #cbd5e1;
+  --color-surface: #0F1117;
+  --color-surface-muted: #171B20;
+  --color-surface-hover: #1E232A;
+  --color-ink: #F8F9FA;
+  --color-muted: #9BA3B2;
+  --color-text-primary: #F8F9FA;
+  --color-text-secondary: #9BA3B2;
+  --color-border: #2D333B;
+  --color-card: #171B20;
+  --color-card-hover: #1E232A;
+  --color-heading: #F8F9FA;
+  --color-body: #C7CCD6;
 
-  color: #e6edf7;
-  background: #0b1220;
+  color: #F8F9FA;
+  background: #0F1117;
   color-scheme: dark;
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
 html {
   background: var(--color-surface);
+  scroll-behavior: smooth;
 }
 
 body {
@@ -50,31 +64,46 @@ body {
   margin: 0;
   color: var(--color-ink);
   background: var(--color-surface);
-  transition: background-color 150ms ease, color 150ms ease;
+  transition: background-color 200ms ease, color 200ms ease;
 }
 
+/* Display headings use DM Sans */
+h1, h2, h3, h4, h5, h6,
+.font-display {
+  font-family: 'DM Sans', system-ui, sans-serif;
+}
+
+/* ============================================
+   Premium Surface Gradient
+   ============================================ */
 .premium-surface {
   background:
-    radial-gradient(circle at top left, rgba(59, 130, 246, 0.08), transparent 34rem),
-    linear-gradient(180deg, #ffffff 0%, #f8fafc 48%, #eef2f7 100%);
+    radial-gradient(circle at top left, rgba(255, 81, 0, 0.06), transparent 34rem),
+    linear-gradient(180deg, #ffffff 0%, #F8F9FA 48%, #F1F5F9 100%);
 }
 
 html.dark .premium-surface {
   background:
-    radial-gradient(circle at top left, rgba(37, 99, 235, 0.16), transparent 34rem),
-    linear-gradient(180deg, #0f172a 0%, #111827 52%, #0b1120 100%);
+    radial-gradient(circle at top left, rgba(255, 81, 0, 0.12), transparent 34rem),
+    linear-gradient(180deg, #0F1117 0%, #171B20 52%, #0F1117 100%);
 }
 
+/* ============================================
+   Selection
+   ============================================ */
 ::selection {
-  background: #dbeafe;
-  color: #0f172a;
+  background: #FFE6D5;
+  color: #1E232A;
 }
 
 html.dark ::selection {
-  background: #1e3a5f;
-  color: #e6edf7;
+  background: #461200;
+  color: #F8F9FA;
 }
 
+/* ============================================
+   Form Elements
+   ============================================ */
 input,
 textarea,
 select,
@@ -85,7 +114,7 @@ button {
 button,
 a,
 select {
-  transition: transform 150ms cubic-bezier(0.23, 1, 0.32, 1), background-color 150ms ease, border-color 150ms ease;
+  transition: transform 150ms cubic-bezier(0.23, 1, 0.32, 1), background-color 150ms ease, border-color 150ms ease, color 150ms ease;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -104,23 +133,168 @@ a:active {
   transform: scale(0.98);
 }
 
+/* ============================================
+   Focus Ring
+   ============================================ */
 .focus-ring {
-  @apply outline-none focus-visible:ring-4 focus-visible:ring-blue-100 dark:focus-visible:ring-blue-900/40;
+  @apply outline-none focus-visible:ring-4 focus-visible:ring-brand-100 dark:focus-visible:ring-brand-900 dark:focus-visible:ring-opacity-40;
 }
 
-/* Scrollbar */
+/* ============================================
+   Scrollbar
+   ============================================ */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
-html.dark ::-webkit-scrollbar-thumb { background: #334155; }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+html.dark ::-webkit-scrollbar-thumb { background: #2D333B; }
+html.dark ::-webkit-scrollbar-thumb:hover { background: #3D4551; }
 
-/* Status + priority badges */
-.status-waiting { @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300; }
-.status-active { @apply bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300; }
-.status-pending { @apply bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300; }
-.status-resolved { @apply bg-slate-100 text-slate-700 dark:bg-slate-700/40 dark:text-slate-300; }
-.status-open { @apply bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300; }
-.priority-urgent { @apply bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300; }
-.priority-high { @apply bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300; }
-.priority-medium { @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300; }
-.priority-low { @apply bg-slate-100 text-slate-700 dark:bg-slate-700/40 dark:text-slate-300; }
+/* ============================================
+   Status + Priority Badges
+   ============================================ */
+.status-waiting { @apply bg-warning-50 text-warning-600 dark:bg-warning-50 dark:bg-opacity-10 dark:text-warning-500; }
+.status-active { @apply bg-success-50 text-success-600 dark:bg-success-50 dark:bg-opacity-10 dark:text-success-500; }
+.status-pending { @apply bg-brand-50 text-brand-600 dark:bg-brand-50 dark:bg-opacity-10 dark:text-brand-400; }
+.status-resolved { @apply bg-navy-50 text-navy-400 dark:bg-navy-50 dark:bg-opacity-10 dark:text-navy-300; }
+.status-open { @apply bg-blue-50 text-blue-700 dark:bg-blue-50 dark:bg-opacity-10 dark:text-blue-300; }
+.status-closed { @apply bg-navy-50 text-navy-400 dark:bg-navy-50 dark:bg-opacity-10 dark:text-navy-300; }
+
+.priority-urgent { @apply bg-danger-50 text-danger-600 dark:bg-danger-50 dark:bg-opacity-10 dark:text-danger-500; }
+.priority-high { @apply bg-brand-50 text-brand-600 dark:bg-brand-50 dark:bg-opacity-10 dark:text-brand-400; }
+.priority-medium { @apply bg-warning-50 text-warning-600 dark:bg-warning-50 dark:bg-opacity-10 dark:text-warning-500; }
+.priority-low { @apply bg-navy-50 text-navy-400 dark:bg-navy-50 dark:bg-opacity-10 dark:text-navy-300; }
+
+/* ============================================
+   Skeleton Shimmer
+   ============================================ */
+.skeleton {
+  background: linear-gradient(90deg, var(--color-surface-muted) 25%, var(--color-surface-hover) 50%, var(--color-surface-muted) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s linear infinite;
+  border-radius: 0.5rem;
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+/* ============================================
+   Marquee Animation
+   ============================================ */
+.marquee-track {
+  display: flex;
+  animation: marquee 40s linear infinite;
+  width: max-content;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0%); }
+  to { transform: translateX(-50%); }
+}
+
+/* ============================================
+   Page + Scroll Reveal Animation Utilities
+   ============================================ */
+.page-enter {
+  animation: page-enter 200ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: reveal-up 240ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   Gradient Text Utility
+   ============================================ */
+.gradient-text {
+  background: linear-gradient(135deg, #FF5100 0%, #FC823D 50%, #FF5100 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+html.dark .gradient-text {
+  background: linear-gradient(135deg, #FC823D 0%, #FF5100 50%, #FC823D 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============================================
+   Glass Effect
+   ============================================ */
+.glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+html.dark .glass {
+  background: rgba(15, 17, 23, 0.8);
+}
+
+/* ============================================
+   Chat Bubble Styles
+   ============================================ */
+.chat-bubble-agent {
+  @apply rounded-2xl rounded-tl-md bg-white border border-border shadow-xs;
+}
+
+.chat-bubble-visitor {
+  @apply rounded-2xl rounded-tr-md bg-brand-500 text-white;
+}
+
+.chat-bubble-bot {
+  @apply rounded-2xl rounded-tl-md bg-brand-50 border border-brand-100;
+}
+
+.chat-bubble-note {
+  @apply rounded-2xl bg-warning-50 border border-warning-100;
+}
+
+html.dark .chat-bubble-agent {
+  @apply bg-navy-800 border-navy-700;
+}
+
+html.dark .chat-bubble-visitor {
+  @apply bg-brand-600;
+}
+
+html.dark .chat-bubble-bot {
+  @apply bg-brand-950 bg-opacity-40 border-brand-900 border-opacity-60;
+}
+
+html.dark .chat-bubble-note {
+  @apply bg-warning-50 bg-opacity-10 border-warning-500 border-opacity-20;
+}
+
+/* ============================================
+   Widget Launcher Pulse
+   ============================================ */
+@keyframes launcher-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 81, 0, 0.5); }
+  70% { box-shadow: 0 0 0 12px rgba(255, 81, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 81, 0, 0); }
+}
+
+.launcher-pulse {
+  animation: launcher-pulse 2s infinite;
+}

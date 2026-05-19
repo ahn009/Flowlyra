@@ -38,15 +38,15 @@ export function TagsPage(): JSX.Element {
       <PageHeader title="Tags" />
       <div className="grid grid-cols-1 gap-4 p-4 lg:grid-cols-[minmax(320px,420px)_minmax(0,1fr)] lg:gap-6 lg:p-6">
         <Card className="p-4">
-          <h2 className="text-lg font-black text-slate-950 dark:text-slate-100">Create tag</h2>
+          <h2 className="text-lg font-black text-navy-700 dark:text-navy-100">Create tag</h2>
           <div className="mt-3 grid gap-3">
             <Field label="Label"><TextInput value={label} onChange={(event) => setLabel(event.target.value)} placeholder="VIP" /></Field>
-            <Field label="Color"><input type="color" className="h-10 w-full rounded border border-border p-1" value={color} onChange={(event) => setColor(event.target.value)} /></Field>
+            <Field label="Color"><input type="color" className="h-10 w-full rounded border border-navy-100 dark:border-navy-700 p-1" value={color} onChange={(event) => setColor(event.target.value)} /></Field>
             <Button variant="primary" disabled={saveMutation.isPending || !label.trim()} onClick={() => saveMutation.mutate()}>{saveMutation.isPending ? "Saving..." : "Save tag"}</Button>
           </div>
         </Card>
         <Card className="overflow-hidden">
-          <div className="border-b border-border px-4 py-3 text-sm font-black uppercase tracking-wide text-slate-500">Tag library</div>
+          <div className="border-b border-navy-100 dark:border-navy-700 px-4 py-3 text-sm font-black uppercase tracking-wide text-navy-400">Tag library</div>
           {tags.length ? (
             <div className="divide-y divide-border">
               {tags.map((tag) => (
@@ -54,8 +54,8 @@ export function TagsPage(): JSX.Element {
                   <div className="flex min-w-0 items-center gap-3">
                     <span className="inline-block h-4 w-4 rounded-full" style={{ backgroundColor: tag.color }} />
                     <div>
-                      <div className="font-bold text-slate-900 dark:text-slate-100">{tag.label}</div>
-                      <div className="text-xs text-slate-500">/{tag.key} • used {tag.usage_count ?? 0} times</div>
+                      <div className="font-bold text-navy-700 dark:text-navy-100">{tag.label}</div>
+                      <div className="text-xs text-navy-400">/{tag.key} • used {tag.usage_count ?? 0} times</div>
                     </div>
                   </div>
                   <Button size="sm" variant="danger" onClick={() => deleteMutation.mutate(tag.key)}>Delete</Button>

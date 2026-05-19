@@ -68,7 +68,8 @@ async def notify(
             user = (await session.execute(select(User).where(User.id == user_id))).scalar_one_or_none()
             if user is not None:
                 try:
-                    await send_email(user.email, title, f"<p>{body or ''}</p>{f'<p><a href=\"{link_url}\">Open</a></p>' if link_url else ''}")
+                    link_html = f"<p><a href='{link_url}'>Open</a></p>" if link_url else ""
+                    await send_email(user.email, title, f"<p>{body or ''}</p>{link_html}")
                 except Exception:  # noqa: BLE001
                     logger.exception("notification email failed user=%s", user_id)
 

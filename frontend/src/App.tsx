@@ -77,7 +77,7 @@ const MomentsPage = lazyNamed(() => import("./pages/GapsPage"), "MomentsPage");
 const VoiceVideoPage = lazyNamed(() => import("./pages/GapsPage"), "VoiceVideoPage");
 
 function ScreenFallback(): JSX.Element {
-  return <div className="grid min-h-[40vh] place-items-center text-sm font-semibold text-slate-500">Loading...</div>;
+  return <div className="grid min-h-[40vh] place-items-center text-sm font-semibold text-navy-400">Loading...</div>;
 }
 
 function AuthGuard(): JSX.Element {
@@ -115,7 +115,7 @@ function AuthGuard(): JSX.Element {
     };
   }, [logout, refreshToken, refreshTokenValue, user]);
 
-  if (!checked) return <div className="grid min-h-screen place-items-center bg-surface text-sm font-semibold text-slate-500">{t("auth.checkingSession")}</div>;
+  if (!checked) return <div className="grid min-h-screen place-items-center bg-white text-sm font-medium text-navy-400 dark:bg-navy-900">{t("auth.checkingSession")}</div>;
   if (!user || !accessToken) return <Navigate to="/login" replace />;
   return <AgentLayout />;
 }

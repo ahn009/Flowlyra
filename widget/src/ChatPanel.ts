@@ -346,7 +346,7 @@ export class ChatPanel {
     emoji.className = "cf-btn cf-icon";
     emoji.type = "button";
     emoji.setAttribute("aria-label", "Emoji");
-    emoji.innerHTML = "😀";
+    emoji.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 14s1.2 2 4 2 4-2 4-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M9 9h.01M15 9h.01" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>`;
     const gif = document.createElement("button");
     gif.className = "cf-btn cf-icon";
     gif.type = "button";
@@ -374,31 +374,39 @@ export class ChatPanel {
     voice.type = "button";
     voice.title = "Voice call";
     voice.setAttribute("aria-label", "Voice call");
-    voice.textContent = "📞";
+    voice.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.4 19.4 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.7 2.6a2 2 0 0 1-.5 2.1L8.1 9.6a16 16 0 0 0 6.3 6.3l1.2-1.2a2 2 0 0 1 2.1-.5c.8.3 1.7.6 2.6.7a2 2 0 0 1 1.7 2Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`;
     voice.addEventListener("click", () => this.handlers.onRtcStart?.("voice"));
     const video = document.createElement("button");
     video.className = "cf-btn cf-icon";
     video.type = "button";
     video.title = "Video call";
     video.setAttribute("aria-label", "Video call");
-    video.textContent = "🎥";
+    video.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 10l5-3v10l-5-3v-4Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><rect x="3" y="6" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/></svg>`;
     video.addEventListener("click", () => this.handlers.onRtcStart?.("video"));
     const screen = document.createElement("button");
     screen.className = "cf-btn cf-icon";
     screen.type = "button";
     screen.title = "Share screen";
     screen.setAttribute("aria-label", "Share screen");
-    screen.textContent = "🖥️";
+    screen.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 21h8M12 17v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
     screen.addEventListener("click", () => this.handlers.onRtcStart?.("screen"));
     const cobrowse = document.createElement("button");
     cobrowse.className = "cf-btn cf-icon";
     cobrowse.type = "button";
     cobrowse.title = "Request co-browse";
     cobrowse.setAttribute("aria-label", "Request co-browse");
-    cobrowse.textContent = "🤝";
+    cobrowse.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 12h8M12 8v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="4" y="4" width="16" height="16" rx="4" fill="none" stroke="currentColor" stroke-width="2"/></svg>`;
     cobrowse.addEventListener("click", () => this.handlers.onCobrowseRequest?.());
-    if (this.init.widget_config.allow_attachments !== false) row.append(attach);
-    row.append(voice, video, screen, cobrowse, emoji, gif, this.input, send, this.fileInput);
+    const tools = document.createElement("div");
+    tools.className = "cf-tools";
+    if (this.init.widget_config.allow_attachments !== false) tools.append(attach);
+    tools.append(voice, video, screen, cobrowse, emoji, gif);
+
+    const composer = document.createElement("div");
+    composer.className = "cf-composer";
+    composer.append(this.input, send, this.fileInput);
+
+    row.append(tools, composer);
     this.footer.replaceChildren(row, hint);
 
     const submit = () => {

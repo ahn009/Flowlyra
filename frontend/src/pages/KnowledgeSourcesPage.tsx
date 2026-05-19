@@ -88,19 +88,19 @@ export function KnowledgeSourcesPage(): JSX.Element {
           <BrainCircuit size={20} /> AI Knowledge Sources
         </div>
 
-        <div className="rounded-xl border border-border bg-white p-4 dark:bg-slate-900">
-          <div className="mb-3 text-sm font-black uppercase text-slate-500">Add source</div>
+        <div className="rounded-xl border border-navy-100 dark:border-navy-700 bg-white p-4 dark:bg-navy-900">
+          <div className="mb-3 text-sm font-black uppercase text-navy-400">Add source</div>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Name"
-              className="rounded border border-border bg-slate-50 px-3 py-2 text-sm dark:bg-slate-800"
+              className="rounded border border-navy-100 dark:border-navy-700 bg-navy-50 px-3 py-2 text-sm dark:bg-navy-800"
             />
             <select
               value={sourceType}
               onChange={(e) => setSourceType(e.target.value as "url" | "text")}
-              className="rounded border border-border bg-slate-50 px-3 py-2 text-sm dark:bg-slate-800"
+              className="rounded border border-navy-100 dark:border-navy-700 bg-navy-50 px-3 py-2 text-sm dark:bg-navy-800"
             >
               <option value="url">URL (crawl + extract)</option>
               <option value="text">Pasted text</option>
@@ -111,7 +111,7 @@ export function KnowledgeSourcesPage(): JSX.Element {
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://docs.example.com/page"
-              className="mt-2 w-full rounded border border-border bg-slate-50 px-3 py-2 text-sm dark:bg-slate-800"
+              className="mt-2 w-full rounded border border-navy-100 dark:border-navy-700 bg-navy-50 px-3 py-2 text-sm dark:bg-navy-800"
             />
           ) : (
             <textarea
@@ -119,7 +119,7 @@ export function KnowledgeSourcesPage(): JSX.Element {
               onChange={(e) => setContent(e.target.value)}
               placeholder="Paste content"
               rows={4}
-              className="mt-2 w-full rounded border border-border bg-slate-50 px-3 py-2 text-sm dark:bg-slate-800"
+              className="mt-2 w-full rounded border border-navy-100 dark:border-navy-700 bg-navy-50 px-3 py-2 text-sm dark:bg-navy-800"
             />
           )}
           <button
@@ -131,20 +131,20 @@ export function KnowledgeSourcesPage(): JSX.Element {
           </button>
         </div>
 
-        <div className="rounded-xl border border-border bg-white p-4 dark:bg-slate-900">
-          <div className="mb-3 text-sm font-black uppercase text-slate-500">Sources ({sources.length})</div>
+        <div className="rounded-xl border border-navy-100 dark:border-navy-700 bg-white p-4 dark:bg-navy-900">
+          <div className="mb-3 text-sm font-black uppercase text-navy-400">Sources ({sources.length})</div>
           <div className="space-y-2">
             {sources.map((s) => (
-              <div key={s.id} className="flex items-center gap-3 rounded border border-border p-2 text-sm">
+              <div key={s.id} className="flex items-center gap-3 rounded border border-navy-100 dark:border-navy-700 p-2 text-sm">
                 {s.source_type === "url" ? <Globe size={14} /> : <FileText size={14} />}
                 <div className="flex-1">
                   <div className="font-bold">{s.name}</div>
-                  <div className="text-[11px] text-slate-500">
+                  <div className="text-[11px] text-navy-400">
                     {s.url ?? "—"} · {s.chunk_count} chunks · {s.status}
                     {s.error && <span className="text-red-600"> · {s.error}</span>}
                   </div>
                 </div>
-                <button onClick={() => reingest.mutate(s.id)} className="rounded p-1 hover:bg-slate-100 dark:hover:bg-slate-800">
+                <button onClick={() => reingest.mutate(s.id)} className="rounded p-1 hover:bg-navy-100 dark:hover:bg-navy-800">
                   <RefreshCw size={14} />
                 </button>
                 <button onClick={() => remove.mutate(s.id)} className="rounded p-1 text-red-600 hover:bg-red-50">
@@ -152,12 +152,12 @@ export function KnowledgeSourcesPage(): JSX.Element {
                 </button>
               </div>
             ))}
-            {sources.length === 0 && <div className="px-2 text-xs text-slate-500">No sources yet.</div>}
+            {sources.length === 0 && <div className="px-2 text-xs text-navy-400">No sources yet.</div>}
           </div>
         </div>
 
-        <div className="rounded-xl border border-border bg-white p-4 dark:bg-slate-900">
-          <div className="mb-3 flex items-center gap-2 text-sm font-black uppercase text-slate-500">
+        <div className="rounded-xl border border-navy-100 dark:border-navy-700 bg-white p-4 dark:bg-navy-900">
+          <div className="mb-3 flex items-center gap-2 text-sm font-black uppercase text-navy-400">
             <Search size={14} /> Test search
           </div>
           <div className="flex gap-2">
@@ -165,20 +165,20 @@ export function KnowledgeSourcesPage(): JSX.Element {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Query"
-              className="flex-1 rounded border border-border bg-slate-50 px-3 py-2 text-sm dark:bg-slate-800"
+              className="flex-1 rounded border border-navy-100 dark:border-navy-700 bg-navy-50 px-3 py-2 text-sm dark:bg-navy-800"
             />
             <button
               onClick={() => search.mutate()}
               disabled={!query.trim() || search.isPending}
-              className="rounded bg-slate-900 px-4 py-2 text-sm font-bold text-white dark:bg-white dark:text-slate-900"
+              className="rounded bg-navy-900 px-4 py-2 text-sm font-bold text-white dark:bg-white dark:text-navy-700"
             >
               Search
             </button>
           </div>
           <div className="mt-3 space-y-2">
             {results.map((r, i) => (
-              <div key={i} className="rounded border border-border p-2 text-xs">
-                <div className="mb-1 text-[11px] text-slate-500">
+              <div key={i} className="rounded border border-navy-100 dark:border-navy-700 p-2 text-xs">
+                <div className="mb-1 text-[11px] text-navy-400">
                   score {Math.round(r.score * 100)}% · {(r.meta as Record<string, string>).title ?? (r.meta as Record<string, string>).name ?? ""}
                 </div>
                 <div className="whitespace-pre-wrap">{r.content}</div>

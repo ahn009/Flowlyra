@@ -102,7 +102,7 @@ export function EngageTrafficPage(): JSX.Element {
       <PageHeader title="Visitor traffic" />
       <div className="grid gap-4 p-4 lg:grid-cols-[minmax(320px,420px)_minmax(0,1fr)] lg:gap-6 lg:p-6">
         <Card className="p-4">
-          <h2 className="text-lg font-black text-slate-950 dark:text-slate-100">Filters</h2>
+          <h2 className="text-lg font-black text-navy-700 dark:text-navy-100">Filters</h2>
           <div className="mt-3 grid gap-3">
             <Field label="Country"><TextInput placeholder="US" value={country} onChange={(event) => setCountry(event.target.value)} /></Field>
             <Field label="Page contains"><TextInput placeholder="/pricing" value={page} onChange={(event) => setPage(event.target.value)} /></Field>
@@ -116,19 +116,19 @@ export function EngageTrafficPage(): JSX.Element {
 
         <Card className="overflow-hidden">
           <PanelHeader title="Geo map view" description="Real-time online visitors mapped by country/city." />
-          <div className="border-b border-border p-4">
-            <div className="relative h-48 w-full rounded-xl border border-border bg-[radial-gradient(circle_at_20%_20%,#dbeafe,transparent_40%),radial-gradient(circle_at_80%_30%,#bfdbfe,transparent_45%),radial-gradient(circle_at_50%_80%,#c7d2fe,transparent_40%)]">
+          <div className="border-b border-navy-100 dark:border-navy-700 p-4">
+            <div className="relative h-48 w-full rounded-xl border border-navy-100 dark:border-navy-700 bg-[radial-gradient(circle_at_20%_20%,#dbeafe,transparent_40%),radial-gradient(circle_at_80%_30%,#bfdbfe,transparent_45%),radial-gradient(circle_at_50%_80%,#c7d2fe,transparent_40%)]">
               {countryPoints.map((point) => (
                 <span
                   key={point.key}
                   title={point.label}
-                  className="absolute inline-block h-3 w-3 rounded-full bg-slate-900 ring-2 ring-white"
+                  className="absolute inline-block h-3 w-3 rounded-full bg-navy-900 ring-2 ring-white"
                   style={{ left: `${point.x}%`, top: `${point.y}%` }}
                 />
               ))}
             </div>
           </div>
-          {isLoading ? <div className="p-4 text-sm text-slate-500">Loading traffic...</div> : null}
+          {isLoading ? <div className="p-4 text-sm text-navy-400">Loading traffic...</div> : null}
           {!isLoading && items.length === 0 ? <EmptyPanel title="No active visitors" description="Traffic appears here when visitors load your site with the widget." /> : null}
           {items.length > 0 ? (
             <div className="divide-y divide-border">
@@ -136,8 +136,8 @@ export function EngageTrafficPage(): JSX.Element {
                 <div key={item.session_id} className="grid gap-3 p-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
-                      <div className="font-semibold text-slate-900 dark:text-slate-100">{item.name || item.email || item.session_id.slice(0, 8)}</div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400">{item.country || "Unknown"}{item.city ? `, ${item.city}` : ""} • {item.is_online ? "Online" : "Offline"} • {item.page_views || 0} views</div>
+                      <div className="font-semibold text-navy-700 dark:text-navy-100">{item.name || item.email || item.session_id.slice(0, 8)}</div>
+                      <div className="text-xs text-navy-400 dark:text-navy-400">{item.country || "Unknown"}{item.city ? `, ${item.city}` : ""} • {item.is_online ? "Online" : "Offline"} • {item.page_views || 0} views</div>
                     </div>
                     <Button
                       size="sm"
@@ -147,7 +147,7 @@ export function EngageTrafficPage(): JSX.Element {
                       {item.is_watched ? "Unwatch" : "Watch"}
                     </Button>
                   </div>
-                  <div className="text-xs text-slate-600 dark:text-slate-300">{item.current_url || "No page URL yet"}</div>
+                  <div className="text-xs text-navy-500 dark:text-navy-300">{item.current_url || "No page URL yet"}</div>
                   <div className="flex gap-2">
                     <TextInput
                       placeholder="Send proactive message"
@@ -163,11 +163,11 @@ export function EngageTrafficPage(): JSX.Element {
                     </Button>
                   </div>
                   {item.timeline?.length ? (
-                    <details className="rounded-lg border border-border bg-slate-50 p-2 text-xs dark:bg-slate-900/50">
+                    <details className="rounded-lg border border-navy-100 dark:border-navy-700 bg-navy-50 p-2 text-xs dark:bg-navy-900/50">
                       <summary className="cursor-pointer font-semibold">Session timeline</summary>
                       <div className="mt-2 grid gap-1">
                         {item.timeline.slice(-8).map((step, index) => (
-                          <div key={`${item.session_id}-${index}`} className="text-slate-600 dark:text-slate-300">{step.ts ? new Date(step.ts).toLocaleTimeString() : "--"} • {step.title || "Page"} • {step.url}</div>
+                          <div key={`${item.session_id}-${index}`} className="text-navy-500 dark:text-navy-300">{step.ts ? new Date(step.ts).toLocaleTimeString() : "--"} • {step.title || "Page"} • {step.url}</div>
                         ))}
                       </div>
                     </details>
@@ -231,7 +231,7 @@ export function EngageCampaignsPage(): JSX.Element {
       <PageHeader title="Campaigns" />
       <div className="grid grid-cols-1 gap-4 p-4 lg:grid-cols-[minmax(360px,460px)_minmax(0,1fr)] lg:gap-6 lg:p-6">
         <Card className="p-4">
-          <h2 className="text-lg font-black text-slate-950 dark:text-slate-100">New campaign</h2>
+          <h2 className="text-lg font-black text-navy-700 dark:text-navy-100">New campaign</h2>
           <div className="mt-3 grid gap-3">
             <Field label="Name"><TextInput value={name} onChange={(event) => setName(event.target.value)} /></Field>
             <Field label="Type">
@@ -274,14 +274,14 @@ export function EngageCampaignsPage(): JSX.Element {
                 <div key={campaign.id} className="grid gap-2 p-4">
                   <div className="flex items-center justify-between gap-2">
                     <div>
-                      <div className="font-semibold text-slate-900 dark:text-slate-100">{campaign.name}</div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400">{campaign.campaign_type} • {campaign.trigger_type} • Sent: {campaign.sent_count}</div>
+                      <div className="font-semibold text-navy-700 dark:text-navy-100">{campaign.name}</div>
+                      <div className="text-xs text-navy-400 dark:text-navy-400">{campaign.campaign_type} • {campaign.trigger_type} • Sent: {campaign.sent_count}</div>
                     </div>
                     <Button size="sm" variant={campaign.is_active ? "secondary" : "primary"} onClick={() => toggleCampaign.mutate({ id: campaign.id, active: !campaign.is_active })}>
                       {campaign.is_active ? "Disable" : "Enable"}
                     </Button>
                   </div>
-                  <div className="text-sm text-slate-700 dark:text-slate-300">{campaign.message}</div>
+                  <div className="text-sm text-navy-600 dark:text-navy-300">{campaign.message}</div>
                 </div>
               ))}
             </div>
@@ -333,7 +333,7 @@ export function EngageGoalsPage(): JSX.Element {
       <PageHeader title="Goals" />
       <div className="grid grid-cols-1 gap-4 p-4 lg:grid-cols-[minmax(340px,440px)_minmax(0,1fr)] lg:gap-6 lg:p-6">
         <Card className="p-4">
-          <h2 className="text-lg font-black text-slate-950 dark:text-slate-100">New goal</h2>
+          <h2 className="text-lg font-black text-navy-700 dark:text-navy-100">New goal</h2>
           <div className="mt-3 grid gap-3">
             <Field label="Name"><TextInput value={name} onChange={(event) => setName(event.target.value)} /></Field>
             <Field label="Goal type">
@@ -354,7 +354,7 @@ export function EngageGoalsPage(): JSX.Element {
 
         <div className="grid gap-4">
           <Card className="p-4">
-            <h2 className="text-lg font-black text-slate-950 dark:text-slate-100">Sales tracker</h2>
+            <h2 className="text-lg font-black text-navy-700 dark:text-navy-100">Sales tracker</h2>
             <div className="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-4">
               <MetricCard label="Active goals" value={dashboard?.total_goals || 0} tone="blue" />
               <MetricCard label="Achieved" value={dashboard?.achieved || 0} tone="green" />
@@ -375,8 +375,8 @@ export function EngageGoalsPage(): JSX.Element {
               <div className="divide-y divide-border">
                 {goals.map((goal) => (
                   <div key={goal.id} className="p-4">
-                    <div className="font-semibold text-slate-900 dark:text-slate-100">{goal.name}</div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400">{goal.goal_type} • {goal.event_name || "-"} • {goal.target_url || "-"}</div>
+                    <div className="font-semibold text-navy-700 dark:text-navy-100">{goal.name}</div>
+                    <div className="text-xs text-navy-400 dark:text-navy-400">{goal.goal_type} • {goal.event_name || "-"} • {goal.target_url || "-"}</div>
                   </div>
                 ))}
               </div>
@@ -391,8 +391,8 @@ export function EngageGoalsPage(): JSX.Element {
               <div className="divide-y divide-border">
                 {achievements.slice(0, 20).map((item) => (
                   <div key={item.id} className="p-4">
-                    <div className="font-semibold text-slate-900 dark:text-slate-100">{item.goal_name}</div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400">{new Date(item.achieved_at).toLocaleString()} • {item.value != null ? `$${Number(item.value).toFixed(2)}` : "No value"}</div>
+                    <div className="font-semibold text-navy-700 dark:text-navy-100">{item.goal_name}</div>
+                    <div className="text-xs text-navy-400 dark:text-navy-400">{new Date(item.achieved_at).toLocaleString()} • {item.value != null ? `$${Number(item.value).toFixed(2)}` : "No value"}</div>
                   </div>
                 ))}
               </div>
