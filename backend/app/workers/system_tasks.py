@@ -23,6 +23,14 @@ from app.workers.celery_app import celery_app
 logger = logging.getLogger(__name__)
 
 
+def _as_aware(value: datetime | None) -> datetime | None:
+    if value is None:
+        return None
+    if value.tzinfo is None:
+        return value.replace(tzinfo=UTC)
+    return value
+
+
 @celery_app.task(name="app.workers.system_tasks.ping")
 def ping(echo: str = "ping") -> dict[str, str]:
     return {"status": "ok", "echo": echo, "timestamp": datetime.now(UTC).isoformat()}
@@ -391,7 +399,8 @@ def check_trial_expiry() -> dict[str, int]:
                     )
                 ).scalars().all()
                 org = (await db.execute(select(Organization).where(Organization.id == sub.organization_id))).scalar_one_or_none()
-                if sub.trial_ends_at and sub.trial_ends_at < now:
+                trial_ends_at = _as_aware(sub.trial_ends_at)
+                if trial_ends_at and trial_ends_at < now:
                     sub.status = "expired"
                     if org:
                         org.plan = "starter"
