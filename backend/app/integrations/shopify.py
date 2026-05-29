@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 import httpx
-from sqlalchemy import select
+from sqlalchemy import delete, select
 
 from app.integrations.base import IntegrationProvider
 from app.models.contact import Contact
@@ -93,6 +93,9 @@ class ShopifyProvider(IntegrationProvider):
         order.source = "shopify"
         order.placed_at = datetime.fromisoformat(item["created_at"].replace("Z", "+00:00")) if item.get("created_at") else datetime.now(UTC)
         order.meta = item
+        await db.flush()
+        await db.execute(delete(OrderItem).where(OrderItem.order_id == order.id))
+        await db.flush()
         for li in item.get("line_items", [])[:100]:
             db.add(OrderItem(order_id=order.id, sku=li.get("sku"), name=li.get("name") or "Item", quantity=int(li.get("quantity") or 1), unit_price=float(li.get("price") or 0), currency=order.currency, line_total=float(li.get("price") or 0) * int(li.get("quantity") or 1), meta=li))
         return order
