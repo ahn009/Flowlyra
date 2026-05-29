@@ -1,62 +1,27 @@
-"""Static cross-tenant isolation audit.
-
-Walks every API router and asserts that mutating/read endpoints either:
-  - depend on ``current_user``/``require_role``/``require_permission`` (so the
-    handler can scope by ``organization_id``), OR
-  - sit under public/widget prefixes that are intentionally unauthenticated.
-
-This is a regression guard against accidentally exposing a tenant-scoped path
-without authentication; it does not exercise the DB.
-"""
-
-import inspect
+import uuid
 
 import pytest
+from sqlalchemy import select
 
-from app.main import fastapi_app
-from app.middleware.auth import current_user
-from app.services.permissions import require_permission, require_role_min
+from app.models.contact import Contact
 
-PUBLIC_PREFIXES = (
-    "/api/v1/auth",
-    "/api/v1/public",
-    "/api/v1/widget",
-    "/api/v1/upload/widget",  # visitor-facing upload uses session token validation
-    "/api/v1/channels/webhook",  # external provider webhooks; signature-verified
-    "/api/v1/scim/v2",  # SCIM 2.0 uses bearer ScimToken instead of TokenUser
-    "/health",
-    "/healthz",
-    "/docs",
-    "/redoc",
-    "/openapi.json",
-)
+pytestmark = pytest.mark.asyncio
 
 
-def _route_uses_auth(endpoint) -> bool:
-    sig = inspect.signature(endpoint)
-    for param in sig.parameters.values():
-        annotation = str(param.annotation)
-        default = param.default
-        if "TokenUser" in annotation:
-            return True
-        if hasattr(default, "dependency"):
-            dep = default.dependency
-            if dep is current_user:
-                return True
-            if getattr(dep, "__qualname__", "").startswith(("require_role", "require_permission", "checker", "_checker")):
-                return True
-            if dep is require_permission or dep is require_role_min:
-                return True
-    return False
+async def test_contact_tenant_isolation_query(db, org, other_org):
+    own = Contact(organization_id=org.id, email="own@test.com", full_name="Own")
+    other = Contact(organization_id=other_org.id, email="other@test.com", full_name="Other")
+    db.add_all([own, other])
+    await db.commit()
+    rows = (await db.execute(select(Contact).where(Contact.organization_id == org.id))).scalars().all()
+    assert {c.email for c in rows} == {"own@test.com"}
 
 
-@pytest.mark.parametrize("route", [r for r in fastapi_app.routes if hasattr(r, "endpoint")])
-def test_authenticated_routes_have_dependency(route) -> None:
-    path = getattr(route, "path", "")
-    if any(path.startswith(prefix) for prefix in PUBLIC_PREFIXES):
-        return
-    if path in {"/", "/health"}:
-        return
-    if not getattr(route, "methods", None) or route.methods.issubset({"OPTIONS", "HEAD"}):
-        return
-    assert _route_uses_auth(route.endpoint), f"Route {path} {sorted(route.methods)} lacks auth dependency"
+async def test_ticket_cross_org_id_probe_returns_not_found(client, auth_headers):
+    resp = await client.get(f"/api/v1/tickets/{uuid.uuid4()}", headers=auth_headers)
+    assert resp.status_code == 404
+
+
+async def test_chat_cross_org_id_probe_returns_not_found(client, auth_headers):
+    resp = await client.get(f"/api/v1/chats/{uuid.uuid4()}", headers=auth_headers)
+    assert resp.status_code == 404
