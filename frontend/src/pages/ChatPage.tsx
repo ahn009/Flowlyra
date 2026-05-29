@@ -312,6 +312,29 @@ export function ChatPage(): JSX.Element {
     setReply("");
   };
 
+  const downloadTranscript = async (): Promise<void> => {
+    try {
+      const response = await api.get(`/chats/${id}/transcript.txt`, { responseType: "blob" });
+      const url = URL.createObjectURL(response.data as Blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `flowlyra-chat-${id}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      toast.error("Could not download transcript");
+    }
+  };
+
+  const emailTranscript = async (): Promise<void> => {
+    try {
+      await api.post(`/chats/${id}/transcript/email`, { email: data?.visitor_email || undefined });
+      toast.success(data?.visitor_email ? "Transcript emailed" : "Transcript email queued/skipped");
+    } catch {
+      toast.error("Could not email transcript");
+    }
+  };
+
   const sendProductCard = (product: ProductCatalogItem): void => {
     const payload = {
       type: "product_card",
@@ -511,6 +534,8 @@ export function ChatPage(): JSX.Element {
               <button className="flex h-8 w-8 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-50 hover:text-navy-600" onClick={() => void startCall("video")} title="Video call"><Video size={15} /></button>
               <button className="flex h-8 w-8 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-50 hover:text-navy-600" onClick={() => void startCall("screen")} title="Screen share"><ScreenShare size={15} /></button>
               <button className="flex h-8 w-8 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-50 hover:text-navy-600" onClick={() => setAssignModal(true)} title="Assign"><UserRound size={15} /></button>
+              <button className="flex h-8 items-center gap-1 rounded-md px-2 text-xs font-semibold text-navy-400 transition hover:bg-navy-50 hover:text-navy-600" onClick={() => void downloadTranscript()} title="Download transcript"><Link2 size={14} /> Transcript</button>
+              <button className="flex h-8 items-center gap-1 rounded-md px-2 text-xs font-semibold text-navy-400 transition hover:bg-navy-50 hover:text-navy-600" onClick={() => void emailTranscript()} title="Email transcript"><MessageSquare size={14} /> Email</button>
               <div className="mx-1 h-4 w-px bg-navy-100" />
               <button
                 className="flex items-center gap-1.5 rounded-lg bg-success-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-success-700"

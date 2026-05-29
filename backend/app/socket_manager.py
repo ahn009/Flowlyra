@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 import uuid
 
 import socketio
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from app.config import get_settings
 from app.db.redis import get_redis
@@ -453,6 +453,21 @@ async def chat_assign(sid: str, data: dict) -> None:
         ).scalar_one_or_none()
         if assignee is None:
             await emit_error(sid, "Target agent not found in this organization")
+            return
+        open_count = int(
+            await db.scalar(
+                select(func.count(Chat.id)).where(
+                    Chat.organization_id == organization_id,
+                    Chat.assigned_user_id == assigned_user_id,
+                    Chat.id != chat.id,
+                    Chat.status.in_(["waiting", "active"]),
+                )
+            )
+            or 0
+        )
+        cap = assignee.max_concurrent_chats or assignee.max_chats or 5
+        if open_count >= cap:
+            await emit_error(sid, f"Agent is at chat limit ({open_count}/{cap})")
             return
         chat.assigned_user_id = assigned_user_id
         chat.status = "active"

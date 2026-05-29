@@ -16,6 +16,7 @@ from app.models.contact import Contact
 from app.models.message import Message
 from app.models.session import Session
 from app.models.ticket import Ticket
+from app.models.user import User
 from app.schemas.chat import (
     AssignRequest,
     ChatDetail,
@@ -29,11 +30,52 @@ from app.schemas.chat import (
     TransferRequest,
 )
 from app.services.chat_service import add_message, convert_to_ticket, get_chat, search_chats
+from app.services.email_service import send_email
 from app.services.sales_service import chat_revenue_summary, contact_ltv, contact_scores
 from app.services.webhook_events import CHAT_RESOLVED
 from app.services.webhook_service import dispatch_event
 
 router = APIRouter(prefix="/chats", tags=["chats"])
+
+
+async def _assert_agent_has_capacity(db: AsyncSession, organization_id: uuid.UUID, agent_id: uuid.UUID, *, exclude_chat_id: uuid.UUID | None = None) -> User:
+    agent = (
+        await db.execute(
+            select(User).where(User.id == agent_id, User.organization_id == organization_id, User.is_active.is_(True))
+        )
+    ).scalar_one_or_none()
+    if agent is None:
+        raise HTTPException(status_code=404, detail="Target agent not found in this organization")
+    count_stmt = select(func.count(Chat.id)).where(
+        Chat.organization_id == organization_id,
+        Chat.assigned_user_id == agent_id,
+        Chat.status.in_(["waiting", "active"]),
+    )
+    if exclude_chat_id:
+        count_stmt = count_stmt.where(Chat.id != exclude_chat_id)
+    open_count = int(await db.scalar(count_stmt) or 0)
+    cap = agent.max_concurrent_chats or agent.max_chats or 5
+    if open_count >= cap:
+        raise HTTPException(status_code=409, detail=f"Agent is at chat limit ({open_count}/{cap})")
+    return agent
+
+
+async def _transcript_lines(db: AsyncSession, chat: Chat) -> list[str]:
+    messages = (
+        await db.execute(
+            select(Message)
+            .where(Message.chat_id == chat.id, Message.is_internal.is_(False))
+            .order_by(Message.created_at.asc())
+        )
+    ).scalars().all()
+    lines = ["FlowLyra transcript", f"Chat: {chat.id}", f"Status: {chat.status}", f"Subject: {chat.subject or 'Live chat'}", ""]
+    for message in messages:
+        sender = {"customer": "Visitor", "agent": "Agent", "system": "System", "bot": "Bot"}.get(message.sender_type, message.sender_type.title())
+        body = message.file_name or message.content or ""
+        if message.file_url:
+            body = f"{body} ({message.file_url})"
+        lines.append(f"[{message.created_at.isoformat()}] {sender}: {body}")
+    return lines
 
 
 @router.get("/dashboard")
@@ -438,22 +480,26 @@ async def delete_message(
 @router.get("/{chat_id}/transcript.txt", response_class=PlainTextResponse)
 async def transcript_txt(chat_id: uuid.UUID, user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db)) -> PlainTextResponse:
     chat = await get_chat(db, user.organization_id, chat_id)
-    messages = (
-        await db.execute(
-            select(Message)
-            .where(Message.chat_id == chat.id, Message.is_internal.is_(False))
-            .order_by(Message.created_at.asc())
-        )
-    ).scalars().all()
-    lines = [f"FlowLyra transcript", f"Chat: {chat.id}", f"Status: {chat.status}", f"Subject: {chat.subject or 'Live chat'}", ""]
-    for message in messages:
-        sender = {"customer": "Visitor", "agent": "Agent", "system": "System"}.get(message.sender_type, message.sender_type.title())
-        body = message.file_name or message.content or ""
-        if message.file_url:
-            body = f"{body} ({message.file_url})"
-        lines.append(f"[{message.created_at.isoformat()}] {sender}: {body}")
+    lines = await _transcript_lines(db, chat)
     filename = f"flowlyra-chat-{chat.id}.txt"
     return PlainTextResponse("\n".join(lines), headers={"Content-Disposition": f'attachment; filename="{filename}"'})
+
+
+@router.post("/{chat_id}/transcript/email")
+async def email_transcript(chat_id: uuid.UUID, payload: dict[str, str], user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db)) -> dict:
+    chat = await get_chat(db, user.organization_id, chat_id)
+    to_email = (payload.get("email") or "").strip()
+    if not to_email:
+        contact = (await db.execute(select(Contact).where(Contact.id == chat.contact_id))).scalar_one_or_none() if chat.contact_id else None
+        to_email = contact.email if contact and contact.email else ""
+    if not to_email:
+        raise HTTPException(status_code=400, detail="Transcript recipient email is required")
+    lines = await _transcript_lines(db, chat)
+    body = "<pre style='white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,monospace'>" + "\n".join(
+        line.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;") for line in lines
+    ) + "</pre>"
+    sent = await send_email(to_email, f"FlowLyra chat transcript {chat.id}", body)
+    return {"ok": True, "sent": sent, "email": to_email}
 
 
 @router.get("/{chat_id}/visitor")
@@ -478,6 +524,8 @@ async def update(chat_id: uuid.UUID, payload: ChatUpdate, user: Annotated[TokenU
 @router.post("/{chat_id}/assign", response_model=ChatOut)
 async def assign(chat_id: uuid.UUID, payload: AssignRequest, user: Annotated[TokenUser, Depends(require_role("admin", "supervisor"))], db: AsyncSession = Depends(get_db)) -> Chat:
     chat = await get_chat(db, user.organization_id, chat_id)
+    if payload.assigned_user_id:
+        await _assert_agent_has_capacity(db, user.organization_id, payload.assigned_user_id, exclude_chat_id=chat.id)
     chat.assigned_user_id = payload.assigned_user_id
     chat.team_id = payload.team_id or chat.team_id
     chat.status = "active"
@@ -489,6 +537,8 @@ async def assign(chat_id: uuid.UUID, payload: AssignRequest, user: Annotated[Tok
 @router.post("/{chat_id}/transfer", response_model=ChatOut)
 async def transfer(chat_id: uuid.UUID, payload: TransferRequest, user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db)) -> Chat:
     chat = await get_chat(db, user.organization_id, chat_id)
+    if payload.assigned_user_id:
+        await _assert_agent_has_capacity(db, user.organization_id, payload.assigned_user_id, exclude_chat_id=chat.id)
     chat.assigned_user_id = payload.assigned_user_id
     chat.team_id = payload.team_id or chat.team_id
     if payload.note:

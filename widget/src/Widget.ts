@@ -37,6 +37,8 @@ export class Widget implements FlowLyraInstance {
   private bootedAt = Date.now();
   private lastActivityAt = Date.now();
   private idleTimer: number | null = null;
+  private inactivityMessageTimer: number | null = null;
+  private inactivityMessageShown = false;
   private lastCampaignId: string | null = null;
 
   constructor(config: typeof window.FlowLyraConfig) {
@@ -227,6 +229,7 @@ export class Widget implements FlowLyraInstance {
     }, this.i18n);
     document.body.append(this.panel.root);
     this.clearUnread();
+    this.scheduleInactivityMessage();
 
     const within = this.initData.is_within_hours ?? true;
     const online = this.initData.is_online;
@@ -242,6 +245,7 @@ export class Widget implements FlowLyraInstance {
   }
 
   close(): void {
+    this.clearInactivityMessageTimer();
     this.panel?.root.remove();
     this.panel = null;
     this.setState("BUBBLE");
@@ -255,6 +259,7 @@ export class Widget implements FlowLyraInstance {
   }
 
   hide(): void {
+    this.clearInactivityMessageTimer();
     this.isHidden = true;
     if (this.bubble) this.bubble.style.display = "none";
     this.panel?.root.remove();
@@ -269,6 +274,7 @@ export class Widget implements FlowLyraInstance {
 
   destroy(): void {
     this.endRtcCall();
+    this.clearInactivityMessageTimer();
     this.socket?.disconnect();
     this.socket = null;
     this.panel?.root.remove();
@@ -409,6 +415,31 @@ export class Widget implements FlowLyraInstance {
       this.evaluateTriggers("dwell");
       this.evaluateTriggers("idle");
     }, 5000);
+  }
+
+  private scheduleInactivityMessage(): void {
+    this.clearInactivityMessageTimer();
+    const config = this.initData?.widget_config?.inactivity_message as { enabled?: boolean; delay_seconds?: number; text?: string } | undefined;
+    if (!config?.enabled || this.inactivityMessageShown) return;
+    const delayMs = Math.max(5, Number(config.delay_seconds ?? 60)) * 1000;
+    this.inactivityMessageTimer = window.setTimeout(() => {
+      if (!this.panel || this.state !== "CHATTING") return;
+      this.inactivityMessageShown = true;
+      this.panel.addMessage({
+        id: `inactivity-${Date.now()}`,
+        chat_id: this.chatId ?? "inactivity",
+        sender_type: "bot",
+        content: config.text || "Still there? Can I help you with anything?",
+        content_type: "text",
+        is_internal: false,
+        created_at: new Date().toISOString(),
+      });
+    }, delayMs);
+  }
+
+  private clearInactivityMessageTimer(): void {
+    if (this.inactivityMessageTimer) window.clearTimeout(this.inactivityMessageTimer);
+    this.inactivityMessageTimer = null;
   }
 
   private evaluateTriggers(triggerType: string): void {
@@ -587,6 +618,7 @@ export class Widget implements FlowLyraInstance {
       this.socket?.markRead(payload.chat.id);
       startChatSession();
       this.setState("CHATTING");
+      this.scheduleInactivityMessage();
       if (payload.message) this.panel?.addMessage(payload.message);
       this.emit("chat:started", payload);
     });
@@ -777,6 +809,7 @@ export class Widget implements FlowLyraInstance {
     });
     this.socket?.sendMessage({ organization_id: this.initData.organization_id, chat_id: this.chatId, content: text, sender_type: "customer", client_id: optimisticId });
     this.socket?.typing(this.chatId, false);
+    this.scheduleInactivityMessage();
     // Failure detection: if not acknowledged within 8s, mark failed.
     window.setTimeout(() => {
       const stillOptimistic = document.querySelector<HTMLElement>(`[data-message-id="${optimisticId}"]`);

@@ -63,6 +63,8 @@ export interface WidgetConfig {
   locale?: string;
   supported_locales?: string[];
   giphy_api_key?: string | null;
+  inactivity_message?: { enabled?: boolean; delay_seconds?: number; text?: string };
+  voice_video_enabled?: boolean;
 }
 
 export interface WidgetInitResponse {
