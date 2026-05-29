@@ -50,8 +50,16 @@ configure_logging(level=settings.log_level, json_logs=settings.json_logs)
 if settings.sentry_dsn:
     try:  # pragma: no cover
         import sentry_sdk
+        from sentry_sdk.integrations.fastapi import FastApiIntegration
+        from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 
-        sentry_sdk.init(dsn=settings.sentry_dsn, traces_sample_rate=0.05, environment=settings.environment)
+        sentry_sdk.init(
+            dsn=settings.sentry_dsn,
+            environment=settings.environment,
+            traces_sample_rate=0.1,
+            integrations=[FastApiIntegration(), SqlalchemyIntegration()],
+            send_default_pii=False,
+        )
     except Exception:  # noqa: BLE001
         logging.getLogger(__name__).warning("Sentry SDK not installed; skipping init")
 
