@@ -1,4 +1,4 @@
-import { Bell, Bot, BrainCircuit, CheckCheck, ChevronLeft, ClipboardList, Code2, Compass, Contact, CreditCard, FileText, Inbox, LayoutDashboard, LifeBuoy, Lock, LogOut, Menu, Plug, Search, Send, Settings, Shield, Sparkles, Tag, Ticket, Trash2, UserPlus, Users, WandSparkles, X, Zap } from "lucide-react";
+import { Bell, Bot, BrainCircuit, CheckCheck, ChevronLeft, ClipboardList, Code2, Compass, Contact, CreditCard, FileText, Home, Inbox, LayoutDashboard, LifeBuoy, Lock, LogOut, Menu, Plug, Search, Send, Settings, Shield, Sparkles, Tag, Ticket, Trash2, UserPlus, Users, WandSparkles, X, Zap } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
@@ -18,6 +18,7 @@ import { FEATURE_LINKS, searchFeatures } from "../lib/featureCatalog";
 
 const nav = [
   { section: "Start here", items: [
+    { to: "/home", label: "Home", icon: Home },
     { to: "/settings", label: "Feature Hub", icon: Compass },
     { to: "/inbox", label: "Live Chat Inbox", icon: Inbox },
     { to: "/tickets", label: "HelpDesk Tickets", icon: Ticket },

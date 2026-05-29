@@ -9,6 +9,7 @@ export interface FeatureLink {
 }
 
 export const FEATURE_LINKS: FeatureLink[] = [
+  { title: "Workspace Home", description: "Start here for live metrics, setup checklist, product map, and recent activity.", href: "/home", category: "Conversations", status: "Core", keywords: ["home", "dashboard", "setup", "onboarding", "product map", "overview"] },
   { title: "Unified Inbox", description: "Handle live chats, queued visitors, assignments, sneak peek, transfers, notes, transcripts, and voice/video actions.", href: "/inbox", category: "Conversations", status: "Core", keywords: ["chat", "inbox", "live chat", "sneak peek", "message preview", "transfer", "assign", "transcript", "notes", "voice", "video", "screen share"] },
   { title: "Tickets / HelpDesk", description: "Manage async support, shared inbox tickets, internal notes, SLA workflows, followers, and collision presence.", href: "/tickets", category: "Conversations", status: "Core", keywords: ["ticket", "helpdesk", "shared inbox", "sla", "internal notes", "collision", "async"] },
   { title: "Contacts & Visitor Profiles", description: "View customer profiles, chat history, ecommerce context, custom variables, and visitor journey.", href: "/contacts", category: "Conversations", keywords: ["customer", "contact", "visitor", "profile", "history", "journey"] },

@@ -11,6 +11,7 @@ function lazyNamed(loader: () => Promise<Record<string, unknown>>, key: string) 
 }
 
 const AgentLayout = lazyNamed(() => import("./components/AgentLayout"), "AgentLayout");
+const WorkspaceHomePage = lazyNamed(() => import("./pages/WorkspaceHomePage"), "WorkspaceHomePage");
 const ArchivesPage = lazyNamed(() => import("./pages/ArchivesPage"), "ArchivesPage");
 const AcceptInvitePage = lazyNamed(() => import("./pages/AuthPages"), "AcceptInvitePage");
 const LoginPage = lazyNamed(() => import("./pages/AuthPages"), "LoginPage");
@@ -156,7 +157,8 @@ export function App(): JSX.Element {
         <Route path="/kb/:orgSlug" element={<PublicKBIndexPage />} />
         <Route path="/kb/:orgSlug/:slug" element={<PublicKBArticlePage />} />
         <Route element={<AuthGuard />}>
-          <Route path="/app" element={<Navigate to="/inbox" replace />} />
+          <Route path="/app" element={<Navigate to="/home" replace />} />
+          <Route path="/home" element={<WorkspaceHomePage />} />
           <Route path="/inbox" element={<InboxPage />} />
           <Route path="/archives" element={<ArchivesPage />} />
           <Route path="/inbox/chat/:id" element={<ChatPage />} />
