@@ -153,7 +153,9 @@ async def update_integration(
     if row is None:
         raise HTTPException(status_code=404, detail="Integration not found")
     if payload.config is not None:
-        row.config = payload.config
+        merged = dict(row.config or {})
+        merged.update(payload.config)
+        row.config = merged
     if payload.is_active is not None:
         row.is_active = payload.is_active
     row.updated_at = datetime.now(UTC)
@@ -322,11 +324,14 @@ async def oauth_start(
     if not auth_url:
         auth_url = str((definition.get("authorize_url") or "")).strip()
     if not auth_url:
-        auth_url = "https://example.com/oauth/authorize"
+        raise HTTPException(status_code=400, detail=f"No OAuth authorize URL configured for {provider}")
+
+    from app.services.oauth_exchange import _CREDENTIALS
+    real_client_id, _ = _CREDENTIALS.get(provider, ("", ""))
 
     params = {
         "response_type": "code",
-        "client_id": "flowlyra-placeholder-client-id",
+        "client_id": real_client_id or "flowlyra-placeholder-client-id",
         "redirect_uri": payload.redirect_uri,
         "scope": " ".join(payload.scopes),
         "state": state,
@@ -367,13 +372,35 @@ async def oauth_callback(
     if state_data.get("integration_id"):
         integration_id = uuid.UUID(str(state_data["integration_id"]))
 
-    token_payload = {
-        "access_token": f"token_{payload.code[:12]}",
-        "refresh_token": f"refresh_{payload.code[:12]}",
-        "token_type": "Bearer",
-        "expires_in": 3600,
-        "scope": " ".join(state_data.get("scopes") or []),
-    }
+    from app.services.oauth_exchange import exchange_code
+
+    definition = get_definition(provider)
+    token_url = (definition or {}).get("token_url", "")
+
+    config: dict = {}
+    if integration_id:
+        integration_row = (await db.execute(
+            select(Integration).where(Integration.id == integration_id, Integration.organization_id == user.organization_id)
+        )).scalar_one_or_none()
+        config = dict(integration_row.config or {}) if integration_row else {}
+
+    if provider == "shopify" and config.get("shop"):
+        shop = str(config["shop"]).replace(".myshopify.com", "").replace("https://", "")
+        token_url = token_url.replace("{shop}", shop)
+
+    redirect_uri = str(state_data.get("redirect_uri") or "")
+
+    try:
+        token_payload = await exchange_code(
+            provider=provider,
+            code=payload.code,
+            redirect_uri=redirect_uri,
+            token_url=token_url,
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Token exchange failed: {exc}") from exc
+
+    is_mock = bool(token_payload.get("_mock"))
 
     conn = await upsert_oauth_connection(
         db,
@@ -385,7 +412,7 @@ async def oauth_callback(
         token_type=token_payload.get("token_type"),
         scopes=list(state_data.get("scopes") or []),
         expires_in=int(token_payload.get("expires_in") or 0),
-        metadata={"mock": True, "received_at": datetime.now(UTC).isoformat()},
+        metadata={"mock": is_mock, "received_at": datetime.now(UTC).isoformat()},
     )
 
     if integration_id:

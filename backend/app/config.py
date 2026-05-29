@@ -82,6 +82,17 @@ class Settings(BaseSettings):
     retention_default_audit_days: int = 365
     retention_default_session_days: int = 90
     data_export_signed_url_ttl_seconds: int = 86400
+    # OAuth integration credentials per provider
+    oauth_shopify_client_id: str = ""
+    oauth_shopify_client_secret: str = ""
+    oauth_slack_client_id: str = ""
+    oauth_slack_client_secret: str = ""
+    oauth_salesforce_client_id: str = ""
+    oauth_salesforce_client_secret: str = ""
+    oauth_hubspot_client_id: str = ""
+    oauth_hubspot_client_secret: str = ""
+    oauth_github_client_id: str = ""
+    oauth_github_client_secret: str = ""
     # Phase 13 — Web/mobile push
     push_vapid_public_key: str = ""
     push_vapid_private_key: str = ""
