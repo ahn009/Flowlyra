@@ -32,6 +32,7 @@ from app.models.report_schedule import ReportSchedule
 from app.models.routing_rule import RoutingRule
 from app.models.session import Session
 from app.models.survey import Survey, SurveyResponse
+from app.models.subscription import Subscription
 from app.models.team import Team, team_members
 from app.models.ticket import (
     SlaPolicy,
@@ -110,6 +111,7 @@ __all__ = [
     "Session",
     "Survey",
     "SurveyResponse",
+    "Subscription",
     "Team",
     "Ticket",
     "TicketActivity",

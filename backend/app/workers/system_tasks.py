@@ -357,3 +357,55 @@ def sweep_retention() -> dict:
             return totals
 
     return asyncio.run(_run())
+
+
+@celery_app.task(name="app.workers.system_tasks.check_trial_expiry")
+def check_trial_expiry() -> dict[str, int]:
+    """Send trial reminders and expire old trials."""
+
+    from app.models.subscription import Subscription
+
+    async def _run() -> dict[str, int]:
+        now = datetime.now(UTC)
+        soon = now + timedelta(days=3)
+        reminded = 0
+        expired = 0
+        async with AsyncSessionLocal() as db:
+            rows = (
+                await db.execute(
+                    select(Subscription).where(
+                        Subscription.status == "trialing",
+                        Subscription.trial_ends_at.is_not(None),
+                        Subscription.trial_ends_at <= soon,
+                    )
+                )
+            ).scalars().all()
+            for sub in rows:
+                admins = (
+                    await db.execute(
+                        select(User).where(
+                            User.organization_id == sub.organization_id,
+                            User.role.in_(["owner", "admin"]),
+                            User.is_active.is_(True),
+                        )
+                    )
+                ).scalars().all()
+                org = (await db.execute(select(Organization).where(Organization.id == sub.organization_id))).scalar_one_or_none()
+                if sub.trial_ends_at and sub.trial_ends_at < now:
+                    sub.status = "expired"
+                    if org:
+                        org.plan = "starter"
+                    expired += 1
+                    title = "FlowLyra trial expired"
+                    body = "Your trial has expired and your workspace is now on starter limits."
+                else:
+                    reminded += 1
+                    title = "FlowLyra trial ending soon"
+                    body = "Your FlowLyra trial ends within 3 days. Add a payment method to keep all features."
+                for admin in admins:
+                    await send_email(admin.email, title, f"<p>{body}</p>")
+                    await notify(organization_id=sub.organization_id, user_id=admin.id, kind="billing.trial", title=title, body=body, link_url="/admin/billing", db=db)
+            await db.commit()
+        return {"reminded": reminded, "expired": expired}
+
+    return asyncio.run(_run())
