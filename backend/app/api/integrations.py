@@ -8,7 +8,7 @@ import json
 import uuid
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel, Field
 from sqlalchemy import desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -24,6 +24,7 @@ from app.services.integration_service import (
     install_integration,
     log_integration,
     mark_sync,
+    get_provider,
     run_health_check,
     uninstall_integration,
     upsert_oauth_connection,
@@ -470,6 +471,33 @@ async def n8n_spec(user: Annotated[TokenUser, Depends(current_user)]) -> dict:
 @router.get("/embed-guides")
 async def guides(_user: Annotated[TokenUser, Depends(current_user)]) -> dict:
     return {"items": embed_guides()}
+
+
+@router.post("/{provider}/webhook")
+async def provider_webhook(provider: str, request: Request, db: Annotated[AsyncSession, Depends(get_db)], org_id: uuid.UUID | None = Query(None)) -> dict:
+    provider = provider.strip().lower()
+    body = await request.body()
+    try:
+        payload = json.loads(body.decode() or "{}")
+    except json.JSONDecodeError:
+        payload = {}
+    stmt = select(Integration).where(Integration.provider == provider, Integration.is_active.is_(True))
+    if org_id:
+        stmt = stmt.where(Integration.organization_id == org_id)
+    integration = (await db.execute(stmt.order_by(Integration.created_at.desc()))).scalars().first()
+    if integration is None:
+        raise HTTPException(status_code=404, detail="Integration not found")
+    config = dict(integration.config or {})
+    config["_raw_body"] = body.decode(errors="ignore")
+    integration.config = config
+    provider_instance = await get_provider(db, integration)
+    if provider_instance is None:
+        raise HTTPException(status_code=404, detail="Provider client not found")
+    provider_instance.config = config
+    result = await provider_instance.handle_webhook(payload, dict(request.headers))
+    await log_integration(db, integration_id=integration.id, organization_id=integration.organization_id, event="integration.webhook", message=f"{provider} webhook processed", payload=result)
+    await db.commit()
+    return {"ok": True, "result": result}
 
 
 @router.get("/shopify/app-listing")

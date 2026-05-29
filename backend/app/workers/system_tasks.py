@@ -409,3 +409,34 @@ def check_trial_expiry() -> dict[str, int]:
         return {"reminded": reminded, "expired": expired}
 
     return asyncio.run(_run())
+
+
+@celery_app.task(name="app.workers.system_tasks.run_integration_sync")
+def run_integration_sync(integration_id: str) -> dict:
+    from app.models.integration import Integration
+    from app.services.integration_service import run_sync
+
+    async def _run() -> dict:
+        async with AsyncSessionLocal() as db:
+            row = (await db.execute(select(Integration).where(Integration.id == uuid.UUID(integration_id)))).scalar_one_or_none()
+            if row is None:
+                return {"ok": False, "error": "integration not found"}
+            result = await run_sync(db, row)
+            await db.commit()
+            return result
+
+    return asyncio.run(_run())
+
+
+@celery_app.task(name="app.workers.system_tasks.run_active_integration_syncs")
+def run_active_integration_syncs() -> dict[str, int]:
+    from app.models.integration import Integration
+
+    async def _run() -> list[str]:
+        async with AsyncSessionLocal() as db:
+            return [str(i) for i in (await db.execute(select(Integration.id).where(Integration.is_active.is_(True), Integration.status == "installed"))).scalars().all()]
+
+    ids = asyncio.run(_run())
+    for integration_id in ids:
+        run_integration_sync.delay(integration_id)
+    return {"scheduled": len(ids)}

@@ -5,13 +5,13 @@ import json
 import secrets
 import uuid
 
-import httpx
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.redis import get_redis, ns
 from app.models.integration import Integration, IntegrationLog, OAuthConnection
 from app.services.integration_registry import get_definition
+from app.integrations import PROVIDERS, IntegrationProvider
 
 
 async def log_integration(
@@ -106,52 +106,18 @@ async def uninstall_integration(db: AsyncSession, row: Integration) -> None:
 
 
 async def run_health_check(db: AsyncSession, row: Integration) -> dict:
-    test_url = str((row.config or {}).get("test_url") or "").strip()
-    if not test_url:
-        row.health_status = "healthy"
-        row.last_success_at = datetime.now(UTC)
-        row.failure_streak = 0
-        await log_integration(
-            db,
-            integration_id=row.id,
-            organization_id=row.organization_id,
-            event="integration.health",
-            message="Health check passed (local config check)",
-        )
-        return {"ok": True, "mode": "local"}
-
     try:
-        async with httpx.AsyncClient(timeout=10) as client:
-            resp = await client.get(test_url)
-        if 200 <= resp.status_code < 400:
-            row.health_status = "healthy"
-            row.last_success_at = datetime.now(UTC)
-            row.failure_streak = 0
-            await log_integration(
-                db,
-                integration_id=row.id,
-                organization_id=row.organization_id,
-                event="integration.health",
-                message="Remote health check succeeded",
-                status_code=resp.status_code,
-            )
-            return {"ok": True, "mode": "http", "status_code": resp.status_code}
-        row.health_status = "degraded"
-        row.failure_streak = int(row.failure_streak or 0) + 1
-        row.last_error_at = datetime.now(UTC)
-        row.last_error_message = f"Unexpected status {resp.status_code}"
-        await log_integration(
-            db,
-            integration_id=row.id,
-            organization_id=row.organization_id,
-            event="integration.health",
-            message="Remote health check failed",
-            level="warn",
-            status_code=resp.status_code,
-        )
-        return {"ok": False, "mode": "http", "status_code": resp.status_code}
+        provider = await get_provider(db, row)
+        ok = await provider.test_connection() if provider else bool(row.config or row.credentials)
+        row.health_status = "healthy" if ok else "unhealthy"
+        row.failure_streak = 0 if ok else int(row.failure_streak or 0) + 1
+        row.last_success_at = datetime.now(UTC) if ok else row.last_success_at
+        row.last_error_at = None if ok else datetime.now(UTC)
+        row.last_error_message = None if ok else "Provider health check failed"
+        await log_integration(db, integration_id=row.id, organization_id=row.organization_id, event="integration.health", message="Provider health check succeeded" if ok else "Provider health check failed", level="info" if ok else "warn")
+        return {"ok": ok, "mode": "provider" if provider else "local"}
     except Exception as exc:  # noqa: BLE001
-        row.health_status = "error"
+        row.health_status = "unhealthy"
         row.failure_streak = int(row.failure_streak or 0) + 1
         row.last_error_at = datetime.now(UTC)
         row.last_error_message = str(exc)[:1000]
@@ -187,6 +153,36 @@ async def mark_sync(db: AsyncSession, row: Integration, *, ok: bool, message: st
         level="info" if ok else "error",
         payload=payload or {},
     )
+
+
+async def get_provider(db: AsyncSession, integration: Integration) -> IntegrationProvider | None:
+    cls = PROVIDERS.get(integration.provider)
+    if cls is None:
+        return None
+    oauth = (
+        await db.execute(
+            select(OAuthConnection).where(
+                OAuthConnection.integration_id == integration.id,
+                OAuthConnection.organization_id == integration.organization_id,
+            )
+        )
+    ).scalars().first()
+    token = oauth.access_token if oauth else None
+    return cls(integration.config or {}, token)
+
+
+async def run_sync(db: AsyncSession, integration: Integration) -> dict:
+    provider = await get_provider(db, integration)
+    if provider is None:
+        await mark_sync(db, integration, ok=False, message="No provider client available")
+        return {"ok": False, "error": "No provider client available"}
+    try:
+        result = await provider.sync(integration.organization_id, db)
+        await mark_sync(db, integration, ok=True, message="Integration sync succeeded", payload=result)
+        return {"ok": True, **(result or {})}
+    except Exception as exc:  # noqa: BLE001
+        await mark_sync(db, integration, ok=False, message=str(exc))
+        return {"ok": False, "error": str(exc)}
 
 
 async def create_oauth_state(

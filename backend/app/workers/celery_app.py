@@ -46,5 +46,9 @@ celery_app.conf.beat_schedule = {
         "task": "app.workers.system_tasks.check_trial_expiry",
         "schedule": 86400.0,
     },
+    "run-active-integration-syncs": {
+        "task": "app.workers.system_tasks.run_active_integration_syncs",
+        "schedule": 900.0,
+    },
 }
 celery_app.autodiscover_tasks(["app.workers"])
