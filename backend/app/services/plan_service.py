@@ -16,11 +16,17 @@ from app.db.session import get_db
 from app.middleware.auth import TokenUser, current_user
 from app.models.organization import Organization
 from app.models.plan_limit import PlanLimits, get_plan, is_plan_at_least
+from app.models.subscription import Subscription
 from app.models.user import User
 
 
 async def get_org_plan(db: AsyncSession, organization_id) -> PlanLimits:
     row = (await db.execute(select(Organization.plan).where(Organization.id == organization_id))).scalar_one_or_none()
+    subscription_status = (
+        await db.execute(select(Subscription.status).where(Subscription.organization_id == organization_id))
+    ).scalar_one_or_none()
+    if subscription_status in {"past_due", "canceled", "unpaid", "expired", "incomplete_expired"}:
+        return get_plan("starter")
     return get_plan(row or "starter")
 
 

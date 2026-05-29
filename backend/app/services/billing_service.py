@@ -16,6 +16,8 @@ from app.models.user import User
 from app.services.audit_service import record as audit_record
 from app.services.email_service import send_email
 from app.services.notification_service import notify
+from app.services.webhook_events import PAYMENT_FAILED, SUBSCRIPTION_CANCELED, SUBSCRIPTION_CREATED, SUBSCRIPTION_UPDATED
+from app.services.webhook_service import dispatch_event
 
 settings = get_settings()
 stripe.api_key = settings.stripe_secret_key or None
@@ -237,6 +239,12 @@ async def handle_webhook_event(db: AsyncSession, event: Any) -> None:
                 sub.status = "canceled"
                 (await _org(db, organization_id)).plan = "starter"
                 await db.commit()
+            await dispatch_event(
+                db=db,
+                organization_id=organization_id,
+                event=SUBSCRIPTION_CANCELED if event_type.endswith("deleted") else SUBSCRIPTION_CREATED if event_type.endswith("created") else SUBSCRIPTION_UPDATED,
+                payload={"subscription_id": sub.stripe_subscription_id, "status": sub.status, "plan": sub.plan},
+            )
         return
     if not organization_id:
         return
@@ -257,6 +265,12 @@ async def handle_webhook_event(db: AsyncSession, event: Any) -> None:
             body = "Your account has been restricted to starter limits until payment is updated."
         await _notify_admins_payment(db, organization_id, title, body)
         await db.commit()
+        await dispatch_event(
+            db=db,
+            organization_id=organization_id,
+            event=PAYMENT_FAILED,
+            payload={"subscription_id": row.stripe_subscription_id, "attempt": attempt, "status": row.status},
+        )
     elif event_type == "customer.subscription.trial_will_end":
         await _notify_admins_payment(db, organization_id, "FlowLyra trial ending soon", "Your trial ends soon. Add a payment method to continue uninterrupted.")
         await db.commit()

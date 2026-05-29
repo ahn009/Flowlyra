@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { CopilotPanel } from "../components/CopilotPanel";
+import { PlanGate } from "../components/PlanGate";
 import {
   ArrowLeft,
   Check,
@@ -759,13 +760,26 @@ export function ChatPage(): JSX.Element {
                   </button>
                   <button className="flex h-8 w-8 items-center justify-center rounded-md text-xs font-bold text-navy-400 transition hover:bg-navy-100 hover:text-navy-600" title="Canned responses">#</button>
                   <div className="mx-1 h-4 w-px bg-navy-200" />
-                  <button
-                    onClick={() => setCopilotOpen(true)}
-                    className="flex h-8 w-8 items-center justify-center rounded-md bg-purple-50 text-purple-500 transition hover:bg-purple-100"
-                    title="AI Copilot"
+                  <PlanGate
+                    feature="ai_copilot"
+                    fallback={(
+                      <button
+                        onClick={() => navigate("/admin/billing")}
+                        className="flex h-8 w-8 items-center justify-center rounded-md bg-amber-50 text-amber-600 transition hover:bg-amber-100"
+                        title="Upgrade for AI Copilot"
+                      >
+                        <Sparkles size={15} />
+                      </button>
+                    )}
                   >
-                    <Sparkles size={15} />
-                  </button>
+                    <button
+                      onClick={() => setCopilotOpen(true)}
+                      className="flex h-8 w-8 items-center justify-center rounded-md bg-purple-50 text-purple-500 transition hover:bg-purple-100"
+                      title="AI Copilot"
+                    >
+                      <Sparkles size={15} />
+                    </button>
+                  </PlanGate>
                   <button
                     onClick={() => { setProductPanelOpen((v) => !v); setCouponPanelOpen(false); }}
                     className={`flex h-8 w-8 items-center justify-center rounded-md transition ${productPanelOpen ? "bg-success-50 text-success-600" : "text-navy-400 hover:bg-navy-100 hover:text-navy-600"}`}
@@ -833,7 +847,9 @@ export function ChatPage(): JSX.Element {
       </div>
 
       <ChatVisitorPanel chat={currentChat} open={visitorPanelOpen} onClose={() => setVisitorPanelOpen(false)} />
-      <CopilotPanel chatId={id} open={copilotOpen} onClose={() => setCopilotOpen(false)} onInsert={(t) => setReply((v) => (v ? `${v}\n\n${t}` : t))} />
+      <PlanGate feature="ai_copilot" fallback={null}>
+        <CopilotPanel chatId={id} open={copilotOpen} onClose={() => setCopilotOpen(false)} onInsert={(t) => setReply((v) => (v ? `${v}\n\n${t}` : t))} />
+      </PlanGate>
       {shortcutOpen ? <ShortcutsModal onClose={() => setShortcutOpen(false)} /> : null}
       {assignModal ? (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4" onClick={() => setAssignModal(false)}>

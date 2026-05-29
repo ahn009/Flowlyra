@@ -48,6 +48,7 @@ INTEGRATION_ERROR = "integration.error"
 SUBSCRIPTION_CREATED = "subscription.created"
 SUBSCRIPTION_UPDATED = "subscription.updated"
 SUBSCRIPTION_CANCELED = "subscription.canceled"
+PAYMENT_FAILED = "payment.failed"
 INVOICE_PAID = "invoice.paid"
 INVOICE_FAILED = "invoice.failed"
 

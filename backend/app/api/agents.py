@@ -15,6 +15,7 @@ from app.models.workspace_membership import WorkspaceMembership
 from app.schemas.agent import AgentCreate, AgentOut, AgentUpdate, StatusRequest
 from app.services.email_service import send_invite
 from app.services.plan_service import assert_seat_available
+from app.services import billing_service
 
 router = APIRouter(prefix="/agents", tags=["agents"])
 
@@ -51,6 +52,11 @@ async def create_agent(payload: AgentCreate, user: Annotated[TokenUser, Depends(
     )
     await db.commit()
     await db.refresh(agent)
+    active_count = await db.scalar(select(func.count()).select_from(User).where(User.organization_id == user.organization_id, User.is_active.is_(True)))
+    try:
+        await billing_service.update_seat_quantity(db, user.organization_id, int(active_count or 1))
+    except RuntimeError:
+        pass
     await send_invite(agent.email, token)
     return agent
 
@@ -106,4 +112,9 @@ async def suspend(agent_id: uuid.UUID, user: Annotated[TokenUser, Depends(requir
         chat.assigned_user_id = None
         chat.status = "waiting"
     await db.commit()
+    active_count = await db.scalar(select(func.count()).select_from(User).where(User.organization_id == user.organization_id, User.is_active.is_(True)))
+    try:
+        await billing_service.update_seat_quantity(db, user.organization_id, max(1, int(active_count or 1)))
+    except RuntimeError:
+        pass
     return {"ok": True, "reassigned": len(chats)}
