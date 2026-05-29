@@ -53,6 +53,16 @@ async def seed() -> None:
             status="online",
             is_online=True,
         )
+        await ensure_user(
+            db,
+            org,
+            email="awais@flowlyra.dev",
+            full_name="Saeed",
+            password="Dev@12345",
+            role="admin",
+            status="online",
+            is_online=True,
+        )
         agent1 = await ensure_user(
             db,
             org,

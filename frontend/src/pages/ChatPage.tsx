@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { VisitorMap as VisitorMapEmbed } from "../components/VisitorMap";
+import { VisitorMap } from "../components/VisitorMap";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -134,6 +134,7 @@ export function ChatPage(): JSX.Element {
   const [couponMessage, setCouponMessage] = useState("");
   const [chatListView, setChatListView] = useState<ChatListView>("my");
   const [chatListSearch, setChatListSearch] = useState("");
+  const [visitorPanelOpen, setVisitorPanelOpen] = useState(false);
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -430,12 +431,12 @@ export function ChatPage(): JSX.Element {
   const currentChat = data;
 
   return (
-    <section className="flex min-h-[calc(100dvh-56px)] flex-col bg-[#f4f6f8] text-navy-700">
+    <section className="flex min-h-[calc(100dvh-56px)] flex-col overflow-x-auto bg-[#f4f6f8] text-navy-700">
       <div className="flex h-12 shrink-0 items-center justify-between border-b border-navy-100 bg-white px-4">
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           <button
             onClick={() => setShortcutOpen(true)}
-            className="flex w-64 items-center gap-2 rounded-md border border-navy-100 bg-navy-50 px-3 py-1.5 text-sm text-navy-400 transition hover:border-navy-200 hover:bg-white"
+            className="hidden sm:flex w-40 sm:w-64 items-center gap-2 rounded-md border border-navy-100 bg-navy-50 px-3 py-1.5 text-sm text-navy-400 transition hover:border-navy-200 hover:bg-white"
           >
             <Search size={14} />
             <span className="flex-1 text-left">Search chats, tickets, visitors</span>
@@ -457,7 +458,7 @@ export function ChatPage(): JSX.Element {
         </div>
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden xl:grid-cols-[320px_minmax(0,1fr)_360px]">
+      <div className="grid min-h-0 flex-1 grid-cols-1 overflow-y-hidden xl:grid-cols-[320px_minmax(0,1fr)]">
         <ChatListPane
           rows={chatListRows}
           activeChatId={id}
@@ -499,6 +500,11 @@ export function ChatPage(): JSX.Element {
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-1">
+              <button
+                className={`flex h-8 w-8 items-center justify-center rounded-md transition hover:bg-navy-50 ${visitorPanelOpen ? "bg-brand-50 text-brand-500" : "text-navy-400 hover:text-navy-600"}`}
+                title="Visitor details"
+                onClick={() => setVisitorPanelOpen((v) => !v)}
+              ><UserRound size={15} /></button>
               <button className="flex h-8 w-8 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-50 hover:text-navy-600" title="Copy link"><Link2 size={15} /></button>
               <button className="flex h-8 w-8 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-50 hover:text-navy-600" title="More options"><MoreHorizontal size={15} /></button>
               <div className="mx-1 h-4 w-px bg-navy-100" />
@@ -799,10 +805,9 @@ export function ChatPage(): JSX.Element {
           </div>
         </div>
 
-        {/* Right: Visitor panel */}
-        <VisitorPanel chat={currentChat} />
       </div>
 
+      <ChatVisitorPanel chat={currentChat} open={visitorPanelOpen} onClose={() => setVisitorPanelOpen(false)} />
       <CopilotPanel chatId={id} open={copilotOpen} onClose={() => setCopilotOpen(false)} onInsert={(t) => setReply((v) => (v ? `${v}\n\n${t}` : t))} />
       {shortcutOpen ? <ShortcutsModal onClose={() => setShortcutOpen(false)} /> : null}
       {assignModal ? (
@@ -841,6 +846,7 @@ export function ChatPage(): JSX.Element {
           </div>
         </div>
       ) : null}
+
     </section>
   );
 }
@@ -1206,308 +1212,6 @@ function EmptyConversation(): JSX.Element {
   );
 }
 
-function VisitorPanel({ chat }: { chat?: ChatDetail }): JSX.Element {
-  const [additionalOpen, setAdditionalOpen] = useState(true);
-  const [pagesOpen, setPagesOpen] = useState(true);
-  const [preChatOpen, setPreChatOpen] = useState(true);
-  const [technologyOpen, setTechnologyOpen] = useState(true);
-  const [integrationsOpen, setIntegrationsOpen] = useState(true);
-  const [ticketsOpen, setTicketsOpen] = useState(false);
-  const [, forceUpdate] = useState(0);
-
-  // Live chat duration timer — re-renders every second
-  useEffect(() => {
-    const t = setInterval(() => forceUpdate((n) => n + 1), 1000);
-    return () => clearInterval(t);
-  }, []);
-
-  const customVariables = chat?.visitor_session?.custom_variables ?? {};
-  const customAttrs = chat?.contact?.custom_attrs ?? {};
-
-  const latitude = numberFromCustomVariable(customVariables["_geo_latitude"]);
-  const longitude = numberFromCustomVariable(customVariables["_geo_longitude"]);
-
-  const geoCity = (customVariables["_geo_city"] as string | undefined) || chat?.visitor_session?.city || "";
-  const geoCountry = (customVariables["_geo_country"] as string | undefined) || chat?.visitor_session?.country || "";
-  const geoIsp = customVariables["_geo_isp"] as string | undefined;
-  const geoLocalTime = customVariables["_geo_local_time"] as string | undefined;
-  const geoSource = customVariables["_geo_source"] as string | undefined;
-  const geoAccuracy = numberFromCustomVariable(customVariables["_geo_accuracy_m"]);
-  const uaOs = (customVariables["_ua_os"] as string | undefined) || chat?.visitor_session?.os || "";
-  const uaBrowser = (customVariables["_ua_browser"] as string | undefined)
-    || (chat?.visitor_session?.browser ? `${chat.visitor_session.browser}${chat.visitor_session.browser_version ? ` (${chat.visitor_session.browser_version})` : ""}` : "");
-  const uaDevice = (customVariables["_ua_device"] as string | undefined) || chat?.visitor_session?.device_type || "";
-
-  const sessionVisitCount = typeof customVariables["_session_visit_count"] === "number"
-    ? (customVariables["_session_visit_count"] as number)
-    : (chat?.visitor_session?.page_views ?? 0);
-  const sessionChatCount = typeof customVariables["_session_chat_count"] === "number"
-    ? (customVariables["_session_chat_count"] as number)
-    : ((chat?.past_chats?.length ?? 0) + 1);
-  const sessionLastSeen = (customVariables["_session_last_seen"] as string | undefined) || chat?.visitor_session?.last_seen_at || null;
-
-  const widgetPages = (() => {
-    const raw = customVariables["_session_pages"];
-    if (typeof raw !== "string") return null;
-    try {
-      return JSON.parse(raw) as Array<{ url: string; title: string; timeSpent: number }>;
-    } catch { return null; }
-  })();
-  const pageDurations = widgetPages
-    ? widgetPages.map((p) => ({ url: p.url, label: p.title || p.url, duration: formatDuration(p.timeSpent * 1000) })).reverse()
-    : computePageDurations(chat?.visitor_session?.page_history ?? []);
-
-  const location = [geoCity, geoCountry].filter(Boolean).join(", ");
-  const visitorName = chat?.visitor_name || chat?.visitor_email || "Website visitor";
-  const visitorInitials = initials(visitorName);
-  const chatDuration = chat?.created_at ? formatDuration(Math.max(0, Date.now() - new Date(chat.created_at).getTime())) : null;
-
-  const integrationsData: Record<string, unknown> = {};
-  for (const [k, v] of Object.entries({ ...customVariables, ...customAttrs })) {
-    if (!k.startsWith("_geo_") && !k.startsWith("_ua_") && !k.startsWith("_session_")) {
-      integrationsData[k] = v;
-    }
-  }
-
-  return (
-    <aside className="hidden min-h-0 flex-col overflow-y-auto border-l border-navy-100 bg-white xl:flex">
-      {/* Panel header */}
-      <div className="flex shrink-0 items-center justify-between border-b border-navy-100 px-5 py-4">
-        <span className="text-sm font-semibold text-navy-700">Visitor Details</span>
-        <div className="flex items-center gap-1">
-          <button className="flex h-7 w-7 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-50 hover:text-navy-600" title="Contact info">
-            <UserRound size={15} />
-          </button>
-          <button className="flex h-7 w-7 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-50 hover:text-navy-600" title="Close panel">
-            <X size={15} />
-          </button>
-        </div>
-      </div>
-
-      {/* Avatar + Contact info */}
-      <div className="shrink-0 border-b border-navy-100 px-5 py-5 text-center">
-        <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-brand-100 text-xl font-bold text-brand-600">
-          {visitorInitials}
-        </div>
-        <div className="mt-3 text-base font-semibold text-navy-700">{visitorName}</div>
-        {chat?.visitor_email && (
-          <a href={`mailto:${chat.visitor_email}`} className="mt-1 block text-sm text-brand-500 hover:text-brand-600">{chat.visitor_email}</a>
-        )}
-        {location && (
-          <div className="mt-1.5 flex items-center justify-center gap-1 text-xs text-navy-400">
-            <MapPin size={11} /> {location}
-          </div>
-        )}
-        <div className="mt-1 flex items-center justify-center gap-1 text-xs text-navy-400">
-          <Clock size={11} />
-          {geoLocalTime
-            ? `${geoLocalTime} local time`
-            : `${new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit", hour12: true }).format(new Date())} local time`}
-        </div>
-        <div className="mt-3 flex items-center justify-center gap-1.5">
-          <span className={`h-2 w-2 rounded-full ${chat?.visitor_status === "online" ? "animate-pulse bg-success-500" : "bg-navy-300"}`} />
-          <span className="text-xs font-medium text-navy-500">
-            {chat?.visitor_status === "online" ? "Online now" : "Offline"}
-          </span>
-        </div>
-      </div>
-
-      {/* Map */}
-      <div className="shrink-0 border-b border-navy-100">
-        {latitude !== null && longitude !== null ? (
-          <VisitorMapEmbed latitude={latitude} longitude={longitude} city={geoCity} country={geoCountry} source={geoSource} accuracyMeters={geoAccuracy} />
-        ) : location ? (
-          <div className="flex h-24 items-center justify-center bg-navy-50">
-            <div className="text-center">
-              <MapPin size={18} className="mx-auto mb-1 text-danger-500" />
-              <div className="text-xs font-medium text-navy-500">{location}</div>
-              <div className="mt-0.5 text-[10px] text-navy-400">No coordinates available</div>
-            </div>
-          </div>
-        ) : null}
-      </div>
-
-      {/* Info sections */}
-      <div className="divide-y divide-navy-100">
-        <PanelSection title="Additional info" open={additionalOpen} onToggle={() => setAdditionalOpen((v) => !v)}>
-          <InfoRow
-            label="Returning visitor"
-            value={`${sessionVisitCount} visit${sessionVisitCount !== 1 ? "s" : ""}, ${sessionChatCount} chat${sessionChatCount !== 1 ? "s" : ""}`}
-          />
-          {sessionLastSeen && (
-            <InfoRow label="Last seen" value={formatRelative(sessionLastSeen)} />
-          )}
-          {chatDuration && (
-            <InfoRow label="Chat duration" value={String(chatDuration)} />
-          )}
-          <InfoRow label="Groups" value="General" />
-        </PanelSection>
-
-        <PanelSection title="Visited pages" open={pagesOpen} onToggle={() => setPagesOpen((v) => !v)}>
-          {pageDurations.length > 0 ? (
-            <div className="grid gap-3">
-              {pageDurations.slice(0, 8).map((page, i) => (
-                <div key={i}>
-                  <div className="truncate text-xs font-medium text-navy-600" title={page.url}>
-                    {page.label}
-                  </div>
-                  <div className="mt-0.5 text-[11px] text-navy-400">{page.duration}</div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-xs text-navy-400">No page history available.</div>
-          )}
-        </PanelSection>
-
-        <PanelSection title="Pre-chat form" open={preChatOpen} onToggle={() => setPreChatOpen((v) => !v)}>
-          {chat?.visitor_name && <InfoRow label="Name" value={chat.visitor_name} />}
-          {chat?.visitor_email && <InfoRow label="E-mail" value={chat.visitor_email} accent />}
-          {!chat?.visitor_name && !chat?.visitor_email && (
-            <div className="text-xs text-navy-400">No pre-chat form data.</div>
-          )}
-        </PanelSection>
-
-        <PanelSection title="Technology" open={technologyOpen} onToggle={() => setTechnologyOpen((v) => !v)}>
-          {chat?.visitor_session?.ip_address && (
-            <InfoRow label="IP address" value={chat.visitor_session.ip_address} />
-          )}
-          {uaOs && <InfoRow label="OS/Device" value={uaDevice ? `${uaOs} / ${uaDevice}` : uaOs} />}
-          {uaBrowser && <InfoRow label="Browser" value={uaBrowser} />}
-          {geoIsp && <InfoRow label="ISP" value={geoIsp} />}
-          {!chat?.visitor_session?.ip_address && !uaOs && !uaBrowser && (
-            <div className="text-xs text-navy-400">No technology data.</div>
-          )}
-        </PanelSection>
-
-        {Object.keys(integrationsData).length > 0 && (
-          <PanelSection title="Integrations data" open={integrationsOpen} onToggle={() => setIntegrationsOpen((v) => !v)}>
-            {Object.entries(integrationsData).slice(0, 15).map(([k, v]) => (
-              <InfoRow key={k} label={k} value={String(v ?? "")} />
-            ))}
-          </PanelSection>
-        )}
-
-        {(chat?.tickets?.length ?? 0) > 0 && (
-          <PanelSection title={`Tickets (${chat?.tickets?.length})`} open={ticketsOpen} onToggle={() => setTicketsOpen((v) => !v)}>
-            <div className="grid gap-2">
-              {(chat?.tickets ?? []).slice(0, 6).map((ticket) => (
-                <div key={ticket.id} className="flex items-start justify-between gap-2 text-xs">
-                  <span className="truncate text-navy-500">#{ticket.ticket_number} {ticket.subject}</span>
-                  <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold ${ticket.status === "resolved" ? "bg-success-50 text-success-600" : "bg-navy-50 text-navy-500"}`}>
-                    {ticket.status}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </PanelSection>
-        )}
-      </div>
-    </aside>
-  );
-}
-
-function PanelSection({
-  title,
-  open,
-  onToggle,
-  children,
-}: {
-  title: string;
-  open: boolean;
-  onToggle: () => void;
-  children: ReactNode;
-}): JSX.Element {
-  return (
-    <div className="shrink-0">
-      <button
-        className="flex w-full items-center justify-between px-5 py-3 text-xs font-semibold uppercase tracking-wider text-navy-400 transition hover:bg-navy-50"
-        onClick={onToggle}
-      >
-        {title}
-        <ChevronDown
-          size={14}
-          className={`text-navy-300 transition-transform duration-200 ${open ? "" : "-rotate-90"}`}
-        />
-      </button>
-      {open && <div className="grid gap-2.5 px-5 pb-4 text-xs">{children}</div>}
-    </div>
-  );
-}
-
-function InfoRow({ label, value, accent }: { label: string; value: string; accent?: boolean }): JSX.Element {
-  return (
-    <div className="flex items-start justify-between gap-3">
-      <span className="shrink-0 text-navy-400">{label}</span>
-      <span className={`break-all text-right font-medium ${accent ? "text-brand-500" : "text-navy-700"}`}>{value}</span>
-    </div>
-  );
-}
-
-function ShortcutsModal({ onClose }: { onClose: () => void }): JSX.Element {
-  const shortcuts = [
-    ["?", "Open shortcut panel"],
-    ["R", "Focus reply box"],
-    ["A", "Assign chat"],
-    ["T", "Focus tag input"],
-    ["N", "Toggle note mode"],
-    ["Ctrl/Cmd + Enter", "Send message"],
-  ];
-  return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4" onClick={onClose}>
-      <div className="w-full max-w-sm rounded-xl border border-navy-100 bg-white p-5 shadow-lift" onClick={(e) => e.stopPropagation()}>
-        <div className="mb-3 text-sm font-semibold text-navy-700">Keyboard shortcuts</div>
-        <div className="grid gap-2">
-          {shortcuts.map(([key, desc]) => (
-            <div key={key} className="flex items-center justify-between rounded-lg border border-navy-100 bg-navy-50 px-3 py-2">
-              <span className="text-sm text-navy-600">{desc}</span>
-              <kbd className="rounded border border-navy-200 bg-white px-2 py-0.5 text-xs font-semibold text-navy-500">{key}</kbd>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function computePageDurations(history: Array<{ url?: string; ts?: string }>): Array<{ url: string; label: string; duration: string }> {
-  const result: Array<{ url: string; label: string; duration: string }> = [];
-  for (let i = 0; i < history.length; i++) {
-    const page = history[i];
-    if (!page.url || !page.ts) continue;
-    const startMs = new Date(page.ts).getTime();
-    const endMs = history[i + 1]?.ts ? new Date(history[i + 1].ts!).getTime() : Date.now();
-    const diff = Math.max(0, endMs - startMs);
-    let label = page.url;
-    try {
-      const u = new URL(page.url);
-      const path = u.pathname.replace(/\/$/, "");
-      label = path ? decodeURIComponent(path.split("/").pop() ?? u.hostname).replace(/[-_]/g, " ") : u.hostname;
-    } catch {
-      label = page.url;
-    }
-    result.push({ url: page.url, label: label || page.url, duration: formatDuration(diff) });
-  }
-  return result.reverse();
-}
-
-function formatDuration(ms: number): string {
-  const total = Math.floor(ms / 1000);
-  const h = Math.floor(total / 3600);
-  const m = Math.floor((total % 3600) / 60);
-  const s = total % 60;
-  if (h > 0) return `${h}h ${m}m ${s}s`;
-  if (m > 0) return `${m}m ${s}s`;
-  return `${s}s`;
-}
-
-function formatRelative(value: string): string {
-  const diffMs = Date.now() - new Date(value).getTime();
-  const days = Math.floor(diffMs / 86400000);
-  if (days === 0) return "today";
-  if (days === 1) return "yesterday";
-  return `${days} days ago`;
-}
 
 function parseStructuredMessage(message: Message): StructuredChatMessage | null {
   const content = message.content;
@@ -1593,4 +1297,504 @@ function initials(value: string): string {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase())
     .join("") || "V";
+}
+
+function formatDuration(ms: number): string {
+  const total = Math.floor(ms / 1000);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  if (h > 0) return `${h}h ${m}m ${s}s`;
+  if (m > 0) return `${m}m ${s}s`;
+  return `${s}s`;
+}
+
+function formatRelative(value: string): string {
+  const diffMs = Date.now() - new Date(value).getTime();
+  if (diffMs < 60000) return "just now";
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(diffMs / 3600000);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(diffMs / 86400000);
+  if (days === 1) return "yesterday";
+  if (days < 7) return `${days} days ago`;
+  try {
+    return new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(new Date(value));
+  } catch { return `${days} days ago`; }
+}
+
+function computePageDurations(history: Array<{ url?: string; ts?: string }>): Array<{ url: string; label: string; duration: string }> {
+  const result: Array<{ url: string; label: string; duration: string }> = [];
+  for (let i = 0; i < history.length; i++) {
+    const page = history[i];
+    if (!page.url || !page.ts) continue;
+    const startMs = new Date(page.ts).getTime();
+    const endMs = history[i + 1]?.ts ? new Date(history[i + 1].ts!).getTime() : Date.now();
+    const diff = Math.max(0, endMs - startMs);
+    let label = page.url;
+    try {
+      const u = new URL(page.url);
+      const path = u.pathname.replace(/\/$/, "");
+      label = path ? decodeURIComponent(path.split("/").pop() ?? u.hostname).replace(/[-_]/g, " ") : u.hostname;
+    } catch { label = page.url; }
+    result.push({ url: page.url, label: label || page.url, duration: formatDuration(diff) });
+  }
+  return result.reverse();
+}
+
+function PanelSection({ title, open, onToggle, children }: { title: string; open: boolean; onToggle: () => void; children: ReactNode }): JSX.Element {
+  return (
+    <div className="shrink-0">
+      <button
+        className="flex w-full items-center justify-between px-5 py-3 text-xs font-semibold uppercase tracking-wider text-navy-400 transition hover:bg-navy-50 dark:hover:bg-navy-800"
+        onClick={onToggle}
+      >
+        {title}
+        <ChevronDown size={14} className={`text-navy-300 transition-transform duration-200 ${open ? "" : "-rotate-90"}`} />
+      </button>
+      {open && <div className="grid gap-2.5 px-5 pb-4 text-xs">{children}</div>}
+    </div>
+  );
+}
+
+function InfoRow({ label, value, accent }: { label: string; value: string; accent?: boolean }): JSX.Element {
+  return (
+    <div className="flex items-start justify-between gap-3">
+      <span className="shrink-0 text-navy-400 dark:text-navy-500">{label}</span>
+      <span className={`break-all text-right font-medium ${accent ? "text-brand-500" : "text-navy-700 dark:text-navy-200"}`}>{value}</span>
+    </div>
+  );
+}
+
+function ChatVisitorPanel({ chat, open, onClose }: { chat?: ChatDetail; open: boolean; onClose: () => void }): JSX.Element {
+  const [, forceUpdate] = useState(0);
+  const [additionalOpen, setAdditionalOpen] = useState(true);
+  const [pagesOpen, setPagesOpen] = useState(true);
+  const [preChatOpen, setPreChatOpen] = useState(true);
+  const [techOpen, setTechOpen] = useState(true);
+  const [integrationsOpen, setIntegrationsOpen] = useState(true);
+  const [ticketsOpen, setTicketsOpen] = useState(false);
+  const [pastChatsOpen, setPastChatsOpen] = useState(false);
+  const [ecommerceOpen, setEcommerceOpen] = useState(false);
+  type GeoResult = {
+    city: string; country: string; latitude: number; longitude: number;
+    isp: string; timezone: string;
+    publicIp: string; os: string; browser: string; device: string;
+  };
+  const [fetchedGeo, setFetchedGeo] = useState<GeoResult | null>(null);
+  const [geoLoading, setGeoLoading] = useState(false);
+  const [geoFetchedIp, setGeoFetchedIp] = useState<string | null>(null);
+  const [localTimeDisplay, setLocalTimeDisplay] = useState("");
+
+  // Live re-render every second for chat duration
+  useEffect(() => {
+    const t = setInterval(() => forceUpdate((n) => n + 1), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const customVariables = chat?.visitor_session?.custom_variables ?? {};
+  const customAttrs = chat?.contact?.custom_attrs ?? {};
+
+  const latitude = numberFromCustomVariable(customVariables["_geo_latitude"]);
+  const longitude = numberFromCustomVariable(customVariables["_geo_longitude"]);
+  const geoCity = (customVariables["_geo_city"] as string | undefined) || chat?.visitor_session?.city || "";
+  const geoCountry = (customVariables["_geo_country"] as string | undefined) || chat?.visitor_session?.country || "";
+  const geoIsp = customVariables["_geo_isp"] as string | undefined;
+  const geoTimezoneVar = customVariables["_geo_timezone"] as string | undefined;
+  const geoSource = customVariables["_geo_source"] as string | undefined;
+  const geoAccuracy = numberFromCustomVariable(customVariables["_geo_accuracy_m"]);
+
+  const visitorIp = chat?.visitor_session?.ip_address ?? null;
+
+  useEffect(() => {
+    if (geoFetchedIp !== null) return;
+    if (latitude !== null && longitude !== null && geoCity && geoCountry) return;
+    if (!chat) return;
+
+    setGeoLoading(true);
+
+    function toNum(v: unknown): number | null {
+      if (typeof v === "number" && Number.isFinite(v)) return v;
+      if (typeof v === "string" && v.trim()) { const n = Number(v); return Number.isFinite(n) ? n : null; }
+      return null;
+    }
+
+    function isPublicIp(ip: string): boolean {
+      if (!ip) return false;
+      return !/^(10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.|127\.|169\.254\.|0\.0\.0\.0|::1$|fc|fd|fe80:|localhost)/i.test(ip);
+    }
+
+    // Parse browser UA for OS/device/browser info (used as fallback when backend doesn't provide it)
+    const ua = navigator.userAgent;
+    const uaInfo = {
+      os: (() => {
+        if (/Windows NT 1[01]/.test(ua)) return "Windows 10/11";
+        if (/Windows/.test(ua)) return "Windows";
+        if (/Android/.test(ua)) return "Android";
+        if (/iPhone|iPad/.test(ua)) return "iOS";
+        if (/Mac OS X/.test(ua)) return "macOS";
+        if (/Linux x86_64/.test(ua)) return "Linux (x86_64)";
+        if (/Linux/.test(ua)) return "Linux";
+        return "";
+      })(),
+      browser: (() => {
+        const m = ua.match(/Edg\/([\d.]+)/) || ua.match(/OPR\/([\d.]+)/) ||
+          ua.match(/Chrome\/([\d.]+)/) || ua.match(/Firefox\/([\d.]+)/) || ua.match(/Safari\/([\d.]+)/);
+        if (!m) return "";
+        const name = /Edg/.test(ua) ? "Edge" : /OPR/.test(ua) ? "Opera" : /Chrome/.test(ua) ? "Chrome" : /Firefox/.test(ua) ? "Firefox" : "Safari";
+        return `${name} (${m[1]})`;
+      })(),
+      device: /Mobi|Android/i.test(ua) ? "Mobile" : /Tablet|iPad/i.test(ua) ? "Tablet" : "Desktop",
+    };
+
+    async function run(): Promise<GeoResult | null> {
+      function make(d: { city: string; country: string; lat: number; lng: number; isp: string; tz: string; ip: string }): GeoResult {
+        return { city: d.city, country: d.country, latitude: d.lat, longitude: d.lng, isp: d.isp, timezone: d.tz, publicIp: d.ip, ...uaInfo };
+      }
+
+      // Try real public visitor IP first
+      if (visitorIp && isPublicIp(visitorIp)) {
+        try {
+          const d = (await (await fetch(`https://ipapi.co/${visitorIp}/json/`)).json()) as Record<string, unknown>;
+          const lat = toNum(d.latitude); const lng = toNum(d.longitude);
+          if (lat !== null && lng !== null && !d.error) {
+            return make({ city: String(d.city ?? ""), country: String(d.country_name ?? ""), lat, lng, isp: String(d.org ?? ""), tz: String(d.timezone ?? ""), ip: visitorIp });
+          }
+        } catch { /* next */ }
+      }
+
+      // Service 1: ipwho.is — auto-detects browser's real public IP in one call
+      try {
+        const d = (await (await fetch("https://ipwho.is/")).json()) as Record<string, unknown>;
+        const lat = toNum(d.latitude); const lng = toNum(d.longitude);
+        const ip = String(d.ip ?? "");
+        if (d.success && lat !== null && lng !== null && isPublicIp(ip)) {
+          return make({
+            city: String(d.city ?? ""), country: String(d.country ?? ""), lat, lng,
+            isp: String((d.connection as Record<string, unknown> | undefined)?.isp ?? ""),
+            tz: String((d.timezone as Record<string, unknown> | undefined)?.id ?? ""),
+            ip,
+          });
+        }
+      } catch { /* next */ }
+
+      // Service 2: freeipapi.com
+      try {
+        const d = (await (await fetch("https://freeipapi.com/api/json")).json()) as Record<string, unknown>;
+        const lat = toNum(d.latitude); const lng = toNum(d.longitude);
+        const ip = String(d.ipAddress ?? "");
+        if (lat !== null && lng !== null && isPublicIp(ip)) {
+          return make({ city: String(d.cityName ?? ""), country: String(d.countryName ?? ""), lat, lng, isp: "", tz: String(d.timeZone ?? ""), ip });
+        }
+      } catch { /* next */ }
+
+      // Service 3: ip-api.com (HTTP — may be blocked on HTTPS pages)
+      try {
+        const d = (await (await fetch("http://ip-api.com/json/?fields=status,country,city,lat,lon,timezone,query,org")).json()) as Record<string, unknown>;
+        const lat = toNum(d.lat); const lng = toNum(d.lon);
+        const ip = String(d.query ?? "");
+        if (d.status === "success" && lat !== null && lng !== null && isPublicIp(ip)) {
+          return make({ city: String(d.city ?? ""), country: String(d.country ?? ""), lat, lng, isp: String(d.org ?? ""), tz: String(d.timezone ?? ""), ip });
+        }
+      } catch { /* ignore */ }
+
+      // All geo failed — still return UA info with no location
+      return { city: "", country: "", latitude: 0, longitude: 0, isp: "", timezone: "", publicIp: "", ...uaInfo };
+    }
+
+    run().then((geo) => {
+      if (geo) setFetchedGeo(geo.latitude !== 0 ? geo : { ...geo, latitude: NaN, longitude: NaN });
+      setGeoFetchedIp(visitorIp ?? "__none__");
+    }).finally(() => setGeoLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chat, visitorIp, latitude, longitude, geoCity, geoCountry, geoFetchedIp]);
+
+  const resolvedTimezone = geoTimezoneVar || fetchedGeo?.timezone || "";
+
+  // Update local time every 60 seconds based on visitor timezone
+  useEffect(() => {
+    function tick(): string {
+      try {
+        return new Intl.DateTimeFormat(undefined, {
+          hour: "numeric", minute: "2-digit", hour12: true,
+          ...(resolvedTimezone ? { timeZone: resolvedTimezone } : {}),
+        }).format(new Date());
+      } catch {
+        return new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit", hour12: true }).format(new Date());
+      }
+    }
+    setLocalTimeDisplay(tick());
+    const t = setInterval(() => setLocalTimeDisplay(tick()), 60000);
+    return () => clearInterval(t);
+  }, [resolvedTimezone]);
+
+  const uaOs = (customVariables["_ua_os"] as string | undefined) || chat?.visitor_session?.os || fetchedGeo?.os || "";
+  const uaBrowser = (customVariables["_ua_browser"] as string | undefined)
+    || (chat?.visitor_session?.browser
+      ? `${chat.visitor_session.browser}${chat.visitor_session.browser_version ? ` (${chat.visitor_session.browser_version})` : ""}`
+      : "") || fetchedGeo?.browser || "";
+  const uaDevice = (customVariables["_ua_device"] as string | undefined) || chat?.visitor_session?.device_type || fetchedGeo?.device || "";
+
+  const sessionVisitCount = typeof customVariables["_session_visit_count"] === "number"
+    ? (customVariables["_session_visit_count"] as number)
+    : (chat?.visitor_session?.page_views ?? 0);
+  const sessionChatCount = typeof customVariables["_session_chat_count"] === "number"
+    ? (customVariables["_session_chat_count"] as number)
+    : ((chat?.past_chats?.length ?? 0) + 1);
+  const sessionLastSeen = (customVariables["_session_last_seen"] as string | undefined)
+    || chat?.visitor_session?.last_seen_at || null;
+
+  const widgetPages = (() => {
+    const raw = customVariables["_session_pages"];
+    if (typeof raw !== "string") return null;
+    try { return JSON.parse(raw) as Array<{ url: string; title: string; timeSpent: number; enteredAt?: number }>; }
+    catch { return null; }
+  })();
+  const pageDurations = (() => {
+    if (widgetPages) {
+      return [...widgetPages].reverse().map((p, i) => {
+        // First item (after reverse) is current page — if timeSpent=0, use live elapsed time
+        const isCurrentPage = i === 0 && p.timeSpent === 0;
+        const liveMs = isCurrentPage && p.enteredAt ? Math.max(0, Date.now() - p.enteredAt) : null;
+        const duration = liveMs !== null ? formatDuration(liveMs) : formatDuration(p.timeSpent * 1000);
+        return { url: p.url, label: p.title || p.url, duration, isLive: isCurrentPage };
+      });
+    }
+    return computePageDurations(chat?.visitor_session?.page_history ?? []).map((p) => ({ ...p, isLive: false }));
+  })();
+
+  const fgLat = fetchedGeo && Number.isFinite(fetchedGeo.latitude) ? fetchedGeo.latitude : null;
+  const fgLng = fetchedGeo && Number.isFinite(fetchedGeo.longitude) ? fetchedGeo.longitude : null;
+  const resolvedLatitude = latitude ?? fgLat;
+  const resolvedLongitude = longitude ?? fgLng;
+  const resolvedCity = geoCity || fetchedGeo?.city || "";
+  const resolvedCountry = geoCountry || fetchedGeo?.country || "";
+  const resolvedIsp = geoIsp || fetchedGeo?.isp || "";
+  const resolvedPublicIp = (visitorIp && !/^(10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.|127\.|::1$|fe80:|fc|fd|localhost)/i.test(visitorIp))
+    ? visitorIp
+    : fetchedGeo?.publicIp || "";
+
+  const geoLocation = [resolvedCity, resolvedCountry].filter(Boolean).join(", ");
+  const visitorName = chat?.visitor_name || chat?.visitor_email || "Website visitor";
+  const chatDuration = chat?.created_at
+    ? formatDuration(Math.max(0, Date.now() - new Date(chat.created_at).getTime()))
+    : null;
+
+  const integrationsData: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries({ ...customVariables, ...customAttrs })) {
+    if (!k.startsWith("_geo_") && !k.startsWith("_ua_") && !k.startsWith("_session_")) {
+      integrationsData[k] = v;
+    }
+  }
+  const hasEcommerce = chat?.ecommerce && Object.values(chat.ecommerce).some((v) => v != null);
+
+  const isOnline = chat?.visitor_status === "online";
+
+  return (
+    <>
+      {open && <div className="fixed inset-0 z-[150] bg-black/30" onClick={onClose} />}
+      <aside className={`fixed inset-y-0 right-0 z-[160] flex w-80 flex-col overflow-y-auto border-l border-navy-100 bg-white shadow-2xl transition-transform duration-300 dark:border-navy-700 dark:bg-navy-900 ${open ? "translate-x-0" : "translate-x-full"}`}
+        style={{ borderTop: "3px solid #f97316" }}>
+
+        {/* Header */}
+        <div className="flex shrink-0 items-center justify-between border-b border-navy-100 px-5 py-4 dark:border-navy-700">
+          <span className="text-sm font-semibold text-navy-700 dark:text-navy-100">Visitor Info</span>
+          <button className="flex h-7 w-7 items-center justify-center rounded-md text-navy-400 hover:bg-navy-50 dark:hover:bg-navy-800" onClick={onClose} aria-label="Close">
+            <X size={15} />
+          </button>
+        </div>
+
+        {/* Section 1: Profile */}
+        <div className="shrink-0 border-b border-navy-100 px-5 py-5 text-center dark:border-navy-700">
+          <div className="relative mx-auto inline-block">
+            <div className="grid h-14 w-14 place-items-center rounded-full bg-orange-100 text-xl font-bold text-orange-600">
+              {initials(visitorName)}
+            </div>
+            {isOnline && (
+              <span className="absolute bottom-0.5 right-0.5 block h-3.5 w-3.5 rounded-full border-2 border-white bg-green-500 dark:border-navy-900"
+                style={{ animation: "pulse-ring 2s infinite" }} />
+            )}
+          </div>
+          <div className="mt-3 text-base font-semibold text-navy-700 dark:text-navy-100">{visitorName}</div>
+          {chat?.visitor_email && (
+            <a href={`mailto:${chat.visitor_email}`} className="mt-1 block text-sm text-brand-500 hover:text-brand-600">{chat.visitor_email}</a>
+          )}
+          {geoLocation && (
+            <div className="mt-1.5 flex items-center justify-center gap-1 text-xs text-navy-400">
+              <MapPin size={11} /> {geoLocation}
+            </div>
+          )}
+          {localTimeDisplay && (
+            <div className="mt-1 flex items-center justify-center gap-1 text-xs text-navy-400">
+              <Clock size={11} /> {localTimeDisplay} local time
+            </div>
+          )}
+          <div className="mt-2 flex items-center justify-center gap-1.5">
+            {isOnline
+              ? <span className="flex items-center gap-1 text-xs font-medium text-green-600"><span className="h-1.5 w-1.5 rounded-full bg-green-500" />Online now</span>
+              : <span className="text-xs text-navy-400">Offline</span>}
+          </div>
+        </div>
+
+        {/* Section 2: Map */}
+        <div className="shrink-0 border-b border-navy-100 dark:border-navy-700">
+          {geoLoading && (
+            <div className="flex h-44 items-center justify-center bg-navy-50 dark:bg-navy-800">
+              <span className="text-xs text-navy-400">Loading map…</span>
+            </div>
+          )}
+          {!geoLoading && resolvedLatitude !== null && resolvedLongitude !== null && (
+            <VisitorMap latitude={resolvedLatitude} longitude={resolvedLongitude} city={resolvedCity} country={resolvedCountry} source={geoSource} accuracyMeters={geoAccuracy} />
+          )}
+          {!geoLoading && resolvedLatitude === null && geoLocation && (
+            <div className="flex h-24 items-center justify-center bg-navy-50 dark:bg-navy-800">
+              <div className="text-center">
+                <MapPin size={18} className="mx-auto mb-1 text-danger-400" />
+                <div className="text-xs font-medium text-navy-500">{geoLocation}</div>
+                <div className="mt-0.5 text-[10px] text-navy-400">No coordinates available</div>
+              </div>
+            </div>
+          )}
+          {!geoLoading && resolvedLatitude === null && !geoLocation && geoFetchedIp && (
+            <div className="flex h-16 items-center justify-center bg-navy-50 dark:bg-navy-800">
+              <div className="text-center">
+                <MapPin size={16} className="mx-auto mb-1 text-navy-300" />
+                <div className="text-[10px] text-navy-400">Location unavailable</div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="divide-y divide-navy-100 dark:divide-navy-700">
+
+          {/* Section 3: Additional info */}
+          <PanelSection title="Additional info" open={additionalOpen} onToggle={() => setAdditionalOpen((v) => !v)}>
+            <InfoRow label="Returning visitor" value={`${sessionVisitCount} visit${sessionVisitCount !== 1 ? "s" : ""}, ${sessionChatCount} chat${sessionChatCount !== 1 ? "s" : ""}`} />
+            {sessionLastSeen && <InfoRow label="Last seen" value={formatRelative(sessionLastSeen)} />}
+            {chat?.visitor_session?.first_seen_at && <InfoRow label="First seen" value={formatRelative(chat.visitor_session.first_seen_at)} />}
+            {chatDuration && <InfoRow label="Chat duration" value={chatDuration} />}
+            {chat?.visitor_session?.current_url && (
+              <div className="flex items-start justify-between gap-3">
+                <span className="shrink-0 text-navy-400 dark:text-navy-500">Current page</span>
+                <a href={chat.visitor_session.current_url} target="_blank" rel="noreferrer"
+                  className="break-all text-right text-xs font-medium text-blue-500 hover:underline" title={chat.visitor_session.current_url}>
+                  {(() => { try { return new URL(chat.visitor_session.current_url!).pathname || "/"; } catch { return chat.visitor_session.current_url; } })()}
+                </a>
+              </div>
+            )}
+            {chat?.visitor_session?.referrer && <InfoRow label="Referrer" value={chat.visitor_session.referrer} />}
+            <InfoRow label="Groups" value="General" />
+          </PanelSection>
+
+          {/* Section 4: Visited pages */}
+          <PanelSection title="Visited pages" open={pagesOpen} onToggle={() => setPagesOpen((v) => !v)}>
+            {pageDurations.length > 0 ? (
+              <div className="grid gap-3">
+                {pageDurations.slice(0, 8).map((page, i) => (
+                  <div key={i}>
+                    <div className="flex items-center gap-1">
+                      <a href={page.url} target="_blank" rel="noreferrer"
+                        className="block truncate text-xs font-medium text-blue-500 hover:underline" title={page.url}>
+                        {page.label}
+                      </a>
+                      {page.isLive && <span className="shrink-0 rounded-full bg-green-100 px-1 text-[9px] font-semibold text-green-600">live</span>}
+                    </div>
+                    <div className="mt-0.5 text-[11px] text-navy-400">{page.duration}</div>
+                  </div>
+                ))}
+              </div>
+            ) : <div className="text-xs text-navy-400">No page history available.</div>}
+          </PanelSection>
+
+          {/* Section 5: Pre-chat form */}
+          <PanelSection title="Pre-chat form" open={preChatOpen} onToggle={() => setPreChatOpen((v) => !v)}>
+            {chat?.visitor_name && <InfoRow label="Name" value={chat.visitor_name} />}
+            {chat?.visitor_email && <InfoRow label="E-mail" value={chat.visitor_email} accent />}
+            {!chat?.visitor_name && !chat?.visitor_email && <div className="text-xs text-navy-400">No pre-chat form data.</div>}
+          </PanelSection>
+
+          {/* Section 6: Technology */}
+          <PanelSection title="Technology" open={techOpen} onToggle={() => setTechOpen((v) => !v)}>
+            {resolvedPublicIp && <InfoRow label="IP address" value={resolvedPublicIp} />}
+            {uaOs && <InfoRow label="OS / Device" value={uaDevice ? `${uaOs} / ${uaDevice}` : uaOs} />}
+            {uaBrowser && <InfoRow label="Browser" value={uaBrowser} />}
+            {resolvedIsp && <InfoRow label="ISP" value={resolvedIsp} />}
+            {resolvedTimezone && <InfoRow label="Timezone" value={resolvedTimezone} />}
+            {!resolvedPublicIp && !uaOs && !uaBrowser && <div className="text-xs text-navy-400">No technology data.</div>}
+          </PanelSection>
+
+          {/* Section 7: Integrations data */}
+          <PanelSection title="Integrations data" open={integrationsOpen} onToggle={() => setIntegrationsOpen((v) => !v)}>
+            {chat?.visitor_name && <InfoRow label="default_Name" value={chat.visitor_name} />}
+            {chat?.visitor_email && <InfoRow label="default_E-mail" value={chat.visitor_email} />}
+            {Object.entries(integrationsData).slice(0, 15).map(([k, v]) => (
+              <InfoRow key={k} label={k} value={String(v ?? "")} />
+            ))}
+            {!chat?.visitor_name && !chat?.visitor_email && Object.keys(integrationsData).length === 0 && (
+              <div className="text-xs text-navy-400">No integrations data.</div>
+            )}
+          </PanelSection>
+
+          {/* Section 8: E-commerce — always visible */}
+          <PanelSection title="E-commerce" open={ecommerceOpen} onToggle={() => setEcommerceOpen((v) => !v)}>
+            <InfoRow label="Total orders" value={chat?.ecommerce?.orders != null ? String(chat.ecommerce.orders) : "0"} />
+            <InfoRow label="Total spent" value={chat?.ecommerce?.lifetime_value != null ? formatMoney(chat.ecommerce.lifetime_value, null) : "$0.00"} />
+            <InfoRow label="Last order" value={chat?.ecommerce?.last_order ? formatRelative(chat.ecommerce.last_order) : "Never"} />
+            {chat?.visitor_session?.first_seen_at && (
+              <InfoRow label="Customer since" value={formatRelative(chat.visitor_session.first_seen_at)} />
+            )}
+            {chat?.ecommerce?.lead_score != null && <InfoRow label="Lead score" value={String(chat.ecommerce.lead_score)} />}
+            {chat?.ecommerce?.churn_risk != null && <InfoRow label="Churn risk" value={String(chat.ecommerce.churn_risk)} />}
+            {!hasEcommerce && (
+              <div className="mt-1 text-[10px] italic text-navy-400">Connect your store to see order data</div>
+            )}
+          </PanelSection>
+
+          {/* Past chats with status badges */}
+          {(chat?.past_chats?.length ?? 0) > 0 && (
+            <PanelSection title={`Past chats (${chat?.past_chats?.length})`} open={pastChatsOpen} onToggle={() => setPastChatsOpen((v) => !v)}>
+              <div className="grid gap-2">
+                {(chat?.past_chats ?? []).slice(0, 8).map((c) => (
+                  <div key={c.id} className="rounded-lg border border-navy-100 p-2.5 transition hover:bg-navy-50 dark:border-navy-700 dark:hover:bg-navy-800">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex min-w-0 items-center gap-1.5">
+                        <MessageSquare size={11} className="shrink-0 text-navy-400" />
+                        <span className="truncate text-xs font-medium text-navy-700 dark:text-navy-200">{c.subject || "Chat"}</span>
+                      </div>
+                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold text-white ${
+                        c.status === "resolved" ? "bg-green-600"
+                        : c.status === "active" || c.status === "open" ? "bg-blue-600"
+                        : c.status === "missed" ? "bg-red-600"
+                        : "bg-navy-400"}`}>
+                        {c.status}
+                      </span>
+                    </div>
+                    {c.updated_at && <div className="mt-1 text-[10px] text-navy-400">{formatRelative(c.updated_at)}</div>}
+                  </div>
+                ))}
+              </div>
+            </PanelSection>
+          )}
+
+          {/* Tickets */}
+          {(chat?.tickets?.length ?? 0) > 0 && (
+            <PanelSection title={`Tickets (${chat?.tickets?.length})`} open={ticketsOpen} onToggle={() => setTicketsOpen((v) => !v)}>
+              <div className="grid gap-2">
+                {(chat?.tickets ?? []).slice(0, 6).map((ticket) => (
+                  <div key={ticket.id} className="flex items-start justify-between gap-2 text-xs">
+                    <span className="truncate text-navy-500 dark:text-navy-400">#{ticket.ticket_number} {ticket.subject}</span>
+                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold text-white ${ticket.status === "resolved" ? "bg-green-600" : "bg-navy-400"}`}>
+                      {ticket.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </PanelSection>
+          )}
+
+        </div>
+      </aside>
+    </>
+  );
 }
