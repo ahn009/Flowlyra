@@ -41,6 +41,60 @@ interface IntegrationLog {
   created_at: string | null;
 }
 
+interface ConfigField {
+  key: string;
+  label: string;
+  type: string;
+  placeholder: string;
+  required?: boolean;
+}
+
+const CONFIG_FIELDS: Record<string, ConfigField[]> = {
+  api_key: [
+    { key: "access_token", label: "API Key / Access Token", type: "password", placeholder: "Enter your API key", required: true },
+  ],
+  oauth2: [
+    { key: "shop", label: "Shop domain (if applicable)", type: "text", placeholder: "your-store.myshopify.com" },
+  ],
+  webhook: [
+    { key: "webhook_url", label: "Webhook URL", type: "url", placeholder: "https://hooks.zapier.com/...", required: true },
+  ],
+  embed: [
+    { key: "site_url", label: "Website URL", type: "url", placeholder: "https://your-site.com" },
+  ],
+  script: [
+    { key: "tracking_id", label: "Tracking / Measurement ID", type: "text", placeholder: "G-XXXXXXXXXX or GTM-XXXXXXX", required: true },
+    { key: "api_secret", label: "API Secret (if applicable)", type: "password", placeholder: "Optional" },
+  ],
+};
+
+const PROVIDER_CONFIG_OVERRIDES: Record<string, ConfigField[]> = {
+  shopify: [
+    { key: "shop", label: "Shop domain", type: "text", placeholder: "your-store.myshopify.com", required: true },
+    { key: "access_token", label: "Admin API Access Token", type: "password", placeholder: "shpat_..." },
+    { key: "webhook_secret", label: "Webhook signing secret", type: "password", placeholder: "Optional" },
+  ],
+  slack: [
+    { key: "bot_token", label: "Bot OAuth Token", type: "password", placeholder: "xoxb-...", required: true },
+    { key: "default_channel", label: "Default notification channel", type: "text", placeholder: "#support" },
+  ],
+  ga4: [
+    { key: "measurement_id", label: "Measurement ID", type: "text", placeholder: "G-XXXXXXXXXX", required: true },
+    { key: "api_secret", label: "API Secret", type: "password", placeholder: "From GA4 Admin → Data Streams", required: true },
+  ],
+  hubspot: [
+    { key: "access_token", label: "Private App Access Token", type: "password", placeholder: "pat-...", required: true },
+    { key: "pipeline", label: "Deal pipeline ID", type: "text", placeholder: "default" },
+  ],
+  salesforce: [
+    { key: "instance_url", label: "Instance URL", type: "url", placeholder: "https://yourorg.my.salesforce.com", required: true },
+    { key: "access_token", label: "Access Token", type: "password", placeholder: "From Connected App", required: true },
+  ],
+  zapier: [
+    { key: "webhook_url", label: "Zapier Webhook URL", type: "url", placeholder: "https://hooks.zapier.com/hooks/catch/...", required: true },
+  ],
+};
+
 export function IntegrationsMarketplacePage(): JSX.Element {
   const me = useMe();
   const queryClient = useQueryClient();
@@ -50,6 +104,8 @@ export function IntegrationsMarketplacePage(): JSX.Element {
   const [category, setCategory] = useState<string>("all");
   const [query, setQuery] = useState<string>("");
   const [selectedIntegrationId, setSelectedIntegrationId] = useState<string | null>(null);
+  const [configModalProvider, setConfigModalProvider] = useState<string | null>(null);
+  const [configValues, setConfigValues] = useState<Record<string, string>>({});
 
   const catalog = useQuery({
     queryKey: ["integrations-catalog"],
@@ -70,11 +126,18 @@ export function IntegrationsMarketplacePage(): JSX.Element {
   });
 
   const installMutation = useMutation({
-    mutationFn: async (provider: string) => (await api.post<IntegrationRow>("/integrations", { provider, config: {} })).data,
+    mutationFn: async ({ provider, config }: { provider: string; config: Record<string, string> }) =>
+      (await api.post<IntegrationRow>("/integrations", { provider, config })).data,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["integrations-installed"] });
       void queryClient.invalidateQueries({ queryKey: ["integrations-health"] });
     },
+  });
+
+  const updateConfigMutation = useMutation({
+    mutationFn: async ({ id, config }: { id: string; config: Record<string, string> }) =>
+      api.patch(`/integrations/${id}`, { config }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["integrations-installed"] }),
   });
 
   const uninstallMutation = useMutation({
@@ -153,12 +216,28 @@ export function IntegrationsMarketplacePage(): JSX.Element {
 
               <div className="mt-3 flex flex-wrap gap-2">
                 {!isInstalled ? (
-                  <button disabled={!canWrite || installMutation.isPending} onClick={() => installMutation.mutate(item.provider)} className="rounded-md bg-navy-900 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50">Install</button>
+                  <button
+                    disabled={!canWrite || installMutation.isPending}
+                    onClick={() => { setConfigModalProvider(item.provider); setConfigValues({}); }}
+                    className="rounded-md bg-navy-900 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+                  >
+                    {item.install_type === "oauth2" ? "Connect" : "Install"}
+                  </button>
                 ) : (
                   <>
                     <button disabled={!canWrite || testMutation.isPending || !installedId} onClick={() => installedId && testMutation.mutate(installedId)} className="rounded-md border border-navy-200 px-3 py-1.5 text-xs font-semibold">Test</button>
                     <button disabled={!canWrite || syncMutation.isPending || !installedId} onClick={() => installedId && syncMutation.mutate(installedId)} className="rounded-md border border-navy-200 px-3 py-1.5 text-xs font-semibold">Sync</button>
                     <button disabled={!installedId} onClick={() => installedId && setSelectedIntegrationId(installedId)} className="rounded-md border border-navy-200 px-3 py-1.5 text-xs font-semibold disabled:opacity-50">Logs</button>
+                    <button
+                      disabled={!canWrite}
+                      onClick={() => {
+                        setConfigModalProvider(item.provider);
+                        setConfigValues(Object.fromEntries(
+                          Object.entries(installedItem?.config ?? {}).map(([k, v]) => [k, String(v ?? "")])
+                        ));
+                      }}
+                      className="rounded-md border border-navy-200 px-3 py-1.5 text-xs font-semibold"
+                    >Configure</button>
                     <button disabled={!canWrite || uninstallMutation.isPending || !installedId} onClick={() => installedId && uninstallMutation.mutate(installedId)} className="rounded-md border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700 disabled:opacity-50">Uninstall</button>
                   </>
                 )}
@@ -193,6 +272,66 @@ export function IntegrationsMarketplacePage(): JSX.Element {
           </div>
         </section>
       )}
+
+      {configModalProvider && (() => {
+        const catalogItem = (catalog.data?.items ?? []).find((i) => i.provider === configModalProvider);
+        const installedItem = installedByProvider.get(configModalProvider);
+        const isAlreadyInstalled = Boolean(installedItem && installedItem.status !== "uninstalled");
+        const fields = PROVIDER_CONFIG_OVERRIDES[configModalProvider] ?? CONFIG_FIELDS[catalogItem?.install_type ?? "api_key"] ?? CONFIG_FIELDS.api_key;
+        const canSubmit = fields.filter((f) => f.required).every((f) => configValues[f.key]?.trim());
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy-950/60 backdrop-blur-sm">
+            <div className="w-full max-w-md rounded-2xl border border-navy-100 bg-white p-6 shadow-xl dark:border-navy-700 dark:bg-navy-900">
+              <h2 className="text-lg font-bold text-navy-800 dark:text-white">
+                Configure {catalogItem?.name ?? configModalProvider}
+              </h2>
+              <p className="mt-1 text-sm text-navy-400">
+                {catalogItem?.install_type === "oauth2"
+                  ? "Enter any required details, then you'll be redirected to authorize."
+                  : "Enter your credentials to connect this integration."}
+              </p>
+              <div className="mt-4 space-y-3">
+                {fields.map((field) => (
+                  <div key={field.key}>
+                    <label className="mb-1 block text-sm font-medium text-navy-600 dark:text-navy-300">
+                      {field.label}{field.required && <span className="text-red-500"> *</span>}
+                    </label>
+                    <input
+                      type={field.type}
+                      placeholder={field.placeholder}
+                      value={configValues[field.key] ?? ""}
+                      onChange={(e) => setConfigValues((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                      className="w-full rounded-lg border border-navy-200 bg-white px-3 py-2 text-sm dark:border-navy-600 dark:bg-navy-800"
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="mt-5 flex justify-end gap-2">
+                <button
+                  onClick={() => { setConfigModalProvider(null); setConfigValues({}); }}
+                  className="rounded-lg border border-navy-200 px-4 py-2 text-sm font-semibold"
+                >Cancel</button>
+                <button
+                  disabled={!canSubmit}
+                  onClick={async () => {
+                    if (isAlreadyInstalled && installedItem?.id) {
+                      await updateConfigMutation.mutateAsync({ id: installedItem.id, config: configValues });
+                    } else {
+                      await installMutation.mutateAsync({ provider: configModalProvider, config: configValues });
+                    }
+                    setConfigModalProvider(null);
+                    setConfigValues({});
+                  }}
+                  className="rounded-lg bg-navy-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                >
+                  {isAlreadyInstalled ? "Save Config" : catalogItem?.install_type === "oauth2" ? "Connect" : "Save & Install"}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
