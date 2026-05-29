@@ -151,11 +151,10 @@ async def plans(user: AdminUser) -> dict[str, Any]:
 async def stripe_webhook(request: Request, db: AsyncSession = Depends(get_db)) -> dict:
     payload = await request.body()
     sig = request.headers.get("stripe-signature", "")
+    if not settings.stripe_webhook_secret:
+        raise HTTPException(status_code=503, detail="Stripe webhook secret not configured")
     try:
-        if settings.stripe_webhook_secret:
-            event = stripe.Webhook.construct_event(payload, sig, settings.stripe_webhook_secret)
-        else:
-            event = stripe.Event.construct_from(await request.json(), stripe.api_key)
+        event = stripe.Webhook.construct_event(payload, sig, settings.stripe_webhook_secret)
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(status_code=400, detail="Invalid Stripe webhook signature") from exc
     await billing_service.handle_webhook_event(db, event)
