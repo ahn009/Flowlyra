@@ -1,4 +1,4 @@
-import { Bell, Bot, BrainCircuit, CheckCheck, ChevronLeft, ClipboardList, Code2, Contact, CreditCard, FileText, Inbox, LayoutDashboard, LifeBuoy, Lock, LogOut, Menu, Plug, Search, Send, Settings, Shield, Sparkles, Tag, Ticket, Trash2, UserPlus, Users, WandSparkles, X, Zap } from "lucide-react";
+import { Bell, Bot, BrainCircuit, CheckCheck, ChevronLeft, ClipboardList, Code2, Compass, Contact, CreditCard, FileText, Inbox, LayoutDashboard, LifeBuoy, Lock, LogOut, Menu, Plug, Search, Send, Settings, Shield, Sparkles, Tag, Ticket, Trash2, UserPlus, Users, WandSparkles, X, Zap } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
@@ -14,39 +14,42 @@ import type { Notification } from "../types";
 import { playIncomingChatSound, unlockNotificationSound } from "../lib/notificationSound";
 import { useI18n } from "../i18n/I18nProvider";
 import { ProductTour } from "./ProductTour";
+import { FEATURE_LINKS, searchFeatures } from "../lib/featureCatalog";
 
 const nav = [
-  { section: "Conversations", items: [
-    { to: "/inbox", label: "Inbox", icon: Inbox },
-    { to: "/tickets", label: "Tickets", icon: Ticket },
-    { to: "/contacts", label: "Contacts", icon: Contact }
+  { section: "Start here", items: [
+    { to: "/settings", label: "Feature Hub", icon: Compass },
+    { to: "/inbox", label: "Live Chat Inbox", icon: Inbox },
+    { to: "/tickets", label: "HelpDesk Tickets", icon: Ticket },
+    { to: "/contacts", label: "Customers", icon: Contact }
   ] },
-  { section: "Workspace", items: [
-    { to: "/admin/analytics", label: "Reports", icon: LayoutDashboard },
-    { to: "/engage/traffic", label: "Traffic", icon: Search },
-    { to: "/engage/campaigns", label: "Campaigns", icon: Send },
-    { to: "/engage/goals", label: "Goals", icon: CheckCheck },
-    { to: "/admin/canned", label: "Canned", icon: ClipboardList },
-    { to: "/admin/kb", label: "Knowledge", icon: LifeBuoy },
-    { to: "/settings/tags", label: "Tags", icon: Tag },
-    { to: "/admin/routing", label: "Routing", icon: Zap },
-    { to: "/admin/triggers", label: "Triggers", icon: Bot },
-    { to: "/admin/chatbot", label: "Chatbot", icon: Sparkles },
-    { to: "/admin/ai-knowledge", label: "AI Knowledge", icon: BrainCircuit },
-    { to: "/admin/channels", label: "Channels", icon: Plug }
+  { section: "Automation & AI", items: [
+    { to: "/admin/canned", label: "Canned Responses", icon: ClipboardList },
+    { to: "/settings/tags", label: "Chat Tags", icon: Tag },
+    { to: "/admin/routing", label: "Routing & Assignment", icon: Zap },
+    { to: "/admin/triggers", label: "Proactive Triggers", icon: Bot },
+    { to: "/admin/chatbot", label: "Chatbot Builder", icon: Sparkles },
+    { to: "/admin/ai-knowledge", label: "AI Copilot & Knowledge", icon: BrainCircuit }
   ] },
-  { section: "Settings", items: [
+  { section: "Growth & reports", items: [
+    { to: "/admin/analytics", label: "Reports Dashboard", icon: LayoutDashboard },
+    { to: "/engage/traffic", label: "Website Traffic", icon: Search },
+    { to: "/engage/campaigns", label: "Targeted Campaigns", icon: Send },
+    { to: "/engage/goals", label: "Goals & Sales Tracker", icon: CheckCheck }
+  ] },
+  { section: "Widget & channels", items: [
+    { to: "/admin/widget", label: "Widget Builder", icon: Settings },
+    { to: "/admin/install", label: "Install Widget", icon: Code2 },
+    { to: "/admin/channels", label: "Messaging Channels", icon: Plug },
+    { to: "/settings/integrations", label: "Integrations", icon: Plug }
+  ] },
+  { section: "Admin", items: [
     { to: "/admin/agents", label: "Agents", icon: Users },
-    { to: "/admin/teams", label: "Teams", icon: UserPlus },
-    { to: "/admin/widget", label: "Widget", icon: Settings },
-    { to: "/admin/install", label: "Install", icon: Code2 },
+    { to: "/admin/teams", label: "Teams / Departments", icon: UserPlus },
+    { to: "/settings/security", label: "Security", icon: Shield },
     { to: "/settings/api", label: "API Keys", icon: Lock },
     { to: "/settings/webhooks", label: "Webhooks", icon: Plug },
-    { to: "/settings/integrations", label: "Integrations", icon: Plug },
-    { to: "/settings/security", label: "Security", icon: Shield }
-  ] },
-  { section: "System", items: [
-    { to: "/settings/billing", label: "Billing", icon: CreditCard },
+    { to: "/admin/billing", label: "Billing & Plans", icon: CreditCard },
     { to: "/settings/notifications", label: "Notifications", icon: Bell },
     { to: "/settings/audit", label: "Audit Log", icon: FileText }
   ] }
@@ -81,7 +84,7 @@ export function AgentLayout(): JSX.Element {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
   const [commandQuery, setCommandQuery] = useState("");
-  const [commandResults, setCommandResults] = useState<Array<{ type: "chat" | "ticket" | "contact" | "nav"; id: string; label: string; href: string }>>([]);
+  const [commandResults, setCommandResults] = useState<Array<{ type: "chat" | "ticket" | "contact" | "nav" | "feature"; id: string; label: string; href: string; description?: string }>>([]);
   const [helpOpen, setHelpOpen] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
   const notificationPanelRef = useRef<HTMLDivElement | null>(null);
@@ -187,12 +190,13 @@ export function AgentLayout(): JSX.Element {
     if (!commandOpen) return;
     const query = commandQuery.trim();
     if (!query) {
-      setCommandResults([
-        { type: "nav", id: "inbox", label: "Go to Inbox", href: "/inbox" },
-        { type: "nav", id: "tickets", label: "Go to Tickets", href: "/tickets" },
-        { type: "nav", id: "contacts", label: "Go to Contacts", href: "/contacts" },
-        { type: "nav", id: "tags", label: "Manage Tags", href: "/settings/tags" },
-      ]);
+      setCommandResults(FEATURE_LINKS.slice(0, 8).map((feature) => ({
+        type: "feature" as const,
+        id: feature.href,
+        label: feature.title,
+        href: feature.href,
+        description: feature.description,
+      })));
       return;
     }
     const timer = window.setTimeout(() => {
@@ -219,7 +223,14 @@ export function AgentLayout(): JSX.Element {
           label: `Contact: ${row.full_name || row.email || row.id.slice(0, 6)}`,
           href: "/contacts",
         }));
-        setCommandResults([...chatRows, ...ticketRows, ...contactRows]);
+        const featureRows = searchFeatures(query).slice(0, 8).map((feature) => ({
+          type: "feature" as const,
+          id: feature.href,
+          label: feature.title,
+          description: feature.description,
+          href: feature.href,
+        }));
+        setCommandResults([...featureRows, ...chatRows, ...ticketRows, ...contactRows].slice(0, 14));
       }).catch(() => {
         setCommandResults([]);
       });
@@ -360,7 +371,7 @@ export function AgentLayout(): JSX.Element {
               onClick={() => setCommandOpen(true)}
             >
               <Search size={15} className="shrink-0" />
-              <span className="flex-1 text-left">{t("layout.searchPlaceholder")}</span>
+              <span className="flex-1 text-left">Search features, chats, tickets...</span>
               <kbd className="hidden lg:inline-flex items-center gap-0.5 rounded border border-navy-200 bg-white px-1.5 py-0.5 text-[10px] font-medium text-navy-400 dark:border-navy-600 dark:bg-navy-700 dark:text-navy-500">⌘K</kbd>
             </button>
             <select className="rounded-md border border-navy-100 bg-white px-2 py-1.5 text-sm font-medium text-navy-600 dark:bg-navy-800 dark:border-navy-700 dark:text-navy-300">
@@ -441,7 +452,7 @@ export function AgentLayout(): JSX.Element {
               <input
                 autoFocus
                 className="flex-1 bg-transparent text-sm text-navy-700 placeholder:text-navy-400 outline-none dark:text-navy-100"
-                placeholder={t("layout.searchPlaceholder")}
+                placeholder="Search any feature, chat, ticket, customer..."
                 value={commandQuery}
                 onChange={(event) => setCommandQuery(event.target.value)}
               />
@@ -458,7 +469,10 @@ export function AgentLayout(): JSX.Element {
                     navigate(row.href);
                   }}
                 >
-                  <span className="text-sm font-medium text-navy-700 dark:text-navy-100">{row.label}</span>
+                  <span className="min-w-0">
+                    <span className="block text-sm font-medium text-navy-700 dark:text-navy-100">{row.label}</span>
+                    {row.description ? <span className="mt-0.5 line-clamp-1 block text-xs text-navy-400">{row.description}</span> : null}
+                  </span>
                   <span className="rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide bg-navy-50 text-navy-400 dark:bg-navy-800 dark:text-navy-500">{row.type}</span>
                 </button>
               )) : <div className="px-3 py-8 text-center text-sm text-navy-400">{t("layout.command.noResults")}</div>}
