@@ -265,6 +265,7 @@ async def search_chats(db: AsyncSession, organization_id: uuid.UUID, query: str)
 async def convert_to_ticket(db: AsyncSession, chat: Chat) -> Ticket:
     ticket = Ticket(
         organization_id=chat.organization_id,
+        ticket_number=uuid.uuid4().int % 1_000_000_000,
         contact_id=chat.contact_id,
         assigned_user_id=chat.assigned_user_id,
         team_id=chat.team_id,

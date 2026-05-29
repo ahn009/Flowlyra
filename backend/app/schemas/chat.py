@@ -39,6 +39,7 @@ class ChatOut(BaseModel):
     snoozed_until: datetime | None = None
     is_spam: bool = False
     csat_score: int | None
+    resolved_at: datetime | None = None
     is_missed: bool
     created_at: datetime
     updated_at: datetime

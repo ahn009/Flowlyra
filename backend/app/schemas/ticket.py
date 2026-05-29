@@ -49,6 +49,7 @@ class TicketOut(BaseModel):
     sla_resolution_due_at: datetime | None = None
     first_response_breached: bool = False
     resolution_breached: bool = False
+    resolved_at: datetime | None = None
     portal_enabled: bool = False
     created_at: datetime
     updated_at: datetime

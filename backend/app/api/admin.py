@@ -184,7 +184,9 @@ async def create_canned(payload: CannedCreate, user: AdminUser, db: AsyncSession
 
 @router.patch("/canned-responses/{item_id}")
 async def update_canned(item_id: uuid.UUID, payload: CannedCreate, user: AdminUser, db: AsyncSession = Depends(get_db)) -> Any:
-    item = (await db.execute(select(CannedResponse).where(CannedResponse.id == item_id, CannedResponse.organization_id == user.organization_id))).scalar_one()
+    item = (await db.execute(select(CannedResponse).where(CannedResponse.id == item_id, CannedResponse.organization_id == user.organization_id))).scalar_one_or_none()
+    if item is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Canned response not found")
     for key, value in payload.model_dump(exclude_unset=True).items():
         setattr(item, key, value)
     await db.commit()
@@ -340,7 +342,9 @@ async def create_rule(payload: RuleCreate, user: AdminUser, db: AsyncSession = D
 
 @router.patch("/routing-rules/{item_id}")
 async def update_rule(item_id: uuid.UUID, payload: RuleCreate, user: AdminUser, db: AsyncSession = Depends(get_db)) -> Any:
-    item = (await db.execute(select(RoutingRule).where(RoutingRule.id == item_id, RoutingRule.organization_id == user.organization_id))).scalar_one()
+    item = (await db.execute(select(RoutingRule).where(RoutingRule.id == item_id, RoutingRule.organization_id == user.organization_id))).scalar_one_or_none()
+    if item is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Routing rule not found")
     for key, value in payload.model_dump(exclude_unset=True).items():
         setattr(item, key, value)
     await db.commit()

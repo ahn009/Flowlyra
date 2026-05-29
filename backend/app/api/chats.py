@@ -23,6 +23,7 @@ from app.schemas.chat import (
     ChatOut,
     ChatUpdate,
     MessageUpdateRequest,
+    MessageOut,
     NoteRequest,
     ReactionRequest,
     SnoozeRequest,
@@ -627,8 +628,8 @@ async def unmark_spam(chat_id: uuid.UUID, user: Annotated[TokenUser, Depends(cur
     return chat
 
 
-@router.post("/{chat_id}/note")
-async def note(chat_id: uuid.UUID, payload: NoteRequest, user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db)) -> Any:
+@router.post("/{chat_id}/note", response_model=MessageOut)
+async def note(chat_id: uuid.UUID, payload: NoteRequest, user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db)) -> Message:
     chat = await get_chat(db, user.organization_id, chat_id)
     message = await add_message(db, chat, "agent", payload.content, user.id, True)
     await db.commit()

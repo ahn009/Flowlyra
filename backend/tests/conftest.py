@@ -1,4 +1,5 @@
 import os
+import json
 import uuid
 from datetime import UTC, datetime, timedelta
 
@@ -23,6 +24,37 @@ def _compile_jsonb_sqlite(type_, compiler, **kw):  # noqa: ANN001, ARG001
 @compiles(ARRAY, "sqlite")
 def _compile_array_sqlite(type_, compiler, **kw):  # noqa: ANN001, ARG001
     return "JSON"
+
+
+def _array_bind_processor(self, dialect):  # noqa: ANN001
+    if dialect.name != "sqlite":
+        return None
+
+    def process(value):  # noqa: ANN001
+        if isinstance(value, (list, tuple)):
+            return json.dumps(list(value))
+        return value
+
+    return process
+
+
+def _array_result_processor(self, dialect, coltype):  # noqa: ANN001, ARG001
+    if dialect.name != "sqlite":
+        return None
+
+    def process(value):  # noqa: ANN001
+        if value is None or isinstance(value, list):
+            return value
+        try:
+            return json.loads(value)
+        except Exception:  # noqa: BLE001
+            return []
+
+    return process
+
+
+ARRAY.bind_processor = _array_bind_processor
+ARRAY.result_processor = _array_result_processor
 
 
 @compiles(PG_UUID, "sqlite")
