@@ -20,6 +20,15 @@ api.interceptors.response.use(
     const status = error.response?.status;
     const url = String(config?.url ?? "");
     if (status !== 401 || !config || config._retry || url.includes("/auth/login") || url.includes("/auth/refresh")) {
+      if (status === 402 && typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("flowlyra:upgrade-required", {
+          detail: {
+            plan: error.response?.headers?.["x-flowlyra-plan-required"],
+            feature: error.response?.headers?.["x-flowlyra-feature-required"],
+            limit: error.response?.headers?.["x-flowlyra-plan-limit"],
+          }
+        }));
+      }
       return Promise.reject(error);
     }
 

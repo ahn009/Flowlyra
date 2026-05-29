@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   BarChart3,
@@ -18,6 +18,7 @@ import {
 import { PageHeader } from "../components/AgentLayout";
 import { Button, Card, EmptyPanel, Field, MetricCard, PageShell, Pill, TextArea, TextInput } from "../components/ui";
 import { api } from "../lib/api";
+import { useBillingStore } from "../stores/billingStore";
 import type { User } from "../types";
 
 interface TeamRow {
@@ -200,40 +201,139 @@ export function AnalyticsPage(): JSX.Element {
   );
 }
 
+interface BillingPlan {
+  plan: string;
+  seats: number;
+  monthly_chats: number;
+  storage_mb: number;
+  features: string[];
+  price_ids: { month?: string; year?: string };
+}
+
 export function BillingPage(): JSX.Element {
-  const plans = ["Starter", "Team", "Business", "Enterprise"];
+  const [interval, setInterval] = useState<"month" | "year">("month");
+  const subscription = useBillingStore((state) => state.subscription);
+  const invoices = useBillingStore((state) => state.invoices);
+  const fetchSubscription = useBillingStore((state) => state.fetchSubscription);
+  const fetchInvoices = useBillingStore((state) => state.fetchInvoices);
+  const createCheckout = useBillingStore((state) => state.createCheckout);
+  const openPortal = useBillingStore((state) => state.openPortal);
+  const updateSeats = useBillingStore((state) => state.updateSeats);
+  const cancelSubscription = useBillingStore((state) => state.cancelSubscription);
+  const { data: plans = {} } = useQuery({ queryKey: ["billing", "plans"], queryFn: async () => (await api.get<Record<string, BillingPlan>>("/billing/plans")).data });
+  const { data: agents = [] } = useQuery({ queryKey: ["billing", "agents"], queryFn: async () => (await api.get<User[]>("/agents")).data });
+  const { data: dashboard } = useQuery({ queryKey: ["billing", "dashboard"], queryFn: async () => (await api.get<{ active_chats: number }>("/chats/dashboard")).data });
+
+  useEffect(() => {
+    void fetchSubscription();
+    void fetchInvoices();
+  }, [fetchInvoices, fetchSubscription]);
+
+  const currentPlan = subscription?.plan ?? "starter";
+  const currentLimits = plans[currentPlan];
+  const trialDays = subscription?.trial_ends_at ? Math.max(0, Math.ceil((new Date(subscription.trial_ends_at).getTime() - Date.now()) / 86400000)) : null;
+  const orderedPlans = ["starter", "team", "business", "enterprise"].filter((key) => plans[key]);
+
+  async function choosePlan(plan: BillingPlan): Promise<void> {
+    const priceId = plan.price_ids?.[interval];
+    if (!priceId) {
+      alert("Stripe price ID is not configured for this plan yet.");
+      return;
+    }
+    const url = await createCheckout(priceId, interval);
+    window.location.assign(url);
+  }
+
+  async function managePayment(): Promise<void> {
+    const url = await openPortal();
+    window.location.assign(url);
+  }
+
+  async function changeSeats(): Promise<void> {
+    const next = Number(window.prompt("How many seats do you need?", String(subscription?.seat_quantity ?? agents.length || 1)));
+    if (Number.isFinite(next) && next > 0) await updateSeats(Math.floor(next));
+  }
+
+  async function cancel(): Promise<void> {
+    const end = subscription?.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString() : "the end of the current period";
+    if (window.confirm(`Are you sure? Access continues until ${end}.`)) await cancelSubscription(true);
+  }
+
   return (
     <PageShell>
-      <PageHeader title="Billing" action={<Button variant="primary" leftIcon={<CreditCard size={16} />}>Update payment</Button>} />
+      <PageHeader title="Billing" action={<Button variant="primary" leftIcon={<CreditCard size={16} />} onClick={() => void managePayment()}>Manage payment</Button>} />
       <div className="grid gap-4 p-4 sm:p-6">
         <Card className="p-5">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <Pill tone="blue">Current plan</Pill>
-              <h2 className="mt-3 font-display text-2xl font-semibold text-navy-800 dark:text-white">Team</h2>
-              <p className="mt-1 text-sm text-navy-400">$39 per agent/month, billed monthly.</p>
+              <Pill tone={subscription?.status === "active" ? "green" : subscription?.status === "trialing" ? "blue" : "yellow"}>{subscription?.status ?? "No subscription"}</Pill>
+              <h2 className="mt-3 font-display text-2xl font-semibold capitalize text-navy-800 dark:text-white">{currentPlan}</h2>
+              <p className="mt-1 text-sm text-navy-400">{subscription ? `${subscription.seat_quantity} seats · billed ${subscription.billing_interval}` : "Choose a plan to start billing."}</p>
+              {trialDays !== null && subscription?.status === "trialing" ? <div className="mt-3 rounded-lg bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700">Trial ends in {trialDays} day{trialDays === 1 ? "" : "s"}</div> : null}
+              {subscription?.cancel_at_period_end ? <div className="mt-3 rounded-lg bg-warning-50 px-3 py-2 text-sm font-semibold text-warning-700">Cancellation scheduled for {subscription.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString() : "period end"}</div> : null}
             </div>
-            <Button variant="secondary">Manage subscription</Button>
+            <div className="grid gap-2 sm:grid-cols-3 lg:w-[520px]">
+              <MetricCard label="Seats used" value={`${agents.length}/${subscription?.seat_quantity ?? currentLimits?.seats ?? "—"}`} tone="blue" />
+              <MetricCard label="Active chats" value={dashboard?.active_chats ?? "—"} tone="green" />
+              <MetricCard label="Payment" value={subscription?.payment_method_last4 ? `${subscription.payment_method_brand ?? "Card"} •••• ${subscription.payment_method_last4}` : "Not set"} tone="slate" />
+            </div>
           </div>
           <div className="mt-5 grid gap-3 md:grid-cols-3">
-            <Usage label="Seats" value={62} />
-            <Usage label="Chatbot resolutions" value={44} />
-            <Usage label="Storage" value={28} />
+            <Usage label="Seat usage" value={Math.min(100, Math.round((agents.length / Math.max(1, subscription?.seat_quantity ?? currentLimits?.seats ?? 1)) * 100))} />
+            <Usage label="Chat usage" value={Math.min(100, Math.round(((dashboard?.active_chats ?? 0) / Math.max(1, currentLimits?.monthly_chats ?? 1000)) * 100))} />
+            <Usage label="Storage" value={0} />
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button variant="secondary" onClick={() => void changeSeats()}>Update seats</Button>
+            <Button variant="secondary" onClick={() => void managePayment()}>Customer portal</Button>
+            {subscription ? <Button variant="danger" onClick={() => void cancel()}>Cancel subscription</Button> : null}
           </div>
         </Card>
-        <div className="grid gap-4 md:grid-cols-4">
-          {plans.map((plan, index) => (
-            <Card key={plan} className={`p-5 ${plan === "Team" ? "border-brand-300 ring-2 ring-brand-100 dark:ring-brand-900/40" : ""}`}>
-              <h3 className="font-display text-lg font-semibold text-navy-800 dark:text-white">{plan}</h3>
-              <div className="mt-3 text-3xl font-bold text-navy-900 dark:text-white">{index === 3 ? "Custom" : `$${[19, 39, 59][index]}`}</div>
-              <p className="mt-1 text-sm text-navy-400">{index === 3 ? "For advanced security and scale." : "per agent/month"}</p>
-              <Button className="mt-5 w-full" variant={plan === "Team" ? "primary" : "secondary"}>{plan === "Team" ? "Current" : "Choose"}</Button>
-            </Card>
-          ))}
+
+        <div className="flex items-center justify-between">
+          <h2 className="font-display text-xl font-semibold text-navy-800 dark:text-white">Plans</h2>
+          <div className="rounded-xl border border-navy-100 bg-white p-1 dark:border-navy-700 dark:bg-navy-900">
+            {["month", "year"].map((item) => <button key={item} onClick={() => setInterval(item as "month" | "year")} className={`rounded-lg px-3 py-1.5 text-sm font-bold capitalize ${interval === item ? "bg-brand-500 text-white" : "text-navy-500"}`}>{item === "year" ? "Annual" : "Monthly"}</button>)}
+          </div>
         </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {orderedPlans.map((key) => {
+            const plan = plans[key];
+            const current = key === currentPlan;
+            return (
+              <Card key={key} className={`p-5 ${current ? "border-brand-300 ring-2 ring-brand-100 dark:ring-brand-900/40" : ""}`}>
+                <div className="flex items-center justify-between"><h3 className="font-display text-lg font-semibold capitalize text-navy-800 dark:text-white">{key}</h3>{current ? <Pill tone="blue">Current</Pill> : null}</div>
+                <div className="mt-3 text-3xl font-bold text-navy-900 dark:text-white">{key === "enterprise" ? "Custom" : interval === "year" ? "Annual" : "Monthly"}</div>
+                <p className="mt-1 text-sm text-navy-400">{plan.seats >= 1000000000 ? "Unlimited seats" : `${plan.seats} included seats`} · {interval === "year" ? "annual discount" : "month to month"}</p>
+                <ul className="mt-4 min-h-36 space-y-2 text-sm text-navy-500 dark:text-navy-400">
+                  <li>{plan.monthly_chats >= 1000000000 ? "Unlimited" : plan.monthly_chats.toLocaleString()} monthly chats</li>
+                  <li>{plan.storage_mb >= 1000000000 ? "Unlimited" : `${Math.round(plan.storage_mb / 1024)}GB`} storage</li>
+                  <li>{plan.features.slice(0, 5).join(", ")}</li>
+                </ul>
+                <Button className="mt-5 w-full" variant={current ? "primary" : "secondary"} disabled={current} onClick={() => void choosePlan(plan)}>{current ? "Current" : key === "enterprise" ? "Contact sales" : "Choose"}</Button>
+              </Card>
+            );
+          })}
+        </div>
+
+        <Card className="overflow-hidden">
+          <div className="border-b border-navy-100 p-5 dark:border-navy-700"><h2 className="font-display text-lg font-semibold text-navy-800 dark:text-white">Invoice history</h2></div>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[760px] text-left text-sm">
+              <thead className="bg-navy-50 text-xs font-semibold uppercase tracking-wider text-navy-400 dark:bg-navy-800/60"><tr><th className="px-5 py-3">Date</th><th className="px-5 py-3">Number</th><th className="px-5 py-3">Amount</th><th className="px-5 py-3">Status</th><th className="px-5 py-3">Actions</th></tr></thead>
+              <tbody className="divide-y divide-navy-100 dark:divide-navy-700">
+                {invoices.length ? invoices.map((invoice) => <tr key={invoice.id}><td className="px-5 py-4">{invoice.created ? new Date(invoice.created).toLocaleDateString() : "—"}</td><td className="px-5 py-4">{invoice.number || invoice.id}</td><td className="px-5 py-4">{formatMoney(invoice.amount_paid || invoice.amount_due, invoice.currency)}</td><td className="px-5 py-4"><Pill>{invoice.status}</Pill></td><td className="px-5 py-4"><div className="flex gap-2">{invoice.invoice_pdf ? <a className="font-bold text-brand-600" href={invoice.invoice_pdf}>PDF</a> : null}{invoice.hosted_invoice_url ? <a className="font-bold text-brand-600" href={invoice.hosted_invoice_url}>View</a> : null}</div></td></tr>) : <tr><td className="px-5 py-8 text-center text-navy-400" colSpan={5}>No invoices yet.</td></tr>}
+              </tbody>
+            </table>
+          </div>
+        </Card>
       </div>
     </PageShell>
   );
+}
+
+function formatMoney(cents: number, currency = "usd"): string {
+  return new Intl.NumberFormat(undefined, { style: "currency", currency: currency.toUpperCase() }).format((cents || 0) / 100);
 }
 
 export function WidgetConfigPage(): JSX.Element {

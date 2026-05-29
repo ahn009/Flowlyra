@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { connectSocket, setRealtimeUpdateHandler } from "../socket";
 import { api } from "../lib/api";
 import { useAuthStore } from "../stores/authStore";
@@ -186,6 +187,30 @@ export function AgentLayout(): JSX.Element {
     const dismissed = window.localStorage.getItem(key);
     if (!dismissed) setTourOpen(true);
   }, []);
+
+  useEffect(() => {
+    const onUpgradeRequired = (event: Event): void => {
+      const detail = (event as CustomEvent<{ plan?: string; feature?: string; limit?: string }>).detail || {};
+      const target = detail.plan || detail.feature || detail.limit || "this feature";
+      toast((tst) => (
+        <div className="grid gap-2">
+          <div className="text-sm font-bold text-navy-800">Upgrade required</div>
+          <div className="text-sm text-navy-500">This action requires {target}. Upgrade now?</div>
+          <button
+            className="rounded-md bg-brand-500 px-3 py-1.5 text-sm font-bold text-white"
+            onClick={() => {
+              toast.dismiss(tst.id);
+              navigate("/admin/billing");
+            }}
+          >
+            View plans
+          </button>
+        </div>
+      ));
+    };
+    window.addEventListener("flowlyra:upgrade-required", onUpgradeRequired);
+    return () => window.removeEventListener("flowlyra:upgrade-required", onUpgradeRequired);
+  }, [navigate]);
 
   useEffect(() => {
     if (!commandOpen) return;
