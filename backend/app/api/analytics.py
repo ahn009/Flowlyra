@@ -4,6 +4,7 @@ import json
 import math
 import secrets
 import zipfile
+from collections import Counter, defaultdict
 from datetime import UTC, datetime, timedelta
 from typing import Annotated, Any
 import uuid
@@ -34,6 +35,50 @@ from app.services.analytics_service import overview
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
 
+def _is_sqlite(db: AsyncSession) -> bool:
+    bind = db.get_bind()
+    return bool(bind and bind.dialect.name == "sqlite")
+
+
+def _aware(value: datetime | None) -> datetime | None:
+    if value is None:
+        return None
+    if value.tzinfo is None:
+        return value.replace(tzinfo=UTC)
+    return value
+
+
+def _duration_seconds(start: datetime | None, end: datetime | None) -> float | None:
+    start = _aware(start)
+    end = _aware(end)
+    if start is None or end is None:
+        return None
+    return max(0.0, (end - start).total_seconds())
+
+
+def _percentile(values: list[float], percentile: float) -> float:
+    if not values:
+        return 0.0
+    ordered = sorted(values)
+    index = (len(ordered) - 1) * percentile
+    lower = math.floor(index)
+    upper = math.ceil(index)
+    if lower == upper:
+        return float(ordered[int(index)])
+    weight = index - lower
+    return float(ordered[lower] * (1 - weight) + ordered[upper] * weight)
+
+
+def _bucket_datetime(value: datetime, group_by: str = "day") -> datetime:
+    value = _aware(value) or datetime.now(UTC)
+    if group_by == "hour":
+        return value.replace(minute=0, second=0, microsecond=0)
+    if group_by == "week":
+        start = value - timedelta(days=value.weekday())
+        return start.replace(hour=0, minute=0, second=0, microsecond=0)
+    return value.replace(hour=0, minute=0, second=0, microsecond=0)
+
+
 @router.get("/overview", response_model=OverviewResponse)
 async def overview_endpoint(user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db)) -> dict:
     return await overview(db, user.organization_id)
@@ -41,6 +86,12 @@ async def overview_endpoint(user: Annotated[TokenUser, Depends(current_user)], d
 
 @router.get("/chat-volume")
 async def chat_volume(user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db), group_by: str = "day") -> list[dict]:
+    if _is_sqlite(db):
+        chats = (
+            await db.execute(select(Chat.created_at).where(Chat.organization_id == user.organization_id))
+        ).scalars().all()
+        counts: Counter[datetime] = Counter(_bucket_datetime(item, group_by if group_by in {"hour", "day", "week"} else "day") for item in chats)
+        return [{"bucket": bucket.isoformat(), "count": count} for bucket, count in sorted(counts.items())]
     bucket = func.date_trunc(group_by if group_by in {"hour", "day", "week"} else "day", Chat.created_at).label("bucket")
     rows = (await db.execute(select(bucket, func.count()).where(Chat.organization_id == user.organization_id).group_by(bucket).order_by(bucket))).all()
     return [{"bucket": str(row[0]), "count": int(row[1] or 0)} for row in rows]
@@ -48,6 +99,34 @@ async def chat_volume(user: Annotated[TokenUser, Depends(current_user)], db: Asy
 
 @router.get("/chat-duration")
 async def chat_duration(user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db)) -> dict:
+    if _is_sqlite(db):
+        chats = (
+            await db.execute(
+                select(Chat.created_at, Chat.resolved_at).where(
+                    Chat.organization_id == user.organization_id,
+                    Chat.resolved_at.is_not(None),
+                )
+            )
+        ).all()
+        durations = [
+            seconds
+            for created_at, resolved_at in chats
+            if (seconds := _duration_seconds(created_at, resolved_at)) is not None
+        ]
+        series_counts: dict[datetime, list[float]] = defaultdict(list)
+        for created_at, resolved_at in chats:
+            seconds = _duration_seconds(created_at, resolved_at)
+            if seconds is not None and resolved_at is not None:
+                series_counts[_bucket_datetime(resolved_at)].append(seconds)
+        return {
+            "avg_seconds": (sum(durations) / len(durations)) if durations else 0.0,
+            "p50_seconds": _percentile(durations, 0.5),
+            "p90_seconds": _percentile(durations, 0.9),
+            "series": [
+                {"bucket": bucket.isoformat(), "avg_seconds": sum(values) / len(values)}
+                for bucket, values in sorted(series_counts.items())
+            ],
+        }
     seconds = func.extract("epoch", Chat.resolved_at - Chat.created_at)
     row = (
         await db.execute(
@@ -113,6 +192,21 @@ async def chat_initiation_breakdown(user: Annotated[TokenUser, Depends(current_u
 
 @router.get("/response-time")
 async def response_time(user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db)) -> dict:
+    if _is_sqlite(db):
+        rows = (
+            await db.execute(
+                select(Chat.created_at, Chat.first_response_at).where(
+                    Chat.organization_id == user.organization_id,
+                    Chat.first_response_at.is_not(None),
+                )
+            )
+        ).all()
+        durations = [
+            seconds
+            for created_at, first_response_at in rows
+            if (seconds := _duration_seconds(created_at, first_response_at)) is not None
+        ]
+        return {"p50": _percentile(durations, 0.5), "p90": _percentile(durations, 0.9), "p99": _percentile(durations, 0.99)}
     seconds = func.extract("epoch", Chat.first_response_at - Chat.created_at)
     rows = (await db.execute(select(func.percentile_cont(0.5).within_group(seconds), func.percentile_cont(0.9).within_group(seconds), func.percentile_cont(0.99).within_group(seconds)).where(Chat.organization_id == user.organization_id, Chat.first_response_at.is_not(None)))).one()
     return {"p50": float(rows[0] or 0), "p90": float(rows[1] or 0), "p99": float(rows[2] or 0)}
@@ -126,6 +220,22 @@ async def frt_report(user: Annotated[TokenUser, Depends(current_user)], db: Asyn
 
 @router.get("/csat")
 async def csat(user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db)) -> list[dict]:
+    if _is_sqlite(db):
+        rows = (
+            await db.execute(
+                select(Chat.updated_at, Chat.csat_score).where(
+                    Chat.organization_id == user.organization_id,
+                    Chat.csat_score.is_not(None),
+                )
+            )
+        ).all()
+        buckets: dict[datetime, list[int]] = defaultdict(list)
+        for updated_at, score in rows:
+            buckets[_bucket_datetime(updated_at)].append(int(score))
+        return [
+            {"bucket": bucket.isoformat(), "score": sum(scores) / len(scores)}
+            for bucket, scores in sorted(buckets.items())
+        ]
     bucket = func.date_trunc("day", Chat.updated_at).label("bucket")
     rows = (await db.execute(select(bucket, func.avg(Chat.csat_score)).where(Chat.organization_id == user.organization_id, Chat.csat_score.is_not(None)).group_by(bucket).order_by(bucket))).all()
     return [{"bucket": str(row[0]), "score": float(row[1])} for row in rows]
@@ -191,6 +301,26 @@ async def queue_abandonment(user: Annotated[TokenUser, Depends(current_user)], d
 
 @router.get("/queue-wait-distribution")
 async def queue_wait_distribution(user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db)) -> dict:
+    if _is_sqlite(db):
+        rows = (
+            await db.execute(
+                select(Chat.created_at, Chat.first_response_at).where(
+                    Chat.organization_id == user.organization_id,
+                    Chat.first_response_at.is_not(None),
+                )
+            )
+        ).all()
+        durations = [
+            seconds
+            for created_at, first_response_at in rows
+            if (seconds := _duration_seconds(created_at, first_response_at)) is not None
+        ]
+        return {
+            "p50": _percentile(durations, 0.5),
+            "p75": _percentile(durations, 0.75),
+            "p90": _percentile(durations, 0.9),
+            "p99": _percentile(durations, 0.99),
+        }
     seconds = func.extract("epoch", Chat.first_response_at - Chat.created_at)
     row = (
         await db.execute(
@@ -207,6 +337,21 @@ async def queue_wait_distribution(user: Annotated[TokenUser, Depends(current_use
 
 @router.get("/avg-resolution-time")
 async def avg_resolution_time(user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db)) -> dict:
+    if _is_sqlite(db):
+        rows = (
+            await db.execute(
+                select(Chat.created_at, Chat.resolved_at).where(
+                    Chat.organization_id == user.organization_id,
+                    Chat.resolved_at.is_not(None),
+                )
+            )
+        ).all()
+        durations = [
+            seconds
+            for created_at, resolved_at in rows
+            if (seconds := _duration_seconds(created_at, resolved_at)) is not None
+        ]
+        return {"avg_seconds": (sum(durations) / len(durations)) if durations else 0.0}
     seconds = func.extract("epoch", Chat.resolved_at - Chat.created_at)
     avg = await db.scalar(select(func.avg(seconds)).where(Chat.organization_id == user.organization_id, Chat.resolved_at.is_not(None)))
     return {"avg_seconds": float(avg or 0)}
@@ -229,6 +374,15 @@ async def repeat_customer_rate(user: Annotated[TokenUser, Depends(current_user)]
 
 @router.get("/tags")
 async def tags(user: Annotated[TokenUser, Depends(current_user)], db: AsyncSession = Depends(get_db)) -> list[dict]:
+    if _is_sqlite(db):
+        rows = (
+            await db.execute(select(Chat.tags).where(Chat.organization_id == user.organization_id))
+        ).scalars().all()
+        counts: Counter[str] = Counter()
+        for tags_value in rows:
+            if isinstance(tags_value, list):
+                counts.update(str(tag) for tag in tags_value)
+        return [{"tag": tag, "count": count} for tag, count in sorted(counts.items())]
     rows = (await db.execute(select(func.unnest(Chat.tags).label("tag"), func.count()).where(Chat.organization_id == user.organization_id).group_by("tag"))).all()
     return [{"tag": row[0], "count": int(row[1] or 0)} for row in rows]
 

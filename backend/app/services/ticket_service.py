@@ -44,6 +44,14 @@ def _now() -> datetime:
     return datetime.now(UTC)
 
 
+def _as_aware(value: datetime | None) -> datetime | None:
+    if value is None:
+        return None
+    if value.tzinfo is None:
+        return value.replace(tzinfo=UTC)
+    return value
+
+
 def _status_is_closed(status_value: str) -> bool:
     return status_value in {"resolved", "solved", "closed", "spam"}
 
@@ -224,6 +232,8 @@ async def create_ticket(
     user_id: uuid.UUID | None = None,
 ) -> Ticket:
     ticket = Ticket(organization_id=organization_id, **payload)
+    if ticket.ticket_number is None:
+        ticket.ticket_number = uuid.uuid4().int % 1_000_000_000
     db.add(ticket)
     await db.flush()
     await auto_assign_ticket(db, ticket)
@@ -334,7 +344,8 @@ async def add_comment(
     now = _now()
     if ticket.first_response_at is None and not is_internal:
         ticket.first_response_at = now
-        ticket.first_response_breached = bool(ticket.sla_first_response_due_at and now > ticket.sla_first_response_due_at)
+        first_response_due_at = _as_aware(ticket.sla_first_response_due_at)
+        ticket.first_response_breached = bool(first_response_due_at and now > first_response_due_at)
     ticket.updated_at = now
     if not is_internal and _status_is_closed(ticket.status):
         ticket.status = "pending"
