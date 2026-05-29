@@ -19,6 +19,7 @@ import { PageHeader } from "../components/AgentLayout";
 import { Button, Card, EmptyPanel, Field, MetricCard, PageShell, Pill, TextArea, TextInput } from "../components/ui";
 import { api } from "../lib/api";
 import { useBillingStore } from "../stores/billingStore";
+import type { Invoice } from "../stores/billingStore";
 import type { User } from "../types";
 
 interface TeamRow {
@@ -250,7 +251,7 @@ export function BillingPage(): JSX.Element {
   }
 
   async function changeSeats(): Promise<void> {
-    const next = Number(window.prompt("How many seats do you need?", String(subscription?.seat_quantity ?? agents.length || 1)));
+    const next = Number(window.prompt("How many seats do you need?", String(subscription?.seat_quantity ?? (agents.length || 1))));
     if (Number.isFinite(next) && next > 0) await updateSeats(Math.floor(next));
   }
 
@@ -322,7 +323,7 @@ export function BillingPage(): JSX.Element {
             <table className="w-full min-w-[760px] text-left text-sm">
               <thead className="bg-navy-50 text-xs font-semibold uppercase tracking-wider text-navy-400 dark:bg-navy-800/60"><tr><th className="px-5 py-3">Date</th><th className="px-5 py-3">Number</th><th className="px-5 py-3">Amount</th><th className="px-5 py-3">Status</th><th className="px-5 py-3">Actions</th></tr></thead>
               <tbody className="divide-y divide-navy-100 dark:divide-navy-700">
-                {invoices.length ? invoices.map((invoice) => <tr key={invoice.id}><td className="px-5 py-4">{invoice.created ? new Date(invoice.created).toLocaleDateString() : "—"}</td><td className="px-5 py-4">{invoice.number || invoice.id}</td><td className="px-5 py-4">{formatMoney(invoice.amount_paid || invoice.amount_due, invoice.currency)}</td><td className="px-5 py-4"><Pill>{invoice.status}</Pill></td><td className="px-5 py-4"><div className="flex gap-2">{invoice.invoice_pdf ? <a className="font-bold text-brand-600" href={invoice.invoice_pdf}>PDF</a> : null}{invoice.hosted_invoice_url ? <a className="font-bold text-brand-600" href={invoice.hosted_invoice_url}>View</a> : null}</div></td></tr>) : <tr><td className="px-5 py-8 text-center text-navy-400" colSpan={5}>No invoices yet.</td></tr>}
+                {invoices.length ? invoices.map((invoice: Invoice) => <tr key={invoice.id}><td className="px-5 py-4">{invoice.created ? new Date(invoice.created).toLocaleDateString() : "—"}</td><td className="px-5 py-4">{invoice.number || invoice.id}</td><td className="px-5 py-4">{formatMoney(invoice.amount_paid || invoice.amount_due, invoice.currency)}</td><td className="px-5 py-4"><Pill>{invoice.status}</Pill></td><td className="px-5 py-4"><div className="flex gap-2">{invoice.invoice_pdf ? <a className="font-bold text-brand-600" href={invoice.invoice_pdf}>PDF</a> : null}{invoice.hosted_invoice_url ? <a className="font-bold text-brand-600" href={invoice.hosted_invoice_url}>View</a> : null}</div></td></tr>) : <tr><td className="px-5 py-8 text-center text-navy-400" colSpan={5}>No invoices yet.</td></tr>}
               </tbody>
             </table>
           </div>

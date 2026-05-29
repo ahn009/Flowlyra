@@ -1839,3 +1839,35 @@ function ChatVisitorPanel({ chat, open, onClose }: { chat?: ChatDetail; open: bo
     </>
   );
 }
+
+interface ShortcutsModalProps {
+  onClose: () => void;
+}
+
+function ShortcutsModal({ onClose }: ShortcutsModalProps): JSX.Element {
+  const shortcuts = [
+    ["Ctrl + Enter", "Send reply"],
+    ["#", "Open canned responses"],
+    ["Esc", "Close dialogs"],
+  ];
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4" onClick={onClose}>
+      <div className="w-full max-w-md rounded-xl border border-navy-100 bg-white p-5 shadow-lift dark:border-navy-700 dark:bg-navy-900" onClick={(event) => event.stopPropagation()}>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="font-display text-lg font-semibold text-navy-800 dark:text-white">Keyboard shortcuts</h2>
+          <button className="rounded-lg p-1 text-navy-400 hover:bg-navy-100 dark:hover:bg-navy-800" onClick={onClose} aria-label="Close shortcuts">
+            <X size={16} />
+          </button>
+        </div>
+        <div className="grid gap-2">
+          {shortcuts.map(([keys, label]) => (
+            <div key={keys} className="flex items-center justify-between rounded-lg bg-navy-50 px-3 py-2 text-sm dark:bg-navy-800">
+              <span className="font-medium text-navy-600 dark:text-navy-300">{label}</span>
+              <kbd className="rounded bg-white px-2 py-1 text-xs font-bold text-navy-500 shadow-sm dark:bg-navy-900 dark:text-navy-300">{keys}</kbd>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}

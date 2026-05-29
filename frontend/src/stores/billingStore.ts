@@ -39,11 +39,11 @@ interface BillingState {
   cancelSubscription: (atPeriodEnd?: boolean) => Promise<void>;
 }
 
-export const useBillingStore = create<BillingState>((set) => ({
+export const useBillingStore = create<BillingState>((set, get) => ({
   subscription: null,
   invoices: [],
   loading: false,
-  fetchSubscription: async () => {
+  fetchSubscription: async (): Promise<void> => {
     set({ loading: true });
     try {
       const { data } = await api.get<Subscription | null>("/billing/subscription");
@@ -52,29 +52,29 @@ export const useBillingStore = create<BillingState>((set) => ({
       set({ loading: false });
     }
   },
-  fetchInvoices: async () => {
+  fetchInvoices: async (): Promise<void> => {
     const { data } = await api.get<Invoice[]>("/billing/invoices");
     set({ invoices: data });
   },
-  createCheckout: async (priceId, interval) => {
+  createCheckout: async (priceId: string, interval: string): Promise<string> => {
     const origin = window.location.origin;
     const { data } = await api.post<{ url: string }>("/billing/checkout", {
       price_id: priceId,
       success_url: `${origin}/admin/billing?checkout=success&interval=${interval}`,
       cancel_url: `${origin}/admin/billing?checkout=cancelled`,
-      quantity: useBillingStore.getState().subscription?.seat_quantity ?? 1,
+      quantity: get().subscription?.seat_quantity ?? 1,
     });
     return data.url;
   },
-  openPortal: async () => {
+  openPortal: async (): Promise<string> => {
     const { data } = await api.post<{ url: string }>("/billing/portal", { return_url: `${window.location.origin}/admin/billing` });
     return data.url;
   },
-  updateSeats: async (quantity) => {
+  updateSeats: async (quantity: number): Promise<void> => {
     const { data } = await api.patch<Subscription | null>("/billing/subscription", { seat_quantity: quantity });
     set({ subscription: data });
   },
-  cancelSubscription: async (atPeriodEnd = true) => {
+  cancelSubscription: async (atPeriodEnd = true): Promise<void> => {
     const { data } = await api.delete<Subscription | null>("/billing/subscription", { params: { at_period_end: atPeriodEnd } });
     set({ subscription: data });
   },
