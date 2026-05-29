@@ -12,9 +12,19 @@ from app.db.redis import get_redis, ns
 from app.models.user import User
 
 
+def _as_aware(value: datetime | None) -> datetime | None:
+    if value is None:
+        return None
+    if value.tzinfo is None:
+        return value.replace(tzinfo=UTC)
+    return value
+
+
 async def ensure_not_locked(user: User) -> None:
-    if user.locked_until and user.locked_until > datetime.now(UTC):
-        delta = int((user.locked_until - datetime.now(UTC)).total_seconds())
+    locked_until = _as_aware(user.locked_until)
+    now = datetime.now(UTC)
+    if locked_until and locked_until > now:
+        delta = int((locked_until - now).total_seconds())
         raise HTTPException(
             status_code=status.HTTP_423_LOCKED,
             detail=f"Account is locked. Retry in {delta} seconds.",

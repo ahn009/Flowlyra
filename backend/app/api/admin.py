@@ -196,7 +196,9 @@ async def update_canned(item_id: uuid.UUID, payload: CannedCreate, user: AdminUs
 
 @router.delete("/canned-responses/{item_id}")
 async def delete_canned(item_id: uuid.UUID, user: AdminUser, db: AsyncSession = Depends(get_db)) -> dict:
-    await db.execute(delete(CannedResponse).where(CannedResponse.id == item_id, CannedResponse.organization_id == user.organization_id))
+    result = await db.execute(delete(CannedResponse).where(CannedResponse.id == item_id, CannedResponse.organization_id == user.organization_id))
+    if not result.rowcount:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Canned response not found")
     await db.commit()
     return {"ok": True}
 

@@ -53,7 +53,7 @@ async def test_canned_responses_cross_org_probe_returns_404(client, db, org, oth
     db.add(row)
     await db.commit()
     assert (await client.patch(f"/api/v1/admin/canned-responses/{row.id}", json={"shortcut": "hack", "title": "Hack", "content": "x"}, headers=other_auth_headers)).status_code == 404
-    assert (await client.delete(f"/api/v1/admin/canned-responses/{row.id}", headers=other_auth_headers)).status_code == 200
+    assert (await client.delete(f"/api/v1/admin/canned-responses/{row.id}", headers=other_auth_headers)).status_code == 404
     await db.refresh(row)
     assert row.title == "Org A"
 

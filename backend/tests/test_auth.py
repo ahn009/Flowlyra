@@ -81,7 +81,7 @@ async def test_account_lockout(client, admin_user):
     for _ in range(5):
         await client.post("/api/v1/auth/login", json={"email": "admin@test.com", "password": "Wrong@12345"})
     resp = await client.post("/api/v1/auth/login", json={"email": "admin@test.com", "password": "Test@12345"})
-    assert resp.status_code in {403, 429}
+    assert resp.status_code in {403, 423, 429}
 
 
 async def test_protected_route_no_token(client):

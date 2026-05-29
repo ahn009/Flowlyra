@@ -36,6 +36,8 @@ Thumbs.db
 
 # Database files
 *.sqlite3
+*.db
+test.db
 
 # Coverage
 .coverage
@@ -53,4 +55,3 @@ htmlcov/
 #documents
 LOCAL_DEVELOPMENT_AND_TESTING.md
 REVIEW_REPORT.md
-
