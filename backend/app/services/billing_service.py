@@ -20,7 +20,6 @@ from app.services.webhook_events import PAYMENT_FAILED, SUBSCRIPTION_CANCELED, S
 from app.services.webhook_service import dispatch_event
 
 settings = get_settings()
-stripe.api_key = settings.stripe_secret_key or None
 
 
 def _ts(value: Any) -> datetime | None:
