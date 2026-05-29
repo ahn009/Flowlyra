@@ -1,7 +1,7 @@
 """Tests for OAuth token exchange service and integration config PATCH."""
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -31,7 +31,7 @@ async def test_exchange_code_calls_real_endpoint(monkeypatch):
         {"slack": ("client_id_123", "client_secret_456")},
     )
 
-    fake_response = AsyncMock()
+    fake_response = MagicMock()
     fake_response.raise_for_status = lambda: None
     fake_response.json.return_value = {
         "access_token": "xoxb-real-token",
@@ -42,7 +42,7 @@ async def test_exchange_code_calls_real_endpoint(monkeypatch):
 
     with patch("app.services.oauth_exchange.httpx.AsyncClient") as mock_client:
         mock_instance = AsyncMock()
-        mock_instance.post.return_value = fake_response
+        mock_instance.post = AsyncMock(return_value=fake_response)
         mock_instance.__aenter__ = AsyncMock(return_value=mock_instance)
         mock_instance.__aexit__ = AsyncMock(return_value=False)
         mock_client.return_value = mock_instance
@@ -68,13 +68,13 @@ async def test_exchange_code_shopify_strips_domain(monkeypatch):
         {"shopify": ("shopify_client", "shopify_secret")},
     )
 
-    fake_response = AsyncMock()
+    fake_response = MagicMock()
     fake_response.raise_for_status = lambda: None
     fake_response.json.return_value = {"access_token": "shpat_abc", "scope": "read_orders"}
 
     with patch("app.services.oauth_exchange.httpx.AsyncClient") as mock_client:
         mock_instance = AsyncMock()
-        mock_instance.post.return_value = fake_response
+        mock_instance.post = AsyncMock(return_value=fake_response)
         mock_instance.__aenter__ = AsyncMock(return_value=mock_instance)
         mock_instance.__aexit__ = AsyncMock(return_value=False)
         mock_client.return_value = mock_instance
