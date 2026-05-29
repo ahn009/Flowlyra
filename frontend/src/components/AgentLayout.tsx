@@ -51,6 +51,7 @@ const nav = [
     { to: "/settings/security", label: "Security", icon: Shield },
     { to: "/settings/api", label: "API Keys", icon: Lock },
     { to: "/settings/webhooks", label: "Webhooks", icon: Plug },
+    { to: "/developer", label: "Developer", icon: Code2 },
     { to: "/admin/billing", label: "Billing & Plans", icon: CreditCard },
     { to: "/settings/notifications", label: "Notifications", icon: Bell },
     { to: "/settings/audit", label: "Audit Log", icon: FileText }

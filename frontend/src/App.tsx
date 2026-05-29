@@ -71,6 +71,7 @@ const SolutionSupportPage = lazyNamed(() => import("./pages/PublicPages"), "Solu
 const StatusPage = lazyNamed(() => import("./pages/PublicPages"), "StatusPage");
 const TermsPage = lazyNamed(() => import("./pages/PublicPages"), "TermsPage");
 const Phase15OpsPage = lazyNamed(() => import("./pages/Phase15OpsPage"), "Phase15OpsPage");
+const DeveloperPortalPage = lazyNamed(() => import("./pages/DeveloperPortalPage"), "DeveloperPortalPage");
 const BenchmarkPage = lazyNamed(() => import("./pages/GapsPage"), "BenchmarkPage");
 const ChatAvailabilityPage = lazyNamed(() => import("./pages/GapsPage"), "ChatAvailabilityPage");
 const GreetingsConversionPage = lazyNamed(() => import("./pages/GapsPage"), "GreetingsConversionPage");
@@ -196,6 +197,7 @@ export function App(): JSX.Element {
           <Route path="/admin/greetings-conversion" element={<GreetingsConversionPage />} />
           <Route path="/admin/moments" element={<MomentsPage />} />
           <Route path="/settings/voice-video" element={<VoiceVideoPage />} />
+          <Route path="/developer" element={<DeveloperPortalPage />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
