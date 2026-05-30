@@ -72,6 +72,7 @@ const StatusPage = lazyNamed(() => import("./pages/PublicPages"), "StatusPage");
 const TermsPage = lazyNamed(() => import("./pages/PublicPages"), "TermsPage");
 const Phase15OpsPage = lazyNamed(() => import("./pages/Phase15OpsPage"), "Phase15OpsPage");
 const DeveloperPortalPage = lazyNamed(() => import("./pages/DeveloperPortalPage"), "DeveloperPortalPage");
+const CompliancePage = lazyNamed(() => import("./pages/CompliancePage"), "CompliancePage");
 const SupervisionPage = lazyNamed(() => import("./pages/SupervisionPage"), "SupervisionPage");
 const BenchmarkPage = lazyNamed(() => import("./pages/GapsPage"), "BenchmarkPage");
 const ChatAvailabilityPage = lazyNamed(() => import("./pages/GapsPage"), "ChatAvailabilityPage");
@@ -147,6 +148,7 @@ export function App(): JSX.Element {
         <Route path="/blog/:slug" element={<BlogPostPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/terms" element={<TermsPage />} />
+        <Route path="/security" element={<CompliancePage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/invite/:token" element={<AcceptInvitePage />} />
