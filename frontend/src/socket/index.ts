@@ -101,6 +101,10 @@ function registerListeners(instance: Socket): void {
     if (chat) useChatStore.getState().addChat({ ...chat, status: "resolved" });
     onRealtimeUpdate?.();
   });
+  instance.on("chat:messages:read", (data: { chat_id: string; reader: string; read_at: string }) => {
+    useChatStore.getState().markMessagesRead(data.chat_id, data.reader);
+    onRealtimeUpdate?.();
+  });
   instance.on("agent:status:changed", (payload: { user_id: string; status: string }) => useAgentStore.getState().setPresence(payload.user_id, payload.status));
   instance.on("ai:suggestions", (payload: { chat_id: string; suggestions: string[] }) => useChatStore.getState().setSuggestions(payload.chat_id, payload.suggestions));
   instance.on("whisper:new", (payload: { from?: string; message: string }) => toast(`Whisper: ${payload.message}`));

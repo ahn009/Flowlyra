@@ -516,7 +516,36 @@ async def chat_read(sid: str, data: dict) -> None:
         chat = await _chat_for_session(db, session, _to_uuid(data["chat_id"]))
         await db.execute(Message.__table__.update().where(Message.chat_id == chat.id).values(is_read=True))
         await db.commit()
+    await sio.emit(
+        "chat:messages:read",
+        {"chat_id": str(chat.id), "reader": session.get("kind", "visitor"), "read_at": datetime.now(UTC).isoformat()},
+        room=f"chat:{chat.id}",
+        skip_sid=sid,
+    )
     await sio.emit("chat:read", {"chat_id": str(chat.id)}, room=f"chat:{chat.id}", skip_sid=sid)
+
+
+@sio.on("chat:mark_read")
+async def mark_read(sid: str, data: dict) -> None:
+    """Mark all messages in a chat as read and notify the other party."""
+    session = await sio.get_session(sid)
+    chat_id = _to_uuid(data.get("chat_id"))
+    async with AsyncSessionLocal() as db:
+        chat = await _chat_for_session(db, session, chat_id)
+        reader = "agent" if session.get("kind") == "agent" else "visitor"
+        other_sender = "customer" if reader == "agent" else "agent"
+        await db.execute(
+            Message.__table__.update()
+            .where(Message.chat_id == chat.id, Message.sender_type == other_sender, Message.is_read.is_(False))
+            .values(is_read=True)
+        )
+        await db.commit()
+    await sio.emit(
+        "chat:messages:read",
+        {"chat_id": str(chat.id), "reader": reader, "read_at": datetime.now(UTC).isoformat()},
+        room=f"chat:{chat.id}",
+        skip_sid=sid,
+    )
 
 
 @sio.on("webrtc:signal")

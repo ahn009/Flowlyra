@@ -50,7 +50,7 @@ export class SocketClient {
   }
 
   markRead(chatId: string): void {
-    this.socket?.emit("chat:read", { chat_id: chatId });
+    this.socket?.emit("chat:mark_read", { chat_id: chatId });
   }
 
   webrtcSignal(chatId: string, mode: "voice" | "video" | "screen", signal: Record<string, unknown>): void {
