@@ -51,7 +51,6 @@ class WidgetInitResponse(BaseModel):
     widget_config: WidgetConfig
     i18n: dict[str, str] = Field(default_factory=dict)
     visitor: dict | None = None
-    ice_servers: list[dict] = Field(default_factory=list)
 
 
 class WidgetHistoryRequest(BaseModel):

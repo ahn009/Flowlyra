@@ -50,10 +50,11 @@ export const useChatStore = create<ChatState>((set) => ({
                 updated_at: message.created_at
               }
             };
+      const isVisitorSideMessage = message.sender_type === "customer";
       const shouldIncrementUnread =
         !alreadyExists &&
         !message.is_internal &&
-        message.sender_type === "customer" &&
+        isVisitorSideMessage &&
         state.activeChatId !== message.chat_id;
       const nextUnread = shouldIncrementUnread
         ? { ...state.unreadCounts, [message.chat_id]: (state.unreadCounts[message.chat_id] ?? 0) + 1 }

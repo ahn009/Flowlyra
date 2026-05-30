@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 import { activeSocket } from "../socket";
@@ -14,11 +14,34 @@ export function SupervisionPage(): JSX.Element {
   const [search, setSearch] = useState("");
   const [agentFilter, setAgentFilter] = useState("all");
   const [whispers, setWhispers] = useState<Record<string,string>>({});
-
-  if (!me || !["admin","supervisor"].includes(me.role)) return <div className="p-6">Access denied.</div>;
+  const [liveLastByChat, setLiveLastByChat] = useState<Record<string, { sender_type: string; content: string | null; created_at?: string }>>({});
 
   const chatsQ = useQuery({ queryKey:["supervision-chats"], queryFn: async()=> (await api.get<{items:ChatRow[]}>("/chats",{params:{status:"active",limit:50}})).data, refetchInterval:5000});
   const agentsQ = useQuery({ queryKey:["supervision-agents"], queryFn: async()=> (await api.get<AgentRow[]>("/admin/agents")).data, refetchInterval:10000});
+
+  useEffect(() => {
+    const sock = activeSocket();
+    if (!sock) return;
+    const onNew = (message: { chat_id: string; sender_type: string; content: string | null; created_at?: string }) => {
+      setLiveLastByChat((prev) => ({ ...prev, [message.chat_id]: message }));
+    };
+    const onTyping = (payload: { chat_id: string; typing: boolean }) => {
+      setLiveLastByChat((prev) => ({
+        ...prev,
+        [payload.chat_id]: payload.typing
+          ? { sender_type: "system", content: "Agent is typing..." }
+          : prev[payload.chat_id],
+      }));
+    };
+    sock.on("chat:message:new", onNew);
+    sock.on("chat:typing", onTyping);
+    return () => {
+      sock.off("chat:message:new", onNew);
+      sock.off("chat:typing", onTyping);
+    };
+  }, []);
+
+  if (!me || !["admin","supervisor"].includes(me.role)) return <div className="p-6">Access denied.</div>;
 
   const agentById = useMemo(()=> new Map((agentsQ.data??[]).map(a=>[a.id,a])), [agentsQ.data]);
   const rows = useMemo(()=> (chatsQ.data?.items??[]).filter(c=>{
@@ -51,11 +74,13 @@ export function SupervisionPage(): JSX.Element {
       {rows.map(chat=>{
         const agent = chat.assigned_user_id ? agentById.get(chat.assigned_user_id) : undefined;
         const mini = (chat.messages??[]).slice(-5);
+        const liveLast = liveLastByChat[chat.id];
         return <div key={chat.id} className="rounded-xl border bg-white p-3 space-y-2">
           <div className="font-semibold">{chat.visitor_name || chat.visitor_email || "Visitor"}</div>
           <div className="text-xs">Agent: {agent?.full_name ?? "Unassigned"} <span className={agent?.is_online?"text-green-600":"text-slate-400"}>●</span></div>
           <div className="max-h-48 overflow-auto rounded border p-2 text-xs space-y-1">
             {mini.map((m,i)=><div key={i}><b>{m.sender_type}:</b> {m.content ?? ""}</div>)}
+            {liveLast ? <div className="text-indigo-600"><b>{liveLast.sender_type}:</b> {liveLast.content ?? ""}</div> : null}
           </div>
           <div className="flex gap-2">
             <input className="flex-1 border rounded px-2 py-1 text-xs" placeholder="Whisper..." value={whispers[chat.id]??""} onChange={(e)=>setWhispers(p=>({...p,[chat.id]:e.target.value}))} />
