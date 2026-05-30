@@ -104,6 +104,11 @@ class Settings(BaseSettings):
     apns_key_id: str = ""
     apns_private_key: str = ""
     apns_topic: str = ""
+    # WebRTC ICE servers for voice/video/screen-sharing
+    webrtc_stun_urls: str = "stun:stun.l.google.com:19302,stun:stun1.l.google.com:19302"
+    webrtc_turn_url: str = ""
+    webrtc_turn_username: str = ""
+    webrtc_turn_credential: str = ""
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
