@@ -7,15 +7,17 @@ import httpx
 
 from app.config import get_settings
 
-settings = get_settings()
 
-_CREDENTIALS: dict[str, tuple[str, str]] = {
-    "shopify": (settings.oauth_shopify_client_id, settings.oauth_shopify_client_secret),
-    "slack": (settings.oauth_slack_client_id, settings.oauth_slack_client_secret),
-    "salesforce": (settings.oauth_salesforce_client_id, settings.oauth_salesforce_client_secret),
-    "hubspot": (settings.oauth_hubspot_client_id, settings.oauth_hubspot_client_secret),
-    "github_issues": (settings.oauth_github_client_id, settings.oauth_github_client_secret),
-}
+def _get_credentials() -> dict[str, tuple[str, str]]:
+    """Build credentials dict lazily from current settings."""
+    s = get_settings()
+    return {
+        "shopify": (s.oauth_shopify_client_id, s.oauth_shopify_client_secret),
+        "slack": (s.oauth_slack_client_id, s.oauth_slack_client_secret),
+        "salesforce": (s.oauth_salesforce_client_id, s.oauth_salesforce_client_secret),
+        "hubspot": (s.oauth_hubspot_client_id, s.oauth_hubspot_client_secret),
+        "github_issues": (s.oauth_github_client_id, s.oauth_github_client_secret),
+    }
 
 
 async def exchange_code(
@@ -26,7 +28,8 @@ async def exchange_code(
     *,
     extra_params: dict[str, str] | None = None,
 ) -> dict[str, Any]:
-    client_id, client_secret = _CREDENTIALS.get(provider, ("", ""))
+    credentials = _get_credentials()
+    client_id, client_secret = credentials.get(provider, ("", ""))
 
     if not client_id or not client_secret:
         return {

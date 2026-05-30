@@ -188,30 +188,6 @@ async def uninstall(
     return {"ok": True}
 
 
-@router.patch("/{integration_id}")
-async def update_integration_config(
-    integration_id: uuid.UUID,
-    payload: dict,
-    user: Annotated[TokenUser, Depends(require_permission("integrations.write"))],
-    db: Annotated[AsyncSession, Depends(get_db)],
-) -> dict:
-    row = (await db.execute(
-        select(Integration).where(
-            Integration.id == integration_id,
-            Integration.organization_id == user.organization_id,
-        )
-    )).scalar_one_or_none()
-    if row is None:
-        raise HTTPException(status_code=404, detail="Integration not found")
-    if "config" in payload:
-        merged = dict(row.config or {})
-        merged.update(payload["config"])
-        row.config = merged
-    row.updated_at = datetime.now(UTC)
-    await db.commit()
-    return {"ok": True}
-
-
 @router.post("/{integration_id}/test")
 async def test_integration(
     integration_id: uuid.UUID,
@@ -350,8 +326,8 @@ async def oauth_start(
     if not auth_url:
         raise HTTPException(status_code=400, detail=f"No OAuth authorize URL configured for {provider}")
 
-    from app.services.oauth_exchange import _CREDENTIALS
-    real_client_id, _ = _CREDENTIALS.get(provider, ("", ""))
+    from app.services.oauth_exchange import _get_credentials
+    real_client_id, _ = _get_credentials().get(provider, ("", ""))
 
     params = {
         "response_type": "code",
@@ -422,7 +398,12 @@ async def oauth_callback(
             token_url=token_url,
         )
     except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"Token exchange failed: {exc}") from exc
+        import logging
+        logging.getLogger(__name__).error("OAuth token exchange failed for %s: %s", provider, exc, exc_info=True)
+        raise HTTPException(
+            status_code=502,
+            detail="Token exchange with the provider failed. Please check your credentials and try again.",
+        ) from exc
 
     is_mock = bool(token_payload.get("_mock"))
 

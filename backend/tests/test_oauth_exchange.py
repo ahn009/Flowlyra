@@ -27,8 +27,8 @@ async def test_exchange_code_calls_real_endpoint(monkeypatch):
 
     monkeypatch.setattr(
         oauth_exchange,
-        "_CREDENTIALS",
-        {"slack": ("client_id_123", "client_secret_456")},
+        "_get_credentials",
+        lambda: {"slack": ("client_id_123", "client_secret_456")},
     )
 
     fake_response = MagicMock()
@@ -64,8 +64,8 @@ async def test_exchange_code_shopify_strips_domain(monkeypatch):
 
     monkeypatch.setattr(
         oauth_exchange,
-        "_CREDENTIALS",
-        {"shopify": ("shopify_client", "shopify_secret")},
+        "_get_credentials",
+        lambda: {"shopify": ("shopify_client", "shopify_secret")},
     )
 
     fake_response = MagicMock()
