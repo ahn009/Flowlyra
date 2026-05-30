@@ -41,8 +41,6 @@ export function SupervisionPage(): JSX.Element {
     };
   }, []);
 
-  if (!me || !["admin","supervisor"].includes(me.role)) return <div className="p-6">Access denied.</div>;
-
   const agentById = useMemo(()=> new Map((agentsQ.data??[]).map(a=>[a.id,a])), [agentsQ.data]);
   const rows = useMemo(()=> (chatsQ.data?.items??[]).filter(c=>{
     const n = `${c.visitor_name??""} ${c.visitor_email??""}`.toLowerCase();
@@ -50,6 +48,8 @@ export function SupervisionPage(): JSX.Element {
     if (agentFilter!=="all" && c.assigned_user_id!==agentFilter) return false;
     return true;
   }), [chatsQ.data, search, agentFilter]);
+
+  if (!me || !["admin","supervisor"].includes(me.role)) return <div className="p-6">Access denied.</div>;
 
   const whisper = (chat: ChatRow) => {
     const text = whispers[chat.id]?.trim();

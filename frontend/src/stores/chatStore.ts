@@ -96,7 +96,7 @@ export const useChatStore = create<ChatState>((set) => ({
       const messages = state.messages[chatId];
       if (!messages) return state;
       const updated = messages.map((msg) => {
-        if (reader === "agent" && msg.sender_type === "customer") return { ...msg, is_read: true };
+        if (reader === "agent" && (msg.sender_type === "customer" || (msg.sender_type as string) === "visitor")) return { ...msg, is_read: true };
         if (reader === "visitor" && msg.sender_type === "agent") return { ...msg, is_read: true };
         return msg;
       });
