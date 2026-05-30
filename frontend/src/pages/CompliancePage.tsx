@@ -16,7 +16,7 @@ export function CompliancePage(): JSX.Element {
       <a href="/FlowLyra-Security-Whitepaper.md" className="rounded bg-navy-900 px-4 py-2 text-white text-sm">Download Security Whitepaper</a>
       <Link to="/contact" className="rounded border px-4 py-2 text-sm">Contact Sales for DPA/BAA</Link>
     </div>
-    {sections.map(([title, bullets]) => <section key={title} className="rounded-xl border bg-white p-4">
+    {sections.map(([title, bullets], idx) => <section key={`${String(title)}-${idx}`} className="rounded-xl border bg-white p-4">
       <h2 className="font-semibold">{title}</h2>
       <ul className="mt-2 list-disc pl-5 text-sm space-y-1">{(bullets as string[]).map((b)=> <li key={b}>{b}</li>)}</ul>
     </section>)}
