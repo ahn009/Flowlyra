@@ -1,7 +1,8 @@
 import logging
+from datetime import UTC, datetime
 
 import socketio
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -36,6 +37,8 @@ from app.api import (
 )
 from app.config import get_settings
 from app.logging_setup import configure as configure_logging
+from app.db.redis import get_redis
+from app.db.session import get_db
 from app.middleware.audit_middleware import AuditMiddleware
 from app.middleware.cors_dynamic import DynamicCorsMiddleware
 from app.middleware.csrf import CsrfMiddleware
@@ -55,8 +58,8 @@ if settings.sentry_dsn:
 
         sentry_sdk.init(
             dsn=settings.sentry_dsn,
-            environment=settings.environment,
-            traces_sample_rate=0.1,
+            environment=settings.sentry_environment,
+            traces_sample_rate=settings.sentry_traces_sample_rate,
             integrations=[FastApiIntegration(), SqlalchemyIntegration()],
             send_default_pii=False,
         )
@@ -120,8 +123,24 @@ def create_fastapi_app() -> FastAPI:
         )
 
     @app.get("/health")
-    async def health() -> dict:
-        return {"ok": True}
+    async def health(db=Depends(get_db)) -> dict:
+        from sqlalchemy import text
+
+        checks: dict[str, str] = {"status": "ok", "timestamp": datetime.now(UTC).isoformat()}
+        try:
+            await db.execute(text("SELECT 1"))
+            checks["database"] = "ok"
+        except Exception:  # noqa: BLE001
+            checks["database"] = "error"
+            checks["status"] = "degraded"
+        try:
+            redis = get_redis()
+            await redis.ping()
+            checks["redis"] = "ok"
+        except Exception:  # noqa: BLE001
+            checks["redis"] = "error"
+            checks["status"] = "degraded"
+        return checks
 
     @app.get("/healthz")
     async def healthz() -> dict:
