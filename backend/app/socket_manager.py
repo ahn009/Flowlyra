@@ -533,12 +533,22 @@ async def mark_read(sid: str, data: dict) -> None:
     async with AsyncSessionLocal() as db:
         chat = await _chat_for_session(db, session, chat_id)
         reader = "agent" if session.get("kind") == "agent" else "visitor"
-        other_sender = "customer" if reader == "agent" else "agent"
-        await db.execute(
-            Message.__table__.update()
-            .where(Message.chat_id == chat.id, Message.sender_type == other_sender, Message.is_read.is_(False))
-            .values(is_read=True)
-        )
+        if reader == "agent":
+            await db.execute(
+                Message.__table__.update()
+                .where(
+                    Message.chat_id == chat.id,
+                    Message.sender_type.in_(["customer", "visitor"]),
+                    Message.is_read.is_(False),
+                )
+                .values(is_read=True)
+            )
+        else:
+            await db.execute(
+                Message.__table__.update()
+                .where(Message.chat_id == chat.id, Message.sender_type == "agent", Message.is_read.is_(False))
+                .values(is_read=True)
+            )
         await db.commit()
     await sio.emit(
         "chat:messages:read",

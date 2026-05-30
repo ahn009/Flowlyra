@@ -159,7 +159,7 @@ async def ingest_inbound(
         chat = await _find_or_create_chat(db, conn, contact, msg.external_thread_id)
         m = Message(
             chat_id=chat.id,
-            sender_type="visitor",
+            sender_type="customer",
             content=msg.content,
             content_type=msg.content_type,
             file_url=msg.file_url,

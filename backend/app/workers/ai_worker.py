@@ -112,7 +112,7 @@ def finalize_resolved_chat(chat_id: str) -> dict:
             visitor_msgs = (
                 await db.execute(
                     select(Message)
-                    .where(Message.chat_id == chat.id, Message.sender_type == "visitor")
+                    .where(Message.chat_id == chat.id, Message.sender_type == "customer")
                     .order_by(Message.created_at.desc())
                     .limit(5)
                 )

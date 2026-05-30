@@ -314,7 +314,6 @@ async def init_widget(payload: WidgetInitRequest, request: Request, db: AsyncSes
         is_within_hours=within,
         next_open_at=next_open.isoformat() if next_open else None,
         widget_config=_merge_widget_overrides(_widget_config(org, locale_pref, is_returning=is_returning), widget_variant.config if widget_variant else None),
-        ice_servers=_ice_servers_config(),
         i18n=widget_catalog(locale_pref),
         visitor=visitor_info,
     )
