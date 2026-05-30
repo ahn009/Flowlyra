@@ -20,6 +20,7 @@ interface ChatState {
   setVisitorStatus: (chatId: string, status: "online" | "offline") => void;
   clearUnread: (chatId: string) => void;
   updateMessage: (chatId: string, messageId: string, patch: Partial<Message>) => void;
+  markMessagesRead: (chatId: string, reader: string) => void;
 }
 
 export const useChatStore = create<ChatState>((set) => ({
@@ -88,7 +89,18 @@ export const useChatStore = create<ChatState>((set) => ({
         ...state.messages,
         [chatId]: (state.messages[chatId] ?? []).map((item) => (item.id === messageId ? { ...item, ...patch } : item))
       }
-    }))
+    })),
+  markMessagesRead: (chatId, reader) =>
+    set((state) => {
+      const messages = state.messages[chatId];
+      if (!messages) return state;
+      const updated = messages.map((msg) => {
+        if (reader === "agent" && msg.sender_type === "customer") return { ...msg, is_read: true };
+        if (reader === "visitor" && msg.sender_type === "agent") return { ...msg, is_read: true };
+        return msg;
+      });
+      return { messages: { ...state.messages, [chatId]: updated } };
+    })
 }));
 
 function hasMessage(messages: Message[], id: string): boolean {
