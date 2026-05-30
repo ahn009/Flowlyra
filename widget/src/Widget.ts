@@ -648,6 +648,9 @@ export class Widget implements FlowLyraInstance {
     this.socket.on<{ chat_id: string }>("chat:read", (payload) => {
       if (payload.chat_id === this.chatId) this.panel?.markCustomerMessagesSeen();
     });
+    this.socket.on<{ chat_id: string; reader: string; read_at: string }>("chat:messages:read", (payload) => {
+      if (payload.chat_id === this.chatId && payload.reader === "visitor") this.panel?.markCustomerMessagesSeen();
+    });
     this.socket.on<{ chat_id: string; typing: boolean; agent_name?: string; agent_avatar_url?: string }>("chat:typing", (payload) => {
       if (payload.chat_id === this.chatId) this.panel?.typingIndicator(payload.typing, payload.agent_name, payload.agent_avatar_url);
     });
@@ -677,7 +680,9 @@ export class Widget implements FlowLyraInstance {
 
   private async ensureRtcPeer(mode: "voice" | "video" | "screen"): Promise<RTCPeerConnection> {
     if (this.rtcPeer) return this.rtcPeer;
-    const pc = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
+    const pc = new RTCPeerConnection({
+      iceServers: this.initData?.widget_config?.ice_servers ?? [{ urls: "stun:stun.l.google.com:19302" }],
+    });
     pc.onicecandidate = (event) => {
       if (!event.candidate || !this.chatId) return;
       this.socket?.webrtcSignal(this.chatId, mode, { type: "candidate", candidate: event.candidate });

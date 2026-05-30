@@ -3,6 +3,7 @@ from urllib.parse import urlparse
 import logging
 import random
 import uuid
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import or_, select
@@ -63,6 +64,31 @@ KB_SUGGESTIONS = [
     {"title": "Upload and share files", "url": "/help/attachments"},
     {"title": "Use pre-chat custom fields", "url": "/help/pre-chat-fields"},
 ]
+
+
+def _ice_servers_config() -> list[dict[str, Any]]:
+    settings = get_settings()
+    servers: list[dict[str, Any]] = []
+    for url in settings.webrtc_stun_urls.split(","):
+        u = url.strip()
+        if u:
+            servers.append({"urls": u})
+    if settings.webrtc_turn_url:
+        turn: dict[str, Any] = {"urls": settings.webrtc_turn_url}
+        if settings.webrtc_turn_username:
+            turn["username"] = settings.webrtc_turn_username
+        if settings.webrtc_turn_credential:
+            turn["credential"] = settings.webrtc_turn_credential
+        servers.append(turn)
+    if not servers:
+        servers = [{"urls": "stun:stun.l.google.com:19302"}]
+    return servers
+
+
+@router.get("/ice-servers")
+async def ice_servers() -> dict:
+    """Return WebRTC ICE server configuration for voice/video/screen-sharing."""
+    return {"ice_servers": _ice_servers_config()}
 
 
 def client_ip_from_request(request: Request) -> str | None:
@@ -156,6 +182,7 @@ def _widget_config(org: Organization, locale: str, *, is_returning: bool = False
         "cookie_consent": org.cookie_consent or {"enabled": False, "text": None},
         "inactivity_message": org.widget_inactivity_message or {"enabled": False, "delay_seconds": 60, "text": "Still there?"},
         "voice_video_enabled": bool(org.widget_voice_video_enabled),
+        "ice_servers": _ice_servers_config(),
     }
 
 
@@ -287,6 +314,7 @@ async def init_widget(payload: WidgetInitRequest, request: Request, db: AsyncSes
         is_within_hours=within,
         next_open_at=next_open.isoformat() if next_open else None,
         widget_config=_merge_widget_overrides(_widget_config(org, locale_pref, is_returning=is_returning), widget_variant.config if widget_variant else None),
+        ice_servers=_ice_servers_config(),
         i18n=widget_catalog(locale_pref),
         visitor=visitor_info,
     )

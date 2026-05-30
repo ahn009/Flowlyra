@@ -187,6 +187,10 @@ export function ChatPage(): JSX.Element {
   const suggestions = useChatStore((state) => state.aiSuggestions[id]) ?? [];
 
   const messages = useMemo(() => mergeMessages(data?.messages ?? [], liveMessages), [data?.messages, liveMessages]);
+  useEffect(() => {
+    if (!id) return;
+    activeSocket()?.emit("chat:mark_read", { chat_id: id });
+  }, [id, messages.length]);
   const chatListRows = useMemo(
     () => mergeChatListRows(chatListData, Object.values(chatsById), data),
     [chatListData, chatsById, data],
@@ -379,7 +383,14 @@ export function ChatPage(): JSX.Element {
 
   async function ensurePeer(mode: "video" | "screen"): Promise<RTCPeerConnection> {
     if (pcRef.current) return pcRef.current;
-    const pc = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
+    let iceServers: RTCIceServer[] = [{ urls: "stun:stun.l.google.com:19302" }];
+    try {
+      const iceResponse = await api.get<{ ice_servers: RTCIceServer[] }>("/widget/ice-servers");
+      if (iceResponse.data?.ice_servers?.length) iceServers = iceResponse.data.ice_servers;
+    } catch {
+      // keep fallback stun
+    }
+    const pc = new RTCPeerConnection({ iceServers });
     pc.onicecandidate = (event) => {
       if (!event.candidate) return;
       activeSocket()?.emit("webrtc:signal", { chat_id: id, mode, signal: { type: "candidate", candidate: event.candidate } });

@@ -37,6 +37,7 @@ class WidgetConfig(BaseModel):
     locale: str = "en"
     supported_locales: list[str] = Field(default_factory=lambda: ["en"])
     giphy_api_key: str | None = None
+    ice_servers: list[dict] = Field(default_factory=list)
 
 
 class WidgetInitResponse(BaseModel):
@@ -50,6 +51,7 @@ class WidgetInitResponse(BaseModel):
     widget_config: WidgetConfig
     i18n: dict[str, str] = Field(default_factory=dict)
     visitor: dict | None = None
+    ice_servers: list[dict] = Field(default_factory=list)
 
 
 class WidgetHistoryRequest(BaseModel):
