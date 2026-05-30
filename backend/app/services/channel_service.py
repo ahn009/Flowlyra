@@ -178,7 +178,7 @@ async def ingest_inbound(
                         "id": str(m.id),
                         "content": m.content,
                         "content_type": m.content_type,
-                        "sender_type": "visitor",
+        "sender_type": "customer",
                     },
                 },
                 room=f"org:{conn.organization_id}",
