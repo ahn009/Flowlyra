@@ -188,6 +188,30 @@ async def uninstall(
     return {"ok": True}
 
 
+@router.patch("/{integration_id}")
+async def update_integration_config(
+    integration_id: uuid.UUID,
+    payload: dict,
+    user: Annotated[TokenUser, Depends(require_permission("integrations.write"))],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    row = (await db.execute(
+        select(Integration).where(
+            Integration.id == integration_id,
+            Integration.organization_id == user.organization_id,
+        )
+    )).scalar_one_or_none()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Integration not found")
+    if "config" in payload:
+        merged = dict(row.config or {})
+        merged.update(payload["config"])
+        row.config = merged
+    row.updated_at = datetime.now(UTC)
+    await db.commit()
+    return {"ok": True}
+
+
 @router.post("/{integration_id}/test")
 async def test_integration(
     integration_id: uuid.UUID,

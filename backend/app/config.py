@@ -52,6 +52,8 @@ class Settings(BaseSettings):
     stripe_tax_enabled: bool = False
     trial_days: int = 14
     sentry_dsn: str = ""
+    sentry_environment: str = "development"
+    sentry_traces_sample_rate: float = 0.1
     db_pool_size: int = 10
     db_max_overflow: int = 20
     db_pool_recycle: int = 1800
