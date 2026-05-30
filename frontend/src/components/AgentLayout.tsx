@@ -1,4 +1,4 @@
-import { Bell, Bot, BrainCircuit, CheckCheck, ChevronLeft, ClipboardList, Code2, Compass, Contact, CreditCard, FileText, Home, Inbox, LayoutDashboard, LifeBuoy, Lock, LogOut, Menu, Plug, Search, Send, Settings, Shield, Sparkles, Tag, Ticket, Trash2, UserPlus, Users, WandSparkles, X, Zap } from "lucide-react";
+import { Bell, Bot, BrainCircuit, CheckCheck, ChevronLeft, Eye, ClipboardList, Code2, Compass, Contact, CreditCard, FileText, Home, Inbox, LayoutDashboard, LifeBuoy, Lock, LogOut, Menu, Plug, Search, Send, Settings, Shield, Sparkles, Tag, Ticket, Trash2, UserPlus, Users, WandSparkles, X, Zap } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
@@ -46,6 +46,7 @@ const nav = [
     { to: "/settings/integrations", label: "Integrations", icon: Plug }
   ] },
   { section: "Admin", items: [
+    { to: "/supervision", label: "Supervision", icon: Eye },
     { to: "/admin/agents", label: "Agents", icon: Users },
     { to: "/admin/teams", label: "Teams / Departments", icon: UserPlus },
     { to: "/settings/security", label: "Security", icon: Shield },
