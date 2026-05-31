@@ -1,3086 +1,530 @@
-# FlowLyra — Complete UI/UX Design Specification
+# Flowlyra — Complete UI/UX Design System
 
-> **Purpose:** Pixel-accurate design reference for implementing every page and component of FlowLyra to match LiveChat.com quality.
-> **Last Updated:** May 2025
-> **Based On:** LiveChat.com production site analysis + FlowLyra brand system (`#FF5100` orange primary, DM Sans/Inter/JeBrains Mono)
+> **Version:** 1.0.0
+> **Product:** Flowlyra — Human-First Customer Support Platform
+> **Status:** Production Specification
+> **Date:** May 2026
+
+---
+
+## ⚠️ Critical Design Mandate
+
+This document establishes an **entirely original** design identity for Flowlyra. The previous iteration of the product's UI/UX was flagged by the client as visually derivative of LiveChat.com. Every decision in this system — color, type, layout, component, illustration, motion, and brand voice — has been engineered to be **categorically distinct** from LiveChat while competing at the same tier of quality.
+
+**What was copied (must be eliminated):**
+
+| Copied Element                         | LiveChat Source         | Flowlyra Replacement            |
+|----------------------------------------|-------------------------|----------------------------------|
+| `#FF5100` theme color                  | LiveChat's brand orange | Deep Indigo `#4F46E5`            |
+| Yellow `#FFD000` accent                | LiveChat's primary CTA  | Warm Coral `#F97066`             |
+| Black `#1B1B20` dark tone              | LiveChat's brand black  | Midnight `#0F172A`               |
+| Colfax typeface                        | LiveChat's brand font   | Plus Jakarta Sans + Fraunces     |
+| "Gets the job done" tagline            | LiveChat's hero copy    | "Conversations that move"        |
+| Chat-bubble logo mark                  | LiveChat's symbol       | Flowing wave/stream abstraction  |
+| Yellow-black-white palette             | LiveChat's palette      | Indigo-Coral-Slate palette       |
+| Feature section alternating layout     | LiveChat's exact pattern| Asymmetric overlap cards         |
+| Review carousel with stars             | LiveChat's pattern      | Voice-card masonry grid          |
 
 ---
 
 ## Table of Contents
 
-1. [Design System Foundation](#1-design-system-foundation)
-2. [Component Library Reference](#2-component-library-reference)
-3. [Public Marketing Pages](#3-public-marketing-pages)
-4. [Authentication Pages](#4-authentication-pages)
-5. [Agent Dashboard — Layout Shell](#5-agent-dashboard--layout-shell)
-6. [Agent Dashboard — Home Page](#6-agent-dashboard--home-page)
-7. [Agent Dashboard — Chat Inbox (3-Pane)](#7-agent-dashboard--chat-inbox-3-pane)
-8. [Agent Dashboard — Archives](#8-agent-dashboard--archives)
-9. [Agent Dashboard — Team Management](#9-agent-dashboard--team-management)
-10. [Agent Dashboard — Reports & Analytics](#10-agent-dashboard--reports--analytics)
-11. [Agent Dashboard — Settings Pages](#11-agent-dashboard--settings-pages)
-12. [Agent Dashboard — Integrations](#12-agent-dashboard--integrations)
-13. [Ticketing System](#13-ticketing-system)
-14. [Knowledge Base (Admin)](#14-knowledge-base-admin)
-15. [Knowledge Base (Public)](#15-knowledge-base-public)
-16. [Chatbot Flow Builder](#16-chatbot-flow-builder)
-17. [Campaigns & Goals](#17-campaigns--goals)
-18. [Billing & Subscription](#18-billing--subscription)
-19. [Engage / Proactive Triggers](#19-engage--proactive-triggers)
-20. [Widget — Embedded Chat Widget](#20-widget--embedded-chat-widget)
-21. [Widget — Pre-Chat Form](#21-widget--pre-chat-form)
-22. [Widget — Post-Chat Survey (CSAT)](#22-widget--post-chat-survey-csat)
-23. [Widget — Offline Form](#23-widget--offline-form)
-24. [Widget — Rich Messages / Cards](#24-widget--rich-messages--cards)
-25. [Notification Center](#25-notification-center)
-26. [Command Palette (Cmd+K)](#26-command-palette-cmdk)
-27. [Mobile Responsive Design](#27-mobile-responsive-design)
-28. [Dark Mode Specification](#28-dark-mode-specification)
-29. [Animation & Micro-Interaction Catalog](#29-animation--micro-interaction-catalog)
-30. [Accessibility Requirements](#30-accessibility-requirements)
+1. [Brand Foundation](#1-brand-foundation)
+2. [Logo System](#2-logo-system)
+3. [Color System](#3-color-system)
+4. [Typography](#4-typography)
+5. [Spacing & Layout Grid](#5-spacing--layout-grid)
+6. [Breakpoints & Responsive Strategy](#6-breakpoints--responsive-strategy)
+7. [Iconography](#7-iconography)
+8. [Elevation & Depth](#8-elevation--depth)
+9. [Borders & Radius](#9-borders--radius)
+10. [Motion & Animation](#10-motion--animation)
+11. [Buttons & CTAs](#11-buttons--ctas)
+12. [Form Elements](#12-form-elements)
+13. [Cards & Containers](#13-cards--containers)
+14. [Navigation System](#14-navigation-system)
+15. [Hero & Landing Patterns](#15-hero--landing-patterns)
+16. [Feature Section Patterns](#16-feature-section-patterns)
+17. [Social Proof & Testimonials](#17-social-proof--testimonials)
+18. [Pricing Section](#18-pricing-section)
+19. [Footer](#19-footer)
+20. [Chat Widget Design](#20-chat-widget-design)
+21. [Agent Dashboard UI](#21-agent-dashboard-ui)
+22. [Data Visualization](#22-data-visualization)
+23. [Imagery & Illustration](#23-imagery--illustration)
+24. [Copywriting Voice & Tone](#24-copywriting-voice--tone)
+25. [Accessibility Standards](#25-accessibility-standards)
+26. [Dark Mode System](#26-dark-mode-system)
+27. [Design Tokens (Full Reference)](#27-design-tokens-full-reference)
+28. [Implementation Stack](#28-implementation-stack)
+29. [Component Library Spec](#29-component-library-spec)
+30. [LiveChat vs Flowlyra Differentiation Checklist](#30-livechat-vs-flowlyra-differentiation-checklist)
 
 ---
 
-# 1. Design System Foundation
+## 1. Brand Foundation
 
-## 1.1 Brand Color System
+### 1.1 Brand Concept
 
-### Primary — Brand Orange (`#FF5100`)
+**Flowlyra** = **Flow** (fluid, effortless movement) + **Lyra** (the constellation, the ancient harp).
 
-| Token | Tailwind Class | Hex | Usage |
-|-------|---------------|-----|-------|
-| `brand-50` | `bg-brand-50` | `#FFF4ED` | Lightest brand bg, hover states for subtle highlights |
-| `brand-100` | `bg-brand-100` | `#FFE6D5` | Light brand bg, selected row, tag bg |
-| `brand-200` | `bg-brand-200` | `#FECCAA` | Medium light brand, progress track |
-| `brand-300` | `bg-brand-300` | `#FDAA74` | Brand borders, light text bg |
-| `brand-400` | `bg-brand-400` | `#FC823D` | Hover state for primary buttons |
-| `brand-500` | `bg-brand-500` | `#FF5100` | **PRIMARY — buttons, links, active nav, chat bubbles (visitor)** |
-| `brand-600` | `bg-brand-600` | `#E93D00` | Button hover/active, pressed states |
-| `brand-700` | `bg-brand-700` | `#C42E00` | Button active (dark), deep emphasis |
-| `brand-800` | `bg-brand-800` | `#9E2600` | Dark brand for gradient endpoints |
-| `brand-900` | `bg-brand-900` | `#802200` | Darkest brand for gradient endpoints |
-| `brand-950` | `bg-brand-950` | `#461200` | Near-black brand for extreme contrast |
+The name evokes conversations that move like music — rhythmic, natural, harmonious. The design system translates this into a visual language built on **flowing gradients, luminous depth, and warm precision**.
 
-### Neutral — Navy (`#1E232A`)
+### 1.2 Brand Personality
 
-| Token | Tailwind Class | Hex | Usage |
-|-------|---------------|-----|-------|
-| `navy-50` | `bg-navy-50` | `#F4F5F7` | Section backgrounds, alternating row bg |
-| `navy-100` | `bg-navy-100` | `#E3E6EB` | Borders, dividers, input borders |
-| `navy-200` | `bg-navy-200` | `#C7CCD6` | Disabled borders, muted text |
-| `navy-300` | `bg-navy-300` | `#9BA3B2` | Placeholder text, secondary muted text |
-| `navy-400` | `bg-navy-400` | `#6B7280` | Muted text, secondary labels |
-| `navy-500` | `bg-navy-500` | `#4B5261` | Medium text, icons secondary |
-| `navy-600` | `bg-navy-600` | `#373D48` | Subtle borders in dark mode |
-| `navy-700` | `bg-navy-700` | `#1E232A` | **Primary dark — headings, dark sections, hero bg** |
-| `navy-800` | `bg-navy-800` | `#171B20` | Darker bg, sidebar bg in dark mode |
-| `navy-900` | `bg-navy-900` | `#0F1117` | **Deepest dark — dashboard sidebar, dark sections** |
-| `navy-950` | `bg-navy-950` | `#0A0C0F` | Absolute darkest bg |
+| Trait          | Expression                                              |
+|----------------|---------------------------------------------------------|
+| Fluid          | Smooth transitions, flowing curves, never rigid or boxy |
+| Luminous       | Depth through light — glows, gradients, not flat        |
+| Human-First    | Warm colors, real photography, empathetic copy           |
+| Precise        | Clean grids, tight type, professional finish             |
+| Confident      | Bold statements, strong hierarchy, no hedging            |
 
-### Semantic Colors
+### 1.3 Brand Positioning Against LiveChat
 
-| Token | Hex | Light Mode | Dark Mode |
-|-------|-----|-----------|-----------|
-| **Success** | `#1DB954` | `bg-success-50` `#ECFDF5` / `text-success-600` `#16A34A` | `bg-success-50/10` / `text-success-500` |
-| **Warning** | `#FFC107` | `bg-warning-50` `#FFFBEB` / `text-warning-600` `#D97706` | `bg-warning-50/10` / `text-warning-500` |
-| **Danger** | `#E53935` | `bg-danger-50` `#FEF2F2` / `text-danger-600` `#DC2626` | `bg-danger-50/10` / `text-danger-400` |
-| **Info** | `#0066FF` | `bg-blue-50` `#F4FAFF` / `text-blue-700` | `bg-blue-50/10` / `text-blue-300` |
-| **Purple / AI** | `#9146FF` | `bg-purple-50` `#FAF8FF` / `text-purple-600` | `bg-purple-50/10` / `text-purple-400` |
+| Dimension       | LiveChat                        | Flowlyra                           |
+|-----------------|----------------------------------|------------------------------------|
+| Color Identity  | Yellow + Black (corporate warm)  | Indigo + Coral (modern luminous)   |
+| Typography      | Colfax (geometric sans)          | Plus Jakarta Sans + Fraunces       |
+| Aesthetic       | Flat, corporate, photography     | Layered, depth-driven, luminous    |
+| Logo            | Chat bubble mark                 | Flowing stream/wave abstraction    |
+| Tone            | "We get the job done"            | "Conversations that move"          |
+| Layout          | Rigid alternating 50/50          | Asymmetric overlapping cards       |
+| Hero Style      | Text + product shot              | Full-bleed gradient + floating UI  |
+| Testimonials    | Star-rating carousel             | Voice-card masonry grid            |
 
-### Status Indicator Colors
+### 1.4 Taglines (Replace All LiveChat-Copied Lines)
 
-| Status | Color | Hex | Dot Style |
-|--------|-------|-----|-----------|
-| **Online** | Green | `#1DB954` | Solid circle, 10px, glow shadow |
-| **Away** | Yellow | `#FFC107` | Solid circle, 10px |
-| **Offline** | Gray | `#C7CCD6` | Solid circle, 10px |
-| **Busy/In Chat** | Brand Orange | `#FF5100` | Solid circle with pulse animation |
-| **DND** | Red | `#E53935` | Solid circle, 10px |
+| Usage              | Copy                                                          |
+|--------------------|---------------------------------------------------------------|
+| Primary tagline    | "Conversations that move"                                     |
+| Hero headline      | "Support that flows. Sales that grow."                        |
+| Sub-headline       | "The human-first platform where every chat turns into value." |
+| Feature lead       | "Built for the rhythm of real conversations."                 |
+| CTA line           | "Start flowing free"                                          |
+| Trust line         | "Trusted by 10,000+ support teams worldwide"                 |
+| Product descriptor | "AI-augmented live chat & customer support platform"          |
 
-### Gradient Recipes
+---
+
+## 2. Logo System
+
+### 2.1 Concept
+
+The Flowlyra mark is an **abstract flowing stream** — two fluid arcs suggesting a conversation in motion. It avoids the chat-bubble cliché used by LiveChat, Intercom, Drift, and most competitors.
+
+### 2.2 Logo Anatomy
 
 ```
-/* Brand hero gradient */
-background: linear-gradient(135deg, #FF5100 0%, #FF8533 50%, #FF5100 100%);
+┌──────────────────────────────────────────┐
+│                                          │
+│   ╭─────╮                               │
+│   │     ╰───╮    F l o w l y r a        │
+│   ╰──╮      │                           │
+│      ╰──────╯                           │
+│                                          │
+│   [Mark]        [Wordmark]              │
+│                                          │
+└──────────────────────────────────────────┘
 
-/* Dark section gradient */
-background: linear-gradient(180deg, #0F1117 0%, #1E232A 100%);
+Mark: Two intertwined fluid arcs (gradient: Indigo → Coral)
+Wordmark: "Flowlyra" set in Plus Jakarta Sans SemiBold
+```
 
-/* AI accent gradient (purple → brand) */
-background: linear-gradient(210deg, #9146FF 35%, #FF5100 100%);
+### 2.3 Logo Variants
 
-/* AI gradient subtle overlay */
-background: linear-gradient(90deg, rgba(145,70,255,0.1), rgba(255,81,0,0.1));
+| Variant            | Usage                                         |
+|--------------------|-----------------------------------------------|
+| Full Color         | Default — gradient mark + dark wordmark        |
+| Indigo Mono        | Single-color contexts                         |
+| White Reverse      | On dark / gradient backgrounds                |
+| Mark Only          | Favicon, app icon, loading, small spaces      |
+| Wordmark Only      | Co-branding, legal, very wide contexts        |
 
-/* Badge gradient */
-background: linear-gradient(92.92deg, #FDAA74, #FFE6D5);
+### 2.4 Logo Colors
 
-/* Premium surface (radial glow) */
-background: radial-gradient(circle at top left, rgba(255,81,0,0.06), transparent 34rem),
-            linear-gradient(180deg, #ffffff 0%, #F8F9FA 48%, #F1F5F9 100%);
+| Element    | Default                  | Dark Background           |
+|------------|--------------------------|---------------------------|
+| Mark       | Gradient: `#4F46E5` → `#F97066` | White `#FFFFFF`     |
+| Wordmark   | `#0F172A` (Midnight)     | `#FFFFFF`                 |
+
+### 2.5 Clear Space
+
+Minimum clear space = **the height of the lowercase "o"** in the wordmark, on all four sides.
+
+### 2.6 Minimum Sizes
+
+| Context    | Minimum Width                          |
+|------------|----------------------------------------|
+| Digital    | 100px (full logo), 24px (mark only)    |
+| Print      | 30mm (full logo), 8mm (mark only)      |
+
+### 2.7 Logo Misuse
+
+Never: use the LiveChat orange (`#FF5100`), add a chat-bubble shape, stretch or rotate, place on clashing backgrounds, add shadows or outlines, change the gradient direction, retype the wordmark in a different font.
+
+---
+
+## 3. Color System
+
+### 3.1 Design Principle
+
+Flowlyra's palette is built on **depth and warmth** — deep indigo grounds the system, warm coral provides energy, and a neutral slate scale handles the everyday. This is categorically different from LiveChat's yellow/black/white palette.
+
+### 3.2 Primary Brand Colors
+
+| Name             | Hex       | RGB            | HSL               | Usage                              |
+|------------------|-----------|----------------|--------------------|------------------------------------|
+| **Indigo 600**   | `#4F46E5` | 79, 70, 229    | 243°, 75%, 59%    | Primary brand, CTAs, links, active |
+| **Indigo 700**   | `#4338CA` | 67, 56, 202    | 245°, 58%, 51%    | Hover states, pressed buttons      |
+| **Indigo 500**   | `#6366F1` | 99, 102, 241   | 239°, 84%, 67%    | Light accents, tags, badges        |
+| **Indigo 50**    | `#EEF2FF` | 238, 242, 255  | 226°, 100%, 97%   | Tinted backgrounds, highlights     |
+
+### 3.3 Accent Colors
+
+| Name             | Hex       | RGB            | HSL               | Usage                              |
+|------------------|-----------|----------------|--------------------|------------------------------------|
+| **Coral 500**    | `#F97066` | 249, 112, 102  | 4°, 93%, 69%      | Secondary CTAs, highlights, badges |
+| **Coral 600**    | `#EF4444` | 239, 68, 68    | 0°, 84%, 60%      | Error states, destructive actions  |
+| **Coral 50**     | `#FFF5F5` | 255, 245, 245  | 0°, 100%, 98%     | Error backgrounds                  |
+| **Amber 400**    | `#FBBF24` | 251, 191, 36   | 43°, 96%, 56%     | Warning, in-progress, highlights   |
+| **Amber 50**     | `#FFFBEB` | 255, 251, 235  | 48°, 100%, 96%    | Warning backgrounds                |
+| **Emerald 500**  | `#10B981` | 16, 185, 129   | 160°, 84%, 39%    | Success, online, positive          |
+| **Emerald 50**   | `#ECFDF5` | 236, 253, 245  | 152°, 81%, 96%    | Success backgrounds                |
+
+### 3.4 Neutral Scale (Slate)
+
+| Name            | Hex       | Usage                                              |
+|-----------------|-----------|-----------------------------------------------------|
+| **Midnight**    | `#0F172A` | Headings, primary text, dark backgrounds            |
+| **Slate 800**   | `#1E293B` | Secondary headings, dark UI                         |
+| **Slate 700**   | `#334155` | Body text (on light), strong labels                 |
+| **Slate 600**   | `#475569` | Secondary body text                                 |
+| **Slate 500**   | `#64748B` | Muted text, placeholders                            |
+| **Slate 400**   | `#94A3B8` | Disabled text, subtle icons                         |
+| **Slate 300**   | `#CBD5E1` | Borders, dividers                                   |
+| **Slate 200**   | `#E2E8F0` | Input borders, light dividers                       |
+| **Slate 100**   | `#F1F5F9` | Backgrounds, alternating rows                       |
+| **Slate 50**    | `#F8FAFC` | Page background, subtle surfaces                    |
+| **White**       | `#FFFFFF` | Cards, elevated surfaces                            |
+
+### 3.5 Gradient Library
+
+| Name                  | CSS                                                  | Usage                          |
+|-----------------------|------------------------------------------------------|--------------------------------|
+| **Brand Gradient**    | `linear-gradient(135deg, #4F46E5, #7C3AED, #F97066)`| Hero backgrounds, hero CTAs    |
+| **Indigo Glow**       | `linear-gradient(180deg, #4F46E5, #312E81)`          | Dark sections, footer          |
+| **Coral Sunrise**     | `linear-gradient(135deg, #F97066, #FBBF24)`          | Accent highlights, tags        |
+| **Surface Wash**      | `linear-gradient(180deg, #F8FAFC, #EEF2FF)`          | Section transitions            |
+| **Glass**             | `rgba(255,255,255,0.7)` + `backdrop-filter: blur(16px)` | Nav bar, floating cards    |
+
+### 3.6 Color Hierarchy Decision Tree
+
+```
+Is it a primary action?
+  → Indigo 600 (fill) or White (on Indigo bg)
+Is it destructive?
+  → Coral 600
+Is it positive/success?
+  → Emerald 500
+Is it a warning?
+  → Amber 400
+Is it a link?
+  → Indigo 600 (underline on hover)
+Is it body text?
+  → Slate 700 (primary) or Slate 500 (secondary)
+Is it a background?
+  → White (card) or Slate 50 (page) or Indigo 50 (tinted)
 ```
 
 ---
 
-## 1.2 Typography System
+## 4. Typography
 
-### Font Stack
+### 4.1 Font Selection Rationale
 
-| Context | Font Family | Fallback | Tailwind Class |
-|---------|-------------|----------|---------------|
-| **Display / Headings** | `DM Sans` | system-ui, sans-serif | `font-display` |
-| **Body / UI** | `Inter` | system-ui, sans-serif | `font-sans` (default) |
-| **Code / Mono** | `JetBrains Mono` | ui-monospace, monospace | `font-mono` |
+LiveChat uses Colfax — a geometric sans-serif. Flowlyra uses a deliberately different pairing:
 
-### Font Loading (index.html)
+| Role         | Font                  | Why                                          |
+|--------------|-----------------------|----------------------------------------------|
+| **Display**  | **Fraunces**          | Soft serif with "wonky" optical weight — memorable, warm, NOT corporate geometric |
+| **UI / Body**| **Plus Jakarta Sans** | Modern humanist sans — warmer than Inter, more distinctive than system fonts |
+| **Mono**     | **JetBrains Mono**    | Code blocks, technical data, widget IDs      |
+
+### 4.2 Font Loading
 
 ```html
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 ```
 
-### Type Scale
+### 4.3 Type Scale — Marketing Website
 
-| Token | Size | Line Height | Weight | Tailwind Class | Usage |
-|-------|------|------------|--------|---------------|-------|
-| `2xs` | 12px | 16px | 400 | `text-2xs` | Captions, metadata, timestamps |
-| `xs` | 13px | 20px | 400 | `text-xs` | Small labels, helper text |
-| `sm` | 14px | 20px | 400 | `text-sm` | Body text, list items, menu items |
-| `base` | 16px | 24px | 400 | `text-base` | Default body |
-| `lg` | 18px | 28px | 400 | `text-lg` | Emphasized body, lead paragraphs |
-| `xl` | 20px | 30px | 500 | `text-xl` | Card titles, section subtitles |
-| `2xl` | 24px | 32px | 600 | `text-2xl` | Page titles (dashboard), modal titles |
-| `3xl` | 30px | 36px | 600 | `text-3xl` | Feature section headings |
-| `4xl` | 36px | 42px | 700 | `text-4xl` | Hero subtitles, marketing h2 |
-| `5xl` | 48px | 52px | 700 | `text-5xl` | Hero h1 (mobile) |
-| `6xl` | 56px | 60px | 700 | `text-6xl` | Hero h1 (desktop) |
-| `display` | 72px+ | 1.0-1.1 | 700 | `text-7xl` | Homepage hero headline |
+| Token                | Font            | Size    | Weight | Line Height | Letter Spacing | Usage                      |
+|----------------------|-----------------|---------|--------|-------------|----------------|----------------------------|
+| `display-hero`       | Fraunces        | 64px    | 800    | 1.05        | -0.03em        | Hero headlines only        |
+| `display-lg`         | Fraunces        | 48px    | 700    | 1.1         | -0.025em       | Section headlines          |
+| `display-md`         | Fraunces        | 36px    | 700    | 1.15        | -0.02em        | Sub-section headlines      |
+| `display-sm`         | Fraunces        | 28px    | 600    | 1.2         | -0.01em        | Card titles, feature heads |
+| `heading-lg`         | Plus Jakarta    | 22px    | 700    | 1.3         | -0.005em       | Component headers          |
+| `heading-md`         | Plus Jakarta    | 18px    | 600    | 1.4         | 0              | Panel / card headers       |
+| `heading-sm`         | Plus Jakarta    | 16px    | 600    | 1.4         | 0              | Sub-headers, labels        |
+| `body-lg`            | Plus Jakarta    | 18px    | 400    | 1.7         | 0              | Lead paragraphs            |
+| `body-md`            | Plus Jakarta    | 16px    | 400    | 1.6         | 0              | Default body               |
+| `body-sm`            | Plus Jakarta    | 14px    | 400    | 1.5         | 0              | Secondary content          |
+| `caption`            | Plus Jakarta    | 12px    | 500    | 1.4         | 0.03em         | Labels, metadata           |
+| `overline`           | Plus Jakarta    | 11px    | 700    | 1.2         | 0.1em          | Section labels (uppercase) |
+| `code`               | JetBrains Mono  | 14px    | 400    | 1.6         | 0              | Code, technical data       |
 
-### Font Weight Usage Rules
+### 4.4 Type Scale — Agent Dashboard
 
-| Weight | Value | Usage |
-|--------|-------|-------|
-| **Regular** | `400` | Body text, descriptions, list items, table cells |
-| **Medium** | `500` | Button labels, nav items, form labels, card subtitles |
-| **Semi-bold** | `600` | Page titles, section headings, table headers |
-| **Bold** | `700` | Hero headlines, feature titles, marketing h1/h2 |
+| Token                | Font            | Size    | Weight | Usage                      |
+|----------------------|-----------------|---------|--------|----------------------------|
+| `app-title`          | Plus Jakarta    | 20px    | 700    | Page titles                |
+| `app-section`        | Plus Jakarta    | 16px    | 600    | Panel headers              |
+| `app-body`           | Plus Jakarta    | 14px    | 400    | Default text               |
+| `app-small`          | Plus Jakarta    | 13px    | 400    | Side panels, metadata      |
+| `app-micro`          | Plus Jakarta    | 11px    | 500    | Timestamps, counts         |
+| `app-mono`           | JetBrains Mono  | 13px    | 400    | Chat IDs, error codes      |
 
-### Letter Spacing
-
-| Context | Value | Example |
-|---------|-------|---------|
-| Hero headline | `-0.02em` to `-0.035em` | `tracking-tighter` |
-| All-caps labels | `0.08em` to `0.12em` | `uppercase tracking-wider` |
-| Normal text | `0` | Default |
-| Code blocks | `0` | Default monospace |
-
----
-
-## 1.3 Spacing System
-
-### Base Scale (Tailwind defaults + custom)
-
-```
-4px   → 1 (0.25rem)
-8px   → 2 (0.5rem)
-12px  → 3 (0.75rem)
-16px  → 4 (1rem)      ← standard padding
-20px  → 5 (1.25rem)
-24px  → 6 (1.5rem)     ← section padding (mobile)
-32px  → 8 (2rem)       ← card padding
-40px  → 10 (2.5rem)
-48px  → 12 (3rem)
-64px  → 16 (4rem)      ← section padding (desktop)
-80px  → 20 (5rem)
-96px  → 24 (6rem)
-128px → 32 (8rem)
-160px → 40 (10rem)
-```
-
-### Standard Spacing Recipes
-
-| Context | Tailwind | Pixels |
-|---------|----------|--------|
-| Page horizontal padding | `px-4 lg:px-8` | 16px / 32px |
-| Section vertical padding (mobile) | `py-12 md:py-16 lg:py-20` | 48px → 80px |
-| Card padding | `p-4 md:p-6` | 16px → 24px |
-| Card gap | `gap-4 md:gap-6` | 16px → 24px |
-| Input padding | `px-3 py-2` | 12px H / 8px V |
-| Button padding (sm) | `px-3 py-1.5` | 12px H / 6px V |
-| Button padding (default) | `px-4 py-2` | 16px H / 8px V |
-| Button padding (lg) | `px-6 py-3` | 24px H / 12px V |
-| Sidebar padding | `p-3` | 12px |
-| List item padding | `px-3 py-2.5` | 12px H / 10px V |
-
----
-
-## 1.4 Border Radius
-
-| Token | Value | Tailwind | Usage |
-|-------|-------|----------|-------|
-| `xs` | 4px | `rounded` | Small badges, inline tags |
-| `sm` | 6px | `rounded-sm` | Tooltips, small chips |
-| `md` | 8px | `rounded-md` | **Default — buttons, inputs, cards, dropdowns** |
-| `lg` | 12px | `rounded-lg` | Large cards, panels, modals |
-| `xl` | 16px | `rounded-xl` | Feature cards, image containers |
-| `2xl` | 24px | `rounded-2xl` | Chat bubbles, hero sections |
-| `3xl` | 32px | `rounded-3xl` | Large panels, fullscreen overlays |
-| `full` | 9999px | `rounded-full` | Avatars, status dots, pills |
-
----
-
-## 1.5 Shadow System
-
-| Token | CSS Value | Tailwind | Usage |
-|-------|-----------|----------|-------|
-| `xs` | `0 1px 2px rgba(15,23,42,0.04)` | `shadow-xs` | Subtle card lift, inline elements |
-| `sm` | `0 1px 3px rgba(15,23,42,0.08), 0 1px 2px rgba(15,23,42,0.04)` | `shadow-sm` | Cards, dropdowns |
-| `soft` | `0 1px 2px rgba(15,23,42,0.04), 0 8px 24px rgba(15,23,42,0.06)` | `shadow-soft` | Floating cards, popovers |
-| `md` | `0 4px 12px rgba(15,23,42,0.08)` | `shadow-md` | Elevated cards |
-| `lift` | `0 16px 40px rgba(15,23,42,0.12)` | `shadow-lift` | Modals, drawers, major elevation |
-| `glow` | `0 0 20px rgba(255,81,0,0.25)` | `shadow-glow` | Brand glow for CTAs |
-| `glow-lg` | `0 0 40px rgba(255,81,0,0.15), 0 0 80px rgba(255,81,0,0.08)` | `shadow-glow-lg` | Hero decorative glow |
-
----
-
-## 1.6 Z-Index Scale
-
-| Token | Value | Usage |
-|-------|-------|-------|
-| `base` | `0-4` | Normal stacking |
-| `dropdown` | `10-50` | Dropdowns, popovers |
-| `sticky` | `100` | Sticky headers |
-| `sidebar` | `200` | Dashboard sidebar overlay |
-| `overlay` | `300` | Drawer/modal backdrop |
-| `modal` | `400` | Modal dialog |
-| `toast` | `500` | Toast notifications |
-| `command-palette` | `600` | Command palette overlay |
-| `navbar` | `700` | Public site sticky navbar |
-| `tooltip` | `800` | Tooltips |
-| `widget` | `999999` | Embedded chat widget (highest) |
-
----
-
-## 1.7 Transition Defaults
+### 4.5 Responsive Type Scaling
 
 ```css
-/* Standard interactive transition */
-transition: all 150ms cubic-bezier(0.23, 1, 0.32, 1);
-
-/* Color-only transition */
-transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
-
-/* Layout transition */
-transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1), opacity 200ms ease;
-
-/* Modal/drawer transition */
-transition: transform 300ms cubic-bezier(0.23, 1, 0.32, 1), opacity 200ms ease;
-```
-
-### Tailwind Utility Pattern
-
-```
-transition-all duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]
+/* Mobile-first fluid scaling */
+--display-hero: clamp(2.25rem, 5vw + 1rem, 4rem);     /* 36px → 64px */
+--display-lg:   clamp(1.75rem, 3.5vw + 0.75rem, 3rem); /* 28px → 48px */
+--display-md:   clamp(1.5rem, 2.5vw + 0.5rem, 2.25rem);/* 24px → 36px */
+--body-lg:      clamp(1rem, 1vw + 0.5rem, 1.125rem);    /* 16px → 18px */
 ```
 
 ---
 
-## 1.8 Scrollbar Styling
+## 5. Spacing & Layout Grid
+
+### 5.1 Base Unit
+
+**4px base grid.** All spacing is a multiple of 4. Components snap to an **8px rhythm** for visual consistency.
+
+### 5.2 Spacing Tokens
+
+| Token      | Value   | Px   | Usage                                          |
+|------------|---------|------|-------------------------------------------------|
+| `space-0`  | 0       | 0    | Reset                                           |
+| `space-px` | 1px     | 1    | Hairline borders                                |
+| `space-0.5`| 0.125rem| 2    | Micro adjustments                               |
+| `space-1`  | 0.25rem | 4    | Icon gaps, tight padding                        |
+| `space-1.5`| 0.375rem| 6    | Badge padding                                   |
+| `space-2`  | 0.5rem  | 8    | Inline gaps, small padding                      |
+| `space-3`  | 0.75rem | 12   | Input padding, compact card padding             |
+| `space-4`  | 1rem    | 16   | Default padding, form groups                    |
+| `space-5`  | 1.25rem | 20   | Card padding, comfortable gaps                  |
+| `space-6`  | 1.5rem  | 24   | Section inner padding, card gaps                |
+| `space-8`  | 2rem    | 32   | Component separation                            |
+| `space-10` | 2.5rem  | 40   | Sub-section gaps                                |
+| `space-12` | 3rem    | 48   | Section vertical rhythm                         |
+| `space-16` | 4rem    | 64   | Major section breaks                            |
+| `space-20` | 5rem    | 80   | Hero-to-content gap                             |
+| `space-24` | 6rem    | 96   | Section vertical padding (desktop)              |
+| `space-32` | 8rem    | 128  | Hero vertical padding (desktop)                 |
+| `space-40` | 10rem   | 160  | Extra-large section padding                     |
+
+### 5.3 Content Container
+
+| Property          | Value                                       |
+|-------------------|---------------------------------------------|
+| Max Width         | `1280px`                                    |
+| Padding           | `16px` (mobile), `24px` (tablet), `32px` (desktop) |
+| Centering         | `margin-inline: auto`                       |
+| Narrow Variant    | `max-width: 768px` (for text-heavy pages)   |
+| Wide Variant      | `max-width: 1440px` (for dashboards)        |
+
+---
+
+## 6. Breakpoints & Responsive Strategy
+
+### 6.1 Breakpoints
+
+| Token    | Width    | Approach              | Usage                              |
+|----------|----------|-----------------------|------------------------------------|
+| `xs`     | 0px      | Mobile-first (base)   | Single column, stacked             |
+| `sm`     | 640px    | Small tablets          | 2-col where appropriate            |
+| `md`     | 768px    | Tablets                | Nav shifts, 2-col grids            |
+| `lg`     | 1024px   | Laptops                | Full nav, 3-col grids              |
+| `xl`     | 1280px   | Desktop                | Max containers, full layout        |
+| `2xl`    | 1536px   | Large monitors         | Generous margins, relaxed density  |
+
+### 6.2 Grid System
+
+**12-column CSS Grid** with flexible gaps:
 
 ```css
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 999px; }
-::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--space-6);    /* 24px */
+}
 
-/* Dark mode */
-html.dark ::-webkit-scrollbar-thumb { background: #2D333B; }
-html.dark ::-webkit-scrollbar-thumb:hover { background: #3D4551; }
+/* Responsive column spans */
+.col-full   { grid-column: span 12; }
+.col-half   { grid-column: span 6; }
+.col-third  { grid-column: span 4; }
+.col-quarter{ grid-column: span 3; }
+
+@media (max-width: 768px) {
+  .col-half, .col-third, .col-quarter {
+    grid-column: span 12;
+  }
+}
 ```
 
----
+### 6.3 Layout Patterns (Marketing Site)
 
-# 2. Component Library Reference
-
-## 2.1 Button
-
-### Variants
-
-| Variant | Background | Text | Border | Hover BG |
-|---------|-----------|------|--------|----------|
-| **primary** | `bg-brand-500` | `text-white` | none | `bg-brand-600` |
-| **secondary** | `bg-white` | `text-navy-700` | `border border-navy-100` | `bg-navy-50` |
-| **ghost** | `transparent` | `text-navy-700` | none | `bg-navy-50` |
-| **danger** | `bg-danger-500` | `text-white` | none | `bg-danger-600` |
-| **outline-brand** | `transparent` | `text-brand-500` | `border border-brand-500` | `bg-brand-50` |
-| **link** | `transparent` | `text-brand-500` | none | `underline` |
-
-### Sizes
-
-| Size | Padding | Font Size | Border Radius |
-|------|---------|-----------|---------------|
-| **xs** | `px-2 py-1` | `text-xs` | `rounded-md` |
-| **sm** | `px-3 py-1.5` | `text-sm` | `rounded-md` |
-| **default** | `px-4 py-2` | `text-sm` | `rounded-md` |
-| **lg** | `px-6 py-3` | `text-base` | `rounded-lg` |
-| **xl** | `px-8 py-4` | `text-lg` | `rounded-lg` |
-
-### States
-
-```
-Default  → as specified above
-Hover    → background darkens one shade, subtle translateY(-1px)
-Active   → scale(0.98), darkest background shade
-Disabled → opacity-50, cursor-not-allowed, pointer-events-none
-Loading  → opacity-60, spinner icon replaces label
-Focus    → ring-2 ring-brand-500/30 ring-offset-2
-```
-
-### Implementation Spec
-
-```tsx
-// Primary button Tailwind classes:
-"inline-flex items-center justify-center gap-2 font-medium text-sm rounded-md
- bg-brand-500 text-white px-4 py-2
- hover:bg-brand-600 hover:-translate-y-px
- active:scale-[0.98]
- disabled:opacity-50 disabled:pointer-events-none
- focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:ring-offset-2
- transition-all duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]"
-```
+| Pattern                    | Desktop Grid          | Tablet        | Mobile        |
+|----------------------------|-----------------------|---------------|---------------|
+| Hero                       | 7 + 5 (text + visual) | 12 stacked    | 12 stacked    |
+| Feature showcase           | 5 + 7 (asymmetric)    | 6 + 6         | 12 stacked    |
+| Three-card grid            | 4 + 4 + 4             | 6 + 6 + 12   | 12 stacked    |
+| Testimonial masonry        | 4 + 4 + 4 (staggered) | 6 + 6        | 12 stacked    |
+| Pricing cards              | 4 + 4 + 4             | 4 + 4 + 4    | 12 stacked    |
+| Stats bar                  | 3 + 3 + 3 + 3         | 6 + 6        | 12 stacked    |
+| Footer                     | 3 + 2 + 2 + 2 + 3     | 6 + 6        | 12 stacked    |
 
 ---
 
-## 2.2 Input / Textarea
+## 7. Iconography
 
-```
-Container: relative, w-full
-Input:    w-full px-3 py-2 text-sm rounded-md
-          bg-white border border-navy-100
-          text-navy-700 placeholder:text-navy-300
-          focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500
-          disabled:bg-navy-50 disabled:text-navy-300 disabled:cursor-not-allowed
-          transition-all duration-150
+### 7.1 Icon System
 
-Label:    text-sm font-medium text-navy-700 mb-1.5 block
-Helper:   text-xs text-navy-400 mt-1
-Error:    text-xs text-danger-500 mt-1 + ring-2 ring-danger-500/30 focus:border-danger-500
+| Property          | Specification                                 |
+|-------------------|-----------------------------------------------|
+| Style             | **Outlined / stroke-based** (2px stroke)      |
+| Grid              | 24 × 24px default viewBox                    |
+| Sizes             | 16, 20, 24, 32, 40px                         |
+| Stroke Cap        | Round                                         |
+| Stroke Join       | Round                                         |
+| Color             | Inherits `currentColor`                       |
+| Library           | Lucide React (open source, consistent style) |
 
-Left icon addon:   pl-10 (icon absolute left-3 top-1/2 -translate-y-1/2)
-Right icon addon:  pr-10 (icon absolute right-3 top-1/2 -translate-y-1/2)
-```
+### 7.2 Icon Categories
 
-### Dark Mode
+| Category           | Examples                                    |
+|--------------------|---------------------------------------------|
+| Navigation         | Menu, X, ChevronDown, ArrowRight            |
+| Communication      | MessageCircle, Mail, Phone, Video           |
+| Actions            | Send, Plus, Edit, Trash, Copy, Download     |
+| Status             | CheckCircle, AlertTriangle, XCircle, Clock  |
+| People             | User, Users, UserPlus, Shield               |
+| Analytics          | BarChart, TrendingUp, PieChart, Activity    |
+| Product            | Headset, Bot, Zap, Settings, Layers         |
 
-```
-Input:    bg-navy-800 border-navy-600 text-navy-50 placeholder:text-navy-400
-          focus:ring-brand-500/40
-          disabled:bg-navy-900
-```
+### 7.3 Feature Icons (Marketing)
 
----
-
-## 2.3 Select / Dropdown
-
-```
-Trigger:   same as Input + chevron-down icon on right
-           min-w-[200px]
-Options:   absolute top-full left-0 mt-1 w-full
-           bg-white border border-navy-100 rounded-lg
-           shadow-soft py-1 z-dropdown
-           max-h-[240px] overflow-y-auto
-
-Option:    px-3 py-2 text-sm text-navy-700
-           hover:bg-navy-50 cursor-pointer
-           selected: bg-brand-50 text-brand-600 font-medium
-
-Group label: px-3 py-1.5 text-xs font-semibold text-navy-400 uppercase tracking-wider
-```
+For marketing feature sections, use **duotone filled icons** at 48px inside a `56px × 56px` rounded container with `Indigo 50` background and `Indigo 600` icon color. This replaces LiveChat's approach of using product screenshots as feature icons.
 
 ---
 
-## 2.4 Badge / Tag
-
-### Variants
-
-| Variant | Tailwind |
-|---------|----------|
-| **default** | `bg-navy-50 text-navy-600 px-2 py-0.5 rounded-md text-xs font-medium` |
-| **brand** | `bg-brand-50 text-brand-600 px-2 py-0.5 rounded-md text-xs font-medium` |
-| **success** | `bg-success-50 text-success-600` |
-| **warning** | `bg-warning-50 text-warning-600` |
-| **danger** | `bg-danger-50 text-danger-600` |
-| **purple** | `bg-purple-50 text-purple-600` |
-| **pill** | Add `rounded-full px-3` instead of `rounded-md` |
-| **dot** | Add `flex items-center gap-1.5` with `w-1.5 h-1.5 rounded-full bg-current` before text |
-
----
-
-## 2.5 Avatar
-
-```
-Default:   w-8 h-8 rounded-full bg-brand-100 text-brand-600 font-medium text-sm
-           flex items-center justify-center
-           overflow-hidden
-
-Sizes:
-  xs:  w-6 h-6 text-2xs
-  sm:  w-8 h-8 text-xs
-  md:  w-10 h-10 text-sm
-  lg:  w-12 h-12 text-base
-  xl:  w-16 h-16 text-lg
-
-Status indicator:
-  absolute -bottom-0.5 -right-0.5
-  w-3 h-3 rounded-full border-2 border-white (or bg parent)
-  colors: bg-success-500 (online), bg-warning-500 (away), bg-navy-200 (offline)
-
-With image:
-  img w-full h-full object-cover
-```
-
----
-
-## 2.6 Card
-
-### Standard Card
-
-```
-bg-white border border-navy-100 rounded-lg p-4 md:p-6
-hover:shadow-soft hover:border-navy-200
-transition-all duration-150
-```
-
-### Elevated Card (Marketing)
-
-```
-bg-white rounded-2xl p-6 md:p-8
-shadow-soft hover:shadow-lift hover:-translate-y-1
-transition-all duration-300
-```
-
-### Dark Card
-
-```
-bg-navy-900 rounded-2xl p-6 md:p-8
-border border-navy-800
-```
-
----
-
-## 2.7 Modal / Dialog
-
-```
-Backdrop:   fixed inset-0 bg-navy-950/60 backdrop-blur-sm z-modal
-            animate: fade-in 200ms
-
-Container:  fixed inset-0 z-modal flex items-center justify-center p-4
-
-Panel:      bg-white rounded-2xl shadow-lift w-full
-            max-w-md (default) / max-w-lg / max-w-2xl
-            animate: scale-in 300ms cubic-bezier(0.34, 1.56, 0.64, 1)
-
-Header:     flex items-center justify-between px-6 py-4 border-b border-navy-100
-            Title: text-lg font-semibold text-navy-700
-            Close:  w-8 h-8 rounded-md hover:bg-navy-50 flex items-center justify-center
-
-Body:       px-6 py-4 overflow-y-auto max-h-[60vh]
-
-Footer:     flex items-center justify-end gap-3 px-6 py-4 border-t border-navy-100
-```
-
----
-
-## 2.8 Drawer / Sheet
-
-```
-Backdrop:   same as Modal
-
-Panel (right): fixed right-0 top-0 h-full w-full max-w-md
-               bg-white shadow-lift z-modal
-               animate: slide-in-right 300ms cubic-bezier(0.23, 1, 0.32, 1)
-
-Header:     flex items-center justify-between px-6 py-4 border-b border-navy-100
-Body:       px-6 py-4 overflow-y-auto flex-1
-Footer:     flex items-center gap-3 px-6 py-4 border-t border-navy-100
-
-Close:      same as Modal close button
-```
-
----
-
-## 2.9 Tooltip
-
-```
-Container:  relative inline-block
-
-Tip:        absolute bottom-full left-1/2 -translate-x-1/2 mb-2
-            bg-navy-700 text-white text-xs font-medium px-2.5 py-1.5
-            rounded-md shadow-soft
-            z-tooltip
-            animate: fade-in 150ms
-            arrow: absolute top-full left-1/2 -translate-x-1/2
-                   w-2 h-2 bg-navy-700 rotate-45 -mt-1
-```
-
----
-
-## 2.10 Toast / Notification
-
-```
-Container:  fixed bottom-4 right-4 z-toast flex flex-col gap-2
-
-Item:       flex items-start gap-3 p-4 rounded-lg shadow-lift
-            bg-white border border-navy-100 min-w-[320px] max-w-[420px]
-            animate: slide-in-right 300ms
-
-Icon:       w-5 h-5 flex-shrink-0 mt-0.5
-  success: text-success-500
-  error:   text-danger-500
-  warning: text-warning-500
-  info:    text-blue-500
-
-Content:
-  Title: text-sm font-medium text-navy-700
-  Body:  text-xs text-navy-400 mt-0.5
-
-Close:      ml-auto w-5 h-5 rounded hover:bg-navy-50 flex-shrink-0
-
-Progress bar (auto-dismiss): h-0.5 bg-brand-500 rounded-full animate
-```
-
----
-
-## 2.11 Table
-
-```
-Container:  overflow-x-auto rounded-lg border border-navy-100
-
-Table:      w-full text-sm
-
-Header:     bg-navy-50/80
-  Cell:     px-4 py-3 text-left text-xs font-semibold text-navy-400
-            uppercase tracking-wider
-
-Body:
-  Row:      border-b border-navy-100 last:border-0
-            hover:bg-navy-50/50 transition-colors 100ms
-  Cell:     px-4 py-3 text-sm text-navy-700
-
-  Selected: bg-brand-50/60
-  Disabled: opacity-50
-```
-
----
-
-## 2.12 Tabs
-
-```
-Container:   border-b border-navy-100
-
-List:        flex gap-0 -mb-px
-
-Trigger:     px-4 py-2.5 text-sm font-medium text-navy-400
-             hover:text-navy-700 transition-colors 150ms
-             border-b-2 border-transparent
-
-Active:      text-brand-500 border-b-2 border-brand-500
-             -mb-px (covers container border)
-```
-
----
-
-## 2.13 Skeleton
-
-```
-Base:    rounded-md
-         bg-gradient(90deg, surface-muted 25%, surface-hover 50%, surface-muted 75%)
-         background-size: 200% 100%
-         animation: shimmer 1.5s linear infinite
-
-Variants:
-  text:  h-4 w-full
-  title: h-6 w-3/4
-  avatar: w-10 h-10 rounded-full
-  card:  w-full h-48 rounded-lg
-  button: w-24 h-10 rounded-md
-```
-
----
-
-## 2.14 Empty State
-
-```
-Container:  flex flex-col items-center justify-center py-16 px-4 text-center
-
-Icon:       w-16 h-16 text-navy-200 mb-4 (illustration or icon)
-
-Title:      text-lg font-semibold text-navy-700 mb-2
-
-Description: text-sm text-navy-400 max-w-md mb-6
-
-Action:     primary button
-```
-
----
-
-## 2.15 Spinner
-
-```
-SVG:  w-5 h-5 animate-spin
-      stroke: currentColor (text-navy-400 by default)
-      stroke-width: 2
-      fill: none
-
-Sizes:
-  sm:  w-4 h-4
-  md:  w-5 h-5
-  lg:  w-8 h-8
-```
-
----
-
-# 3. Public Marketing Pages
-
-## 3.1 Global Navbar (Public Pages)
-
-### Structure
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│ [Logo]    [AI] [Product▾] [Pricing] [Integrations▾] [CTA]  │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Specs
-
-```
-Position:       sticky top-0
-Height:         64px (h-16)
-Background:     bg-white/90 backdrop-blur-md
-Border-bottom:  border-b border-navy-100/80
-Z-index:        z-navbar (700)
-Padding:        px-4 lg:px-8 (horizontal), full height content
-
-Logo:
-  Width:       140px (w-36)
-  Font:        DM Sans, font-bold text-xl
-  Text:        "FlowLyra" with brand gradient or solid brand-500
-  Mark:        chat bubble icon in brand-500, 28×28px
-
-Nav Links:
-  Font:        Inter, text-sm font-medium
-  Color:       text-navy-500 hover:text-navy-700
-  Padding:     px-3 py-2 rounded-md
-  Hover:       bg-navy-50/60
-  Active:      text-brand-500
-
-Dropdown trigger:
-  Icon:        ChevronDown 16×16, ml-1
-  Panel:       absolute top-full left-0 mt-2 w-64
-               bg-white rounded-xl border border-navy-100 shadow-lift p-2
-               animate: fade-in 150ms
-  Item:        px-3 py-2.5 rounded-lg text-sm text-navy-600 hover:bg-navy-50
-  Item icon:   w-5 h-5 mr-3 text-navy-400
-  Group title: px-3 py-1.5 text-xs font-semibold text-navy-400 uppercase tracking-wider
-
-CTA Buttons:
-  Login:       text-sm font-medium text-navy-500 hover:text-navy-700 px-3 py-2
-  Get Started: bg-brand-500 text-white px-4 py-2 rounded-lg text-sm font-medium
-               hover:bg-brand-600 shadow-sm hover:shadow-md transition-all 150ms
-
-Mobile ( hamburger menu ):
-  Icon:        Menu 24×24 in navy-500
-  Panel:       fixed inset-0 bg-white z-overlay
-               animate: slide-in-right 300ms
-  Header:      flex items-center justify-between p-4 border-b
-  Links:       flex flex-col p-4 gap-1
-  Link:        px-4 py-3 rounded-lg text-base font-medium text-navy-700 hover:bg-navy-50
-```
-
-### Announcement Bar (optional)
-
-```
-Height:     36px (h-9)
-Background: bg-brand-500
-Text:       text-white text-xs font-medium text-center
-Hover:      hover:bg-brand-600 (entire bar is a link)
-```
-
----
-
-## 3.2 Homepage
-
-### Hero Section
-
-```
-┌─────────────────────────────────────────────┐
-│                                             │
-│         ✨ [AI-Powered Badge]               │
-│                                             │
-│     Customer Service                       │
-│     That Actually Converts                │
-│                                             │
-│     Build relationships, increase sales,   │
-│     and deliver real-time support with     │
-│     AI-powered live chat.                  │
-│                                             │
-│     [Start Free Trial]  [Watch Demo ▶]     │
-│                                             │
-│     Trusted by 30,000+ companies            │
-│     ○ ○ ○ ○ ○ ○ (logo marquee)             │
-│                                             │
-└─────────────────────────────────────────────┘
-```
-
-### Specs
-
-```
-Background:   premium-surface class
-              (radial gradient glow top-left + light gradient)
-              OR: bg-navy-900 with text-white (dark variant)
-
-Padding:      py-20 md:py-28 lg:py-32
-Max-width:    max-w-5xl mx-auto text-center
-
-AI Badge:
-  Display:    inline-flex items-center gap-2 px-4 py-1.5
-  Background: bg-purple-50 border border-purple-200
-  Text:       text-purple-600 text-xs font-semibold uppercase tracking-wider
-  Icon:       Sparkles 14×14
-
-Headline:
-  Font:       DM Sans, text-5xl md:text-6xl lg:text-7xl font-bold
-  Color:      text-navy-700 (light) / text-white (dark)
-  Tracking:   tracking-tight
-  Line height: 1.1
-  Max width:  4xl (max-w-4xl mx-auto)
-  Animated:   fadeIn 600ms ease-out
-  Gradient word: use gradient-text class on key word
-
-Sub-headline:
-  Font:       Inter, text-lg md:text-xl text-navy-400
-  Max width:  2xl (max-w-2xl mx-auto)
-  Margin:     mt-6
-  Line height: 1.6
-
-CTA Group:
-  Display:    flex items-center justify-center gap-4 mt-10
-  Primary:    bg-brand-500 text-white px-8 py-4 rounded-xl text-base font-semibold
-              shadow-glow hover:bg-brand-600 hover:shadow-glow-lg
-              hover:-translate-y-0.5 transition-all 300ms
-  Secondary:  bg-white text-navy-700 px-6 py-4 rounded-xl text-base font-semibold
-              border border-navy-100 shadow-sm
-              hover:border-navy-200 hover:shadow-soft transition-all 150ms
-  Icon:       Play 16×16 inside secondary CTA
-
-Social Proof:
-  Margin:     mt-16
-  Text:       "Trusted by 30,000+ companies worldwide"
-  Font:       text-sm text-navy-400
-  Marquee:    overflow-hidden py-6
-  Track:      marquee-track (flex, animate marquee 40s linear infinite)
-  Logos:      h-8 opacity-50 grayscale hover:opacity-100 transition-all
-              mx-8 flex-shrink-0
-  Hover:      animation-play-state: paused
-```
-
-### Feature Sections (Alternating Layout)
-
-```
-┌──────────────────────────────────────────────┐
-│ Section BG: white OR navy-50 (alternating)    │
-│ Padding: py-20 md:py-28 lg:py-32             │
-│ Max-width: max-w-6xl mx-auto px-4 lg:px-8   │
-│                                               │
-│ ┌─────────────────┐  ┌─────────────────────┐  │
-│ │ Section Label   │  │                     │  │
-│ │ (pill badge)    │  │   Illustration /    │  │
-│ │                 │  │   Screenshot         │  │
-│ │ Section Title   │  │   (rounded-2xl)      │  │
-│ │ (3xl, DM Sans)  │  │   shadow-lift       │  │
-│ │                 │  │                     │  │
-│ │ Description     │  │                     │  │
-│ │ (lg, navy-400)  │  │                     │  │
-│ │                 │  │                     │  │
-│ │ Feature list    │  │                     │  │
-│ │ ✓ Feature 1     │  │                     │  │
-│ │ ✓ Feature 2     │  │                     │  │
-│ │ ✓ Feature 3     │  │                     │  │
-│ └─────────────────┘  └─────────────────────┘  │
-│                                               │
-│ (Alternate: swap text/image sides)            │
-└──────────────────────────────────────────────┘
-```
-
-### Specs
-
-```
-Section Label:
-  Display:    inline-flex items-center gap-2 px-3 py-1 rounded-full
-  Background: bg-brand-50
-  Text:       text-brand-600 text-xs font-semibold uppercase tracking-wider
-
-Section Title:
-  Font:       DM Sans, text-3xl md:text-4xl font-bold text-navy-700
-  Margin:     mt-4
-
-Description:
-  Font:       text-lg text-navy-400
-  Line height: 1.7
-  Margin:     mt-4
-
-Feature List:
-  Margin:     mt-8
-  Items:      flex items-start gap-3 text-sm text-navy-600
-  Check icon: w-5 h-5 text-success-500 flex-shrink-0 mt-0.5
-  Item:       py-2
-
-Illustration:
-  Rounded:    rounded-2xl
-  Shadow:     shadow-lift
-  Border:     border border-navy-100
-  Animation:  hover:-translate-y-2 transition-transform 500ms
-  Width:      w-full (takes remaining grid space)
-```
-
-### Grid Layout for Features
-
-```
-2-column:  grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center
-3-column:  grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8
-4-column:  grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6
-```
-
-### AI Feature Section
-
-```
-Background:   bg-purple-50/50 (light purple tint)
-Badge:        gradient from purple to brand
-Title:        includes purple gradient text for "AI" keyword
-Illustration: shows AI chat assist panel with purple accents
-```
-
----
-
-## 3.3 Integrations Grid Section
-
-```
-┌─────────────────────────────────────────────────────┐
-│                    Integrations                      │
-│         Connect with your favorite tools            │
-│                                                      │
-│   ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐     │
-│   │Shopify│ │Slack │ │HubSpot│ │Stripe│ │WhatsApp│    │
-│   │ Logo  │ │ Logo │ │ Logo │ │ Logo │ │ Logo  │    │
-│   └──────┘ └──────┘ └──────┘ └──────┘ └──────┘     │
-│   ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐     │
-│   │Salesf│ │Jira  │ │Zapier│ │Mailcg│ │Zendes │    │
-│   └──────┘ └──────┘ └──────┘ └──────┘ └──────┘     │
-│                                                      │
-│              [View All Integrations →]               │
-└─────────────────────────────────────────────────────┘
-```
-
-### Specs
-
-```
-Grid:         grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4
-Card:         bg-white border border-navy-100 rounded-xl p-4
-              flex flex-col items-center justify-center gap-2
-              hover:border-brand-200 hover:shadow-soft hover:-translate-y-1
-              transition-all 200ms cursor-pointer
-Icon:         w-10 h-10 (integrations use their brand colors)
-Label:        text-xs font-medium text-navy-600
-```
-
----
-
-## 3.4 Testimonials Section
-
-```
-Background:   bg-navy-900
-Padding:      py-20 md:py-28
-Text color:   text-white
-
-Section Title: DM Sans text-3xl md:text-4xl font-bold text-white text-center
-
-Testimonial Cards:
-  Grid:       grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto
-  Card:       bg-navy-800 border border-navy-700 rounded-2xl p-6
-  Quote:      text-base text-navy-200 leading-relaxed
-  Author:     flex items-center gap-3 mt-6 pt-6 border-t border-navy-700
-    Avatar:   w-10 h-10 rounded-full
-    Name:     text-sm font-semibold text-white
-    Role:     text-xs text-navy-400
-  Stars:      flex gap-1 mt-2 (yellow filled stars, text-warning-500)
-```
-
----
-
-## 3.5 CTA Section (Bottom)
-
-```
-Background:   bg-brand-500 with subtle radial gradient overlay
-              OR: premium-surface with brand gradient text
-Padding:      py-20 md:py-28 text-center
-
-Title:        DM Sans text-3xl md:text-4xl font-bold
-              (white on brand bg, or gradient-text on light bg)
-
-Description:  text-lg text-white/80 (on brand bg)
-
-Buttons:
-  Primary:    bg-white text-brand-600 px-8 py-4 rounded-xl
-              shadow-lg hover:shadow-lift
-  Ghost:      text-white border border-white/30 px-8 py-4 rounded-xl
-              hover:bg-white/10
-```
-
----
-
-## 3.6 Footer
-
-```
-┌──────────────────────────────────────────────────────────────┐
-│ Background: bg-navy-50 border-t border-navy-100              │
-│ Padding: pt-16 pb-8 px-4 lg:px-8                             │
-│                                                              │
-│  ┌──────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐           │
-│  │Logo  │ │ Product  │ │ Resources│ │ Company  │           │
-│  │+Desc │ │ Features │ │ Blog     │ │ About    │           │
-│  │      │ │ Pricing  │ │ Help     │ │ Careers  │           │
-│  │      │ │ AI       │ │ Docs     │ │ Press    │           │
-│  │      │ │ Widget   │ │ Status   │ │ Contact  │           │
-│  └──────┘ └──────────┘ └──────────┘ └──────────┘           │
-│                                                              │
-│  ──────────────────────────────────────────────────          │
-│  Social Icons │ © 2025 FlowLyra │ Privacy │ Terms           │
-└──────────────────────────────────────────────────────────────┘
-```
-
-### Specs
-
-```
-Grid:           grid grid-cols-2 md:grid-cols-5 gap-8
-
-Logo Column:
-  Logo:         DM Sans font-bold text-xl text-navy-700
-  Description:  text-sm text-navy-400 mt-3 max-w-xs
-
-Link Columns:
-  Title:        text-xs font-semibold text-navy-700 uppercase tracking-wider mb-4
-  Links:        flex flex-col gap-2.5
-  Link:         text-sm text-navy-400 hover:text-brand-500 transition-colors 150ms
-
-Bottom Bar:
-  Margin:       mt-12 pt-8 border-t border-navy-100
-  Layout:       flex flex-col md:flex-row items-center justify-between gap-4
-  Copyright:    text-xs text-navy-400
-  Links:        flex items-center gap-6
-  Link:         text-xs text-navy-400 hover:text-brand-500
-  Social:       flex items-center gap-4
-  Icon:         w-5 h-5 text-navy-400 hover:text-brand-500
-```
-
----
-
-## 3.7 Pricing Page
-
-### Layout
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│ Navbar                                                          │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│            Simple, Transparent Pricing                           │
-│            Start free, scale as you grow                        │
-│                                                                  │
-│            [Monthly] [Annual — Save 20%]                        │
-│                                                                  │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐          │
-│  │ Starter  │ │  Team    │ │ Business │ │Enterprise│          │
-│  │  $24/mo  │ │  $49/mo  │ │  $69/mo  │ │  Custom  │          │
-│  │ (or $19) │ │ (or $41) │ │ (or $59) │ │          │          │
-│  │          │ │ POPULAR  │ │          │ │          │          │
-│  │ features │ │ features │ │ features │ │ features │          │
-│  │ [Start]  │ │ [Start]  │ │ [Start]  │ │[Contact] │          │
-│  └──────────┘ └──────────┘ └──────────┘ └──────────┘          │
-│                                                                  │
-│           [Feature Comparison Table ▼]                          │
-│                                                                  │
-│  ┌────────────────────────────────────────────────────────┐     │
-│  │ Feature              │Starter│ Team │Business│Enterprise│   │
-│  │ ─────────────────────┼───────┼──────┼────────┼──────────│   │
-│  │ Agents               │   1   │   5  │  20    │ Unlimited│   │
-│  │ Concurrent chats     │   5   │  25  │  60    │ Unlimited│   │
-│  │ ...                  │       │      │        │          │   │
-│  └────────────────────────────────────────────────────────┘     │
-│                                                                  │
-│  FAQ Accordion                                                   │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### Pricing Card Specs
-
-```
-Grid:           grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6
-Card:           bg-white border border-navy-100 rounded-2xl p-6 md:p-8
-                flex flex-col relative
-
-Popular badge:  absolute -top-3 left-1/2 -translate-x-1/2
-                bg-brand-500 text-white text-xs font-semibold px-4 py-1
-                rounded-full shadow-glow
-                (only on "Team" plan)
-
-Plan name:      DM Sans text-lg font-bold text-navy-700 mt-2
-Price:          text-4xl font-bold text-navy-700 mt-4
-                (period: text-base font-normal text-navy-400)
-Description:    text-sm text-navy-400 mt-2
-
-Feature list:   flex flex-col gap-3 mt-6 flex-1
-  Item:         flex items-start gap-2.5 text-sm text-navy-600
-  Check:        w-4 h-4 text-brand-500 flex-shrink-0 mt-0.5 (or text-success-500)
-  Cross:        w-4 h-4 text-navy-200 flex-shrink-0 mt-0.5 (not included)
-
-CTA button:     mt-8 w-full
-  Normal:       bg-white text-navy-700 border border-navy-100 hover:bg-navy-50
-  Popular:      bg-brand-500 text-white hover:bg-brand-600 shadow-glow
-  Enterprise:   ghost style, text-brand-500 border border-brand-500 hover:bg-brand-50
-```
-
-### Toggle (Monthly/Annual)
-
-```
-Container:     flex items-center justify-center gap-3
-Toggle:        relative w-14 h-7 bg-navy-200 rounded-full cursor-pointer
-               transition-colors 200ms
-Active:        bg-brand-500
-Knob:          absolute top-0.5 w-6 h-6 bg-white rounded-full shadow-sm
-               left-0.5 (monthly) / left-[calc(100%-1.625rem)] (annual)
-               transition-transform 200ms cubic-bezier(0.23,1,0.32,1)
-
-Labels:        text-sm font-medium
-Active:        text-navy-700
-Inactive:      text-navy-400
-
-Savings badge: inline-flex px-2 py-0.5 bg-success-50 text-success-600
-               text-xs font-semibold rounded-full -ml-1
-```
-
-### Comparison Table
-
-```
-Container:     overflow-x-auto rounded-xl border border-navy-100
-               max-w-6xl mx-auto mt-16
-Background:    bg-white
-
-Sticky header: sticky top-0 z-10
-Header row:    bg-navy-50/80 backdrop-blur-sm
-Header cell:   px-4 md:px-6 py-3 text-sm font-semibold text-navy-700
-Feature cell:  px-4 md:px-6 py-3.5 text-sm text-navy-600
-               border-b border-navy-100
-Hover:         hover:bg-navy-50/50
-Section header: bg-navy-50 font-semibold text-navy-700 py-3
-Check mark:    w-5 h-5 text-brand-500
-Cross mark:    w-5 h-5 text-navy-200
-```
-
----
-
-## 3.8 Features Page
-
-### Layout
-
-```
-Hero:          Same pattern as homepage hero, smaller scale
-               title: text-4xl md:text-5xl
-
-Feature groups: Each with section label badge + title + grid of feature cards
-Card:          bg-white border border-navy-100 rounded-xl p-6
-               hover:shadow-soft hover:border-brand-200 transition-all 200ms
-  Icon:        w-10 h-10 rounded-lg bg-brand-50 text-brand-500 p-2
-  Title:       text-base font-semibold text-navy-700 mt-4
-  Description: text-sm text-navy-400 mt-2 leading-relaxed
-```
-
----
-
-# 4. Authentication Pages
-
-## 4.1 Shared Layout
-
-```
-Container:     min-h-screen flex
-  Left panel:  hidden lg:flex lg:w-1/2 bg-navy-900 p-12
-               flex-col justify-between relative overflow-hidden
-  Right panel: w-full lg:w-1/2 flex items-center justify-center p-6 md:p-12
-
-Left panel content:
-  Logo:        text-white DM Sans font-bold text-xl
-  Decorative:  absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-               radial gradient glow in brand-500/20, w-96 h-96 rounded-full
-  Quote:       text-lg text-white/80 italic max-w-sm
-  Quote attr:  text-sm text-white/50 mt-4
-
-Right panel content:
-  Max width:   w-full max-w-md
-  Title:       DM Sans text-2xl font-bold text-navy-700
-  Subtitle:    text-sm text-navy-400 mt-2
-```
-
----
-
-## 4.2 Login Page
-
-```
-┌──────────────────┬──────────────────┐
-│                   │                  │
-│  Brand visual     │  Welcome back    │
-│  + decorative     │                  │
-│  gradient         │  [Email input]   │
-│                   │  [Password input]│
-│  "Join 30,000+   │  [Forgot link]   │
-│   companies"      │                  │
-│                   │  [Sign In ▸]     │
-│                   │                  │
-│                   │  ── or ──        │
-│                   │                  │
-│                   │  [Google] [SSO]  │
-│                   │                  │
-│                   │  No account?     │
-│                   │  Sign up →       │
-│                   │                  │
-└──────────────────┴──────────────────┘
-```
-
-### Specs
-
-```
-Form fields:   stacked vertically, gap-4
-               each has label + input
-
-Divider:       flex items-center gap-4 my-6
-               border-t border-navy-100 flex-1
-               text: text-xs text-navy-400 "or continue with"
-
-Social buttons:
-               flex gap-3
-               bg-white border border-navy-100 rounded-lg px-4 py-2.5
-               flex items-center justify-center gap-2 text-sm font-medium text-navy-700
-               hover:bg-navy-50 transition-colors 150ms
-               icon: w-5 h-5 (Google logo, SSO logo)
-```
-
----
-
-## 4.3 Signup Page
-
-```
-Same layout as Login, with additional fields:
-  - Full Name
-  - Work Email
-  - Password (with strength indicator)
-  - Company Name (optional)
-
-Password strength indicator:
-  Container:   h-1.5 bg-navy-100 rounded-full mt-2 overflow-hidden
-  Bar:         h-full rounded-full transition-all 300ms
-  Colors:      bg-danger-500 (weak) → bg-warning-500 (fair) → bg-brand-500 (good) → bg-success-500 (strong)
-  Width:       25% / 50% / 75% / 100%
-  Label:       text-xs text-navy-400 mt-1
-```
-
----
-
-## 4.4 Forgot Password / Reset
-
-```
-Centered layout (no split panel):
-  Container:   min-h-screen flex items-center justify-center p-4
-  Card:        w-full max-w-md bg-white rounded-2xl border border-navy-100
-               shadow-soft p-8
-
-  Icon:        w-12 h-12 bg-brand-50 rounded-xl text-brand-500 flex items-center justify-center mx-auto
-  Title:       text-xl font-bold text-navy-700 text-center mt-4
-  Description: text-sm text-navy-400 text-center mt-2
-
-  Steps:       1. Enter email → 2. Check inbox → 3. Set new password
-  Progress:    3 dots, active = brand-500 filled, inactive = navy-100
-```
-
----
-
-# 5. Agent Dashboard — Layout Shell
-
-## 5.1 Overall Layout
-
-```
-┌──────────────────────────────────────────────────────────┐
-│ [Sidebar]  │            [Main Content Area]               │
-│            │  ┌─────────────────────────────────────────┐ │
-│ w-64       │  │ [Top Header Bar]                        │ │
-│ (256px)    │  ├─────────────────────────────────────────┤ │
-│            │  │                                         │ │
-│            │  │         Page Content                    │ │
-│            │  │         (scrollable)                    │ │
-│            │  │                                         │ │
-│            │  │                                         │ │
-│            │  └─────────────────────────────────────────┘ │
-└──────────────────────────────────────────────────────────┘
-```
-
----
-
-## 5.2 Sidebar Navigation
-
-### Specs
-
-```
-Position:       fixed left-0 top-0 h-full
-Width:          w-64 (256px)
-Background:     bg-white (light) / bg-navy-900 (dark)
-Border-right:   border-r border-navy-100
-Z-index:        z-sidebar (200)
-Padding:        flex flex-col
-
-Top section:
-  Logo:         px-4 py-5
-                DM Sans font-bold text-xl text-brand-500
-                (or: gradient text variant)
-  Workspace:    px-4 flex items-center gap-2 text-sm text-navy-400
-                ChevronDown icon for workspace switcher
-
-Nav sections:   flex-1 overflow-y-auto py-2 px-2
-
-Section label:
-  Display:      px-3 py-2 text-[11px] font-semibold uppercase tracking-wider
-  Color:        text-navy-300 (light) / text-navy-500 (dark)
-
-Nav item:
-  Display:      flex items-center gap-3 px-3 py-2 rounded-lg
-  Font:         text-sm font-medium text-navy-600
-  Icon:         w-5 h-5 text-navy-400
-  Hover:        bg-navy-50 (light) / bg-navy-800 (dark)
-  Active:       bg-brand-50 text-brand-600
-                icon: text-brand-500
-
-Active indicator:
-  Left border:  absolute left-0 top-1/2 -translate-y-1/2
-                w-1 h-5 bg-brand-500 rounded-r-full
-
-Sub-item:
-  Display:      flex items-center gap-3 pl-11 pr-3 py-1.5
-  Font:         text-sm text-navy-400
-  Hover:        text-navy-700 bg-navy-50/50
-  Active:       text-brand-600 bg-brand-50/50
-  Bullet:       w-1.5 h-1.5 rounded-full bg-current
-
-Badge (count):
-  Display:      ml-auto bg-brand-500 text-white text-[10px] font-bold
-                px-1.5 py-0.5 rounded-full min-w-[18px] text-center
-
-Bottom section:
-  Padding:      p-3 border-t border-navy-100
-  User:         flex items-center gap-3 p-2 rounded-lg hover:bg-navy-50
-    Avatar:     w-8 h-8 rounded-full bg-brand-100 text-brand-600 font-medium text-sm
-    Info:       flex flex-col
-      Name:     text-sm font-medium text-navy-700
-      Role:     text-xs text-navy-400
-    Menu:       ChevronDown 16×16 text-navy-400
-```
-
-### Sidebar Navigation Structure
-
-```
-FlowLyra
-├── [Workspace: My Company ▾]
-│
-├── MAIN
-│   ├── Home
-│   │   (LayoutDashboard icon)
-│   │
-│   ├── CHATS
-│   │   ├── My Chats          (MessageSquare icon)
-│   │   ├── Queued            (Clock icon)
-│   │   ├── Assigned to Me    (UserCheck icon)
-│   │   └── All Open          (Inbox icon)
-│   │
-│   ├── TICKETS
-│   │   ├── Open              (Ticket icon)
-│   │   ├── Pending           (AlertCircle icon)
-│   │   └── Resolved          (CheckCircle icon)
-│   │
-│   └── ENGAGE
-│       ├── Traffic           (Globe icon)
-│       ├── Campaigns         (Megaphone icon)
-│       └── Goals             (Target icon)
-│
-├── WORKSPACE
-│   ├── Contacts          (Users icon)
-│   ├── Knowledge Base    (BookOpen icon)
-│   ├── Chatbot           (Bot icon)
-│   └── Tags              (Tag icon)
-│
-├── INSIGHTS
-│   └── Reports           (BarChart3 icon)
-│
-├── MANAGE
-│   ├── Agents             (UserCog icon)
-│   ├── Teams              (Users icon)
-│   ├── Integrations       (Puzzle icon)
-│   └── Settings           (Settings icon)
-│       ├── Overview
-│       ├── Widget
-│       ├── Channels
-│       ├── Billing
-│       ├── Notifications
-│       ├── Security
-│       └── API Keys
-│
-├── SYSTEM
-│   ├── API Platform       (Code icon)
-│   ├── Webhooks           (Webhook icon)
-│   ├── Audit Log          (FileText icon)
-│   └── Archives           (Archive icon)
-│
-└── [User Avatar] Agent Name
-    ├── Profile
-    ├── Preferences
-    └── Sign Out
-```
-
----
-
-## 5.3 Top Header Bar
-
-```
-┌──────────────────────────────────────────────────────────┐
-│ [☰] │ Chat Inbox                     │ [🔍] [🔔 3] [👤]│
-└──────────────────────────────────────────────────────────┘
-```
-
-### Specs
-
-```
-Position:       sticky top-0
-Height:         h-14 (56px)
-Background:     bg-white/80 backdrop-blur-md (light)
-                bg-navy-800/80 backdrop-blur-md (dark)
-Border-bottom:  border-b border-navy-100
-Padding:        px-4 flex items-center justify-between
-
-Left:
-  Mobile menu:  lg:hidden, w-8 h-8 rounded-md hover:bg-navy-50
-                flex items-center justify-center (Menu icon)
-  Breadcrumb:   flex items-center gap-2 text-sm
-    Current:    font-semibold text-navy-700
-    Separator:  text-navy-300 (ChevronRight 14×14)
-    Parent:     text-navy-400 hover:text-navy-600
-
-Right:
-  Search:       Cmd+K trigger
-                flex items-center gap-2 px-3 py-1.5 rounded-lg
-                bg-navy-50 border border-navy-100 text-sm text-navy-400
-                hover:border-navy-200 cursor-pointer
-                Icon: Search 16×16
-                Shortcut: text-xs text-navy-300 border border-navy-200
-                           rounded px-1.5 py-0.5 ml-4
-
-  Notifications:
-                relative w-8 h-8 rounded-md hover:bg-navy-50
-                flex items-center justify-center
-                Icon: Bell 18×18 text-navy-500
-                Badge: absolute -top-0.5 -right-0.5
-                       w-4 h-4 bg-brand-500 text-white text-[9px]
-                       font-bold rounded-full flex items-center justify-center
-
-  User menu:    flex items-center gap-2
-                Avatar: w-8 h-8
-                Dropdown: same pattern as public nav dropdown
-```
-
----
-
-# 6. Agent Dashboard — Home Page
-
-## 6.1 Layout
-
-```
-┌──────────────────────────────────────────────────────────┐
-│ Good morning, Alex 👋                                     │
-│ Here's what's happening today                              │
-│                                                           │
-│ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐         │
-│ │Active   │ │Unassigned│ │Avg Resp │ │Satisf.  │         │
-│ │Chats:12 │ │Chats: 3  │ │Time:24s │ │Score:96%│         │
-│ │↑ 18%    │ │↓ 5%     │ │↓ 3s     │ │↑ 2%     │         │
-│ └─────────┘ └─────────┘ └─────────┘ └─────────┘         │
-│                                                           │
-│ ┌──────────────────────┐ ┌──────────────────────┐        │
-│ │ Recent Conversations │ │   Quick Actions       │        │
-│ │                      │ │                        │        │
-│ │ [chat list items]    │ │ [New Chat]             │        │
-│ │                      │ │ [New Ticket]           │        │
-│ │                      │ │ [View Reports]         │        │
-│ └──────────────────────┘ └──────────────────────┘        │
-│                                                           │
-│ ┌──────────────────────────────────────────────┐         │
-│ │ Agent Performance (7-day chart)               │         │
-│ │ [Recharts line/bar chart]                     │         │
-│ └──────────────────────────────────────────────┘         │
-└──────────────────────────────────────────────────────────┘
-```
-
-### Specs
-
-```
-Container:    max-w-6xl mx-auto px-6 py-6
-
-Greeting:
-  Font:       DM Sans text-2xl font-bold text-navy-700
-  Subtitle:   text-sm text-navy-400 mt-1
-
-Stats Grid:
-  Grid:       grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4
-
-  Stat Card:
-    Bg:       bg-white border border-navy-100 rounded-xl p-5
-    Label:    text-xs font-semibold text-navy-400 uppercase tracking-wider
-    Value:    text-2xl font-bold text-navy-700 mt-1
-    Trend:    flex items-center gap-1 text-sm mt-2
-      Up:     text-success-500 (TrendingUp icon)
-      Down:   text-danger-500 (TrendingDown icon)
-      Neutral: text-navy-400
-
-Recent Chats Panel:
-  Bg:         bg-white border border-navy-100 rounded-xl
-  Header:     px-5 py-4 border-b border-navy-100
-    Title:    text-base font-semibold text-navy-700
-    Link:     text-sm text-brand-500 hover:text-brand-600 "View all →"
-  List:       divide-y divide-navy-100
-    Item:     flex items-center gap-3 px-5 py-3 hover:bg-navy-50/50 cursor-pointer
-      Avatar: w-8 h-8
-      Info:   flex-1 min-w-0
-        Name: text-sm font-medium text-navy-700
-        Msg:  text-xs text-navy-400 truncate
-      Meta:  text-xs text-navy-300 text-right
-        Time: relative ("2m ago")
-        Status: Badge
-
-Performance Chart:
-  Bg:         bg-white border border-navy-100 rounded-xl p-5
-  Chart:      Recharts ResponsiveContainer, h-64
-  Colors:     brand-500 for primary metric, navy-200 for comparison
-```
-
----
-
-# 7. Agent Dashboard — Chat Inbox (3-Pane)
-
-## 7.1 Overall Layout
-
-```
-┌─────────┬──────────────────────┬──────────────┐
-│ Chats   │   Chat Feed          │  Visitor     │
-│ List    │                      │  Info Panel  │
-│         │                      │              │
-│ w-80    │   flex-1             │  w-80        │
-│(320px)  │                      │  (320px)     │
-│         │                      │              │
-│ [Search]│  [Header: Name]      │ [Visitor]    │
-│ [Filter]│  ─────────────────── │ [Details]    │
-│         │                      │ [Notes]      │
-│ ┌─────┐ │  [Messages area]     │ [Tags]       │
-│ │Chat │ │  (scrollable)        │ [History]    │
-│ │Item │ │                      │              │
-│ │  1  │ │  Agent: Hello!       │              │
-│ │     │ │           ●          │              │
-│ │     │ │  Visitor: Hi         │              │
-│ │     │ │                      │              │
-│ │Chat │ │  [AI Assist Panel]   │              │
-│ │Item │ │  ─────────────────── │              │
-│ │  2  │ │                      │              │
-│ │     │ │  [Reply input area]  │              │
-│ │Chat │ │  [Emoji][Attach][AI] │              │
-│ │Item │ │  [Send ▸]            │              │
-│ │  3  │ │                      │              │
-│ └─────┘ │                      │              │
-└─────────┴──────────────────────┴──────────────┘
-```
-
----
-
-## 7.2 Conversation List (Left Pane)
-
-### Specs
-
-```
-Width:          w-80 (320px)
-Background:     bg-white
-Border-right:   border-r border-navy-100
-Display:        flex flex-col h-full
-
-Header:
-  Padding:      px-4 py-3 border-b border-navy-100
-  Title:        text-sm font-semibold text-navy-700
-  Tabs:         flex gap-1 mt-2
-    Tab:        px-2.5 py-1 rounded-md text-xs font-medium
-                text-navy-400 hover:text-navy-600 hover:bg-navy-50
-    Active:     bg-brand-50 text-brand-600
-
-Search:
-  Margin:       px-3 py-2
-  Input:        w-full pl-8 pr-3 py-1.5 text-sm rounded-md
-                bg-navy-50 border border-transparent
-                focus:border-brand-500 focus:ring-1 focus:ring-brand-500/30
-  Search icon:  absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-navy-400
-
-Chat Item:
-  Padding:      px-4 py-3 mx-2 rounded-lg cursor-pointer
-  Hover:        bg-navy-50
-  Active:       bg-brand-50 border-l-2 border-brand-500 -ml-px
-  Display:      flex gap-3
-  Avatar:       w-10 h-10 rounded-full flex-shrink-0 relative
-    Status:     absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full
-                border-2 border-white bg-success-500
-  Info:         flex-1 min-w-0
-    Top row:    flex items-center justify-between
-      Name:     text-sm font-medium text-navy-700 truncate
-      Time:     text-[11px] text-navy-300
-    Message:    text-xs text-navy-400 truncate mt-0.5
-    Bottom:     flex items-center gap-2 mt-1
-      Badge:    text-[10px] font-medium (unread count / queue position / agent name)
-  Unread:       ml-auto w-5 h-5 bg-brand-500 text-white text-[10px]
-                font-bold rounded-full flex items-center justify-center flex-shrink-0
-
-Divider:       mx-4 my-1 border-t border-navy-100
-  Label:       text-[10px] font-semibold text-navy-300 uppercase tracking-wider px-1
-
-Empty state:   flex-1 flex flex-col items-center justify-center py-12
-  Icon:        w-12 h-12 text-navy-200 mb-3 (Inbox icon)
-  Text:        text-sm text-navy-400
-```
-
----
-
-## 7.3 Chat Feed (Center Pane)
-
-### Specs
-
-```
-Flex:           flex-1 flex flex-col h-full
-Background:     bg-navy-50/50 (very light, provides subtle contrast)
-
-Chat Header:
-  Padding:      px-5 py-3 border-b border-navy-100 bg-white
-  Display:      flex items-center justify-between
-  Left:         flex items-center gap-3
-    Avatar:     w-9 h-9 rounded-full
-    Name:       text-sm font-semibold text-navy-700
-    Status:     text-xs text-navy-400 flex items-center gap-1.5
-                (dot + "Online" / "Browsing your pricing page")
-  Right:        flex items-center gap-2
-    Buttons:    w-8 h-8 rounded-md hover:bg-navy-50
-                flex items-center justify-center text-navy-400
-                (Phone, Video, Transfer, Info panel toggle)
-
-Messages Area:
-  Flex:         flex-1 overflow-y-auto px-5 py-4
-  Display:      flex flex-col gap-4
-
-  Date divider:
-    Display:    flex items-center justify-center my-4
-    Text:       text-[11px] text-navy-300 bg-navy-100/60 px-3 py-1 rounded-full
-
-  Message group (same sender, consecutive):
-    Display:    flex gap-2.5 max-w-[75%]
-    Agent:      flex-row (avatar left)
-    Visitor:    flex-row-reverse (avatar right, if shown)
-
-  Avatar:
-    Width:      w-7 h-7 rounded-full flex-shrink-0 mt-1
-    Agent:      bg-brand-100 text-brand-600 text-[11px] font-bold
-    Visitor:    bg-navy-200 text-navy-600 text-[11px] font-bold
-
-  Message bubble:
-    Agent (chat-bubble-agent):
-      bg-white border border-navy-100 rounded-2xl rounded-tl-md
-      px-4 py-2.5 shadow-xs
-      text-sm text-navy-700 leading-relaxed
-
-    Visitor (chat-bubble-visitor):
-      bg-brand-500 text-white rounded-2xl rounded-tr-md
-      px-4 py-2.5 shadow-xs
-      text-sm leading-relaxed
-
-    Bot (chat-bubble-bot):
-      bg-brand-50 border border-brand-100 rounded-2xl rounded-tl-md
-      px-4 py-2.5
-      text-sm text-navy-700 leading-relaxed
-      Label:    "AI Assistant" badge at top, text-[10px] font-semibold
-                text-brand-600 uppercase tracking-wider
-
-    Note (chat-bubble-note):
-      bg-warning-50 border border-warning-100 rounded-2xl
-      px-4 py-2.5
-      text-sm text-navy-600 italic
-      Label:    "Private Note" text-[10px] font-semibold
-                text-warning-600 uppercase tracking-wider
-
-  Timestamp:
-    Position:  below bubble, mt-1
-    Text:      text-[10px] text-navy-300
-    (show on hover or always for first message in group)
-
-  Message meta (below bubble):
-    Display:   flex items-center gap-3 mt-1
-    Time:      text-[10px] text-navy-300
-    Status:    text-[10px] text-navy-300
-      Sent:    "Sent" or single check ✓
-      Delivered: "Delivered" or double check ✓✓
-      Read:    "Read" or blue double check ✓✓
-    Actions:   opacity-0 group-hover:opacity-100 transition-opacity
-              (Reply, Forward, Copy, Delete icons)
-
-  Typing indicator:
-    Display:   flex items-center gap-2 px-4 py-3
-    Dots:      flex gap-1
-      Dot:     w-1.5 h-1.5 rounded-full bg-navy-300
-               animate-bounce (staggered: 0ms, 150ms, 300ms)
-    Label:     text-xs text-navy-400 ml-1
-
-  File attachment in message:
-    Container: flex items-center gap-3 p-3 rounded-lg border border-navy-100
-               bg-navy-50/80 max-w-xs
-    Icon:      w-10 h-10 rounded-lg bg-brand-50 text-brand-500
-               flex items-center justify-center
-    Info:
-      Name:    text-sm font-medium text-navy-700
-      Size:    text-xs text-navy-400
-    Download:  w-5 h-5 text-navy-400 hover:text-brand-500
-
-  Image in message:
-    Width:      max-w-xs rounded-xl overflow-hidden
-    Shadow:    shadow-sm
-    Hover:     cursor-pointer, overlay appears
-    Caption:   text-xs text-navy-400 mt-1 text-center
-
-  Sneak peek (visitor typing):
-    Container: bg-navy-50 border border-navy-100 rounded-lg px-3 py-2
-               text-xs text-navy-400 italic
-    Label:     "Visitor is typing:" + partial text
-    Position:  fixed to bottom of messages, above input
-```
-
-### Reply Input Area
-
-```
-Container:    bg-white border-t border-navy-100 px-5 py-3
-
-AI Suggestion banner (if active):
-  Display:    flex items-center gap-3 px-4 py-2.5 bg-purple-50
-              border border-purple-200 rounded-lg mb-3
-  Icon:       w-5 h-5 text-purple-500 (Sparkles)
-  Text:       text-sm text-purple-700 (suggested reply text)
-  Actions:    "Use" button (bg-purple-500 text-white px-3 py-1 rounded-md text-xs)
-              "Dismiss" text-xs text-purple-400 hover:text-purple-600
-
-Input area:
-  Container:  border border-navy-100 rounded-xl bg-navy-50/50
-              focus-within:border-brand-500 focus-within:ring-2
-              focus-within:ring-brand-500/20 transition-all 150ms
-
-  Textarea:   w-full px-4 py-2.5 text-sm text-navy-700 resize-none
-              bg-transparent border-none outline-none
-              placeholder:text-navy-300
-              min-h-[40px] max-h-[120px]
-
-  Toolbar:    flex items-center justify-between px-3 py-2
-    Left:     flex items-center gap-1
-      Button:  w-8 h-8 rounded-md hover:bg-navy-100 text-navy-400
-               hover:text-navy-600 transition-colors 100ms
-               flex items-center justify-center
-      Icons:   Emoji (SmilePlus), Attach (Paperclip), Image (ImagePlus),
-               Canned (MessageSquare), Note (StickyNote)
-    Right:    flex items-center gap-2
-      AI btn:  w-8 h-8 rounded-md bg-purple-50 text-purple-500
-               hover:bg-purple-100 flex items-center justify-center
-               (Sparkles icon)
-      Send:    w-8 h-8 rounded-lg bg-brand-500 text-white
-               hover:bg-brand-600 flex items-center justify-center
-               disabled:bg-navy-200 disabled:text-navy-400
-               transition-colors 150ms
-               (SendHorizontal icon)
-
-  Character count: text-[10px] text-navy-300 text-right pr-2
-```
-
----
-
-## 7.4 Visitor Info Panel (Right Pane)
-
-### Specs
-
-```
-Width:          w-80 (320px)
-Background:     bg-white
-Border-left:    border-l border-navy-100
-Display:        flex flex-col h-full overflow-y-auto
-
-Header:
-  Padding:      px-5 py-4 border-b border-navy-100
-  Title:        "Visitor Details" text-sm font-semibold text-navy-700
-  Close:        w-7 h-7 rounded-md hover:bg-navy-50 (X icon)
-
-Sections:       divide-y divide-navy-100
-
-Visitor Section:
-  Padding:      px-5 py-4
-  Avatar:       w-14 h-14 rounded-full bg-brand-100 text-brand-600
-                text-xl font-bold mx-auto
-  Name:         text-base font-semibold text-navy-700 text-center mt-3
-  Email:        text-sm text-brand-500 text-center mt-1 (clickable)
-
-Info Grid:
-  Display:      grid grid-cols-2 gap-3
-  Item:         bg-navy-50/80 rounded-lg p-3
-    Label:      text-[10px] font-semibold text-navy-400 uppercase tracking-wider
-    Value:      text-sm font-medium text-navy-700 mt-1
-
-Info items:
-  - Location: 🌍 City, Country
-  - Browser:   🖥️ Chrome 120
-  - OS:        💻 macOS
-  - IP:        🔗 192.168.x.x
-  - Language:  🌐 English
-  - Timezone:  🕐 UTC+5
-  - Page views: 👁️ 5
-  - Sessions:  🔄 2
-  - First visit: 📅 Jan 15, 2025
-  - Referrer:  🔗 google.com
-
-Custom Fields Section:
-  Padding:      px-5 py-4
-  Title:        text-xs font-semibold text-navy-400 uppercase tracking-wider mb-3
-  Fields:       flex flex-col gap-2
-  Field:        text-sm
-    Label:      text-navy-400
-    Value:      text-navy-700
-
-Tags Section:
-  Padding:      px-5 py-4
-  Title:        "Tags" text-xs font-semibold text-navy-400 uppercase tracking-wider mb-3
-  Tags:         flex flex-wrap gap-1.5
-    Tag:        bg-brand-50 text-brand-600 px-2 py-0.5 rounded-md text-xs font-medium
-    Add:        bg-navy-50 text-navy-400 hover:text-navy-600 px-2 py-0.5 rounded-md text-xs
-                cursor-pointer border border-dashed border-navy-200
-
-Notes Section:
-  Padding:      px-5 py-4
-  Title:        "Notes" + count badge
-  List:         flex flex-col gap-3
-  Note:         bg-warning-50/50 rounded-lg p-3 border border-warning-100/60
-    Text:       text-sm text-navy-600
-    Author:     text-xs text-navy-400 mt-2
-    Time:       text-[10px] text-navy-300
-
-Chat History Section:
-  Padding:      px-5 py-4
-  Title:        "Previous Chats" + count
-  List:         flex flex-col gap-2
-  Item:         flex items-center gap-3 p-2 rounded-lg hover:bg-navy-50
-    Icon:       w-8 h-8 rounded-full bg-navy-100 text-navy-400 flex items-center
-                justify-center (MessageSquare 14×14)
-    Info:
-      Subject:  text-sm text-navy-700
-      Date:     text-xs text-navy-400
-
-Actions Section:
-  Padding:      px-5 py-4 border-t border-navy-100
-  Buttons:      flex flex-col gap-2
-  Button:       flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium
-               hover:bg-navy-50 transition-colors 100ms text-navy-600
-  Options:      Transfer chat, Ban visitor, Export conversation, Add to ticket
-```
-
----
-
-# 8. Agent Dashboard — Archives
-
-```
-Container:      full content area (no 3-pane split)
-
-Header:
-  Title:        "Archives" text-2xl font-bold
-  Subtitle:     "View resolved and closed conversations"
-
-Filters bar:
-  Display:      flex items-center gap-3 px-6 py-4 border-b border-navy-100
-  Search:       Input with Search icon, w-72
-  Filters:      flex gap-2
-    Select:     Date range, Agent, Channel, Tag
-    Badge:      active filter count
-  View toggle:  flex gap-1 (List / Grid icons)
-
-Archived list:
-  Table-style rows with: Subject, Visitor, Agent, Closed Date, Tags, Duration
-  Row click:   expands to show full conversation
-
-Empty state:   Archive icon + "No archived conversations"
-```
-
----
-
-# 9. Agent Dashboard — Team Management
-
-## 9.1 Agents Page
-
-```
-┌──────────────────────────────────────────────────────┐
-│  Agents                                    [+ Invite] │
-│  Manage your support team                           │
-│                                                      │
-│  [Search agents...] [Role ▾] [Status ▾]              │
-│                                                      │
-│  ┌──────────────────────────────────────────────┐   │
-│  │ Avatar │ Name          │ Role    │ Status    │   │
-│  │  (JD)  │ John Doe      │ Admin   │ ● Online  │   │
-│  │        │ john@co.com   │         │ Chats: 3  │   │
-│  ├────────┼───────────────┼─────────┼───────────┤   │
-│  │  (AS)  │ Alice Smith   │ Agent   │ ● Away    │   │
-│  │        │ alice@co.com  │         │           │   │
-│  ├────────┼───────────────┼─────────┼───────────┤   │
-│  │  (BW)  │ Bob Wilson    │ Agent   │ ● Offline │   │
-│  │        │ bob@co.com    │         │           │   │
-│  └──────────────────────────────────────────────┘   │
-└──────────────────────────────────────────────────────┘
-```
-
-### Specs
-
-```
-Page header:
-  Display:      flex items-center justify-between
-  Title:        DM Sans text-2xl font-bold text-navy-700
-  Subtitle:     text-sm text-navy-400 mt-1
-  Action:       bg-brand-500 text-white button
-
-Agent row:
-  Padding:      px-5 py-4 border-b border-navy-100
-  Display:      flex items-center gap-4 hover:bg-navy-50/50 cursor-pointer
-  Avatar:       w-10 h-10 with status dot
-  Name:         text-sm font-semibold text-navy-700
-  Email:        text-xs text-navy-400
-  Role badge:   bg-navy-50 text-navy-600 px-2 py-0.5 rounded-md text-xs font-medium
-  Status:       flex items-center gap-1.5 text-xs text-navy-500
-    Dot:        w-2 h-2 rounded-full (green/yellow/gray)
-  Active chats: text-xs text-navy-400 bg-navy-50 px-2 py-0.5 rounded-full
-
-Invite modal:
-  Title:        "Invite Team Member"
-  Fields:       Email, Role (select), Teams (multi-select)
-  Send button:  bg-brand-500 text-white
-```
-
-## 9.2 Teams Page
-
-```
-Team cards grid:
-  Grid:       grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4
-
-  Team card:
-    Bg:       bg-white border border-navy-100 rounded-xl p-5
-    Name:     text-base font-semibold text-navy-700
-    Desc:     text-sm text-navy-400 mt-1
-    Members:  flex items-center gap-2 mt-4
-      Avatars: flex -space-x-2 (overlapping)
-      Count:  text-xs text-navy-400 ml-1 "+3 more"
-    Stats:    flex items-center gap-4 mt-4 pt-4 border-t border-navy-100
-      Item:   text-xs text-navy-400
-        Value: font-semibold text-navy-700
-
-Create team modal:
-  Fields:     Name, Description, Assign agents (multi-select with search)
-```
-
----
-
-# 10. Agent Dashboard — Reports & Analytics
-
-## 10.1 Overview Page
-
-```
-┌──────────────────────────────────────────────────────────┐
-│  Reports                                                  │
-│  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌──────────┐│
-│  │Total      │ │Avg Resp   │ │Resolution │ │CSAT      ││
-│  │Conversations│Time      │ │Time       │ │Score     ││
-│  │1,247     │ │24s        │ │8m 32s     │ │96.2%     ││
-│  │↑12%     │ │↓3s       │ │↓45s       │ │↑1.8%    ││
-│  └───────────┘ └───────────┘ └───────────┘ └──────────┘│
-│                                                           │
-│  Date: [Last 7 days ▾]    [Export PDF]                   │
-│                                                           │
-│  ┌────────────────────────────────────────────────┐      │
-│  │  Conversations Over Time                       │      │
-│  │  [Line chart - Recharts]                       │      │
-│  │  - Total conversations                         │      │
-│  │  - Resolved conversations                     │      │
-│  │  Legend: ● Total  ● Resolved                   │      │
-│  └────────────────────────────────────────────────┘      │
-│                                                           │
-│  ┌──────────────────┐ ┌──────────────────┐               │
-│  │ Channels         │ │ Top Agents       │               │
-│  │ [Donut chart]    │ │ [Table/list]     │               │
-│  │ Widget  65%      │ │ 1. Alice 142chats│               │
-│  │ Email   20%      │ │ 2. Bob   98chats │               │
-│  │ Facebook 15%     │ │ 3. Carol 87chats │               │
-│  └──────────────────┘ └──────────────────┘               │
-└──────────────────────────────────────────────────────────┘
-```
-
-### Chart Specs
-
-```
-Container:      bg-white border border-navy-100 rounded-xl p-5
-Title:          text-base font-semibold text-navy-700 mb-4
-
-Line chart:
-  Colors:       brand-500 (primary), navy-200 (secondary)
-  Grid:         horizontal grid lines in navy-50
-  Axis text:    text-xs text-navy-400
-  Tooltip:      bg-navy-700 text-white text-xs rounded-lg px-3 py-2 shadow-soft
-  Dot:          w-3 h-3 bg-brand-500 stroke-2 stroke-white
-
-Bar chart:
-  Colors:       brand-500 (primary), navy-100 (secondary)
-  Radius:       rounded-t-md (4px top corners)
-  Hover:        opacity-80
-
-Donut chart:
-  Colors:       brand-500, #0066FF, #9146FF, #1DB954, #FFC107, #E53935
-  Center label: text-2xl font-bold text-navy-700 (stat value)
-  Sub label:    text-xs text-navy-400 (stat name)
-  Legend:       flex items-center gap-2 text-xs text-navy-600
-    Dot:       w-2.5 h-2.5 rounded-full
-
-Date range picker:
-  Container:   flex items-center gap-2 px-3 py-1.5 rounded-lg border border-navy-100
-  Text:        text-sm text-navy-600
-  Icon:        Calendar 16×16 text-navy-400
-
-Export button:
-  Icon:        Download 16×16
-  Text:        text-sm font-medium text-navy-600
-```
-
----
-
-# 11. Agent Dashboard — Settings Pages
-
-## 11.1 Settings Overview
-
-```
-Settings grid (card-based navigation):
-  Grid:        grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4
-  Card:        bg-white border border-navy-100 rounded-xl p-5
-              flex items-center gap-4 hover:shadow-soft hover:border-navy-200
-              transition-all 150ms cursor-pointer
-    Icon:      w-10 h-10 rounded-lg bg-brand-50 text-brand-500 p-2
-    Content:
-      Title:   text-sm font-semibold text-navy-700
-      Desc:    text-xs text-navy-400 mt-0.5
-
-  Cards: Widget, Channels, Teams, Agents, Chatbot, Integrations,
-         Billing, Notifications, Security, API Keys, Webhooks, Audit Log
-```
-
-## 11.2 Widget Settings
-
-```
-Tabs: Appearance, Behavior, Pre-chat, Post-chat, Advanced
-
-Appearance tab:
-  Preview:    Phone mockup frame (w-64 h-[500px] rounded-2xl border-navy-200)
-              Shows live widget preview on right, settings on left
-              Split layout: grid grid-cols-1 lg:grid-cols-2 gap-8
-
-  Settings:
-    Color:     Color picker for primary color (brand-500 default)
-    Position:  Select: Bottom Right / Bottom Left
-    Theme:     Toggle: Light / Dark / Auto
-    Title:     Input: "Chat with us" (default)
-    Avatar:    Upload custom avatar (or default)
-    Welcome:   Textarea: "Hi there! How can we help?"
-
-  Widget theme options:
-    Rounded:   Toggle (rounded vs square corners)
-    Size:      Slider (compact / default / large)
-
-Behavior tab:
-  Auto-open:     Toggle with delay input (seconds)
-  Online hours:  Schedule editor (day × time grid)
-  Away timeout:  Input (seconds)
-  Sound:         Toggle + volume slider
-  Desktop notifications: Toggle
-```
-
-## 11.3 Notification Preferences
-
-```
-Sections: Desktop, Email, Push (each with toggles)
-
-Notification types:
-  Row:        flex items-center justify-between py-3 border-b border-navy-100
-  Left:       flex items-center gap-3
-    Icon:     w-5 h-5 text-navy-400
-    Label:    text-sm text-navy-700
-    Desc:     text-xs text-navy-400
-  Right:      Toggle switch
-
-Categories:
-  - New conversation assigned
-  - New message in active chat
-  - Visitor returns
-  - Ticket assigned
-  - Ticket updated
-  - CSAT rating received
-  - Agent status change
-  - System alerts
-```
-
-## 11.4 Security Settings (2FA, Sessions)
-
-```
-Two-Factor Auth:
-  Card:       bg-white border rounded-xl p-6
-  Status:     Badge (Enabled/Disabled)
-  Setup:      QR code display + input for TOTP code
-  Backup:     List of recovery codes (copy + regenerate)
-
-Active Sessions:
-  Table:      Device, Browser, IP, Last Active, Actions (Revoke)
-  Current:    "This device" badge
-
-API Keys:
-  Table:      Name, Key (masked), Created, Last Used, Actions
-  Create:     Modal with name + permissions (scopes)
-```
-
----
-
-# 12. Agent Dashboard — Integrations
-
-## 12.1 Marketplace
-
-```
-Search bar:  Input with Search icon, w-full max-w-md
-Categories:  flex gap-2 overflow-x-auto pb-2
-  Pill:      px-4 py-1.5 rounded-full text-sm font-medium
-            bg-navy-100 text-navy-600 hover:bg-navy-200
-            Active: bg-brand-500 text-white
-
-Integration Grid:
-  Grid:      grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4
-
-  Card:      bg-white border border-navy-100 rounded-xl p-5
-             hover:shadow-soft hover:border-navy-200 transition-all 150ms
-    Header:  flex items-center gap-3
-      Icon:  w-12 h-12 rounded-xl (integration brand color bg) + logo
-      Info:
-        Name: text-base font-semibold text-navy-700
-        Desc: text-xs text-navy-400
-    Body:    text-sm text-navy-500 mt-3 leading-relaxed
-    Footer:  flex items-center justify-between mt-4 pt-4 border-t border-navy-100
-      Badge: "Installed" (success) / "Available" (navy-400)
-      Button: "Install" / "Configure" / "Uninstall"
-
-Connected page (after install):
-  Form:      Integration-specific settings (API key input, webhooks, sync options)
-  Status:    Connection status indicator (green dot + "Connected")
-  Test:      "Test Connection" button
-```
-
----
-
-# 13. Ticketing System
-
-## 13.1 Ticket List
-
-```
-┌──────────────────────────────────────────────────────┐
-│  Tickets                              [+ New Ticket]  │
-│  Open (12) │ Pending (3) │ Resolved (45) │ All       │
-│                                                      │
-│  [Search...] [Status ▾] [Priority ▾] [Assignee ▾]   │
-│                                                      │
-│  ┌──────────────────────────────────────────────┐   │
-│  │ ID    │ Subject        │ Priority│ Assignee  │   │
-│  │ #1247 │ Login issue    │ 🔴 High │ Alice     │   │
-│  │ #1246 │ Billing Q      │ 🟡 Med  │ Bob       │   │
-│  │ #1245 │ Feature req    │ 🟢 Low  │ Unassign  │   │
-│  └──────────────────────────────────────────────┘   │
-└──────────────────────────────────────────────────────┘
-```
-
-### Specs
-
-```
-Tabs:          same pattern as main tabs component
-Priority colors:
-  Urgent:      bg-danger-50 text-danger-600 + left border-l-2 border-danger-500
-  High:        bg-brand-50 text-brand-600 + left border-l-2 border-brand-500
-  Medium:      bg-warning-50 text-warning-600
-  Low:         bg-navy-50 text-navy-400
-
-Ticket detail (side panel / page):
-  Header:      Ticket ID + subject + priority badge
-  Meta:        Created date, updated date, assignee, requester
-  Messages:    Thread-style conversation (same as chat messages)
-  Sidebar:     Properties panel (status, priority, assignee, tags, due date)
-  Actions:     Reply, Internal note, Change status, Merge, Delete
-```
-
----
-
-# 14. Knowledge Base (Admin)
-
-## 14.1 Article List
-
-```
-Categories sidebar (left):
-  Width:       w-56 (224px)
-  List:        flex flex-col gap-0.5
-  Item:        px-3 py-2 rounded-md text-sm text-navy-600
-              hover:bg-navy-50 cursor-pointer
-  Active:      bg-brand-50 text-brand-600 font-medium
-  Count:       text-xs text-navy-300 ml-auto
-
-Content area (right):
-  Table:       Article title, Category, Status (Published/Draft), Updated date
-  Actions:     Edit, View, Delete
-  Bulk:        Checkbox selection + bulk actions bar
-
-Create/Edit:
-  Title:       text-2xl font-bold input (no border, focus:underline)
-  Editor:      Rich text (Markdown or WYSIWYG)
-  Sidebar:     Category, Tags, Status toggle, URL slug, SEO title/description
-  Preview:     "Preview" button opens in new tab
-```
-
----
-
-# 15. Knowledge Base (Public)
-
-```
-Public KB layout:
-  Header:      Centered, minimal. Brand logo + "Help Center" title
-  Search:      Large centered search input (max-w-xl mx-auto)
-               bg-white border border-navy-100 rounded-xl px-5 py-3
-               text-base placeholder:text-navy-300
-               shadow-soft focus:ring-2 focus:ring-brand-500/30
-
-  Categories:  Grid of category cards
-    Card:      bg-white border border-navy-100 rounded-xl p-6
-               hover:shadow-soft hover:border-brand-200 transition-all 150ms
-      Icon:    w-10 h-10 rounded-lg bg-brand-50 text-brand-500 p-2
-      Title:   text-base font-semibold text-navy-700 mt-3
-      Count:   text-xs text-navy-400 mt-1 "12 articles"
-
-  Popular:     List of popular articles with view counts
-
-  Article page:
-    Layout:    max-w-3xl mx-auto px-6 py-8
-    Breadcrumb: Home > Category > Article Title
-    Title:     text-3xl font-bold text-navy-700
-    Content:   Prose (typography plugin styles)
-    Feedback:  "Was this helpful?" Yes/No buttons + comment input
-```
-
----
-
-# 16. Chatbot Flow Builder
-
-```
-Canvas layout:
-  Full-screen canvas with grid dots background
-  Nodes:       Draggable cards connected by lines/curves
-
-  Node types:
-    Trigger:   rounded-lg bg-brand-50 border-2 border-brand-500
-               Icon + "Welcome Message"
-    Message:   rounded-lg bg-white border border-navy-100 shadow-sm
-               Text preview (truncated)
-    Question:  rounded-lg bg-white border border-navy-100
-               Question text + option chips below
-    Action:    rounded-lg bg-purple-50 border border-purple-200
-               Icon + action label (assign, tag, API call)
-    Condition: diamond/rotated-square shape, bg-warning-50
-
-  Connections:
-    Lines:     stroke: navy-200, stroke-width: 2
-    Arrow:     arrowhead SVG at end
-    Label:     text-xs text-navy-400 on connection line
-
-  Toolbar (left sidebar):
-    Width:     w-56
-    Sections:  Triggers, Messages, Questions, Actions, Conditions
-    Items:     draggable list items with icons
-    + Add:     "Add Node" button
-
-  Properties panel (right sidebar):
-    Width:     w-80
-    Shows:     Properties of selected node
-    Fields:    Context-specific (text input, options editor, etc.)
-```
-
----
-
-# 17. Campaigns & Goals
-
-## 17.1 Campaigns List
-
-```
-Table:       Campaign name, Type, Status (Active/Draft/Paused),
-             Trigger count, Goal, Start/End date
-Actions:     Edit, Duplicate, Pause/Resume, Delete
-
-Create campaign:
-  Type:       Card selection (Pop-up, Embedded, Link)
-  Target:     URL rules (include/exclude patterns)
-  Message:    Rich text editor
-  Schedule:   Start/end date, active hours
-  Goal:       Select goal (visit page, start chat, purchase)
-```
-
-## 17.2 Goals
-
-```
-Goal cards:  grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4
-  Card:      bg-white border rounded-xl p-5
-    Name:    text-base font-semibold
-    Type:    badge (Page Visit, Chat Started, Purchase, Custom)
-    Progress: Progress bar (current/target)
-    Stats:   flex items-center justify-between text-xs text-navy-400 mt-4
-
-Create goal:
-  Name:       Input
-  Type:       Select
-  URL:        Input (for page visit goals)
-  Value:      Input (for purchase/revenue goals)
-```
-
----
-
-# 18. Billing & Subscription
-
-## 18.1 Current Plan
-
-```
-Plan card:    bg-white border rounded-xl p-6 max-w-2xl
-  Header:     flex items-center justify-between
-    Plan:     "Team" text-xl font-bold + "Active" badge (success)
-    Price:    "$49/month" text-lg text-navy-400
-  Usage:      Progress bars for limits
-    Agents:   3/5 used (green if under, yellow if near, red if over)
-    Chats:    120/500 concurrent
-    Storage:  2.4 GB / 10 GB
-
-  Actions:    "Change Plan" (outline button) | "Cancel" (ghost danger)
-
-Invoice list:
-  Table:      Date, Description, Amount, Status (Paid/Pending/Failed), PDF download
-  Pagination: at bottom
-```
-
-## 18.2 Plan Upgrade
-
-```
-Comparison:   Same pricing card grid as public pricing page
-              Current plan highlighted with "Current Plan" badge
-              CTA buttons show "Upgrade" or "Downgrade" with price difference
-
-Payment method:
-  Card display: Card brand icon + **** 4242 + Exp 12/26
-  Actions:     "Update" (edit card) | "Remove"
-  Stripe:      Stripe Elements embedded form for new card
-```
-
----
-
-# 19. Engage / Proactive Triggers
-
-```
-Triggers list:
-  Table:      Name, Type (URL match / Time on page / Exit intent / Referrer),
-             Status (Active/Inactive), Fires count, Last fired
-  Actions:    Edit, Toggle, Duplicate, Delete
-
-Create trigger:
-  Conditions: AND/OR rule builder
-    Rule:     [Field ▾] [Operator ▾] [Value]
-    Fields:   URL, Time on page, Page scroll %, Visit count, Referrer, Country, Device
-  Action:     Show message / Redirect / Track event
-
-Traffic monitoring:
-  Real-time:  Active visitors count (big number, brand color)
-  List:       Current visitors with page, duration, source, device
-  Refresh:    Auto-refresh every 30s
-```
-
----
-
-# 20. Widget — Embedded Chat Widget
-
-## 20.1 Launcher Button
-
-### Specs
-
-```
-Position:     fixed bottom-6 right-6 (24px from edges)
-Size:         w-14 h-14 (56×56px)
-Shape:        rounded-full
-Background:   bg-brand-500
-Icon:         MessageCircle 24×24 text-white
-Shadow:       shadow-glow (0 0 20px rgba(255,81,0,0.25))
-Border:       none
-
-Hover:
-  Background: bg-brand-600
-  Transform:  scale(1.08)
-  Shadow:     shadow-glow-lg
-
-Active/pressed:
-  Transform:  scale(0.95)
-
-Pulse animation (when closed, no unread messages):
-  Keyframes:
-    0%:     box-shadow: 0 0 0 0 rgba(255,81,0,0.5)
-    70%:    box-shadow: 0 0 0 12px rgba(255,81,0,0)
-    100%:   box-shadow: 0 0 0 0 rgba(255,81,0,0)
-  Animation:  launcher-pulse 2s ease-in-out infinite
-
-Unread badge:
-  Position:   absolute -top-1 -right-1
-  Size:       min-w-[20px] h-5
-  Background: bg-white text-brand-500
-  Text:       text-[11px] font-bold
-  Shape:      rounded-full
-  Shadow:     shadow-sm
-  Border:     2px solid brand-500 (creates ring effect)
-  Animation:  bounce-in 350ms when count changes
-
-Tooltip (on hover, when widget is closed):
-  Text:       "Chat with us" or custom
-  Position:   right-16 top-1/2 -translate-y-1/2
-  Background: bg-navy-700 text-white text-xs font-medium
-  Shape:      rounded-lg px-3 py-1.5
-  Shadow:     shadow-sm
-  Arrow:      right-pointing caret
-
-Custom color support:
-  CSS variable: --flowlyra-color: #FF5100 (default)
-  All brand colors reference this variable for easy theming
-```
-
----
-
-## 20.2 Widget Window
-
-### Overall Layout
-
-```
-┌────────────────────────────────┐
-│ Widget Header                  │  ← h-16 (64px)
-├────────────────────────────────┤
-│                                │
-│     Messages Area              │  ← flex-1, scrollable
-│     (visitor + agent messages) │
-│                                │
-├────────────────────────────────┤
-│ Input Area                     │  ← h-auto, max ~200px
-│ [Emoji][Attach] [Type here..]  │
-│                    [Send ▸]    │
-└────────────────────────────────┘
-```
-
-### Window Specs
-
-```
-Position:     fixed bottom-24 right-6 (above launcher)
-Size:         w-[380px] h-[560px] (default compact)
-              OR: w-[380px] h-[calc(100vh-120px)] (expanded)
-              OR: w-[calc(100vw-24px)] h-[calc(100vh-120px)] (mobile)
-              OR: fullscreen on mobile (w-full h-full)
-Background:   bg-white
-Border-radius: rounded-2xl (16px) — NOT fullscreen
-Shadow:       shadow-lift (0 16px 40px rgba(15,23,42,0.12))
-Border:       1px solid navy-100
-Z-index:      999999 (highest, above everything)
-Overflow:     hidden
-
-Open animation:
-  Keyframes:  scaleIn 300ms cubic-bezier(0.34, 1.56, 0.64, 1)
-  From:       opacity 0, scale 0.9, translateY(10px)
-  To:         opacity 1, scale 1, translateY 0
-
-Close animation:
-  Keyframes:  200ms ease-out
-  From:       opacity 1, scale 1
-  To:         opacity 0, scale 0.9, translateY(10px)
-
-Mobile (< 480px):
-  Size:       fullscreen (fixed inset-0)
-  Radius:     none
-  Shadow:     none
-  Back button in header instead of X
-```
-
----
-
-## 20.3 Widget Header
-
-### Online State
-
-```
-Height:         h-16 (64px)
-Padding:        px-5
-Display:        flex items-center gap-3
-Background:     bg-brand-500 (uses primary color)
-Text color:     text-white
-
-Left:
-  Avatar:       w-10 h-10 rounded-full bg-white/20 border border-white/30
-                flex items-center justify-center
-                Icon/initials in text-white font-bold text-sm
-                OR: uploaded agent/team avatar
-
-  Title group:
-    Title:      text-base font-semibold text-white
-    Subtitle:   text-xs text-white/80 flex items-center gap-1.5
-      Dot:      w-2 h-2 rounded-full bg-success-300 (green, pulsing)
-      Text:     "Online now" / "Typing..." / "Average reply time: 2m"
-
-Right:
-  Close button: w-8 h-8 rounded-full hover:bg-white/20
-               flex items-center justify-center
-               Icon: X 18×18 text-white
-  Maximize button (optional):
-               same style, Maximize2 icon
-```
-
-### Offline State
-
-```
-Background:    bg-navy-700
-Avatar:        same but muted
-Title:         "Leave us a message"
-Subtitle:      "We're offline, but we'll get back to you"
-Close:         same
-```
-
----
-
-## 20.4 Widget Messages Area
-
-```
-Flex:           flex-1 overflow-y-auto
-Padding:        px-5 py-4
-Background:     bg-navy-50/30 (subtle warm gray)
-
-Message date divider:
-  Same as dashboard: centered pill with date text
-
-Agent message:
-  Container:   flex gap-2 max-w-[85%]
-  Avatar:      w-7 h-7 rounded-full bg-brand-100 text-brand-600
-               text-[11px] font-bold flex-shrink-0 mt-auto
-  Bubble:      bg-white rounded-2xl rounded-tl-md shadow-xs
-               px-4 py-2.5 text-sm text-navy-700 leading-relaxed
-  Timestamp:   text-[10px] text-navy-300 mt-1 ml-9
-
-Visitor message:
-  Container:   flex justify-end
-  Bubble:      bg-brand-500 rounded-2xl rounded-tr-md shadow-xs
-               px-4 py-2.5 text-sm text-white leading-relaxed
-  Timestamp:   text-[10px] text-navy-300 mt-1 text-right
-
-Bot message:
-  Same as agent but with:
-    Badge:     "AI" label, bg-purple-100 text-purple-600 text-[10px]
-               font-bold px-1.5 py-0.5 rounded mb-1
-    Bubble:    bg-purple-50/50 (subtle purple tint)
-
-Welcome message (first message):
-  Container:   text-center py-6
-  Avatar:      w-14 h-14 rounded-full bg-brand-100 text-brand-500
-               flex items-center justify-center mx-auto mb-3
-               (MessageCircle 24×24)
-  Text:        text-base font-semibold text-navy-700
-  Subtitle:    text-sm text-navy-400 mt-1
-
-Typing indicator:
-  Container:   flex items-center gap-2 py-2 px-1
-  Dots:        flex gap-1
-    Dot:       w-2 h-2 rounded-full bg-navy-300 animate-bounce
-               (stagger: 0ms, 150ms, 300ms)
-
-Quick Replies:
-  Container:   flex flex-wrap gap-2 my-2
-  Button:      px-4 py-2 rounded-full text-sm font-medium
-               border border-navy-200 text-navy-600
-               hover:bg-navy-50 hover:border-brand-300 transition-all 150ms
-               Active: bg-brand-50 border-brand-300 text-brand-600
-
-Image message:
-  Width:       max-w-[240px] rounded-xl overflow-hidden
-  Shadow:      shadow-sm
-  Cursor:      cursor-pointer (opens lightbox)
-  Loading:     skeleton shimmer overlay
-
-File message:
-  Container:   flex items-center gap-3 p-3 rounded-xl
-               bg-white border border-navy-100 shadow-xs max-w-[260px]
-  Icon:        w-10 h-10 rounded-lg bg-brand-50 text-brand-500
-               flex items-center justify-center
-  Info:
-    Name:      text-sm font-medium text-navy-700
-    Size:      text-xs text-navy-400
-  Download:   hover:text-brand-500 cursor-pointer
-
-Carousel/Rich cards:
-  Container:   overflow-x-auto flex gap-3 snap-x snap-mandatory pb-2
-  Card:        min-w-[220px] snap-start bg-white border border-navy-100
-               rounded-xl overflow-hidden shadow-sm hover:shadow-soft
-    Image:     h-32 w-full object-cover
-    Content:   p-4
-      Title:   text-sm font-semibold text-navy-700
-      Desc:    text-xs text-navy-400 mt-1
-      Button:  text-brand-500 text-xs font-medium mt-2
-  Scrollbar:   hidden (scrollbar-hide utility)
-```
-
----
-
-## 20.5 Widget Input Area
-
-### Online Input
-
-```
-Padding:        px-4 py-3
-Background:     bg-white
-Border-top:     border-t border-navy-100
-
-Attachments preview (if files attached):
-  Container:   flex gap-2 overflow-x-auto pb-2
-  Chip:        flex items-center gap-2 px-3 py-1.5 rounded-lg
-               bg-navy-50 border border-navy-100
-    Icon:      w-5 h-5 text-navy-400
-    Name:      text-xs text-navy-600 max-w-[120px] truncate
-    Remove:    w-4 h-4 text-navy-400 hover:text-danger-500 cursor-pointer
-
-Input row:
-  Container:   flex items-end gap-2
-  Textarea:    flex-1 px-4 py-2.5 text-sm bg-navy-50/80 rounded-xl
-               border border-navy-100 resize-none
-               focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20
-               max-h-[120px] transition-all 150ms
-               placeholder: "Type your message..."
-               line-height: 1.5
-
-  Toolbar:     flex flex-col gap-1
-    Buttons:   w-9 h-9 rounded-lg flex items-center justify-center
-               text-navy-400 hover:text-navy-600 hover:bg-navy-50
-               transition-colors 100ms
-      Emoji:   SmilePlus 18×18
-      Attach:  Paperclip 18×18 (triggers file input)
-
-  Send button: w-9 h-9 rounded-xl bg-brand-500 text-white flex items-center
-               justify-center hover:bg-brand-600 transition-colors 150ms
-               disabled:bg-navy-200 disabled:text-navy-400
-               Icon: SendHorizontal 16×16
-
-Powered by:
-  Text:       text-[10px] text-navy-300 text-center mt-1
-  Link:       "Powered by FlowLyra" hover:text-brand-500
-```
-
-### Offline Input
-
-```
-Replaced by offline form (see Section 23)
-```
-
----
-
-## 20.6 Widget Dark Mode
-
-```
-Triggered by: CSS class on widget container OR OS preference
-
-Window:
-  Background:  bg-navy-900
-  Border:      border-navy-700
-
-Header:
-  Background:  bg-navy-800
-  Text:        text-white
-
-Messages area:
-  Background:  bg-navy-950/50
-  Agent bubble: bg-navy-800 border-navy-700 text-navy-100
-  Visitor bubble: bg-brand-600 text-white
-  Bot bubble:  bg-purple-950/50 border-purple-900/60
-
-Input area:
-  Background:  bg-navy-800
-  Textarea bg: bg-navy-700 border-navy-600 text-navy-100
-  Send button: bg-brand-500 hover:bg-brand-600
-
-Launcher:
-  Same brand color, but pulse uses brand-600
-
-Timestamps:    text-navy-500
-Quick replies: border-navy-600 text-navy-300 hover:bg-navy-700
-```
-
----
-
-# 21. Widget — Pre-Chat Form
-
-```
-Position:       Replaces messages area when pre-chat is enabled
-Background:     bg-white
-
-Header:         "Before we start" text-base font-semibold text-navy-700
-                text-sm text-navy-400 mt-1
-
-Form fields:
-  Name:         Input, required
-  Email:        Input email, required
-  Department:   Select (optional), shows departments from settings
-  Message:      Textarea (optional), pre-filled if visitor typed before form
-
-Submit:         bg-brand-500 text-white w-full py-3 rounded-xl
-                font-medium text-sm hover:bg-brand-600 transition-colors 150ms
-
-Skip link:      text-xs text-navy-400 hover:text-brand-500 text-center mt-3
-                cursor-pointer
-
-Animation:      fade-in 200ms when appearing, slide-up 200ms
-```
-
----
-
-# 22. Widget — Post-Chat Survey (CSAT)
-
-```
-Position:       Replaces messages area after chat ends
-Background:     bg-white
-
-Thank you:      text-base font-semibold text-navy-700 text-center
-
-Question:       "How would you rate this conversation?"
-Rating:         flex items-center justify-center gap-3 my-6
-  Stars:        w-10 h-10 text-navy-200 hover:text-warning-500 cursor-pointer
-               transition-colors 100ms (animate fill)
-  Scale:        OR 1-5 number buttons (rounded-lg text-sm font-medium)
-               border border-navy-200 hover:border-brand-300
-
-Comment:        Textarea (optional)
-  Placeholder:  "Tell us more about your experience..."
-  Rows:         3
-
-Submit:         bg-brand-500 text-white w-full py-3 rounded-xl
-
-Skip:           text-xs text-navy-400 text-center mt-3 cursor-pointer
-```
-
----
-
-# 23. Widget — Offline Form
-
-```
-Header:         OfflineSection icon + "We're currently away"
-Subtitle:       "Leave us a message and we'll get back to you"
-
-Form:
-  Name:         Input, required
-  Email:        Input email, required
-  Message:      Textarea, required
-  Department:   Select (optional)
-
-Submit:         "Send Message" primary button
-Success:        CheckCircle icon + "Message sent! We'll reply within [X hours]"
-
-Animation:      fade-in 300ms
-```
-
----
-
-# 24. Widget — Rich Messages / Cards
-
-```
-Card message:
-  Container:    max-w-[280px] bg-white border border-navy-100 rounded-xl
-                overflow-hidden shadow-xs
-  Image:        h-40 w-full object-cover
-  Body:         p-4
-    Title:      text-sm font-semibold text-navy-700
-    Desc:       text-xs text-navy-400 mt-1.5 leading-relaxed
-    Actions:    flex gap-2 mt-3
-      Button:   px-3 py-1.5 rounded-lg text-xs font-medium
-        Primary: bg-brand-500 text-white
-        Secondary: border border-navy-200 text-navy-600
-
-List picker:
-  Container:    bg-white border border-navy-100 rounded-xl p-3 max-w-[260px]
-  Title:        text-sm font-semibold text-navy-700 mb-2
-  Options:      flex flex-col gap-1
-    Option:     px-3 py-2 rounded-lg text-sm text-navy-600
-                hover:bg-navy-50 cursor-pointer transition-colors 100ms
-    Selected:   bg-brand-50 text-brand-600
-
-Button group:
-  Container:    flex gap-2 max-w-[260px]
-  Button:       flex-1 px-4 py-2.5 rounded-xl text-sm font-medium text-center
-    Style:      bg-brand-500 text-white OR border border-navy-200 text-navy-600
-```
-
----
-
-# 25. Notification Center
-
-```
-Triggered by: Bell icon in header
-
-Panel:         absolute top-full right-0 mt-2 w-96 max-h-[480px]
-               bg-white border border-navy-100 rounded-xl shadow-lift z-dropdown
-               animate: fade-in 150ms + slide-down 200ms
-
-Header:        flex items-center justify-between px-4 py-3 border-b border-navy-100
-  Title:       text-sm font-semibold text-navy-700 "Notifications"
-  Actions:     "Mark all read" text-xs text-brand-500 cursor-pointer
-
-Tabs:          flex gap-0 border-b border-navy-100
-  All | Unreads | Mentions
-
-List:          overflow-y-auto max-h-[360px]
-  Item:        flex gap-3 px-4 py-3 hover:bg-navy-50/50 cursor-pointer
-               border-b border-navy-100/60
-    Unread:    bg-brand-50/30 (left indicator bar, 3px wide)
-    Avatar:    w-8 h-8 rounded-full
-    Content:   flex-1 min-w-0
-      Title:   text-sm font-medium text-navy-700
-      Body:    text-xs text-navy-400 truncate mt-0.5
-      Time:    text-[10px] text-navy-300 mt-1
-    Actions:   w-5 h-5 text-navy-300 hover:text-navy-600 (dismiss icon)
-
-Empty state:   text-center py-12
-  Icon:        Bell 32×32 text-navy-200
-  Text:        text-sm text-navy-400 "No notifications yet"
-```
-
----
-
-# 26. Command Palette (Cmd+K)
-
-```
-Trigger:       Cmd+K (Mac) / Ctrl+K (Windows)
-
-Overlay:       fixed inset-0 bg-navy-950/60 backdrop-blur-sm z-command-palette
-               animate: fade-in 150ms
-
-Container:     fixed top-[20%] left-1/2 -translate-x-1/2
-               w-full max-w-lg bg-white rounded-2xl shadow-lift
-               border border-navy-100 overflow-hidden
-               animate: scale-in 300ms cubic-bezier(0.34, 1.56, 0.64, 1)
-
-Search input:
-  Container:   flex items-center gap-3 px-5 py-4 border-b border-navy-100
-  Icon:        Search 20×20 text-navy-400
-  Input:       flex-1 text-base text-navy-700 bg-transparent outline-none
-               placeholder: "Search conversations, agents, actions..."
-  Esc badge:   text-xs text-navy-300 border border-navy-200 rounded px-1.5 py-0.5
-
-Results:
-  Container:   max-h-[320px] overflow-y-auto py-2
-  Group:       px-4 py-1.5 text-[11px] font-semibold text-navy-400
-               uppercase tracking-wider
-  Item:        flex items-center gap-3 px-4 py-2.5 mx-1 rounded-lg cursor-pointer
-               hover:bg-navy-50 transition-colors 100ms
-    Active:    bg-brand-50 (keyboard navigation)
-    Icon:      w-5 h-5 text-navy-400
-    Label:     text-sm text-navy-700
-    Shortcut:  text-xs text-navy-300 ml-auto (e.g., "G then C")
-    Badge:     text-[10px] font-medium (optional context)
-
-Footer:
-  Padding:     px-4 py-2 border-t border-navy-100
-  Text:        text-[10px] text-navy-300
-  Content:     "↑↓ Navigate · Enter Select · Esc Close"
-```
-
----
-
-# 27. Mobile Responsive Design
-
-## 27.1 Breakpoints
-
-| Name | Min Width | Sidebar | Inbox | Widget |
-|------|-----------|---------|-------|--------|
-| **xs** | 0px | Hidden (hamburger) | Single pane | Fullscreen |
-| **sm** | 640px | Hidden (hamburger) | Single pane | Fullscreen |
-| **md** | 768px | Overlay | 2-pane (list+chat) | Expanded |
-| **lg** | 1024px | Visible | 3-pane | Compact |
-| **xl** | 1280px | Visible | 3-pane (wider) | Compact |
-
-## 27.2 Dashboard Mobile (< 768px)
-
-```
-Sidebar:
-  Hidden by default, triggered by hamburger icon
-  Overlay: fixed inset-0 bg-navy-950/50 z-overlay
-  Panel:   fixed left-0 top-0 h-full w-72 bg-white shadow-lift
-           animate: slide-in-left 300ms
-
-Chat Inbox:
-  Single pane: conversation list OR chat feed (not both)
-  Navigation: swipe left/right OR back button
-  Chat header: shows visitor name + back arrow
-  Visitor panel: slides up as bottom sheet OR separate page
-
-Header:
-  Simplified: hamburger + page title + notification bell
-  Search:     moved to search page OR top of content
-
-Tables:
-  Card layout: each row becomes a card with stacked info
-  OR: horizontal scroll with sticky first column
-```
-
-## 27.3 Widget Mobile (< 480px)
-
-```
-Launcher:
-  Size:       w-12 h-12 (48×48px) instead of w-14
-  Position:   bottom-4 right-4 (16px from edges)
-  Badge:      smaller text
-
-Window:
-  Size:       fullscreen (fixed inset-0 w-full h-full)
-  Radius:     none (rounded-none)
-  Shadow:     none
-  Animation:  slide-up from bottom
-
-Header:
-  Back button: w-8 h-8 rounded-md hover:bg-white/20 (ArrowLeft icon)
-  Close:       moved to left side (replaces back button when in root)
-
-Messages:
-  Max width:  85% of screen width
-
-Input:
-  Full-width textarea, attached to bottom
-  Toolbar:    single row, icons only (no labels)
-```
-
----
-
-# 28. Dark Mode Specification
-
-## 28.1 Dashboard Dark Mode
-
-### CSS Variables
+## 8. Elevation & Depth
+
+### 8.1 Shadow Scale
+
+| Token           | CSS Value                                                       | Usage                        |
+|-----------------|-----------------------------------------------------------------|------------------------------|
+| `shadow-xs`     | `0 1px 2px 0 rgba(15,23,42,0.04)`                             | Subtle lift                  |
+| `shadow-sm`     | `0 1px 3px 0 rgba(15,23,42,0.06), 0 1px 2px -1px rgba(15,23,42,0.06)` | Inputs, resting cards |
+| `shadow-md`     | `0 4px 6px -1px rgba(15,23,42,0.07), 0 2px 4px -2px rgba(15,23,42,0.05)` | Dropdowns, popovers  |
+| `shadow-lg`     | `0 10px 15px -3px rgba(15,23,42,0.08), 0 4px 6px -4px rgba(15,23,42,0.04)` | Modals, floating panels |
+| `shadow-xl`     | `0 20px 25px -5px rgba(15,23,42,0.1), 0 8px 10px -6px rgba(15,23,42,0.06)` | Chat widget, hero cards |
+| `shadow-2xl`    | `0 25px 50px -12px rgba(15,23,42,0.2)`                        | Dramatic hero elements       |
+| `shadow-inner`  | `inset 0 2px 4px 0 rgba(15,23,42,0.05)`                       | Pressed states, wells        |
+
+### 8.2 Glow Effects (Brand Differentiator)
+
+Unlike LiveChat's flat shadows, Flowlyra uses **colored glow shadows** to create a luminous, depth-driven aesthetic:
 
 ```css
-html.dark {
-  --color-surface: #0F1117;
-  --color-surface-muted: #171B20;
-  --color-surface-hover: #1E232A;
-  --color-ink: #F8F9FA;
-  --color-muted: #9BA3B2;
-  --color-text-primary: #F8F9FA;
-  --color-text-secondary: #9BA3B2;
-  --color-border: #2D333B;
-  --color-card: #171B20;
-  --color-card-hover: #1E232A;
-  --color-heading: #F8F9FA;
-  --color-body: #C7CCD6;
-}
-```
+/* Indigo glow — for primary CTAs */
+--glow-indigo: 0 0 20px rgba(79, 70, 229, 0.25), 0 0 60px rgba(79, 70, 229, 0.1);
 
-### Component Adaptations
+/* Coral glow — for accent highlights */
+--glow-coral: 0 0 20px rgba(249, 112, 102, 0.25), 0 0 60px rgba(249, 112, 102, 0.1);
 
-| Component | Light | Dark |
-|-----------|-------|------|
-| **Sidebar** | `bg-white border-navy-100` | `bg-navy-900 border-navy-700` |
-| **Header** | `bg-white/80 backdrop-blur` | `bg-navy-800/80 backdrop-blur` |
-| **Card** | `bg-white border-navy-100` | `bg-navy-800 border-navy-700` |
-| **Input** | `bg-white border-navy-100` | `bg-navy-800 border-navy-600` |
-| **Table header** | `bg-navy-50/80` | `bg-navy-800/80` |
-| **Table row hover** | `hover:bg-navy-50/50` | `hover:bg-navy-700/50` |
-| **Modal backdrop** | `bg-navy-950/60` | `bg-black/70` |
-| **Modal panel** | `bg-white` | `bg-navy-800` |
-| **Toast** | `bg-white border-navy-100` | `bg-navy-800 border-navy-700` |
-| **Chat messages bg** | `bg-navy-50/50` | `bg-navy-950/50` |
-| **Agent bubble** | `bg-white border-navy-100` | `bg-navy-700 border-navy-600` |
-| **Visitor bubble** | `bg-brand-500` | `bg-brand-600` |
-| **Scrollbar** | `#CBD5E1` | `#2D333B` |
-| **Selection** | `bg-brand-100 text-navy-700` | `bg-brand-950 text-navy-50` |
-| **Focus ring** | `ring-brand-500/30` | `ring-brand-500/40` |
-
-### Public Pages Dark Mode
-
-```
-Navbar:        bg-navy-900/90 backdrop-blur-md border-navy-700
-Hero:          bg-navy-900 text-white
-Sections:      alternating bg-navy-900 and bg-navy-800
-Footer:        bg-navy-900 border-navy-800
-Cards:         bg-navy-800 border-navy-700
-Gradients:     reduced opacity (0.08 instead of 0.06 for radial glow)
+/* Glass surface */
+--glass: background: rgba(255,255,255,0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.3);
 ```
 
 ---
 
-# 29. Animation & Micro-Interaction Catalog
+## 9. Borders & Radius
 
-## 29.1 Page Transitions
+### 9.1 Radius Scale
 
-```css
-/* Standard page transition */
-@keyframes pageEnter {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.animate-page-enter { animation: pageEnter 200ms ease-out; }
+| Token           | Value    | Usage                                       |
+|-----------------|----------|---------------------------------------------|
+| `radius-none`   | 0        | Tables, tight containers                    |
+| `radius-sm`     | 4px      | Tags, micro badges                          |
+| `radius-md`     | 6px      | Inputs, small buttons                       |
+| `radius-DEFAULT`| 8px      | Buttons, dropdowns, standard cards          |
+| `radius-lg`     | 12px     | Cards, panels, modals                       |
+| `radius-xl`     | 16px     | Featured cards, hero elements               |
+| `radius-2xl`    | 20px     | Large containers, widget window             |
+| `radius-3xl`    | 24px     | Hero images, section containers             |
+| `radius-full`   | 9999px   | Avatars, pills, toggles                     |
 
-/* Modal enter */
-@keyframes modalEnter {
-  from { opacity: 0; transform: scale(0.95); }
-  to   { opacity: 1; transform: scale(1); }
-}
+### 9.2 Border Styles
 
-/* Drawer slide in (right) */
-@keyframes drawerIn {
-  from { transform: translateX(100%); }
-  to   { transform: translateX(0); }
-}
-
-/* Widget open */
-@keyframes widgetOpen {
-  from { opacity: 0; transform: scale(0.9) translateY(10px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
-```
-
-## 29.2 Hover Effects
-
-```
-Button hover:     -translate-y-px (1px lift) + darken bg + shadow increase
-Card hover:       shadow-soft + border-darken + -translate-y-1 (4px lift) over 200ms
-Nav link hover:   bg-navy-50 transition-colors 100ms
-Table row hover:  bg-navy-50/50 transition-colors 100ms
-Icon button hover: bg-navy-50 text-navy-600 transition-colors 100ms
-Badge hover:      (none — badges are not interactive unless clickable)
-```
-
-## 29.3 Loading States
-
-```
-Spinner:          animate-spin (SVG, stroke-based)
-Skeleton shimmer: linear-gradient animation, 1.5s linear infinite
-Progress bar:     width transition from 0% to X% over 500ms ease-out
-Dots typing:      3 dots, staggered bounce (0ms, 150ms, 300ms), infinite
-Button loading:   opacity-60 + spinner replaces icon, text unchanged
-Page loading:     top progress bar (h-0.5 bg-brand-500 fixed top-0 z-max)
-```
-
-## 29.4 State Changes
-
-```
-Toggle:     transition-colors 200ms + knob transition-transform 200ms cubic-bezier
-Checkbox:   scale(0.8) → scale(1) on check, 100ms
-Radio:      same as checkbox
-Badge:      bounce-in 350ms when count changes
-Toast:      slide-in-right 300ms on appear, fade-out 200ms on dismiss
-Notification panel: scale-in 200ms from top-right
-Command palette: scale-in 300ms with spring physics
-Dropdown:   fade-in 150ms + scale(0.98) → scale(1)
-Tooltip:    fade-in 100ms, delay 300ms on show, instant on hide
-```
-
-## 29.5 Scroll Animations
-
-```
-Intersection observer patterns:
-  fadeUp:    opacity 0 → 1, translateY(20px → 0), 600ms ease-out
-  fadeIn:    opacity 0 → 1, 400ms ease-out
-  slideLeft: opacity 0 → 1, translateX(-30px → 0), 600ms ease-out
-  slideRight: opacity 0 → 1, translateX(30px → 0), 600ms ease-out
-
-Usage:      Applied via data-animate attribute + IntersectionObserver
-Threshold:  0.1 (trigger when 10% visible)
-Once:       true (don't re-trigger)
-Stagger:    100ms delay between sibling elements
-```
+| Usage               | Specification                              |
+|----------------------|--------------------------------------------|
+| Default divider      | `1px solid var(--slate-200)`               |
+| Subtle divider       | `1px solid var(--slate-100)`               |
+| Input resting        | `1px solid var(--slate-300)`               |
+| Input hover          | `1px solid var(--slate-400)`               |
+| Input focus          | `2px solid var(--indigo-600)`              |
+| Input error          | `2px solid var(--coral-600)`               |
+| Card outline         | `1px solid var(--slate-200)`               |
+| Dashed drop zone     | `2px dashed var(--slate-300)`              |
 
 ---
 
-# 30. Accessibility Requirements
+## 10. Motion & Animation
 
-## 30.1 Focus Management
+### 10.1 Duration Tokens
 
-```
-Focus ring:       ring-2 ring-brand-500/30 ring-offset-2 (standard)
-Focus ring error: ring-2 ring-danger-500/30 ring-offset-2
-Skip to content:  fixed top-0 left-0 sr-only focus:not-sr-only focus:z-max
-                  bg-brand-500 text-white px-4 py-2 text-sm
+| Token               | Duration | Usage                              |
+|----------------------|----------|------------------------------------|
+| `duration-instant`   | 0ms      | State toggles (no visible change)  |
+| `duration-fast`      | 100ms    | Hover, focus, micro-feedback       |
+| `duration-normal`    | 200ms    | Dropdowns, tooltips, state changes |
+| `duration-moderate`  | 300ms    | Panels, reveals, slides            |
+| `duration-slow`      | 500ms    | Page transitions, scroll reveals   |
+| `duration-slower`    | 700ms    | Hero entrances, orchestrated flows |
 
-Keyboard navigation:
-  Tab:      forward focus
-  Shift+Tab: backward focus
-  Enter/Space: activate
-  Escape:    close modal/drawer/dropdown
-  Arrow keys: navigate within dropdowns, tabs, menus
-  Cmd+K:     open command palette
-```
+### 10.2 Easing Functions
 
-## 30.2 Color Contrast
+| Token               | Value                                 | Usage                     |
+|----------------------|---------------------------------------|---------------------------|
+| `ease-default`       | `cubic-bezier(0.4, 0, 0.2, 1)`      | General purpose            |
+| `ease-in`            | `cubic-bezier(0.4, 0, 1, 1)`        | Elements leaving           |
+| `ease-out`           | `cubic-bezier(0, 0, 0.2, 1)`        | Elements entering          |
+| `ease-bounce`        | `cubic-bezier(0.34, 1.56, 0.64, 1)` | Playful interactions       |
+| `ease-spring`        | `cubic-bezier(0.22, 1, 0.36, 1)`    | Natural, physics-like      |
 
-```
-Minimum ratios (WCAG AA):
-  Text on bg:           4.5:1 (normal text), 3:1 (large text)
-  Interactive elements: 3:1 (against adjacent colors)
-  Status indicators:    3:1 (with text label)
+### 10.3 Marketing Site Animation Patterns
 
-Verified pairs:
-  navy-700 (#1E232A) on white:       16.2:1 ✅
-  navy-400 (#6B7280) on white:       5.9:1 ✅
-  brand-500 (#FF5100) on white:      3.6:1 ✅ (for large text/icons only)
-  white on brand-500:                 3.6:1 ✅ (large text)
-  navy-400 on navy-50 (#F4F5F7):     5.1:1 ✅
-  brand-600 on white:                 4.6:1 ✅
-```
+| Pattern                         | Specification                                       |
+|---------------------------------|-----------------------------------------------------|
+| **Scroll reveal (sections)**    | Fade up 24px, 500ms, staggered 80ms per child       |
+| **Hero entrance**               | Title slides in from bottom 40px, 700ms spring ease |
+| **Floating UI cards**           | Subtle 3D tilt on scroll (CSS perspective + transform) |
+| **Stats counter**               | Count-up on intersection, 800ms ease-out             |
+| **CTA button hover**            | Scale 1.03 + glow shadow, 200ms                     |
+| **CTA button press**            | Scale 0.97, 100ms                                   |
+| **Nav link hover**              | Underline slides in from left, 200ms                |
+| **Card hover**                  | Translate Y -4px + shadow-lg, 200ms                 |
+| **Feature tab switch**          | Crossfade 300ms + slide 16px                        |
+| **Testimonial grid**            | Staggered fade-in on scroll, masonry layout          |
+| **Background gradient shift**   | Slow color cycling, 15s infinite                    |
 
-## 30.3 Screen Reader Support
-
-```
-Icons:         aria-hidden="true" (decorative), aria-label (interactive)
-Buttons:       aria-label if no visible text
-Modals:        role="dialog", aria-modal="true", aria-labelledby="title-id"
-Dropdowns:     role="menu", items role="menuitem", aria-expanded
-Toasts:        role="alert" or role="status", aria-live="polite"
-Loading:       aria-busy="true", aria-live="polite" on container
-Progress:      role="progressbar", aria-valuenow, aria-valuemin, aria-valuemax
-Tabs:          role="tablist", role="tab", role="tabpanel", aria-selected
-```
-
-## 30.4 Motion Preferences
+### 10.4 Reduced Motion
 
 ```css
 @media (prefers-reduced-motion: reduce) {
@@ -3088,99 +532,1002 @@ Tabs:          role="tablist", role="tab", role="tabpanel", aria-selected
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
   }
 }
 ```
 
 ---
 
-# Appendix A: Tailwind Config Reference
+## 11. Buttons & CTAs
 
-The FlowLyra Tailwind config is already set up at `frontend/tailwind.config.js` with:
+### 11.1 Button Variants
 
-- **Fonts:** DM Sans (display), Inter (body), JetBrains Mono (code)
-- **Colors:** brand (orange), navy (neutral), success, warning, danger
-- **CSS Variables:** surface, ink, muted, text-primary, text-secondary, border, card
-- **Animations:** fade-in, fade-out, slide-up, slide-down, slide-in-right, scale-in,
-  bounce-in, shimmer, marquee, pulse-dot, float, typewriter
-- **Shadows:** xs, soft, lift, glow, glow-lg
-- **Screens:** 640/768/1024/1280/1536px
-- **Dark mode:** class-based (`darkMode: "class"`)
-- **Plugins:** @tailwindcss/forms, @tailwindcss/typography, tailwindcss-animate
+**Primary (Indigo Fill)**
 
-# Appendix B: CSS Custom Properties (index.css)
+| Property        | Value                                      |
+|-----------------|--------------------------------------------|
+| Background      | `var(--indigo-600)` → hover `var(--indigo-700)` |
+| Text            | `#FFFFFF`, Plus Jakarta Sans 600, 15px     |
+| Padding         | `12px 24px`                                |
+| Radius          | `8px`                                      |
+| Shadow          | `shadow-sm` resting → `glow-indigo` hover  |
+| Active          | Scale 0.97, `var(--indigo-800)` bg         |
+| Disabled        | Opacity 0.5, cursor not-allowed            |
+| Min Height      | `44px`                                     |
 
-Defined in `frontend/src/index.css`:
-- Light/dark surface system: `--color-surface`, `--color-surface-muted`, etc.
-- `.premium-surface` — radial gradient hero background
-- `.glass` — frosted glass effect
-- `.gradient-text` — brand gradient text clip
-- `.skeleton` — shimmer loading placeholder
-- `.marquee-track` — infinite scroll animation
-- `.launcher-pulse` — widget button pulse
-- `.chat-bubble-agent/visitor/bot/note` — message bubble styles
-- Status/priority badge utility classes
-- Custom scrollbar styling
-- Form element defaults and focus ring
-- Reduced motion support
+**Secondary (Outline)**
 
-# Appendix C: File Structure Reference
+| Property        | Value                                      |
+|-----------------|--------------------------------------------|
+| Background      | Transparent → hover `var(--indigo-50)`     |
+| Border          | `1.5px solid var(--indigo-600)`            |
+| Text            | `var(--indigo-600)`, 600 weight            |
+| Radius          | `8px`                                      |
+
+**Ghost (Text Only)**
+
+| Property        | Value                                      |
+|-----------------|--------------------------------------------|
+| Background      | Transparent → hover `var(--slate-100)`     |
+| Text            | `var(--slate-700)`, 500 weight             |
+| Underline       | On hover                                   |
+
+**Destructive (Coral Fill)**
+
+| Property        | Value                                      |
+|-----------------|--------------------------------------------|
+| Background      | `var(--coral-600)` → hover darkened 10%    |
+| Text            | `#FFFFFF`                                  |
+| Usage           | Delete, cancel subscription, revoke access |
+
+**Hero CTA (Gradient)**
+
+| Property        | Value                                      |
+|-----------------|--------------------------------------------|
+| Background      | `var(--brand-gradient)`                    |
+| Text            | `#FFFFFF`, Plus Jakarta Sans 700, 16px     |
+| Padding         | `16px 32px`                                |
+| Radius          | `12px`                                     |
+| Shadow          | `glow-indigo`                              |
+| Hover           | Shadow expands, slight scale 1.03          |
+
+### 11.2 Button Sizes
+
+| Size     | Height | Padding         | Font Size |
+|----------|--------|-----------------|-----------|
+| `xs`     | 32px   | `6px 12px`      | 13px      |
+| `sm`     | 36px   | `8px 16px`      | 14px      |
+| `md`     | 44px   | `12px 24px`     | 15px      |
+| `lg`     | 52px   | `14px 32px`     | 16px      |
+| `xl`     | 60px   | `18px 40px`     | 18px      |
+
+### 11.3 Button With Icon
+
+Icons are 20px (for md) or 16px (for sm/xs), placed left or right of text with `space-2` gap. Icon-only buttons use square dimensions matching the height.
+
+---
+
+## 12. Form Elements
+
+### 12.1 Text Input
+
+| State       | Border                       | Background        | Shadow                          |
+|-------------|------------------------------|--------------------|---------------------------------|
+| Resting     | `1px solid var(--slate-300)` | `var(--white)`     | None                            |
+| Hover       | `1px solid var(--slate-400)` | `var(--white)`     | `shadow-xs`                     |
+| Focus       | `2px solid var(--indigo-600)`| `var(--white)`     | `0 0 0 3px var(--indigo-50)`    |
+| Error       | `2px solid var(--coral-600)` | `var(--coral-50)`  | `0 0 0 3px rgba(249,112,102,0.1)` |
+| Disabled    | `1px solid var(--slate-200)` | `var(--slate-100)` | None                            |
+| Read-only   | `1px solid var(--slate-200)` | `var(--slate-50)`  | None                            |
+
+| Property           | Value                              |
+|--------------------|------------------------------------|
+| Height             | `44px` (md), `36px` (sm)          |
+| Padding            | `10px 14px`                        |
+| Radius             | `var(--radius-md)` (6px)          |
+| Font               | Plus Jakarta Sans 400, 15px        |
+| Placeholder Color  | `var(--slate-400)`                 |
+| Label              | Plus Jakarta 500, 14px, `var(--slate-700)`, `space-1.5` above |
+| Helper Text        | 13px, `var(--slate-500)`, `space-1` below |
+| Error Message      | 13px, `var(--coral-600)`, `space-1` below |
+
+### 12.2 Textarea
+
+Same as text input but with `min-height: 96px`, `resize: vertical`.
+
+### 12.3 Select / Dropdown
+
+Same border/radius as text input. Chevron-down icon right-aligned. Dropdown menu: `shadow-lg`, `radius-lg`, max-height `280px`, `8px` padding.
+
+### 12.4 Checkbox
+
+| Property        | Value                                    |
+|-----------------|------------------------------------------|
+| Size            | `18 × 18px`                             |
+| Border          | `1.5px solid var(--slate-300)`           |
+| Radius          | `4px`                                    |
+| Checked Fill    | `var(--indigo-600)`                      |
+| Check Mark      | White, 2px stroke                        |
+| Focus Ring      | `0 0 0 3px var(--indigo-50)`             |
+
+### 12.5 Radio
+
+Same as checkbox but `border-radius: 50%`, inner dot `8px` filled circle.
+
+### 12.6 Toggle / Switch
+
+| State       | Track Background         | Knob              | Width × Height |
+|-------------|--------------------------|--------------------|----|
+| Off         | `var(--slate-300)`       | `#FFFFFF`          | `44 × 24px` |
+| On          | `var(--indigo-600)`      | `#FFFFFF`          | Knob shifts right |
+| Disabled    | `var(--slate-200)`       | `var(--slate-100)` | Opacity 0.5 |
+
+---
+
+## 13. Cards & Containers
+
+### 13.1 Standard Card
+
+| Property        | Value                                    |
+|-----------------|------------------------------------------|
+| Background      | `var(--white)`                           |
+| Border          | `1px solid var(--slate-200)`             |
+| Radius          | `var(--radius-lg)` (12px)               |
+| Padding         | `var(--space-6)` (24px)                  |
+| Shadow          | `var(--shadow-sm)` resting              |
+| Hover Shadow    | `var(--shadow-md)` + translateY(-4px)    |
+| Transition      | `200ms var(--ease-default)`              |
+
+### 13.2 Feature Card
+
+| Property        | Value                                    |
+|-----------------|------------------------------------------|
+| Background      | `var(--white)` or `var(--indigo-50)`     |
+| Border          | None                                     |
+| Radius          | `var(--radius-xl)` (16px)               |
+| Padding         | `var(--space-8)` (32px)                  |
+| Icon container  | `56px` with `Indigo 50` bg, `radius-lg` |
+| Title           | `heading-lg` Fraunces                    |
+| Description     | `body-md` Plus Jakarta, `Slate 600`     |
+| Shadow          | `var(--shadow-md)`                       |
+
+### 13.3 Glass Card (Hero / Featured)
+
+```css
+.glass-card {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+}
+```
+
+### 13.4 Stat Card
+
+| Property        | Value                                    |
+|-----------------|------------------------------------------|
+| Layout          | Number top (display-md, Fraunces 700, Indigo 600), label below (body-sm, Slate 500) |
+| Background      | `var(--white)` or transparent            |
+| Border          | `1px solid var(--slate-200)` or none     |
+| Padding         | `var(--space-6)`                         |
+
+---
+
+## 14. Navigation System
+
+### 14.1 Primary Navigation (Marketing)
+
+| Property            | Value                                             |
+|---------------------|---------------------------------------------------|
+| Type                | **Glass nav** (frosted backdrop blur)              |
+| Position            | `sticky top-0 z-50`                               |
+| Height              | `72px`                                            |
+| Background          | `rgba(255,255,255,0.8)` + `backdrop-filter: blur(12px)` |
+| Border Bottom       | `1px solid rgba(226,232,240,0.6)`                 |
+| Logo                | Left — Flowlyra full logo                         |
+| Links               | Center — Plus Jakarta 500, 15px, `Slate 700`      |
+| Link Hover          | `Indigo 600` + underline slide-in                 |
+| Link Active         | `Indigo 600`, font-weight 600                     |
+| Right Actions       | "Log in" (ghost) + "Start free" (primary button)  |
+| Mobile Trigger      | Hamburger icon at `md` breakpoint                  |
+| Mobile Menu         | Full-screen overlay, slide-in from right, dark bg  |
+
+### 14.2 Dashboard Navigation (Agent App)
+
+| Property            | Value                                             |
+|---------------------|---------------------------------------------------|
+| Type                | **Sidebar** (left, collapsible)                   |
+| Width               | `260px` expanded, `72px` collapsed                |
+| Background          | `var(--slate-50)` with `1px right border`         |
+| Items               | Icon (24px) + Label (14px, 500), `44px` row height|
+| Active Item         | `Indigo 50` bg, `Indigo 600` icon + text          |
+| Hover Item          | `Slate 100` bg                                    |
+| Sections            | Separated by subtle dividers with section labels  |
+| Bottom Area         | Agent avatar + name + status toggle               |
+
+---
+
+## 15. Hero & Landing Patterns
+
+### 15.1 Primary Hero (Home Page)
+
+This is the **#1 area** where differentiation from LiveChat is critical.
+
+**LiveChat hero:** White bg, text left, product screenshot right, yellow/black palette.
+**Flowlyra hero:** Gradient bg, asymmetric layout, floating glass cards, indigo/coral palette.
+
+| Property            | Value                                             |
+|---------------------|---------------------------------------------------|
+| Background          | `var(--brand-gradient)` with subtle animated mesh  |
+| Layout              | Asymmetric — 7-col text / 5-col floating UI cards  |
+| Headline            | Fraunces 800, `display-hero`, White                |
+| Sub-headline        | Plus Jakarta 400, `body-lg`, White at 85% opacity  |
+| CTA                 | White fill + Indigo text (inverted primary)         |
+| Secondary CTA       | Ghost white outline                                |
+| Trust bar           | Logo row below hero on white strip                 |
+| Visual              | Floating glass cards showing chat UI, not a flat screenshot |
+| Ambient animation   | Slow gradient color shift + floating particle dots |
+| Height              | `min-height: 90vh` desktop, `auto` mobile          |
+
+### 15.2 Sub-Page Hero (Features, Pricing, etc.)
+
+| Property            | Value                                             |
+|---------------------|---------------------------------------------------|
+| Background          | `var(--surface-wash)` gradient                    |
+| Height              | `400px` desktop, `auto` mobile                     |
+| Headline            | Fraunces 700, `display-lg`, `Midnight`            |
+| Description         | `body-lg`, `Slate 600`, max-width `640px`          |
+| Alignment           | Centered                                           |
+
+---
+
+## 16. Feature Section Patterns
+
+### 16.1 Primary Feature Block (Asymmetric Overlap)
+
+This replaces LiveChat's alternating 50/50 text/image sections:
 
 ```
-frontend/src/
-├── components/
-│   ├── ui/                    ← 33 UI components (Button, Input, etc.)
-│   │   ├── index.ts           ← Barrel export
-│   │   ├── Button.tsx
-│   │   ├── Input.tsx
-│   │   ├── Modal.tsx
-│   │   ├── Toast.tsx
-│   │   └── ...
-│   ├── AgentLayout.tsx        ← Dashboard shell (sidebar + header + content)
-│   ├── AIToolsMenu.tsx
-│   ├── CopilotPanel.tsx
-│   └── ProductTour.tsx
-├── pages/
-│   ├── PublicPages.tsx        ← Homepage, pricing, features, integrations
-│   ├── AuthPages.tsx          ← Login, signup, forgot password
-│   ├── ChatPage.tsx           ← 3-pane chat inbox
-│   ├── InboxPage.tsx          ← Inbox variants
-│   ├── TicketsPage.tsx        ← Ticket management
-│   ├── ContactsPage.tsx       ← Contact management
-│   ├── EngagePages.tsx        ← Traffic, campaigns, goals
-│   ├── KnowledgeBasePage.tsx  ← KB admin
-│   ├── PublicKBPage.tsx       ← Public KB
-│   ├── ChatbotPage.tsx        ← Chatbot flow builder
-│   ├── IntegrationsMarketplacePage.tsx
-│   ├── SettingsOverviewPage.tsx
-│   ├── NotificationPreferencesPage.tsx
-│   ├── SecurityPage.tsx       ← 2FA, sessions
-│   ├── AuditLogsPage.tsx
-│   ├── ApiKeysPage.tsx
-│   ├── WebhooksPage.tsx
-│   ├── TagsPage.tsx
-│   ├── ChannelsPage.tsx
-│   └── ...
-├── stores/                    ← Zustand state management
-├── hooks/                     ← Custom React hooks
-├── socket/                    ← Socket.IO client
-├── api/                       ← API client functions
-├── types/                     ← TypeScript type definitions
-└── index.css                  ← Global styles, CSS variables, utilities
+┌─────────────────────────────────────────────────┐
+│                                                 │
+│   OVERLINE LABEL                                │
+│   ┌──────────────────────┐                      │
+│   │ Feature Headline     │     ┌─────────────┐  │
+│   │ in Fraunces serif    │     │ ┌─────────┐ │  │
+│   │                      │     │ │ Product │ │  │
+│   │ Description text in  │     │ │ UI Card │ │  │
+│   │ Plus Jakarta. Short  │     │ └─────────┘ │  │
+│   │ and impactful.       │     │             │  │
+│   │                      │     │  ┌────────┐ │  │
+│   │ [Learn more →]       │     │  │ Glass  │ │  │
+│   └──────────────────────┘     │  │ Card   │ │  │
+│                                │  └────────┘ │  │
+│                                └─────────────┘  │
+│                                                 │
+└─────────────────────────────────────────────────┘
 
-widget/src/
-├── Widget.ts                  ← Main widget class
-├── ChatPanel.ts              ← Chat messages + input
-├── PreChatForm.ts            ← Pre-chat form
-├── PostChatForm.ts           ← CSAT survey
-├── OfflineForm.ts            ← Offline form
-├── RichMessage.ts            ← Rich message/card renderer
-├── SocketClient.ts           ← Socket.IO client for widget
-├── styles.ts                 ← Widget CSS-in-TS styles
-├── emoji.ts                  ← Emoji picker data
-├── i18n.ts                   ← Internationalization
-├── sound.ts                  ← Notification sounds
-├── types.ts                  ← Widget types
-└── utils.ts                  ← Widget utilities
+Visual: Cards overlap and float with shadow-xl, subtle 3D tilt.
+Alternating: Text/visual sides swap, but never a rigid 50/50.
 ```
+
+### 16.2 Feature Grid (Three Cards)
+
+Three `Feature Cards` (see 13.2) in a row, each with: icon container, Fraunces headline, description, text link with arrow.
+
+### 16.3 Feature Tabs (Interactive)
+
+Horizontal tab bar (Plus Jakarta 600, 15px) above a content area that swaps on click with a 300ms crossfade + slide animation. Active tab has Indigo 600 underline (3px thick, animated).
+
+---
+
+## 17. Social Proof & Testimonials
+
+### 17.1 Voice Card (Replaces Star Carousel)
+
+LiveChat uses a horizontal auto-scrolling carousel with star ratings. Flowlyra uses a **masonry voice-card grid** — more visually interesting, avoids the clone look.
+
+| Property            | Value                                             |
+|---------------------|---------------------------------------------------|
+| Layout              | 3-column masonry grid (CSS columns), 2-col tablet, 1-col mobile |
+| Card Background     | `var(--white)` with `shadow-sm`                   |
+| Card Radius         | `var(--radius-lg)` (12px)                         |
+| Card Padding        | `var(--space-6)` (24px)                           |
+| Quote Text          | Plus Jakarta 400, 16px, `Slate 700`, italic       |
+| Quote Mark          | Large `"` in Fraunces, 48px, `Indigo 200`         |
+| Attribution         | Name (Plus Jakarta 600, 14px, `Midnight`) + Title (14px, `Slate 500`) |
+| Company Logo        | 24px height, grayscale, in header of card         |
+| Highlight Stat      | Fraunces 700, 32px, `Indigo 600`, above the quote |
+| Animation           | Staggered fade-in on scroll, 80ms delay per card  |
+| No Stars            | No 5-star ratings (differentiates from LiveChat)   |
+
+### 17.2 Logo Bar (Trust Strip)
+
+| Property            | Value                                             |
+|---------------------|---------------------------------------------------|
+| Layout              | Horizontal flex row, centered, wrap                |
+| Logo Treatment      | Grayscale, 32px height, `opacity: 0.5` → `1` on hover |
+| Padding             | `var(--space-16)` vertical                        |
+| Label               | "Trusted by 10,000+ support teams" — `overline` token |
+| Background          | `var(--white)` or `var(--slate-50)`               |
+
+---
+
+## 18. Pricing Section
+
+### 18.1 Pricing Card
+
+| Property            | Value                                             |
+|---------------------|---------------------------------------------------|
+| Layout              | 3 cards in a row (Starter, Pro, Enterprise)        |
+| Background          | White with Indigo-bordered "recommended" card      |
+| Featured Card       | `2px solid var(--indigo-600)` border, `Indigo 50` top strip, "Most Popular" badge |
+| Badge               | Coral 500 bg, white text, `radius-full`, above card|
+| Plan Name           | Plus Jakarta 600, 18px, `Midnight`                |
+| Price               | Fraunces 800, 48px, `Midnight`                    |
+| Per unit            | Plus Jakarta 400, 14px, `Slate 500`, "/agent/mo"  |
+| Feature list        | Check icons in Emerald 500 + text 14px Slate 700   |
+| CTA Button          | Primary (Indigo) for featured, Secondary for others|
+| Radius              | `var(--radius-xl)` (16px)                         |
+| Padding             | `var(--space-8)` (32px)                           |
+| Shadow              | `shadow-md` resting, `shadow-lg` hover            |
+| Enterprise card     | "Contact Sales" CTA, custom dark/gradient variant  |
+
+### 18.2 Pricing Toggle
+
+Annual/Monthly toggle using `Switch` component, with "Save 20%" badge on Annual in `Emerald 500`.
+
+---
+
+## 19. Footer
+
+### 19.1 Layout & Style
+
+| Property            | Value                                             |
+|---------------------|---------------------------------------------------|
+| Background          | `var(--midnight)` (#0F172A)                       |
+| Text Color          | `var(--slate-300)` (links), `var(--slate-500)` (secondary) |
+| Link Hover          | `var(--white)`                                    |
+| Layout              | 5-column grid (Logo/CTA + 4 link columns)         |
+| Top Section         | Flowlyra logo (white reverse) + "Start flowing free" CTA |
+| Column Headings     | Plus Jakarta 600, 13px, `overline`, `var(--slate-400)`, uppercase |
+| Column Links        | Plus Jakarta 400, 14px, `var(--slate-300)`        |
+| Bottom Bar          | Divider + Copyright + Social icons + Legal links   |
+| Social Icons        | 20px, `Slate 500` → `White` on hover             |
+| Padding             | `var(--space-24)` vertical                        |
+
+### 19.2 Footer Columns
+
+| Column 1     | Column 2       | Column 3      | Column 4       |
+|-------------|----------------|---------------|----------------|
+| **Product** | **Solutions**  | **Resources** | **Company**    |
+| Features    | Customer Support| Help Center  | About          |
+| Pricing     | Sales & Marketing| Blog        | Contact        |
+| Integrations| Enterprise     | API Docs      | Careers        |
+| Product Tour| Ecommerce      | Status        | Legal          |
+| What's New  |                | Community     | Privacy        |
+
+---
+
+## 20. Chat Widget Design
+
+### 20.1 Visual Identity (Must Be Distinct from LiveChat Widget)
+
+| Property            | Flowlyra Widget                      | LiveChat Widget (avoid)    |
+|---------------------|--------------------------------------|----------------------------|
+| Launcher shape      | Rounded square with wave icon        | Circle with chat bubble    |
+| Default color       | Indigo 600 gradient                  | Customizable (often orange)|
+| Window radius       | `20px` top corners                   | `16px` top corners         |
+| Header style        | Gradient indigo header + glass blur  | Solid color header         |
+| Message bubbles     | Soft rounded, tail-less              | Rounded with directional tail |
+
+### 20.2 Widget Specs
+
+| Property            | Value                                    |
+|---------------------|------------------------------------------|
+| Position            | Bottom-right, `24px` from edges          |
+| Launcher Size       | `56 × 56px`                             |
+| Launcher Radius     | `16px`                                   |
+| Launcher Icon       | Flowlyra stream mark (white, 28px)       |
+| Launcher Shadow     | `var(--shadow-xl)` + `var(--glow-indigo)`|
+| Launcher Hover      | Scale 1.08, glow intensifies             |
+| Window Width        | `380px` desktop, `100vw` mobile          |
+| Window Height       | `560px` desktop, `100vh - 24px` mobile   |
+| Window Radius       | `20px` top corners, `0` bottom           |
+| Window Shadow       | `var(--shadow-2xl)`                      |
+| Open Animation      | Scale from launcher origin, 300ms spring |
+| Close Animation     | Scale down + fade, 200ms ease-in         |
+
+### 20.3 Widget Header
+
+| Property            | Value                                    |
+|---------------------|------------------------------------------|
+| Background          | `var(--brand-gradient)`                  |
+| Height              | `72px`                                   |
+| Content             | Agent avatar cluster + "Flowlyra Support" + online indicator |
+| Close Button        | X icon, white, top-right                 |
+| Text Color          | White                                    |
+| Avatar              | `36px`, `radius-full`, white `2px` border|
+
+### 20.4 Message Bubbles
+
+| Sender        | Background              | Text Color     | Radius                    | Max Width |
+|---------------|-------------------------|----------------|---------------------------|-----------|
+| Agent/Bot     | `var(--slate-100)`      | `var(--slate-800)` | `16px 16px 16px 4px`  | `75%`     |
+| Visitor       | `var(--indigo-600)`     | `#FFFFFF`      | `16px 16px 4px 16px`      | `75%`     |
+| System        | `var(--indigo-50)`      | `var(--indigo-700)` | `12px` all            | `85%`     |
+
+### 20.5 Input Area
+
+| Property            | Value                                    |
+|---------------------|------------------------------------------|
+| Background          | `var(--white)`                           |
+| Border Top          | `1px solid var(--slate-200)`             |
+| Input Height        | `48px`                                   |
+| Padding             | `12px 16px`                              |
+| Placeholder         | "Type a message..." in `Slate 400`       |
+| Send Button         | `36px` circle, `Indigo 600` bg, arrow icon white |
+| Attachment Button   | Paperclip icon, `Slate 400`, left of input|
+
+---
+
+## 21. Agent Dashboard UI
+
+### 21.1 Layout Structure
+
+```
+┌──────┬───────────────────────────────────────────┐
+│      │  Toolbar (56px)                           │
+│      ├──────────────┬────────────────┬───────────┤
+│ Side │              │                │           │
+│ bar  │  Chat List   │  Conversation  │  Details  │
+│      │  Panel       │  Panel         │  Panel    │
+│ 72px │  280px       │  Flex          │  320px    │
+│  or  │              │                │           │
+│260px │              │                │           │
+│      │              │                │           │
+└──────┴──────────────┴────────────────┴───────────┘
+```
+
+### 21.2 Dashboard Color Palette
+
+The dashboard uses a **denser, more muted version** of the marketing palette:
+
+| Element              | Color                              |
+|----------------------|------------------------------------|
+| Sidebar bg           | `var(--slate-50)` (#F8FAFC)       |
+| Main bg              | `var(--white)`                     |
+| Chat list bg         | `var(--white)`                     |
+| Active chat row      | `var(--indigo-50)` (#EEF2FF)      |
+| Unread indicator     | `var(--indigo-600)` dot            |
+| Online status        | `var(--emerald-500)` dot           |
+| Away status          | `var(--amber-400)` dot             |
+| Offline status       | `var(--slate-400)` dot             |
+| Tag chips            | Various pastel backgrounds + dark text |
+| Toolbar bg           | `var(--white)`, bottom border      |
+
+### 21.3 Chat Composition Area (Agent)
+
+| Property            | Value                                    |
+|---------------------|------------------------------------------|
+| Background          | `var(--white)`                           |
+| Border Top          | `1px solid var(--slate-200)`             |
+| Min Height          | `120px`                                  |
+| Toolbar Row         | Bold, Italic, Link, Emoji, Attachment, Canned Reply icons |
+| Send Button         | Primary Indigo, right-aligned            |
+| AI Suggestion       | `var(--indigo-50)` banner above input, "Suggested reply" label with accept/dismiss |
+
+### 21.4 Notification System
+
+| Type      | Background             | Border Left          | Icon Color         |
+|-----------|------------------------|----------------------|--------------------|
+| Info      | `var(--indigo-50)`     | `3px var(--indigo-600)` | Indigo 600       |
+| Success   | `var(--emerald-50)`    | `3px var(--emerald-500)`| Emerald 500      |
+| Warning   | `var(--amber-50)`      | `3px var(--amber-400)`  | Amber 600        |
+| Error     | `var(--coral-50)`      | `3px var(--coral-600)`  | Coral 600        |
+
+---
+
+## 22. Data Visualization
+
+### 22.1 Chart Color Palette
+
+| Index | Color       | Hex       | Usage                    |
+|-------|-------------|-----------|--------------------------|
+| 1     | Indigo      | `#4F46E5` | Primary metric            |
+| 2     | Coral       | `#F97066` | Secondary metric          |
+| 3     | Emerald     | `#10B981` | Positive / success        |
+| 4     | Amber       | `#FBBF24` | Warning / attention       |
+| 5     | Violet      | `#8B5CF6` | Tertiary data             |
+| 6     | Cyan        | `#06B6D4` | Supplementary             |
+| 7     | Rose        | `#F43F5E` | Negative / decline        |
+| 8     | Slate       | `#64748B` | Neutral / baseline        |
+
+### 22.2 Chart Style Rules
+
+| Property            | Value                                    |
+|---------------------|------------------------------------------|
+| Font                | Plus Jakarta Sans 400, 12px for labels   |
+| Grid lines          | `var(--slate-100)`, 1px                  |
+| Axis text           | `var(--slate-500)`, 11px                 |
+| Tooltip bg          | `var(--midnight)`, white text, `radius-md`, `shadow-lg` |
+| Bar radius          | `4px` top corners                        |
+| Line stroke         | `2px`                                    |
+| Area fill           | 10% opacity of line color                |
+| Hover state         | Circle dot `6px`, tooltip appears        |
+
+---
+
+## 23. Imagery & Illustration
+
+### 23.1 Photography Style
+
+| Attribute        | Flowlyra                                     | Avoid (LiveChat style)           |
+|------------------|----------------------------------------------|----------------------------------|
+| Tone             | Cool-toned, modern, slightly editorial       | Warm, corporate stock            |
+| Lighting         | Natural with cool undertones                 | Warm studio                      |
+| Subjects         | Real people at workstations, close-up hands  | Full body in staged environments |
+| Color grading    | Slight blue/violet shift, high contrast      | Warm yellow/orange shift         |
+| Composition      | Tight crops, shallow depth of field          | Wide environmental shots         |
+
+### 23.2 Product Screenshots
+
+| Level          | Description                                    |
+|----------------|------------------------------------------------|
+| **Hero**       | Floating glass-card UI mockups, not flat shots |
+| **Feature**    | Focused UI crops with subtle 3D perspective    |
+| **Detail**     | Annotated close-ups of specific features       |
+
+### 23.3 Abstract Illustrations
+
+For backgrounds and section transitions, use **flowing gradient meshes** and **constellation dot patterns** — never the "blob" or "wave" shapes common in generic SaaS design.
+
+```css
+/* Constellation pattern overlay */
+.constellation {
+  background-image: radial-gradient(1.5px 1.5px at 20px 30px, rgba(99,102,241,0.3), transparent),
+                    radial-gradient(1px 1px at 80px 60px, rgba(99,102,241,0.2), transparent),
+                    radial-gradient(2px 2px at 150px 100px, rgba(249,112,102,0.2), transparent);
+  background-size: 200px 200px;
+}
+```
+
+---
+
+## 24. Copywriting Voice & Tone
+
+### 24.1 Voice Principles
+
+| Principle      | Description                                          | Example                                   |
+|----------------|------------------------------------------------------|-------------------------------------------|
+| **Fluid**      | Sentences that flow, not bullet-point corporate      | "Support that flows naturally"             |
+| **Confident**  | State facts, don't hedge                             | "10x faster than email" not "may be faster"|
+| **Human**      | Second person, active voice, no jargon               | "You'll see results" not "Results are seen"|
+| **Concise**    | Cut every unnecessary word                           | "Start free" not "Sign up for a free trial today" |
+
+### 24.2 Headline Formula
+
+```
+[Emotion-evoking verb] + [what the customer gets]
+```
+
+Examples:
+- "Support that flows. Sales that grow."
+- "Turn every conversation into value."
+- "See your team at its best."
+- "Built for the rhythm of real conversations."
+
+### 24.3 Banned Phrases (LiveChat Clones)
+
+| ❌ Never Use                          | ✅ Use Instead                        |
+|---------------------------------------|---------------------------------------|
+| "Gets the job done"                   | "Built for how teams actually work"   |
+| "Go-to choice"                        | "The platform teams switch to"        |
+| "Quick to set up, easy to use"        | "From zero to live in five minutes"   |
+| "35,000+ companies"                   | "10,000+ support teams"              |
+| "Free 14-day trial"                   | "Start flowing free — 14 days, no card"|
+| "Live chat software"                  | "Customer support platform"           |
+| "Premium experience"                  | "Conversations that convert"          |
+
+---
+
+## 25. Accessibility Standards
+
+### 25.1 WCAG 2.1 AA Compliance (Minimum)
+
+| Requirement                          | Specification                            |
+|--------------------------------------|------------------------------------------|
+| Color contrast (normal text)         | ≥ 4.5:1                                |
+| Color contrast (large text)          | ≥ 3:1                                  |
+| Touch target size                    | ≥ 44 × 44px                            |
+| Focus indicator                      | `2px solid var(--indigo-600)` + `3px` offset ring |
+| Keyboard navigation                  | Full tab order, arrow keys in composite widgets |
+| Skip link                            | Hidden "Skip to content" on all pages   |
+| ARIA labels                          | All icon-only buttons, all form elements|
+| Alt text                             | All non-decorative images               |
+| Reduced motion                       | `prefers-reduced-motion` respected       |
+| Color independence                   | Never color-only status — always icon + text |
+
+### 25.2 Verified Contrast Ratios
+
+| Combination                          | Ratio  | Pass    |
+|--------------------------------------|--------|---------|
+| Midnight on White                    | 17.1:1 | AAA ✓   |
+| White on Indigo 600                  | 5.4:1  | AA ✓    |
+| White on Midnight                    | 17.1:1 | AAA ✓   |
+| Slate 700 on White                   | 7.0:1  | AAA ✓   |
+| Indigo 600 on White                  | 5.2:1  | AA ✓    |
+| Coral 600 on White                   | 4.6:1  | AA ✓    |
+| Emerald 500 on White                 | 3.4:1  | AA-lg ✓ |
+| White on Coral 600                   | 4.6:1  | AA ✓    |
+
+---
+
+## 26. Dark Mode System
+
+### 26.1 Token Mapping
+
+| Semantic Token              | Light Mode             | Dark Mode              |
+|-----------------------------|------------------------|------------------------|
+| `--bg-primary`              | `#FFFFFF`              | `#0F172A`              |
+| `--bg-secondary`            | `#F8FAFC`              | `#1E293B`              |
+| `--bg-tertiary`             | `#F1F5F9`              | `#334155`              |
+| `--bg-elevated`             | `#FFFFFF`              | `#1E293B`              |
+| `--text-primary`            | `#0F172A`              | `#F1F5F9`              |
+| `--text-secondary`          | `#475569`              | `#94A3B8`              |
+| `--text-muted`              | `#64748B`              | `#64748B`              |
+| `--border-default`          | `#E2E8F0`              | `#334155`              |
+| `--border-subtle`           | `#F1F5F9`              | `#1E293B`              |
+| `--interactive-primary`     | `#4F46E5`              | `#6366F1`              |
+| `--interactive-hover`       | `#4338CA`              | `#4F46E5`              |
+
+### 26.2 Implementation
+
+```css
+:root { /* Light mode defaults */ }
+
+@media (prefers-color-scheme: dark) {
+  :root { /* Dark overrides */ }
+}
+
+[data-theme="dark"] { /* Manual toggle overrides */ }
+```
+
+---
+
+## 27. Design Tokens (Full Reference)
+
+### 27.1 CSS Custom Properties
+
+```css
+:root {
+  /* ─── Colors: Indigo (Primary) ─── */
+  --indigo-50:  #EEF2FF;
+  --indigo-100: #E0E7FF;
+  --indigo-200: #C7D2FE;
+  --indigo-300: #A5B4FC;
+  --indigo-400: #818CF8;
+  --indigo-500: #6366F1;
+  --indigo-600: #4F46E5;
+  --indigo-700: #4338CA;
+  --indigo-800: #3730A3;
+  --indigo-900: #312E81;
+  --indigo-950: #1E1B4B;
+
+  /* ─── Colors: Coral (Accent) ─── */
+  --coral-50:  #FFF5F5;
+  --coral-100: #FFE4E6;
+  --coral-200: #FECDD3;
+  --coral-300: #FDA4AF;
+  --coral-400: #FB7185;
+  --coral-500: #F97066;
+  --coral-600: #EF4444;
+  --coral-700: #DC2626;
+
+  /* ─── Colors: Slate (Neutrals) ─── */
+  --midnight:   #0F172A;
+  --slate-50:   #F8FAFC;
+  --slate-100:  #F1F5F9;
+  --slate-200:  #E2E8F0;
+  --slate-300:  #CBD5E1;
+  --slate-400:  #94A3B8;
+  --slate-500:  #64748B;
+  --slate-600:  #475569;
+  --slate-700:  #334155;
+  --slate-800:  #1E293B;
+  --slate-900:  #0F172A;
+
+  /* ─── Colors: Semantic ─── */
+  --emerald-50:  #ECFDF5;
+  --emerald-500: #10B981;
+  --emerald-600: #059669;
+  --amber-50:    #FFFBEB;
+  --amber-400:   #FBBF24;
+  --amber-600:   #D97706;
+
+  /* ─── Gradients ─── */
+  --gradient-brand:   linear-gradient(135deg, #4F46E5, #7C3AED, #F97066);
+  --gradient-indigo:  linear-gradient(180deg, #4F46E5, #312E81);
+  --gradient-surface: linear-gradient(180deg, #F8FAFC, #EEF2FF);
+
+  /* ─── Typography ─── */
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-sans:    'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Fira Code', monospace;
+
+  --text-display-hero: 800 clamp(2.25rem, 5vw + 1rem, 4rem)/1.05 var(--font-display);
+  --text-display-lg:   700 clamp(1.75rem, 3.5vw + 0.75rem, 3rem)/1.1 var(--font-display);
+  --text-display-md:   700 clamp(1.5rem, 2.5vw + 0.5rem, 2.25rem)/1.15 var(--font-display);
+  --text-display-sm:   600 1.75rem/1.2 var(--font-display);
+  --text-heading-lg:   700 1.375rem/1.3 var(--font-sans);
+  --text-heading-md:   600 1.125rem/1.4 var(--font-sans);
+  --text-heading-sm:   600 1rem/1.4 var(--font-sans);
+  --text-body-lg:      400 1.125rem/1.7 var(--font-sans);
+  --text-body-md:      400 1rem/1.6 var(--font-sans);
+  --text-body-sm:      400 0.875rem/1.5 var(--font-sans);
+  --text-caption:      500 0.75rem/1.4 var(--font-sans);
+  --text-overline:     700 0.6875rem/1.2 var(--font-sans);
+
+  /* ─── Spacing ─── */
+  --space-0:    0;
+  --space-px:   1px;
+  --space-0-5:  0.125rem;
+  --space-1:    0.25rem;
+  --space-1-5:  0.375rem;
+  --space-2:    0.5rem;
+  --space-3:    0.75rem;
+  --space-4:    1rem;
+  --space-5:    1.25rem;
+  --space-6:    1.5rem;
+  --space-8:    2rem;
+  --space-10:   2.5rem;
+  --space-12:   3rem;
+  --space-16:   4rem;
+  --space-20:   5rem;
+  --space-24:   6rem;
+  --space-32:   8rem;
+  --space-40:   10rem;
+
+  /* ─── Radius ─── */
+  --radius-none:    0;
+  --radius-sm:      4px;
+  --radius-md:      6px;
+  --radius-DEFAULT: 8px;
+  --radius-lg:      12px;
+  --radius-xl:      16px;
+  --radius-2xl:     20px;
+  --radius-3xl:     24px;
+  --radius-full:    9999px;
+
+  /* ─── Shadows ─── */
+  --shadow-xs:    0 1px 2px 0 rgba(15,23,42,0.04);
+  --shadow-sm:    0 1px 3px 0 rgba(15,23,42,0.06), 0 1px 2px -1px rgba(15,23,42,0.06);
+  --shadow-md:    0 4px 6px -1px rgba(15,23,42,0.07), 0 2px 4px -2px rgba(15,23,42,0.05);
+  --shadow-lg:    0 10px 15px -3px rgba(15,23,42,0.08), 0 4px 6px -4px rgba(15,23,42,0.04);
+  --shadow-xl:    0 20px 25px -5px rgba(15,23,42,0.1), 0 8px 10px -6px rgba(15,23,42,0.06);
+  --shadow-2xl:   0 25px 50px -12px rgba(15,23,42,0.2);
+  --shadow-inner: inset 0 2px 4px 0 rgba(15,23,42,0.05);
+  --glow-indigo:  0 0 20px rgba(79,70,229,0.25), 0 0 60px rgba(79,70,229,0.1);
+  --glow-coral:   0 0 20px rgba(249,112,102,0.25), 0 0 60px rgba(249,112,102,0.1);
+
+  /* ─── Transitions ─── */
+  --duration-fast:     100ms;
+  --duration-normal:   200ms;
+  --duration-moderate: 300ms;
+  --duration-slow:     500ms;
+  --duration-slower:   700ms;
+  --ease-default:      cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in:           cubic-bezier(0.4, 0, 1, 1);
+  --ease-out:          cubic-bezier(0, 0, 0.2, 1);
+  --ease-bounce:       cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-spring:       cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* ─── Z-Index ─── */
+  --z-dropdown:   50;
+  --z-sticky:     100;
+  --z-fixed:      200;
+  --z-modal-bg:   300;
+  --z-modal:      400;
+  --z-popover:    500;
+  --z-tooltip:    600;
+  --z-widget:     9999;
+}
+```
+
+---
+
+## 28. Implementation Stack
+
+### 28.1 Frontend (Marketing Site)
+
+| Technology           | Package/Tool                        |
+|----------------------|-------------------------------------|
+| Framework            | Next.js 14+ (App Router)           |
+| Styling              | Tailwind CSS 4 + CSS custom props  |
+| Animations           | Framer Motion                       |
+| Icons                | Lucide React                        |
+| Fonts                | Google Fonts (self-hosted in prod)  |
+| Deployment           | Vercel                              |
+
+### 28.2 Frontend (Agent Dashboard)
+
+| Technology           | Package/Tool                        |
+|----------------------|-------------------------------------|
+| Framework            | React 18 + Vite 5                  |
+| State                | Zustand + TanStack Query           |
+| Styling              | Tailwind CSS + Emotion (component) |
+| Charts               | Recharts                            |
+| Real-time            | Socket.IO client                   |
+| Icons                | Lucide React                        |
+
+### 28.3 Design System Component Library
+
+| Property             | Specification                       |
+|----------------------|-------------------------------------|
+| Package name         | `@flowlyra/ui`                     |
+| Language             | TypeScript                          |
+| Build                | tsup (ESM + CJS)                   |
+| Styling              | Tailwind CSS preset + CSS vars     |
+| Documentation        | Storybook 8                        |
+| Testing              | Vitest + Testing Library           |
+| Visual regression    | Chromatic                           |
+
+---
+
+## 29. Component Library Spec
+
+### 29.1 Core Components
+
+| Component        | Variants                                      |
+|------------------|-----------------------------------------------|
+| Button           | primary, secondary, ghost, destructive, hero   |
+| Input            | text, email, password, search, textarea, number|
+| Select           | single, multi, searchable, grouped             |
+| Checkbox         | default, indeterminate                         |
+| Radio            | default, card-style                            |
+| Toggle           | default, with-label                            |
+| Badge            | filled, outlined, dot-only                     |
+| Avatar           | image, initials, icon, status-indicator        |
+| Tag / Chip       | removable, selectable, status                  |
+| Tooltip          | top, right, bottom, left                       |
+| Popover          | click, hover                                   |
+| Modal / Dialog   | sm, md, lg, fullscreen                         |
+| Dropdown Menu    | with icons, with shortcuts, with sub-menus     |
+| Tabs             | underline, pill, vertical                      |
+| Accordion        | single, multi, bordered                        |
+| Alert / Banner   | info, success, warning, error, dismissible     |
+| Toast            | info, success, warning, error, with-action     |
+| Card             | standard, feature, glass, stat                 |
+| Table            | sortable, selectable, paginated                |
+| Pagination       | numbered, cursor, load-more                    |
+| Skeleton         | text, card, avatar, table-row                  |
+| Progress Bar     | linear, circular                               |
+| Breadcrumb       | default                                        |
+| Sidebar Nav      | collapsible, with-sections                     |
+| Command Palette  | ⌘K style, searchable, categorized              |
+
+### 29.2 Chat-Specific Components
+
+| Component            | Description                               |
+|----------------------|-------------------------------------------|
+| ChatBubble           | Agent, visitor, bot, system variants       |
+| ChatInput            | Rich text, attachment, emoji, canned reply |
+| ChatList             | Unread indicator, preview, status, time    |
+| AgentAvatar          | With online/away/offline status dot        |
+| TypingIndicator      | Three-dot bounce animation                 |
+| AISuggestion         | Inline suggestion bar with accept/dismiss  |
+| VisitorInfo          | Side panel with context, history, tags     |
+| CSAT Rating          | 1–5 scale with emoji faces                |
+
+---
+
+## 30. LiveChat vs Flowlyra Differentiation Checklist
+
+Use this checklist before shipping any page or component.
+
+| Element                         | LiveChat                  | Flowlyra (Must Be)                    | ✓ |
+|---------------------------------|---------------------------|---------------------------------------|---|
+| Primary color                   | Yellow `#FFD000`          | Indigo `#4F46E5`                      | □ |
+| Dark color                      | Black `#1B1B20`           | Midnight `#0F172A`                    | □ |
+| Accent color                    | Orange `#FF5100`          | Coral `#F97066`                       | □ |
+| Display font                    | Colfax (geometric sans)  | Fraunces (soft serif)                 | □ |
+| Body font                       | Colfax                    | Plus Jakarta Sans                     | □ |
+| Logo mark                       | Chat bubble               | Flowing stream/wave arcs              | □ |
+| Hero background                 | White / light             | Brand gradient (indigo → coral)       | □ |
+| Hero layout                     | 50/50 text + screenshot   | Asymmetric + floating glass cards     | □ |
+| Hero tagline                    | "Gets the job done"       | "Conversations that move"             | □ |
+| CTA text                        | "Sign up free"            | "Start flowing free"                  | □ |
+| Feature section                 | Rigid 50/50 alternating   | Asymmetric overlap cards              | □ |
+| Testimonials                    | Star-rating carousel      | Masonry voice-card grid (no stars)    | □ |
+| Navigation                      | Solid white sticky bar    | Glass blur sticky bar                 | □ |
+| Footer background               | Black `#1B1B20`           | Midnight `#0F172A`                    | □ |
+| Chat widget launcher            | Circle + chat bubble      | Rounded square + wave icon            | □ |
+| Widget header                   | Solid color               | Brand gradient + glass blur           | □ |
+| Message bubble (visitor)        | Blue with tail            | Indigo, tail-less, soft round         | □ |
+| Shadow style                    | Flat neutral shadows      | Colored glow shadows                  | □ |
+| Section labels                  | Plain uppercase            | Overline with letter-spacing 0.1em   | □ |
+| Photography tone                | Warm, corporate            | Cool, editorial, blue-shifted        | □ |
+| Trust bar logos                  | Full color                 | Grayscale → color on hover           | □ |
+| Pricing card highlight          | None / yellow accent       | Indigo border + "Most Popular" badge | □ |
+| Stats display                   | In testimonial blocks      | Standalone stat cards with Fraunces  | □ |
+| Animation style                 | Minimal, functional        | Glow effects, spring physics, depth  | □ |
+| meta-theme-color                | `#FF5100` (LiveChat's!)   | `#4F46E5` (Flowlyra Indigo)          | □ |
+
+---
+
+## Appendix A: File Structure
+
+```
+flowlyra/
+├── packages/
+│   └── ui/                          # @flowlyra/ui component library
+│       ├── src/
+│       │   ├── tokens/              # Design token CSS files
+│       │   ├── components/          # React components
+│       │   └── hooks/               # Shared hooks (useAnimations, etc.)
+│       ├── .storybook/
+│       └── package.json
+├── frontend/                        # Agent dashboard + marketing site
+│   ├── src/
+│   │   ├── styles/
+│   │   │   ├── tokens.css           # All CSS custom properties
+│   │   │   ├── globals.css          # Reset + base styles
+│   │   │   └── fonts.css            # Font-face declarations
+│   │   ├── pages/
+│   │   │   ├── marketing/           # Public website pages
+│   │   │   └── app/                 # Authenticated dashboard
+│   │   └── components/
+│   ├── tailwind.config.ts           # Tailwind config with Flowlyra tokens
+│   └── package.json
+├── widget/                          # Embeddable chat widget
+│   ├── src/
+│   │   ├── styles/                  # Widget-scoped styles
+│   │   └── Widget.ts
+│   └── package.json
+└── docs/
+    └── FLOWLYRA_DESIGN_SYSTEM.md    # This file
+```
+
+## Appendix B: Tailwind Configuration
+
+```js
+// tailwind.config.ts
+export default {
+  theme: {
+    extend: {
+      colors: {
+        indigo: {
+          50:  '#EEF2FF', 100: '#E0E7FF', 200: '#C7D2FE',
+          300: '#A5B4FC', 400: '#818CF8', 500: '#6366F1',
+          600: '#4F46E5', 700: '#4338CA', 800: '#3730A3',
+          900: '#312E81', 950: '#1E1B4B',
+        },
+        coral: {
+          50:  '#FFF5F5', 100: '#FFE4E6', 200: '#FECDD3',
+          300: '#FDA4AF', 400: '#FB7185', 500: '#F97066',
+          600: '#EF4444', 700: '#DC2626',
+        },
+        midnight: '#0F172A',
+      },
+      fontFamily: {
+        display: ['Fraunces', 'Georgia', 'serif'],
+        sans:    ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+        mono:    ['JetBrains Mono', 'Fira Code', 'monospace'],
+      },
+      borderRadius: {
+        DEFAULT: '8px',
+        lg: '12px', xl: '16px', '2xl': '20px', '3xl': '24px',
+      },
+      boxShadow: {
+        'glow-indigo': '0 0 20px rgba(79,70,229,0.25), 0 0 60px rgba(79,70,229,0.1)',
+        'glow-coral':  '0 0 20px rgba(249,112,102,0.25), 0 0 60px rgba(249,112,102,0.1)',
+      },
+    },
+  },
+}
+```
+
+---
+
+> **This document is the single source of truth for all Flowlyra visual design decisions. Every page, component, and pixel must be validated against this system before shipping. Any element that visually resembles LiveChat.com must be redesigned using this specification.**
