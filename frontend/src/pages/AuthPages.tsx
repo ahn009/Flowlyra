@@ -454,7 +454,7 @@ export function LoginPage(): JSX.Element {
         <p className="text-center text-sm text-navy-400 dark:text-navy-400">
           Don&apos;t have an account?{" "}
           <Link to="/signup" className="font-semibold text-[#4F46E5] hover:text-[#4338CA] transition">
-            Sign up free
+            Start flowing free
           </Link>
         </p>
       }

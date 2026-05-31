@@ -167,46 +167,104 @@ function SiteFooter(): JSX.Element {
    HOME PAGE
    ================================================================ */
 
+const trustLogos = ["Company A", "Company B", "Company C", "Company D", "Company E", "Company F"];
+
+function HeroGlassCard({
+  className,
+  delay,
+  title,
+  visitor,
+  agent,
+}: {
+  className: string;
+  delay: string;
+  title: string;
+  visitor: string;
+  agent: string;
+}): JSX.Element {
+  return (
+    <div className={cx("hero-glass-card animate-hero-card", className)} style={{ animationDelay: delay }}>
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">{title}</p>
+          <p className="mt-1 text-sm font-semibold text-midnight">Live conversation</p>
+        </div>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-600">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Flowing
+        </span>
+      </div>
+      <div className="mt-5 grid gap-3">
+        <div className="max-w-[82%] rounded-2xl rounded-tl-md bg-slate-100 px-4 py-3 text-sm leading-6 text-slate-700 shadow-xs">
+          {visitor}
+        </div>
+        <div className="ml-auto max-w-[86%] rounded-2xl rounded-tr-md bg-indigo-600 px-4 py-3 text-sm leading-6 text-white shadow-lg shadow-indigo-600/20">
+          {agent}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function HeroChatMockup(): JSX.Element {
   return (
-    <div className="relative mx-auto w-full max-w-lg">
-      <div className="absolute -inset-6 rounded-[2.5rem] bg-gradient-to-br from-brand-200/40 to-brand-100/20 blur-3xl animate-float" />
-      <Card className="relative overflow-hidden rounded-3xl border-white/80 bg-white/95 p-5 shadow-lift sm:p-6">
-        <div className="flex items-center justify-between gap-3">
-          <img src={flowlyraLogo} alt="FlowLyra" className="h-10 w-auto" />
-          <Pill tone="green" className="rounded-full">Live</Pill>
-        </div>
-        <div className="mt-5 rounded-2xl bg-navy-900 p-4 text-white">
-          <div className="flex items-center gap-2 text-xs font-bold text-brand-300"><span className="h-2 w-2 animate-pulse-dot rounded-full bg-brand-500" /> Visitor on pricing page</div>
-          <div className="mt-4 rounded-xl bg-white/10 p-3 text-sm">Hi, do you offer team routing and AI features?</div>
-          <div className="ml-auto mt-2.5 max-w-[85%] rounded-xl bg-brand-500 p-3 text-sm shadow-lg shadow-brand/20">Yes! FlowLyra routes by team, stores history, and includes AI copilot assistance.</div>
-          <div className="mt-3 grid grid-cols-3 gap-2 text-center text-[11px] font-bold text-navy-400">
-            <div className="rounded-lg bg-white/5 p-2 hover:bg-white/10 transition-colors cursor-pointer">AI draft</div>
-            <div className="rounded-lg bg-white/5 p-2 hover:bg-white/10 transition-colors cursor-pointer">Transfer</div>
-            <div className="rounded-lg bg-white/5 p-2 hover:bg-white/10 transition-colors cursor-pointer">Tag lead</div>
-          </div>
-        </div>
-        <div className="mt-4 grid gap-2 text-sm">
-          <Metric label="Live channels" value="Web + social + email" />
-          <Metric label="Automation" value="Rules + AI assistance" />
-          <Metric label="Analytics" value="Team and conversion reporting" />
-        </div>
-      </Card>
+    <div className="relative mx-auto hidden min-h-[520px] w-full max-w-xl md:block lg:col-span-5">
+      <div className="absolute left-8 top-8 h-48 w-48 rounded-full bg-white/20 blur-3xl" />
+      <div className="absolute bottom-14 right-8 h-56 w-56 rounded-full bg-coral-300/20 blur-3xl" />
+      <HeroGlassCard
+        className="absolute left-0 top-12 w-[82%] [rotate:-4deg] animate-float-gentle"
+        delay="0ms"
+        title="Support"
+        visitor="Can you help me choose the right plan for my team?"
+        agent="Absolutely. Tell me your team size and I’ll guide you to the best fit."
+      />
+      <HeroGlassCard
+        className="absolute right-0 top-40 z-10 w-[78%] [rotate:3deg] animate-float-gentle-slow"
+        delay="100ms"
+        title="Sales"
+        visitor="Do you integrate with our CRM and ecommerce stack?"
+        agent="Yes. Flowlyra connects chats, customer history, and revenue signals in one flow."
+      />
+      <HeroGlassCard
+        className="absolute bottom-4 left-12 w-[70%] [rotate:-2deg] animate-float-gentle"
+        delay="200ms"
+        title="AI Copilot"
+        visitor="Summarize this chat for handoff?"
+        agent="Done. Priority lead, interested in annual plan, wants Salesforce routing."
+      />
+    </div>
+  );
+}
+
+function MobileHeroGlassCard(): JSX.Element {
+  return (
+    <div className="hero-glass-card animate-hero-card md:hidden">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm font-semibold text-midnight">Live conversation</p>
+        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-600">Flowing</span>
+      </div>
+      <div className="mt-5 grid gap-3">
+        <div className="max-w-[86%] rounded-2xl rounded-tl-md bg-slate-100 px-4 py-3 text-sm text-slate-700">Can you help my team move faster?</div>
+        <div className="ml-auto max-w-[88%] rounded-2xl rounded-tr-md bg-indigo-600 px-4 py-3 text-sm text-white">Yes. Flowlyra brings support, sales, and AI into one smooth conversation.</div>
+      </div>
     </div>
   );
 }
 
 function SocialProofBar(): JSX.Element {
   return (
-    <section className="relative overflow-hidden border-b border-navy-100/60 bg-navy-50/50 dark:border-navy-800/60 dark:bg-navy-900/30">
-      <p className="py-5 text-center text-xs font-bold uppercase tracking-widest text-navy-400">Trusted by 35,000+ companies worldwide</p>
-      <div className="relative">
-        <div className="absolute left-0 top-0 z-10 h-full w-24 bg-gradient-to-r from-slate-50/80 to-transparent dark:from-navy-900/80" />
-        <div className="absolute right-0 top-0 z-10 h-full w-24 bg-gradient-to-l from-slate-50/80 to-transparent dark:from-navy-900/80" />
-        <div className="marquee-track" aria-hidden="true">
-          {[...marqueeNames, ...marqueeNames].map((name, i) => (
-            <div key={`${name}-${i}`} className="mx-3 flex h-12 w-32 shrink-0 items-center justify-center rounded-xl border border-navy-100/80 bg-white px-4 text-sm font-bold text-navy-400 dark:border-navy-700/60 dark:bg-navy-800/60 dark:text-navy-400">
-              {name}
+    <section className="bg-white" aria-labelledby="trust-bar-title">
+      <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6">
+        <p id="trust-bar-title" className="text-center font-sans text-[11px] font-bold uppercase leading-[1.2] tracking-[0.1em] text-slate-500">
+          Trusted by 10,000+ support teams
+        </p>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-x-10 gap-y-5">
+          {trustLogos.map((name, index) => (
+            <div
+              key={name}
+              className="animate-trust-logo flex h-8 items-center justify-center grayscale transition-opacity duration-200 hover:opacity-100"
+              style={{ animationDelay: `${index * 80}ms` }}
+            >
+              <span className="font-display text-xl font-semibold tracking-[-0.03em] text-slate-500 opacity-50">{name}</span>
             </div>
           ))}
         </div>
@@ -422,74 +480,41 @@ function CTASection(): JSX.Element {
    ================================================================ */
 
 export function HomePage(): JSX.Element {
-  const [phraseIndex, setPhraseIndex] = useState(0);
-  const [phraseVisible, setPhraseVisible] = useState(true);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setPhraseVisible(false);
-      setTimeout(() => {
-        setPhraseIndex((prev) => (prev + 1) % heroPhrases.length);
-        setPhraseVisible(true);
-      }, 300);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <div className="min-h-screen bg-white font-sans text-navy-700 dark:bg-navy-950 dark:text-navy-100">
       <MarketingNavigation />
 
       <main>
         {/* Hero */}
-        <section className="relative overflow-hidden">
-          <div className="pointer-events-none absolute -left-32 top-0 h-[600px] w-[600px] rounded-full bg-brand-100/30 blur-3xl dark:bg-brand-900/10" />
-          <div className="pointer-events-none absolute -right-32 bottom-0 h-[500px] w-[500px] rounded-full bg-brand-50/40 blur-3xl dark:bg-brand-950/10" />
-          <div className="relative mx-auto grid w-full max-w-7xl items-center gap-10 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-2 lg:gap-16 lg:py-32">
-            <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3.5 py-2 text-xs font-bold text-brand-600 dark:border-brand-800 dark:bg-brand-950/30 dark:text-brand-400">
-                <Sparkles size={14} /> Now with AI Copilot
-              </div>
-              <h1 className="font-display mt-6 max-w-2xl text-4xl font-extrabold tracking-[-0.03em] text-navy-700 sm:text-5xl lg:text-6xl dark:text-white">
-                Conversations that <span className="gradient-text">move</span>
+        <section className="hero-gradient-bg constellation relative overflow-hidden text-white">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,0.22),transparent_26rem),radial-gradient(circle_at_82%_24%,rgba(255,255,255,0.14),transparent_24rem),radial-gradient(circle_at_52%_88%,rgba(249,112,102,0.18),transparent_30rem)]" />
+          <div className="relative mx-auto grid min-h-0 w-full max-w-7xl items-center gap-12 px-4 py-20 sm:px-6 sm:py-24 md:min-h-[90vh] lg:grid-cols-12 lg:gap-10 lg:py-20">
+            <div className="lg:col-span-7">
+              <h1 className="animate-hero-title max-w-3xl font-display text-[clamp(2.25rem,5vw+1rem,4rem)] font-extrabold leading-[1.05] tracking-[-0.03em] text-white">
+                Support that flows. Sales that grow.
               </h1>
-              <div className="mt-4 h-8 overflow-hidden">
-                <p
-                  className={cx(
-                    "font-display text-lg font-semibold text-brand-500 transition-all duration-300 sm:text-xl",
-                    phraseVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
-                  )}
-                >
-                  {heroPhrases[phraseIndex]}
-                </p>
-              </div>
-              <p className="mt-2 max-w-xl text-base leading-7 text-navy-500 dark:text-navy-400">
-                Increase conversions, improve support quality, and automate repetitive work with a production-ready chat and workflow suite.
+              <p className="animate-hero-subtitle mt-6 max-w-2xl font-sans text-[1.125rem] font-normal leading-[1.7] text-white/85">
+                The human-first platform where every chat turns into value.
               </p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link to="/signup" className="inline-flex h-12 items-center gap-2 rounded-xl bg-brand-500 px-6 text-sm font-bold text-white shadow-glow transition-all hover:bg-brand-600 hover:shadow-glow-lg">
-                  Start free trial <ArrowRight size={16} />
+              <div className="animate-hero-ctas mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <Link
+                  to="/signup"
+                  className="inline-flex items-center justify-center rounded-xl bg-white px-8 py-4 text-base font-bold text-indigo-600 shadow-lg shadow-indigo-950/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-glow-indigo focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/30 active:scale-[0.97]"
+                >
+                  Start flowing free
                 </Link>
                 <Link
                   to="/product-tour"
-                  className="inline-flex h-12 items-center gap-2 rounded-xl border border-navy-100 bg-white px-6 text-sm font-bold text-navy-700 shadow-xs transition-all hover:border-brand-200 hover:bg-brand-50 dark:border-navy-700 dark:bg-navy-800 dark:text-navy-200 dark:hover:border-brand-800"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/45 bg-white/10 px-8 py-4 text-base font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:bg-white/15 hover:border-white/70 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/25"
                 >
-                  <Play size={16} /> Watch demo
+                  <Play size={18} /> Watch demo
                 </Link>
               </div>
-              <div className="mt-10 grid max-w-md grid-cols-3 gap-3">
-                <div className="rounded-xl border border-navy-100 bg-white p-3 text-center shadow-xs dark:border-navy-800 dark:bg-navy-800/50">
-                  <div className="font-display text-xl font-extrabold text-navy-700 dark:text-white">2.4s</div>
-                  <div className="mt-0.5 text-xs font-semibold text-navy-400">Avg reply</div>
-                </div>
-                <div className="rounded-xl border border-navy-100 bg-white p-3 text-center shadow-xs dark:border-navy-800 dark:bg-navy-800/50">
-                  <div className="font-display text-xl font-extrabold text-navy-700 dark:text-white">98%</div>
-                  <div className="mt-0.5 text-xs font-semibold text-navy-400">CSAT goal</div>
-                </div>
-                <div className="rounded-xl border border-navy-100 bg-white p-3 text-center shadow-xs dark:border-navy-800 dark:bg-navy-800/50">
-                  <div className="font-display text-xl font-extrabold text-navy-700 dark:text-white">24/7</div>
-                  <div className="mt-0.5 text-xs font-semibold text-navy-400">Coverage</div>
-                </div>
+              <p className="animate-hero-ctas mt-4 text-xs font-medium leading-[1.4] text-white/60">
+                No credit card required · 14-day free trial
+              </p>
+              <div className="mt-10">
+                <MobileHeroGlassCard />
               </div>
             </div>
             <HeroChatMockup />

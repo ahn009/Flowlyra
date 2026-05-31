@@ -272,3 +272,97 @@ html.dark .chat-bubble-note {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ============================================
+   Section 15.1 Primary Hero
+   ============================================ */
+.hero-gradient-bg {
+  background: var(--gradient-brand);
+  background-size: 180% 180%;
+  animation: hero-gradient-shift 15s ease-in-out infinite;
+}
+
+.constellation {
+  background-image: radial-gradient(1.5px 1.5px at 20px 30px, rgba(255,255,255,0.32), transparent),
+                    radial-gradient(1px 1px at 80px 60px, rgba(255,255,255,0.22), transparent),
+                    radial-gradient(2px 2px at 150px 100px, rgba(249,112,102,0.24), transparent);
+  background-size: 200px 200px;
+}
+
+.hero-glass-card {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-6);
+}
+
+.animate-hero-title {
+  opacity: 0;
+  animation: hero-slide-up 700ms var(--ease-spring) forwards;
+}
+
+.animate-hero-subtitle {
+  opacity: 0;
+  animation: hero-fade-up 700ms var(--ease-spring) 200ms forwards;
+}
+
+.animate-hero-ctas {
+  opacity: 0;
+  animation: hero-fade-up 700ms var(--ease-spring) 400ms forwards;
+}
+
+.animate-hero-card {
+  opacity: 0;
+  transform: scale(0.9);
+  animation-name: hero-card-in;
+  animation-duration: 700ms;
+  animation-timing-function: var(--ease-spring);
+  animation-fill-mode: forwards;
+}
+
+.animate-float-gentle {
+  animation: hero-card-in 700ms var(--ease-spring) forwards, hero-float 3s ease-in-out 900ms infinite;
+}
+
+.animate-float-gentle-slow {
+  animation: hero-card-in 700ms var(--ease-spring) forwards, hero-float-slow 3.4s ease-in-out 1000ms infinite;
+}
+
+.animate-trust-logo {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: hero-fade-up 600ms var(--ease-out) forwards;
+}
+
+@keyframes hero-gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes hero-slide-up {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes hero-fade-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes hero-card-in {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes hero-float {
+  0%, 100% { margin-top: 0; }
+  50% { margin-top: -12px; }
+}
+
+@keyframes hero-float-slow {
+  0%, 100% { margin-top: 0; }
+  50% { margin-top: 10px; }
+}
