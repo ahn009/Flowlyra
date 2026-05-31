@@ -338,7 +338,7 @@ function formatMoney(cents: number, currency = "usd"): string {
 }
 
 export function WidgetConfigPage(): JSX.Element {
-  const [brand, setBrand] = useState("#FF5100");
+  const [brand, setBrand] = useState("#4F46E5");
   return (
     <PageShell>
       <PageHeader title="Widget settings" action={<Button variant="primary">Publish changes</Button>} />

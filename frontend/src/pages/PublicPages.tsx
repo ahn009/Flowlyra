@@ -229,7 +229,7 @@ function SiteFooter(): JSX.Element {
             <img src={flowlyraMark} alt="" className="h-9 w-9 rounded-xl" />
             <span className="font-display text-lg font-extrabold text-white">FlowLyra</span>
           </Link>
-          <p className="mt-4 text-sm leading-6 text-navy-400">The live chat platform that gets the job done.</p>
+          <p className="mt-4 text-sm leading-6 text-navy-400">Conversations that move.</p>
           {/* Social icons */}
           <div className="mt-5 flex gap-3">
             {["X", "Li", "Gh", "Yt"].map((s) => (
@@ -541,7 +541,7 @@ export function HomePage(): JSX.Element {
                 <Sparkles size={14} /> Now with AI Copilot
               </div>
               <h1 className="font-display mt-6 max-w-2xl text-4xl font-extrabold tracking-[-0.03em] text-navy-700 sm:text-5xl lg:text-6xl dark:text-white">
-                The live chat platform that <span className="gradient-text">gets the job done</span>
+                Conversations that <span className="gradient-text">move</span>
               </h1>
               <div className="mt-4 h-8 overflow-hidden">
                 <p
@@ -923,7 +923,7 @@ function PublicLayout({ title, subtitle, children }: { title: string; subtitle: 
               <img src={flowlyraMark} alt="" className="h-9 w-9 rounded-xl" />
               <span className="font-display text-lg font-extrabold text-white">FlowLyra</span>
             </Link>
-            <p className="mt-3 text-sm leading-6 text-navy-400">The live chat platform that gets the job done.</p>
+            <p className="mt-3 text-sm leading-6 text-navy-400">Conversations that move.</p>
           </div>
           <FooterColumn title="Product" links={[{ to: "/features", label: "Features" }, { to: "/pricing", label: "Pricing" }, { to: "/product-tour", label: "Product Tour" }, { to: "/integrations", label: "Integrations" }]} />
           <FooterColumn title="Solutions" links={solutionLinks} />

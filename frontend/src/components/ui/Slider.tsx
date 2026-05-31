@@ -96,7 +96,7 @@ export function Slider({
             "focus-visible:ring-4 focus-visible:ring-brand-100 dark:focus-visible:ring-brand-900/40"
           )}
           style={{
-            background: `linear-gradient(to right, #FF5100 0%, #FF5100 ${percentage}%, #e2e8f0 ${percentage}%, #e2e8f0 100%)`,
+            background: `linear-gradient(to right, #4F46E5 0%, #4F46E5 ${percentage}%, #e2e8f0 ${percentage}%, #e2e8f0 100%)`,
           }}
         />
       </div>

@@ -35,10 +35,10 @@ function AuthShell({
     <>
       <style>{FADE_IN_STYLE}</style>
 
-      <main className="relative grid min-h-screen place-items-center bg-[radial-gradient(circle_at_top_left,rgba(255,81,0,0.07),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(255,81,0,0.04),transparent_36%),linear-gradient(175deg,#F8F9FA_0%,#F1F5F9_50%,#EBEEF2_100%)] p-4 dark:bg-[radial-gradient(circle_at_top_left,rgba(255,81,0,0.10),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(255,81,0,0.06),transparent_36%),linear-gradient(175deg,#0F1117_0%,#131720_50%,#0F1117_100%)]">
+      <main className="relative grid min-h-screen place-items-center bg-[radial-gradient(circle_at_top_left,rgba(79,70,229,0.07),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(79,70,229,0.04),transparent_36%),linear-gradient(175deg,#F8FAFC_0%,#F1F5F9_50%,#EEF2FF_100%)] p-4 dark:bg-[radial-gradient(circle_at_top_left,rgba(79,70,229,0.10),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(79,70,229,0.06),transparent_36%),linear-gradient(175deg,#0F172A_0%,#1E293B_50%,#0F172A_100%)]">
         {/* Decorative orbs */}
-        <div className="pointer-events-none absolute left-[10%] top-[8%] h-72 w-72 rounded-full bg-[#FF5100]/[0.04] blur-3xl dark:bg-[#FF5100]/[0.08]" />
-        <div className="pointer-events-none absolute bottom-[10%] right-[8%] h-96 w-96 rounded-full bg-[#FF5100]/[0.03] blur-3xl dark:bg-[#FF5100]/[0.06]" />
+        <div className="pointer-events-none absolute left-[10%] top-[8%] h-72 w-72 rounded-full bg-[#4F46E5]/[0.04] blur-3xl dark:bg-[#4F46E5]/[0.08]" />
+        <div className="pointer-events-none absolute bottom-[10%] right-[8%] h-96 w-96 rounded-full bg-[#4F46E5]/[0.03] blur-3xl dark:bg-[#4F46E5]/[0.06]" />
 
         {/* Theme toggle */}
         <div className="absolute right-4 top-4 z-10">
@@ -104,7 +104,7 @@ function PasswordInput(props: React.InputHTMLAttributes<HTMLInputElement>): JSX.
       <input
         type={visible ? "text" : "password"}
         className={cx(
-          "h-11 w-full rounded-xl border border-navy-200 bg-white px-4 pr-11 text-sm outline-none transition placeholder:text-navy-400 focus:border-[#FF5100] focus:ring-4 focus:ring-[#FF5100]/[0.08] dark:border-navy-700 dark:bg-navy-800/60 dark:text-navy-100 dark:placeholder:text-navy-400 dark:focus:border-[#FF5100] dark:focus:ring-[#FF5100]/[0.12]",
+          "h-11 w-full rounded-xl border border-navy-200 bg-white px-4 pr-11 text-sm outline-none transition placeholder:text-navy-400 focus:border-[#4F46E5] focus:ring-4 focus:ring-[#4F46E5]/[0.08] dark:border-navy-700 dark:bg-navy-800/60 dark:text-navy-100 dark:placeholder:text-navy-400 dark:focus:border-[#4F46E5] dark:focus:ring-[#4F46E5]/[0.12]",
           className,
         )}
         {...rest}
@@ -128,7 +128,7 @@ function PasswordInput(props: React.InputHTMLAttributes<HTMLInputElement>): JSX.
 function StyledInput(props: React.InputHTMLAttributes<HTMLInputElement>): JSX.Element {
   return (
     <input
-      className="h-11 w-full rounded-xl border border-navy-200 bg-white px-4 text-sm outline-none transition placeholder:text-navy-400 focus:border-[#FF5100] focus:ring-4 focus:ring-[#FF5100]/[0.08] dark:border-navy-700 dark:bg-navy-800/60 dark:text-navy-100 dark:placeholder:text-navy-400 dark:focus:border-[#FF5100] dark:focus:ring-[#FF5100]/[0.12]"
+      className="h-11 w-full rounded-xl border border-navy-200 bg-white px-4 text-sm outline-none transition placeholder:text-navy-400 focus:border-[#4F46E5] focus:ring-4 focus:ring-[#4F46E5]/[0.08] dark:border-navy-700 dark:bg-navy-800/60 dark:text-navy-100 dark:placeholder:text-navy-400 dark:focus:border-[#4F46E5] dark:focus:ring-[#4F46E5]/[0.12]"
       {...props}
     />
   );
@@ -146,7 +146,7 @@ function PrimaryButton({
   return (
     <button
       className={cx(
-        "inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#FF5100] px-5 text-sm font-semibold text-white shadow-lg shadow-[#FF5100]/20 transition hover:bg-[#E84900] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#FF5100]/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 dark:shadow-[#FF5100]/10 dark:hover:bg-[#FF6830]",
+        "inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#4F46E5] px-5 text-sm font-semibold text-white shadow-lg shadow-[#4F46E5]/20 transition hover:bg-[#4338CA] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#4F46E5]/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 dark:shadow-[#4F46E5]/10 dark:hover:bg-[#6366F1]",
         className,
       )}
       disabled={props.disabled || loading}
@@ -422,7 +422,7 @@ export function LoginPage(): JSX.Element {
               value={twofaCode}
               onChange={(e) => setTwofaCode(e.target.value)}
               autoFocus
-              className="mt-2 h-11 w-full rounded-xl border border-navy-200 bg-white px-4 text-center text-lg tracking-[0.3em] outline-none transition placeholder:text-navy-400 focus:border-[#FF5100] focus:ring-4 focus:ring-[#FF5100]/[0.08] dark:border-navy-700 dark:bg-navy-800/60 dark:text-navy-100 dark:placeholder:text-navy-400 dark:focus:border-[#FF5100] dark:focus:ring-[#FF5100]/[0.12]"
+              className="mt-2 h-11 w-full rounded-xl border border-navy-200 bg-white px-4 text-center text-lg tracking-[0.3em] outline-none transition placeholder:text-navy-400 focus:border-[#4F46E5] focus:ring-4 focus:ring-[#4F46E5]/[0.08] dark:border-navy-700 dark:bg-navy-800/60 dark:text-navy-100 dark:placeholder:text-navy-400 dark:focus:border-[#4F46E5] dark:focus:ring-[#4F46E5]/[0.12]"
               placeholder="000000"
               maxLength={6}
             />
@@ -433,7 +433,7 @@ export function LoginPage(): JSX.Element {
           </PrimaryButton>
           <button
             type="button"
-            className="w-full text-center text-sm font-medium text-[#FF5100] hover:text-[#E84900] transition"
+            className="w-full text-center text-sm font-medium text-[#4F46E5] hover:text-[#4338CA] transition"
             onClick={() => {
               setUseBackup((v) => !v);
               setTwofaCode("");
@@ -453,7 +453,7 @@ export function LoginPage(): JSX.Element {
       footer={
         <p className="text-center text-sm text-navy-400 dark:text-navy-400">
           Don&apos;t have an account?{" "}
-          <Link to="/signup" className="font-semibold text-[#FF5100] hover:text-[#E84900] transition">
+          <Link to="/signup" className="font-semibold text-[#4F46E5] hover:text-[#4338CA] transition">
             Sign up free
           </Link>
         </p>
@@ -485,7 +485,7 @@ export function LoginPage(): JSX.Element {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
               required
-              className="h-11 w-full rounded-xl border border-navy-200 bg-white px-4 pr-11 text-sm outline-none transition placeholder:text-navy-400 focus:border-[#FF5100] focus:ring-4 focus:ring-[#FF5100]/[0.08] dark:border-navy-700 dark:bg-navy-800/60 dark:text-navy-100 dark:placeholder:text-navy-400 dark:focus:border-[#FF5100] dark:focus:ring-[#FF5100]/[0.12]"
+              className="h-11 w-full rounded-xl border border-navy-200 bg-white px-4 pr-11 text-sm outline-none transition placeholder:text-navy-400 focus:border-[#4F46E5] focus:ring-4 focus:ring-[#4F46E5]/[0.08] dark:border-navy-700 dark:bg-navy-800/60 dark:text-navy-100 dark:placeholder:text-navy-400 dark:focus:border-[#4F46E5] dark:focus:ring-[#4F46E5]/[0.12]"
             />
             <button
               type="button"
@@ -506,13 +506,13 @@ export function LoginPage(): JSX.Element {
               type="checkbox"
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
-              className="h-4 w-4 rounded border-navy-200 text-[#FF5100] focus:ring-[#FF5100]/20 dark:border-navy-600 dark:bg-navy-800"
+              className="h-4 w-4 rounded border-navy-200 text-[#4F46E5] focus:ring-[#4F46E5]/20 dark:border-navy-600 dark:bg-navy-800"
             />
             <span className="text-sm text-navy-500 dark:text-navy-400">Remember me</span>
           </label>
           <Link
             to="/reset-password"
-            className="text-sm font-medium text-[#FF5100] hover:text-[#E84900] transition"
+            className="text-sm font-medium text-[#4F46E5] hover:text-[#4338CA] transition"
           >
             Forgot password?
           </Link>
@@ -573,7 +573,7 @@ export function SignupPage(): JSX.Element {
       footer={
         <p className="text-center text-sm text-navy-400 dark:text-navy-400">
           Already have an account?{" "}
-          <Link to="/login" className="font-semibold text-[#FF5100] hover:text-[#E84900] transition">
+          <Link to="/login" className="font-semibold text-[#4F46E5] hover:text-[#4338CA] transition">
             Sign in
           </Link>
         </p>
@@ -653,15 +653,15 @@ export function SignupPage(): JSX.Element {
             type="checkbox"
             checked={agreeTerms}
             onChange={(e) => setAgreeTerms(e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-navy-200 text-[#FF5100] focus:ring-[#FF5100]/20 dark:border-navy-600 dark:bg-navy-800"
+            className="mt-0.5 h-4 w-4 rounded border-navy-200 text-[#4F46E5] focus:ring-[#4F46E5]/20 dark:border-navy-600 dark:bg-navy-800"
           />
           <span className="text-sm leading-relaxed text-navy-500 dark:text-navy-400">
             I agree to the{" "}
-            <Link to="/terms" className="font-medium text-[#FF5100] hover:text-[#E84900] transition">
+            <Link to="/terms" className="font-medium text-[#4F46E5] hover:text-[#4338CA] transition">
               Terms of Service
             </Link>{" "}
             and{" "}
-            <Link to="/privacy" className="font-medium text-[#FF5100] hover:text-[#E84900] transition">
+            <Link to="/privacy" className="font-medium text-[#4F46E5] hover:text-[#4338CA] transition">
               Privacy Policy
             </Link>
           </span>
@@ -720,7 +720,7 @@ export function ResetPasswordPage(): JSX.Element {
       footer={
         <p className="text-center text-sm text-navy-400 dark:text-navy-400">
           Remember your password?{" "}
-          <Link to="/login" className="font-semibold text-[#FF5100] hover:text-[#E84900] transition">
+          <Link to="/login" className="font-semibold text-[#4F46E5] hover:text-[#4338CA] transition">
             Sign in
           </Link>
         </p>
@@ -880,7 +880,7 @@ export function AcceptInvitePage(): JSX.Element {
       footer={
         <p className="text-center text-sm text-navy-400 dark:text-navy-400">
           Already have an account?{" "}
-          <Link to="/login" className="font-semibold text-[#FF5100] hover:text-[#E84900] transition">
+          <Link to="/login" className="font-semibold text-[#4F46E5] hover:text-[#4338CA] transition">
             Sign in
           </Link>
         </p>
@@ -967,12 +967,12 @@ export function OauthCallbackPage(): JSX.Element {
   }
 
   return (
-    <main className="grid min-h-screen place-items-center bg-[radial-gradient(circle_at_top_left,rgba(255,81,0,0.07),transparent_40%),linear-gradient(175deg,#F8F9FA_0%,#F1F5F9_50%,#EBEEF2_100%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(255,81,0,0.10),transparent_40%),linear-gradient(175deg,#0F1117_0%,#131720_50%,#0F1117_100%)]">
+    <main className="grid min-h-screen place-items-center bg-[radial-gradient(circle_at_top_left,rgba(79,70,229,0.07),transparent_40%),linear-gradient(175deg,#F8FAFC_0%,#F1F5F9_50%,#EEF2FF_100%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(79,70,229,0.10),transparent_40%),linear-gradient(175deg,#0F172A_0%,#1E293B_50%,#0F172A_100%)]">
       <div className="auth-fade-in flex flex-col items-center gap-4 text-center">
         {/* Spinning brand ring */}
         <div className="relative h-14 w-14">
           <div className="absolute inset-0 rounded-full border-[3px] border-navy-200 dark:border-navy-700" />
-          <div className="absolute inset-0 animate-spin rounded-full border-[3px] border-transparent border-t-[#FF5100]" />
+          <div className="absolute inset-0 animate-spin rounded-full border-[3px] border-transparent border-t-[#4F46E5]" />
         </div>
         <div>
           <p className="font-display text-base font-semibold text-navy-700 dark:text-white">

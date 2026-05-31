@@ -1,0 +1,192 @@
+/* Flowlyra Design Tokens — Section 27 + Section 26 dark mode mapping */
+:root {
+  /* ─── Colors: Indigo (Primary) ─── */
+  --indigo-50:  #EEF2FF;
+  --indigo-100: #E0E7FF;
+  --indigo-200: #C7D2FE;
+  --indigo-300: #A5B4FC;
+  --indigo-400: #818CF8;
+  --indigo-500: #6366F1;
+  --indigo-600: #4F46E5;
+  --indigo-700: #4338CA;
+  --indigo-800: #3730A3;
+  --indigo-900: #312E81;
+  --indigo-950: #1E1B4B;
+
+  /* ─── Colors: Coral (Accent) ─── */
+  --coral-50:  #FFF5F5;
+  --coral-100: #FFE4E6;
+  --coral-200: #FECDD3;
+  --coral-300: #FDA4AF;
+  --coral-400: #FB7185;
+  --coral-500: #F97066;
+  --coral-600: #EF4444;
+  --coral-700: #DC2626;
+
+  /* ─── Colors: Slate (Neutrals) ─── */
+  --midnight:   #0F172A;
+  --slate-50:   #F8FAFC;
+  --slate-100:  #F1F5F9;
+  --slate-200:  #E2E8F0;
+  --slate-300:  #CBD5E1;
+  --slate-400:  #94A3B8;
+  --slate-500:  #64748B;
+  --slate-600:  #475569;
+  --slate-700:  #334155;
+  --slate-800:  #1E293B;
+  --slate-900:  #0F172A;
+
+  /* ─── Colors: Semantic ─── */
+  --emerald-50:  #ECFDF5;
+  --emerald-500: #10B981;
+  --emerald-600: #059669;
+  --amber-50:    #FFFBEB;
+  --amber-400:   #FBBF24;
+  --amber-600:   #D97706;
+
+  /* ─── Gradients ─── */
+  --gradient-brand:   linear-gradient(135deg, #4F46E5, #7C3AED, #F97066);
+  --gradient-indigo:  linear-gradient(180deg, #4F46E5, #312E81);
+  --gradient-surface: linear-gradient(180deg, #F8FAFC, #EEF2FF);
+
+  /* ─── Typography ─── */
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-sans:    'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Fira Code', monospace;
+
+  --text-display-hero: 800 clamp(2.25rem, 5vw + 1rem, 4rem)/1.05 var(--font-display);
+  --text-display-lg:   700 clamp(1.75rem, 3.5vw + 0.75rem, 3rem)/1.1 var(--font-display);
+  --text-display-md:   700 clamp(1.5rem, 2.5vw + 0.5rem, 2.25rem)/1.15 var(--font-display);
+  --text-display-sm:   600 1.75rem/1.2 var(--font-display);
+  --text-heading-lg:   700 1.375rem/1.3 var(--font-sans);
+  --text-heading-md:   600 1.125rem/1.4 var(--font-sans);
+  --text-heading-sm:   600 1rem/1.4 var(--font-sans);
+  --text-body-lg:      400 1.125rem/1.7 var(--font-sans);
+  --text-body-md:      400 1rem/1.6 var(--font-sans);
+  --text-body-sm:      400 0.875rem/1.5 var(--font-sans);
+  --text-caption:      500 0.75rem/1.4 var(--font-sans);
+  --text-overline:     700 0.6875rem/1.2 var(--font-sans);
+
+  /* ─── Spacing ─── */
+  --space-0:    0;
+  --space-px:   1px;
+  --space-0-5:  0.125rem;
+  --space-1:    0.25rem;
+  --space-1-5:  0.375rem;
+  --space-2:    0.5rem;
+  --space-3:    0.75rem;
+  --space-4:    1rem;
+  --space-5:    1.25rem;
+  --space-6:    1.5rem;
+  --space-8:    2rem;
+  --space-10:   2.5rem;
+  --space-12:   3rem;
+  --space-16:   4rem;
+  --space-20:   5rem;
+  --space-24:   6rem;
+  --space-32:   8rem;
+  --space-40:   10rem;
+
+  /* ─── Radius ─── */
+  --radius-none:    0;
+  --radius-sm:      4px;
+  --radius-md:      6px;
+  --radius-DEFAULT: 8px;
+  --radius-lg:      12px;
+  --radius-xl:      16px;
+  --radius-2xl:     20px;
+  --radius-3xl:     24px;
+  --radius-full:    9999px;
+
+  /* ─── Shadows ─── */
+  --shadow-xs:    0 1px 2px 0 rgba(15,23,42,0.04);
+  --shadow-sm:    0 1px 3px 0 rgba(15,23,42,0.06), 0 1px 2px -1px rgba(15,23,42,0.06);
+  --shadow-md:    0 4px 6px -1px rgba(15,23,42,0.07), 0 2px 4px -2px rgba(15,23,42,0.05);
+  --shadow-lg:    0 10px 15px -3px rgba(15,23,42,0.08), 0 4px 6px -4px rgba(15,23,42,0.04);
+  --shadow-xl:    0 20px 25px -5px rgba(15,23,42,0.1), 0 8px 10px -6px rgba(15,23,42,0.06);
+  --shadow-2xl:   0 25px 50px -12px rgba(15,23,42,0.2);
+  --shadow-inner: inset 0 2px 4px 0 rgba(15,23,42,0.05);
+  --glow-indigo:  0 0 20px rgba(79,70,229,0.25), 0 0 60px rgba(79,70,229,0.1);
+  --glow-coral:   0 0 20px rgba(249,112,102,0.25), 0 0 60px rgba(249,112,102,0.1);
+
+  /* ─── Transitions ─── */
+  --duration-fast:     100ms;
+  --duration-normal:   200ms;
+  --duration-moderate: 300ms;
+  --duration-slow:     500ms;
+  --duration-slower:   700ms;
+  --ease-default:      cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in:           cubic-bezier(0.4, 0, 1, 1);
+  --ease-out:          cubic-bezier(0, 0, 0.2, 1);
+  --ease-bounce:       cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-spring:       cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* ─── Z-Index ─── */
+  --z-dropdown:   50;
+  --z-sticky:     100;
+  --z-fixed:      200;
+  --z-modal-bg:   300;
+  --z-modal:      400;
+  --z-popover:    500;
+  --z-tooltip:    600;
+  --z-widget:     9999;
+
+  /* ─── Semantic Mode Tokens (Section 26) ─── */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F8FAFC;
+  --bg-tertiary: #F1F5F9;
+  --bg-elevated: #FFFFFF;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+  --border-default: #E2E8F0;
+  --border-subtle: #F1F5F9;
+  --interactive-primary: #4F46E5;
+  --interactive-hover: #4338CA;
+
+  /* Compatibility aliases for existing dashboard classes */
+  --color-surface: var(--bg-secondary);
+  --color-surface-muted: var(--bg-tertiary);
+  --color-surface-hover: var(--indigo-50);
+  --color-ink: var(--text-primary);
+  --color-muted: var(--text-muted);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-border: var(--border-default);
+  --color-card: var(--bg-elevated);
+  --color-card-hover: var(--bg-secondary);
+  --color-heading: var(--text-primary);
+  --color-body: var(--text-secondary);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0F172A;
+    --bg-secondary: #1E293B;
+    --bg-tertiary: #334155;
+    --bg-elevated: #1E293B;
+    --text-primary: #F1F5F9;
+    --text-secondary: #94A3B8;
+    --text-muted: #64748B;
+    --border-default: #334155;
+    --border-subtle: #1E293B;
+    --interactive-primary: #6366F1;
+    --interactive-hover: #4F46E5;
+  }
+}
+
+[data-theme="dark"],
+html.dark {
+  --bg-primary: #0F172A;
+  --bg-secondary: #1E293B;
+  --bg-tertiary: #334155;
+  --bg-elevated: #1E293B;
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --border-default: #334155;
+  --border-subtle: #1E293B;
+  --interactive-primary: #6366F1;
+  --interactive-hover: #4F46E5;
+  color-scheme: dark;
+}
