@@ -1,5 +1,5 @@
 import {
-  ArrowRight, BarChart3, Bot, CheckCircle2, ChevronDown, ChevronRight, CreditCard, Globe2,
+  ArrowRight, BarChart3, Bot, Check, CheckCircle2, ChevronDown, ChevronRight, CreditCard, Globe2,
   Headphones, Layers3, LifeBuoy, LineChart, Lock, Mail, MessageCircle, MessageSquareText,
   Network, Paperclip, Play, ShieldCheck, Sparkles, Star, TrendingUp, Truck, Users, Workflow,
   Zap, Send, type LucideIcon,
@@ -624,58 +624,141 @@ function TestimonialsSection(): JSX.Element {
   );
 }
 
-function PricingPreviewSection(): JSX.Element {
+const pricingPlans = [
+  {
+    name: "Starter",
+    monthly: "$19",
+    annual: "$15",
+    unit: "/agent/mo",
+    features: ["Up to 5 agents", "Unlimited chats", "Basic routing rules", "Canned responses", "Email integration", "7-day chat history"],
+    cta: "Start free trial",
+    href: "/signup",
+    variant: "starter" as const,
+  },
+  {
+    name: "Pro",
+    monthly: "$49",
+    annual: "$39",
+    unit: "/agent/mo",
+    features: ["Everything in Starter", "Unlimited agents", "AI reply suggestions", "Advanced routing & triggers", "Ticketing system", "Contact management", "Analytics dashboard", "Proactive chat triggers", "Custom branding", "Priority support"],
+    cta: "Start free trial",
+    href: "/signup",
+    variant: "pro" as const,
+  },
+  {
+    name: "Enterprise",
+    monthly: "Custom",
+    annual: "Custom",
+    unit: "tailored to your needs",
+    features: ["Everything in Pro", "Dedicated account manager", "SSO & advanced security", "Custom integrations", "SLA guarantees", "Onboarding & training", "Unlimited history", "Multi-brand support"],
+    cta: "Contact sales",
+    href: "/contact",
+    variant: "enterprise" as const,
+  },
+];
+
+function PricingToggle({ annual, onChange }: { annual: boolean; onChange: (annual: boolean) => void }): JSX.Element {
   return (
-    <section className="mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 sm:py-28">
-      <div className="text-center">
-        <Pill tone="brand" className="rounded-full">Pricing</Pill>
-        <h2 className="font-display mt-4 text-3xl font-extrabold tracking-tight text-navy-700 sm:text-4xl dark:text-white">Simple, transparent pricing</h2>
-        <p className="mx-auto mt-3 max-w-2xl text-base text-navy-500 dark:text-navy-400">Start free. No credit card required.</p>
+    <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+      <button type="button" onClick={() => onChange(false)} className={cx("text-sm font-medium transition-colors", !annual ? "text-midnight" : "text-slate-500")}>Monthly</button>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={annual}
+        aria-label="Toggle annual billing"
+        onClick={() => onChange(!annual)}
+        className={cx("relative h-7 w-12 rounded-full p-1 transition-colors duration-200", annual ? "bg-indigo-600" : "bg-slate-300")}
+      >
+        <span className={cx("block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200", annual && "translate-x-5")} />
+      </button>
+      <button type="button" onClick={() => onChange(true)} className={cx("text-sm font-medium transition-colors", annual ? "text-midnight" : "text-slate-500")}>Annual</button>
+      <span className="rounded-full bg-emerald-500 px-2.5 py-1 text-xs font-medium leading-[1.4] text-white">Save 20%</span>
+    </div>
+  );
+}
+
+function PriceDisplay({ monthly, annual, unit, isAnnual, dark = false }: { monthly: string; annual: string; unit: string; isAnnual: boolean; dark?: boolean }): JSX.Element {
+  return (
+    <div className="mt-5 min-h-[70px]">
+      <div key={`${isAnnual}-${monthly}-${annual}`} className="price-crossfade flex flex-wrap items-end gap-2">
+        <span className={cx("font-display text-5xl font-extrabold leading-none tracking-[-0.03em]", dark ? "text-white" : "text-midnight")}>{isAnnual ? annual : monthly}</span>
+        <span className={cx("pb-1 text-sm font-normal", dark ? "text-white/70" : "text-slate-500")}>{unit}</span>
       </div>
-      <div className="mt-12 grid gap-5 md:grid-cols-3">
-        {homepagePlans.map((plan) => (
-          <Card
-            key={plan.name}
-            className={cx(
-              "relative p-6 transition-shadow dark:bg-navy-800/60 dark:border-navy-700/50",
-              plan.highlighted && "ring-2 ring-brand-400 shadow-glow dark:ring-brand-500"
-            )}
-          >
-            {plan.highlighted && (
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand-500 px-3 py-1 text-xs font-bold text-white shadow-glow">Most popular</span>
-            )}
-            <h3 className="font-display text-lg font-bold text-navy-700 dark:text-white">{plan.name}</h3>
-            <p className="text-sm text-navy-400">{plan.audience}</p>
-            <div className="mt-4 flex items-baseline gap-1">
-              <span className="font-display text-4xl font-extrabold text-navy-700 dark:text-white">{plan.price}</span>
-              <span className="text-sm font-medium text-navy-400">{plan.period}</span>
-            </div>
-            <div className="mt-5 grid gap-2.5 text-sm text-navy-500 dark:text-navy-400">
-              {plan.points.map((pt) => (
-                <div key={pt} className="flex items-center gap-2"><CheckCircle2 size={16} className="shrink-0 text-brand-500" />{pt}</div>
-              ))}
-            </div>
-            <Link
-              to="/signup"
-              className={cx(
-                "mt-6 flex h-11 w-full items-center justify-center rounded-xl text-sm font-bold transition-all",
-                plan.highlighted
-                  ? "bg-brand-500 text-white shadow-glow hover:bg-brand-600 hover:shadow-glow-lg"
-                  : "border border-navy-100 bg-white text-navy-700 hover:border-brand-200 hover:bg-brand-50 dark:border-navy-700 dark:bg-navy-800 dark:text-navy-200 dark:hover:border-brand-800"
-              )}
-            >
-              {plan.cta}
-            </Link>
-          </Card>
+    </div>
+  );
+}
+
+function PricingCard({ plan, annual, index }: { plan: (typeof pricingPlans)[number]; annual: boolean; index: number }): JSX.Element {
+  const isPro = plan.variant === "pro";
+  const isEnterprise = plan.variant === "enterprise";
+
+  return (
+    <article
+      className={cx(
+        "reveal-child pricing-card relative flex flex-col overflow-visible",
+        isPro && "pricing-card-pro order-first md:order-none lg:scale-[1.03]",
+        isEnterprise && "pricing-card-enterprise",
+      )}
+      style={{ transitionDelay: `${index * 100}ms` }}
+    >
+      {isPro && <div className="absolute -top-4 left-1/2 z-10 -translate-x-1/2 rounded-full bg-coral-500 px-4 py-1.5 text-xs font-semibold text-white shadow-md">Most Popular</div>}
+      {isPro && <div className="absolute inset-x-0 top-0 h-2 rounded-t-[14px] bg-indigo-50" />}
+
+      <h3 className={cx("text-lg font-semibold", isEnterprise ? "text-white" : "text-midnight")}>{plan.name}</h3>
+      <PriceDisplay monthly={plan.monthly} annual={plan.annual} unit={plan.unit} isAnnual={annual} dark={isEnterprise} />
+
+      <div className="mt-6 grid flex-1 gap-3">
+        {plan.features.map((feature) => (
+          <div key={feature} className={cx("flex items-start gap-2.5 text-sm font-normal leading-[1.5]", isEnterprise ? "text-white/90" : "text-slate-700")}>
+            <Check size={16} className={cx("mt-0.5 shrink-0", isEnterprise ? "text-emerald-400" : "text-emerald-500")} />
+            <span>{feature}</span>
+          </div>
         ))}
       </div>
-      <div className="mt-8 text-center">
-        <Link to="/pricing" className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-500 hover:text-brand-600 transition-colors">
-          See all plans <ArrowRight size={16} />
-        </Link>
+
+      <Link
+        to={plan.href}
+        className={cx(
+          "mt-8 inline-flex min-h-[44px] w-full items-center justify-center rounded-lg px-6 py-3 text-[15px] font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-4",
+          isPro && "bg-indigo-600 text-white shadow-sm hover:bg-indigo-700 hover:shadow-glow-indigo focus-visible:ring-indigo-100 active:scale-[0.97] active:bg-indigo-800",
+          plan.variant === "starter" && "border-[1.5px] border-indigo-600 bg-transparent text-indigo-600 hover:bg-indigo-50 focus-visible:ring-indigo-100 active:scale-[0.97]",
+          isEnterprise && "border border-white/45 bg-white/10 text-white backdrop-blur-sm hover:bg-white/15 focus-visible:ring-white/25 active:scale-[0.97]",
+        )}
+      >
+        {plan.cta}
+      </Link>
+    </article>
+  );
+}
+
+function PricingSection({ includeCompareLink = true }: { includeCompareLink?: boolean }): JSX.Element {
+  const [annual, setAnnual] = useState(false);
+
+  return (
+    <section className="reveal-on-scroll bg-white">
+      <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:py-24">
+        <div className="mx-auto max-w-[640px] text-center">
+          <p className="font-sans text-[11px] font-bold uppercase leading-[1.2] tracking-[0.1em] text-indigo-600">SIMPLE PRICING</p>
+          <h2 className="mt-4 font-display text-[clamp(1.75rem,3.5vw+0.75rem,3rem)] font-bold leading-[1.1] tracking-[-0.025em] text-midnight">Plans that scale with your team</h2>
+          <p className="mt-4 text-base font-normal leading-[1.6] text-slate-600">Start free. Upgrade when you&apos;re ready.</p>
+          <PricingToggle annual={annual} onChange={setAnnual} />
+        </div>
+
+        <div className="mt-14 grid gap-6 md:grid-cols-3">
+          {pricingPlans.map((plan, index) => <PricingCard key={plan.name} plan={plan} annual={annual} index={index} />)}
+        </div>
+
+        <div className="mt-10 text-center">
+          <p className="text-sm font-normal leading-[1.5] text-slate-500">All plans include a 14-day free trial. No credit card required. Cancel anytime.</p>
+          {includeCompareLink && <Link to="/pricing" className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-indigo-600 hover:underline">Compare all features <ArrowRight size={16} /></Link>}
+        </div>
       </div>
     </section>
   );
+}
+
+function PricingPreviewSection(): JSX.Element {
+  return <PricingSection />;
 }
 
 function CTASection(): JSX.Element {
@@ -689,7 +772,7 @@ function CTASection(): JSX.Element {
             Ready to transform your customer conversations?
           </h2>
           <p className="mt-4 text-base leading-7 text-brand-100">
-            Join 35,000+ companies using FlowLyra to deliver exceptional customer experiences.
+            Join 10,000+ support teams using Flowlyra to deliver exceptional customer experiences.
           </p>
           <form
             className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center"
@@ -854,142 +937,60 @@ function AccordionItem({ question, answer, isOpen, onToggle }: { question: strin
 }
 
 export function PricingPage(): JSX.Element {
-  const [annual, setAnnual] = useState(true);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  const plans = [
-    {
-      name: "Starter", audience: "Small teams", priceMonthly: "$19", priceAnnual: "$15", period: "/mo",
-      features: ["1 agent seat", "Basic live chat", "Email support", "14-day chat history", "1 website"],
-      cta: "Get started", highlighted: false,
-    },
-    {
-      name: "Team", audience: "Growing support teams", priceMonthly: "$39", priceAnnual: "$31", period: "/agent/mo",
-      features: ["Unlimited agents", "AI suggestions", "Integrations", "Reports & analytics", "3 websites", "1-year history", "Chatbot"],
-      cta: "Start free trial", highlighted: true, badge: "Recommended",
-    },
-    {
-      name: "Business", audience: "Established departments", priceMonthly: "$59", priceAnnual: "$47", period: "/agent/mo",
-      features: ["Everything in Team", "Automation workflows", "Advanced chatbot", "AI Copilot", "5 websites", "Unlimited history", "SLA policies"],
-      cta: "Start free trial", highlighted: false,
-    },
-    {
-      name: "Enterprise", audience: "Large organizations", priceMonthly: "Custom", priceAnnual: "Custom", period: "",
-      features: ["Everything in Business", "Unlimited everything", "SSO / SAML", "Dedicated support", "SLA guarantee", "Custom contracts"],
-      cta: "Contact sales", highlighted: false,
-    },
-  ];
+  useEffect(() => {
+    const elements = Array.from(document.querySelectorAll<HTMLElement>(".reveal-on-scroll"));
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      elements.forEach((element) => element.classList.add("is-visible"));
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.16 },
+    );
+
+    elements.forEach((element) => observer.observe(element));
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <div className="min-h-screen bg-white font-sans text-navy-700 dark:bg-navy-950 dark:text-navy-100">
+    <div className="min-h-screen bg-white font-sans text-midnight">
       <MarketingNavigation />
 
       <main>
-        {/* Header */}
-        <section className="relative overflow-hidden border-b border-navy-100/60 dark:border-navy-800/60">
-          <div className="pointer-events-none absolute -left-32 top-0 h-[400px] w-[400px] rounded-full bg-brand-100/30 blur-3xl dark:bg-brand-900/10" />
-          <div className="relative mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 sm:py-24">
-            <h1 className="font-display text-4xl font-extrabold tracking-tight text-navy-700 sm:text-5xl dark:text-white">
-              Simple, transparent pricing
-            </h1>
-            <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-navy-500 dark:text-navy-400">
-              Start free. No credit card required. Choose the plan that fits your team.
-            </p>
-            {/* Toggle */}
-            <div className="mt-8 inline-flex items-center gap-3 rounded-xl border border-navy-100 bg-navy-50 p-1 dark:border-navy-700 dark:bg-navy-800/50">
-              <button
-                type="button"
-                onClick={() => setAnnual(false)}
-                className={cx(
-                  "rounded-lg px-4 py-2 text-sm font-bold transition-all",
-                  !annual ? "bg-white text-navy-700 shadow-sm dark:bg-navy-700 dark:text-white" : "text-navy-400 dark:text-navy-400"
-                )}
-              >
-                Monthly
-              </button>
-              <button
-                type="button"
-                onClick={() => setAnnual(true)}
-                className={cx(
-                  "rounded-lg px-4 py-2 text-sm font-bold transition-all",
-                  annual ? "bg-white text-navy-700 shadow-sm dark:bg-navy-700 dark:text-white" : "text-navy-400 dark:text-navy-400"
-                )}
-              >
-                Annual
-                <span className="ml-1.5 rounded-full bg-brand-100 px-2 py-0.5 text-xs font-bold text-brand-600 dark:bg-brand-900/30 dark:text-brand-400">Save 20%</span>
-              </button>
-            </div>
-          </div>
-        </section>
+        <PricingSection includeCompareLink={false} />
 
-        {/* Pricing Cards */}
-        <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
-          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-            {plans.map((plan) => (
-              <Card
-                key={plan.name}
-                className={cx(
-                  "relative flex flex-col p-6 transition-shadow dark:bg-navy-800/60 dark:border-navy-700/50",
-                  plan.highlighted && "ring-2 ring-brand-400 shadow-glow dark:ring-brand-500"
-                )}
-              >
-                {plan.badge && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand-500 px-3 py-1 text-xs font-bold text-white shadow-glow">{plan.badge}</span>
-                )}
-                <h3 className="font-display text-lg font-bold text-navy-700 dark:text-white">{plan.name}</h3>
-                <p className="text-sm text-navy-400">{plan.audience}</p>
-                <div className="mt-4 flex items-baseline gap-1">
-                  <span className="font-display text-4xl font-extrabold text-navy-700 dark:text-white">
-                    {annual ? plan.priceAnnual : plan.priceMonthly}
-                  </span>
-                  <span className="text-sm font-medium text-navy-400">{plan.period}</span>
-                </div>
-                <div className="mt-6 flex-1 grid gap-2.5 text-sm text-navy-500 dark:text-navy-400">
-                  {plan.features.map((f) => (
-                    <div key={f} className="flex items-center gap-2"><CheckCircle2 size={16} className="shrink-0 text-brand-500" />{f}</div>
-                  ))}
-                </div>
-                <Link
-                  to={plan.name === "Enterprise" ? "/contact" : "/signup"}
-                  className={cx(
-                    "mt-6 flex h-11 w-full items-center justify-center rounded-xl text-sm font-bold transition-all",
-                    plan.highlighted
-                      ? "bg-brand-500 text-white shadow-glow hover:bg-brand-600 hover:shadow-glow-lg"
-                      : plan.name === "Enterprise"
-                        ? "border-2 border-navy-200 bg-white text-navy-700 hover:border-navy-300 dark:border-navy-600 dark:bg-navy-800 dark:text-navy-200"
-                        : "border border-navy-100 bg-white text-navy-700 hover:border-brand-200 hover:bg-brand-50 dark:border-navy-700 dark:bg-navy-800 dark:text-navy-200 dark:hover:border-brand-800"
-                  )}
-                >
-                  {plan.cta}
-                </Link>
-              </Card>
-            ))}
-          </div>
-        </section>
-
-        {/* What's included */}
-        <section className="mx-auto w-full max-w-7xl px-4 pb-16 sm:px-6">
-          <Card className="p-6 sm:p-8 dark:bg-navy-800/40 dark:border-navy-700/50">
-            <h3 className="font-display text-xl font-bold text-navy-700 dark:text-white">What every plan includes</h3>
-            <div className="mt-5 grid gap-3 text-sm text-navy-500 sm:grid-cols-2 dark:text-navy-400">
+        <section className="mx-auto w-full max-w-7xl px-4 pb-16 sm:px-6 lg:pb-24">
+          <Card className="p-6 sm:p-8">
+            <h3 className="font-display text-xl font-bold text-midnight">What every plan includes</h3>
+            <div className="mt-5 grid gap-3 text-sm text-slate-600 sm:grid-cols-2">
               {[
                 "Real-time messaging workspace",
                 "Widget deployment and customization",
                 "Routing and automation tools",
                 "Analytics dashboards and exports",
                 "Secure data encryption",
-                "24/7 infrastructure uptime",
+                "99.9% platform uptime",
               ].map((item) => (
-                <div key={item} className="flex items-center gap-2"><CheckCircle2 size={16} className="shrink-0 text-brand-500" />{item}</div>
+                <div key={item} className="flex items-center gap-2"><Check size={16} className="shrink-0 text-emerald-500" />{item}</div>
               ))}
             </div>
           </Card>
         </section>
 
-        {/* FAQ */}
-        <section className="border-t border-navy-100/60 dark:border-navy-800/60">
-          <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-20">
-            <h2 className="font-display text-center text-3xl font-extrabold tracking-tight text-navy-700 dark:text-white">Frequently asked questions</h2>
+        <section className="border-t border-slate-200">
+          <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:py-20">
+            <h2 className="font-display text-center text-3xl font-bold tracking-tight text-midnight">Frequently asked questions</h2>
             <div className="mt-10">
               {pricingFaqs.map((faq, i) => (
                 <AccordionItem
@@ -1004,7 +1005,6 @@ export function PricingPage(): JSX.Element {
           </div>
         </section>
 
-        {/* CTA */}
         <CTASection />
       </main>
 
@@ -1012,10 +1012,6 @@ export function PricingPage(): JSX.Element {
     </div>
   );
 }
-
-/* ================================================================
-   PUBLIC LAYOUT (used by remaining pages)
-   ================================================================ */
 
 function PublicLayout({ title, subtitle, children }: { title: string; subtitle: string; children: JSX.Element | JSX.Element[] }): JSX.Element {
   return (
@@ -1138,17 +1134,13 @@ function CTASectionInner(): JSX.Element {
           </div>
           <div className="flex flex-wrap gap-3">
             <Link to="/signup"><Button className="bg-white text-brand-600 hover:bg-brand-50 border-0">Start free trial</Button></Link>
-            <Link to="/contact"><Button variant="secondary" className="border-white/30 bg-white/10 text-white hover:bg-white/20">Talk to sales</Button></Link>
+            <Link to="/contact"><Button variant="secondary" className="border-white/30 bg-white/10 text-white hover:bg-white/20">Contact sales</Button></Link>
           </div>
         </div>
       </Card>
     </section>
   );
 }
-
-/* ================================================================
-   REMAINING EXPORTED PAGES
-   ================================================================ */
 
 export function FeaturesPage(): JSX.Element {
   return (
@@ -1289,7 +1281,7 @@ export function CustomersPage(): JSX.Element {
         <section className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
           <div className="grid gap-4 md:grid-cols-3">
             {[
-              { stat: "35,000+", label: "Businesses using live-chat style support platforms" },
+              { stat: "10,000+", label: "Support teams using conversation-first platforms" },
               { stat: "30%", label: "Typical conversion lift reported after chat implementation" },
               { stat: "24/7", label: "Always-on customer coverage through asynchronous messaging" },
             ].map((item) => (
