@@ -50,7 +50,7 @@ function PrimaryCta({ className = "", onClick }: { className?: string; onClick?:
       to="/signup"
       onClick={onClick}
       className={cx(
-        "inline-flex items-center justify-center rounded-lg bg-indigo-600 px-6 py-3 text-[15px] font-semibold leading-none text-white transition-all duration-200 hover:bg-indigo-700 hover:shadow-glow-indigo focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-100 active:scale-[0.98]",
+        "inline-flex min-h-[44px] items-center justify-center rounded-lg bg-indigo-600 px-6 py-3 text-[15px] font-semibold leading-none text-white shadow-sm transition-all duration-200 hover:bg-indigo-700 hover:shadow-glow-indigo focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-100 active:scale-[0.97] active:bg-indigo-800 disabled:cursor-not-allowed disabled:opacity-50",
         className,
       )}
     >
@@ -109,7 +109,7 @@ export function MarketingNavigation(): JSX.Element {
         <div className="hidden items-center gap-3 md:flex">
           <Link
             to="/login"
-            className="inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-[15px] font-semibold text-slate-700 transition-colors hover:bg-slate-100/80 hover:text-indigo-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-100"
+            className="inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-[15px] font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-700 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-100"
           >
             Log in
           </Link>
