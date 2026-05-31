@@ -94,8 +94,8 @@ export function AgentLayout(): JSX.Element {
   const notificationPanelRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const sidebarWidth = collapsed ? "md:w-[68px]" : "md:w-[260px]";
-  const contentOffset = collapsed ? "pl-0 md:pl-[68px]" : "pl-0 md:pl-[260px]";
+  const sidebarWidth = collapsed ? "md:w-[72px]" : "md:w-[260px]";
+  const contentOffset = collapsed ? "pl-0 md:pl-[72px]" : "pl-0 md:pl-[260px]";
   const orgQuery = useQuery({
     queryKey: ["org", "layout"],
     queryFn: async () => (await api.get("/admin/org")).data as {
@@ -284,9 +284,9 @@ export function AgentLayout(): JSX.Element {
   return (
     <div className="min-h-screen bg-white text-navy-700 dark:bg-navy-900 dark:text-navy-100">
       <Toaster position="top-right" />
-      <aside className={`fixed inset-y-0 left-0 z-[200] hidden flex-col border-r border-navy-100 bg-white transition-all duration-300 dark:bg-navy-900 dark:border-navy-700 md:flex ${sidebarWidth}`}>
+      <aside className={`fixed inset-y-0 left-0 z-[200] hidden flex-col border-r border-navy-200 bg-navy-50 transition-all duration-300 dark:bg-navy-900 dark:border-navy-700 md:flex ${sidebarWidth}`}>
         {/* Logo */}
-        <div className="flex h-16 items-center justify-between border-b border-navy-100 px-4 dark:border-navy-700">
+        <div className="flex h-16 items-center justify-between border-b border-navy-200 px-4 dark:border-navy-700">
           {!collapsed && <div className="flex items-center gap-2"><img src={dashboardLogo} alt="FlowLyra" className="h-7 w-7 rounded-lg" /><span className="text-lg font-bold font-display text-brand-500">FlowLyra</span></div>}
           <button aria-label="Toggle navigation" className="flex h-8 w-8 items-center justify-center rounded-md text-navy-400 hover:bg-navy-50 dark:hover:bg-navy-800" onClick={() => setCollapsed((v) => !v)}>
             {collapsed ? <Menu size={17} /> : <ChevronLeft size={17} />}
@@ -315,7 +315,7 @@ export function AgentLayout(): JSX.Element {
                       {({ isActive }) => (
                         <>
                           {isActive && !collapsed && (
-                            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-brand-500 rounded-r-full" />
+                            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-brand-600 rounded-r-full" />
                           )}
                           <Icon size={17} className={`shrink-0 ${collapsed ? "" : "ml-1"}`} />
                           {!collapsed && <span>{item.label}</span>}
@@ -328,20 +328,8 @@ export function AgentLayout(): JSX.Element {
             </div>
           ))}
         </nav>
-        {/* User footer */}
-        <div className="border-t border-navy-100 p-3 dark:border-navy-700">
-          <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-navy-50 dark:hover:bg-navy-800 cursor-pointer">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-100 text-brand-600 text-sm font-medium dark:bg-brand-950 dark:text-brand-300">
-              {(user?.full_name ?? "A").charAt(0).toUpperCase()}
-            </div>
-            {!collapsed && (
-              <div className="min-w-0 flex-1">
-                <div className="text-sm font-medium text-navy-700 dark:text-navy-100 truncate">{user?.full_name ?? "Agent"}</div>
-                <div className="text-xs text-navy-400 capitalize">{user?.role ?? "agent"}</div>
-              </div>
-            )}
-          </div>
-        </div>
+        {/* User / status footer */}
+        <AgentStatusFooter user={user} collapsed={collapsed} />
       </aside>
       {mobileNavOpen ? (
         <div className="fixed inset-0 z-[300] md:hidden">
@@ -537,6 +525,60 @@ export function AgentLayout(): JSX.Element {
           setTourOpen(false);
         }}
       />
+    </div>
+  );
+}
+
+type AgentStatus = "online" | "away" | "offline";
+
+const STATUS_CONFIG: Record<AgentStatus, { label: string; dot: string }> = {
+  online:  { label: "Online",  dot: "bg-success-500" },
+  away:    { label: "Away",    dot: "bg-warning-500" },
+  offline: { label: "Offline", dot: "bg-navy-400" },
+};
+
+function AgentStatusFooter({ user, collapsed }: { user: { full_name?: string | null; role?: string | null } | null; collapsed: boolean }): JSX.Element {
+  const [status, setStatus] = useState<AgentStatus>("online");
+  const [open, setOpen] = useState(false);
+  const cfg = STATUS_CONFIG[status];
+
+  return (
+    <div className="relative border-t border-navy-200 p-3 dark:border-navy-700">
+      <button
+        className="flex w-full items-center gap-3 rounded-lg p-2 text-left hover:bg-navy-100 dark:hover:bg-navy-800 transition-colors"
+        onClick={() => !collapsed && setOpen((v) => !v)}
+        aria-label="Agent status"
+      >
+        <div className="relative shrink-0">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-100 text-brand-600 text-sm font-semibold dark:bg-brand-950 dark:text-brand-300">
+            {(user?.full_name ?? "A").charAt(0).toUpperCase()}
+          </div>
+          <span className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-navy-50 dark:border-navy-900 ${cfg.dot}`} />
+        </div>
+        {!collapsed && (
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-sm font-semibold text-navy-700 dark:text-navy-100">{user?.full_name ?? "Agent"}</div>
+            <div className="flex items-center gap-1.5 text-xs text-navy-400">
+              <span className={`inline-block h-1.5 w-1.5 rounded-full ${cfg.dot}`} />
+              {cfg.label}
+            </div>
+          </div>
+        )}
+      </button>
+      {open && !collapsed && (
+        <div className="absolute bottom-full left-3 right-3 mb-1 overflow-hidden rounded-lg border border-navy-200 bg-white shadow-lift dark:border-navy-700 dark:bg-navy-900">
+          {(Object.entries(STATUS_CONFIG) as Array<[AgentStatus, typeof STATUS_CONFIG[AgentStatus]]>).map(([key, val]) => (
+            <button
+              key={key}
+              className={`flex w-full items-center gap-2.5 px-3 py-2.5 text-sm transition-colors hover:bg-navy-50 dark:hover:bg-navy-800 ${status === key ? "text-brand-600 font-semibold dark:text-brand-400" : "text-navy-600 dark:text-navy-300"}`}
+              onClick={() => { setStatus(key); setOpen(false); }}
+            >
+              <span className={`h-2.5 w-2.5 rounded-full ${val.dot}`} />
+              {val.label}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

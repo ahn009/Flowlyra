@@ -29,11 +29,11 @@ export function useToast(): ToastContextValue {
   return ctx;
 }
 
-const typeConfig: Record<ToastType, { icon: React.ReactNode; iconClass: string }> = {
-  success: { icon: <CheckCircle className="h-5 w-5" />, iconClass: "text-success-500" },
-  error:   { icon: <AlertCircle className="h-5 w-5" />, iconClass: "text-danger-500" },
-  warning: { icon: <AlertTriangle className="h-5 w-5" />, iconClass: "text-warning-500" },
-  info:    { icon: <Info className="h-5 w-5" />, iconClass: "text-blue-500" },
+const typeConfig: Record<ToastType, { icon: React.ReactNode; iconClass: string; bg: string; border: string }> = {
+  success: { icon: <CheckCircle className="h-5 w-5" />, iconClass: "text-success-500", bg: "bg-success-50 dark:bg-success-950/30", border: "border-l-[3px] border-l-success-500 border-t border-t-success-100 border-r border-r-success-100 border-b border-b-success-100 dark:border-l-success-500 dark:border-t-success-900/40 dark:border-r-success-900/40 dark:border-b-success-900/40" },
+  error:   { icon: <AlertCircle className="h-5 w-5" />,  iconClass: "text-danger-500",  bg: "bg-danger-50 dark:bg-danger-950/30",   border: "border-l-[3px] border-l-danger-500 border-t border-t-danger-100 border-r border-r-danger-100 border-b border-b-danger-100 dark:border-l-danger-500 dark:border-t-danger-900/40 dark:border-r-danger-900/40 dark:border-b-danger-900/40" },
+  warning: { icon: <AlertTriangle className="h-5 w-5" />, iconClass: "text-warning-500", bg: "bg-warning-50 dark:bg-warning-950/30",  border: "border-l-[3px] border-l-warning-500 border-t border-t-warning-100 border-r border-r-warning-100 border-b border-b-warning-100 dark:border-l-warning-500 dark:border-t-warning-900/40 dark:border-r-warning-900/40 dark:border-b-warning-900/40" },
+  info:    { icon: <Info className="h-5 w-5" />,          iconClass: "text-brand-600",   bg: "bg-brand-50 dark:bg-brand-950/30",     border: "border-l-[3px] border-l-brand-600 border-t border-t-brand-100 border-r border-r-brand-100 border-b border-b-brand-100 dark:border-l-brand-500 dark:border-t-brand-900/40 dark:border-r-brand-900/40 dark:border-b-brand-900/40" },
 };
 
 interface ToastItemProps {
@@ -59,7 +59,9 @@ function ToastItem({ data, onDismiss, isExiting }: ToastItemProps) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={cn(
-        "pointer-events-auto flex w-full min-w-[320px] max-w-[420px] items-start gap-3 rounded-lg border border-navy-100 bg-white p-4 shadow-lift dark:bg-navy-800 dark:border-navy-700",
+        "pointer-events-auto flex w-full min-w-[320px] max-w-[420px] items-start gap-3 rounded-lg p-4 shadow-lift",
+        config.bg,
+        config.border,
         "animate-slide-in-right",
         isExiting && "animate-slide-out-right"
       )}
@@ -68,9 +70,9 @@ function ToastItem({ data, onDismiss, isExiting }: ToastItemProps) {
       <span className={cn("mt-0.5 shrink-0", config.iconClass)}>{config.icon}</span>
       <div className="flex-1 min-w-0">
         {data.title && (
-          <p className="text-sm font-medium text-navy-700 dark:text-navy-50">{data.title}</p>
+          <p className="text-sm font-semibold text-navy-800 dark:text-navy-50">{data.title}</p>
         )}
-        <p className="mt-0.5 text-xs text-navy-400 dark:text-navy-300">{data.message}</p>
+        <p className={cn("text-sm text-navy-600 dark:text-navy-300", data.title && "mt-0.5 text-xs")}>{data.message}</p>
         {data.action && (
           <button
             type="button"

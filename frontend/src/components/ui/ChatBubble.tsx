@@ -23,14 +23,18 @@ export interface ChatBubbleProps {
 }
 
 const variantStyles = {
+  /* Visitor — indigo-600, right-aligned, tight bottom-right corner — NO directional tail */
   visitor:
-    "ml-auto bg-brand text-white rounded-2xl rounded-br-md",
+    "ml-auto bg-brand-600 text-white [border-radius:16px_16px_4px_16px]",
+  /* Agent — slate-100, left-aligned, tight bottom-left corner — NO directional tail */
   agent:
-    "mr-auto bg-white text-navy-700 border border-navy-100 dark:border-navy-700 rounded-2xl rounded-bl-md dark:bg-navy-700 dark:text-navy-100 dark:border-navy-600",
+    "mr-auto bg-navy-100 text-navy-700 [border-radius:16px_16px_16px_4px] dark:bg-navy-700 dark:text-navy-100",
+  /* Bot — indigo-50, same shape as agent */
   bot:
-    "mr-auto bg-navy-100 text-navy-700 rounded-2xl rounded-bl-md dark:bg-navy-700 dark:text-navy-100",
+    "mr-auto bg-brand-50 text-brand-700 [border-radius:16px_16px_16px_4px] dark:bg-brand-950/40 dark:text-brand-300",
+  /* Internal note — amber tint, centered */
   "internal-note":
-    "mx-auto bg-yellow-50 text-yellow-900 border border-yellow-200 rounded-xl dark:bg-yellow-900/20 dark:text-yellow-200 dark:border-yellow-800/40",
+    "mx-auto bg-amber-50 text-amber-900 border border-amber-200 rounded-xl dark:bg-amber-900/20 dark:text-amber-200 dark:border-amber-800/40",
 };
 
 export function ChatBubble({
