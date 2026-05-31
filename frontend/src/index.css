@@ -264,14 +264,11 @@ html.dark .chat-bubble-note {
   animation: launcher-pulse 2s infinite;
 }
 
-/* Section 10.4: respect reduced motion preferences */
+/* Section 10.4: Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }
 }
