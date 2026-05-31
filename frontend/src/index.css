@@ -366,3 +366,98 @@ html.dark .chat-bubble-note {
   0%, 100% { margin-top: 0; }
   50% { margin-top: 10px; }
 }
+
+/* ============================================
+   Section 16 Home Feature Sections
+   ============================================ */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out);
+}
+
+.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-child {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out), box-shadow var(--duration-normal) var(--ease-default), background-color var(--duration-normal) var(--ease-default);
+}
+
+.reveal-on-scroll.is-visible .reveal-child {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.feature-visual-stage {
+  position: relative;
+  min-height: 360px;
+  perspective: 1000px;
+}
+
+.feature-ui-card {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-xl);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  transition: transform var(--duration-normal) var(--ease-default), box-shadow var(--duration-normal) var(--ease-default);
+}
+
+.feature-tilt-left {
+  transform: rotateY(-8deg) rotateZ(-2deg);
+}
+
+.feature-tilt-right {
+  transform: rotateY(8deg) rotateZ(2deg);
+}
+
+.feature-ui-card:hover {
+  transform: translateY(-4px) rotateY(0deg) rotateZ(0deg);
+  box-shadow: var(--shadow-2xl);
+}
+
+.feature-card {
+  background: #FFFFFF;
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  box-shadow: var(--shadow-md);
+  transition: transform var(--duration-normal) var(--ease-default), box-shadow var(--duration-normal) var(--ease-default);
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.feature-tab-panel {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: feature-tab-in 300ms var(--ease-out) forwards;
+}
+
+.feature-tab-card {
+  border-radius: var(--radius-2xl);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: var(--shadow-xl);
+  padding: var(--space-8);
+  border: 1px solid rgba(226, 232, 240, 0.75);
+}
+
+@keyframes feature-tab-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-on-scroll,
+  .reveal-child,
+  .feature-tab-panel {
+    opacity: 1;
+    transform: none;
+  }
+}

@@ -1,7 +1,7 @@
 import {
-  ArrowRight, Bot, CheckCircle2, ChevronDown, ChevronRight, CreditCard, Globe2,
-  Headphones, Layers3, LifeBuoy, LineChart, Lock, Mail, MessageSquareText,
-  Network, Play, ShieldCheck, Sparkles, Star, TrendingUp, Truck, Users, Workflow,
+  ArrowRight, BarChart3, Bot, CheckCircle2, ChevronDown, ChevronRight, CreditCard, Globe2,
+  Headphones, Layers3, LifeBuoy, LineChart, Lock, Mail, MessageCircle, MessageSquareText,
+  Network, Paperclip, Play, ShieldCheck, Sparkles, Star, TrendingUp, Truck, Users, Workflow,
   Zap, Send, type LucideIcon,
 } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
@@ -273,42 +273,225 @@ function SocialProofBar(): JSX.Element {
   );
 }
 
-function FeatureRow({ title, subtitle, features, reversed, accent }: { title: string; subtitle: string; features: Array<{ icon: LucideIcon; label: string }>; reversed?: boolean; accent?: string }): JSX.Element {
-  return (
-    <section className="mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 sm:py-28">
-      <div className={cx("grid items-center gap-12 lg:grid-cols-2 lg:gap-20", reversed && "lg:direction-rtl")}>
-        <div className={cx(reversed && "lg:order-2")}>
-          <Pill tone="orange" className="rounded-full">{accent || "Feature"}</Pill>
-          <h2 className="font-display mt-4 text-3xl font-extrabold tracking-tight text-navy-700 sm:text-4xl dark:text-white">{title}</h2>
-          <p className="mt-4 max-w-lg text-base leading-7 text-navy-500 dark:text-navy-400">{subtitle}</p>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            {features.map((f) => (
-              <div key={f.label} className="inline-flex items-center gap-3 rounded-xl border border-navy-100 bg-white p-3.5 shadow-xs dark:border-navy-800 dark:bg-navy-800/50">
-                <div className="inline-grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-500 dark:bg-brand-950/30"><f.icon size={20} /></div>
-                <span className="text-sm font-semibold text-navy-700 dark:text-navy-200">{f.label}</span>
-              </div>
-            ))}
+const asymmetricFeatures = [
+  {
+    overline: "REAL-TIME CHAT",
+    title: "Real-time conversations",
+    description: "Meet customers in the moment with fast, fluid messaging that keeps context close. Every reply, handoff, and note stays connected so teams can move naturally.",
+    link: "/features",
+    bg: "bg-white",
+    reverse: false,
+    visual: "chat" as const,
+  },
+  {
+    overline: "AI AGENT ASSIST",
+    title: "AI-powered agent assist",
+    description: "Give every agent a copilot that drafts thoughtful replies, summarizes long threads, and suggests next actions without taking the human out of the conversation.",
+    link: "/features/ai",
+    bg: "bg-slate-50",
+    reverse: true,
+    visual: "ai" as const,
+  },
+  {
+    overline: "GROWTH INSIGHTS",
+    title: "Insights that drive growth",
+    description: "See which conversations convert, where customers get stuck, and how your team performs across every channel, all in a calm reporting workspace.",
+    link: "/features/analytics",
+    bg: "bg-white",
+    reverse: false,
+    visual: "analytics" as const,
+  },
+];
+
+const featureCards = [
+  { icon: Layers3, title: "Omnichannel inbox", description: "Bring website, email, and social conversations into one focused team workspace." },
+  { icon: Zap, title: "Smart routing", description: "Send every conversation to the right team based on intent, priority, and context." },
+  { icon: MessageCircle, title: "Canned responses", description: "Reply faster with polished snippets that agents can personalize in seconds." },
+  { icon: CheckCircle2, title: "Ticketing system", description: "Turn complex conversations into trackable work without losing chat history." },
+  { icon: Users, title: "Contact management", description: "Keep profiles, notes, and conversation timelines ready for every teammate." },
+  { icon: Paperclip, title: "File sharing", description: "Exchange screenshots, documents, and details safely inside the conversation." },
+];
+
+const featureTabs = [
+  {
+    label: "Sales",
+    title: "Turn high-intent chats into qualified pipeline",
+    description: "Spot buying signals, route prospects instantly, and keep the next best action visible from first message to booked meeting.",
+    cta: "/solutions/sales-marketing",
+    stat: "3.2x",
+    caption: "more qualified leads",
+  },
+  {
+    label: "Support",
+    title: "Resolve customer questions with calm precision",
+    description: "Give agents the full conversation history, customer profile, and reply tools they need to deliver confident support.",
+    cta: "/solutions/customer-support",
+    stat: "62%",
+    caption: "faster first replies",
+  },
+  {
+    label: "Automation",
+    title: "Let smart workflows handle the repeat work",
+    description: "Automate routing, tagging, follow-ups, and handoffs while your team focuses on the conversations that need a human touch.",
+    cta: "/features/automation",
+    stat: "24/7",
+    caption: "coverage without clutter",
+  },
+  {
+    label: "Analytics",
+    title: "Learn what moves customers forward",
+    description: "Measure response speed, conversion paths, satisfaction, and team load in reporting views designed for action.",
+    cta: "/features/analytics",
+    stat: "18pt",
+    caption: "CSAT lift visibility",
+  },
+];
+
+function ProductVisual({ type }: { type: "chat" | "ai" | "analytics" }): JSX.Element {
+  if (type === "analytics") {
+    return (
+      <div className="feature-visual-stage">
+        <div className="feature-ui-card feature-tilt-left absolute left-3 top-8 w-[72%] p-6">
+          <div className="flex items-center justify-between"><p className="text-sm font-semibold text-midnight">Growth dashboard</p><BarChart3 className="text-indigo-600" size={22} /></div>
+          <div className="mt-6 flex items-end gap-3">
+            {[44, 72, 58, 88, 68, 96].map((h, i) => <div key={i} className="w-full rounded-t-lg bg-indigo-600/80" style={{ height: `${h}px` }} />)}
           </div>
         </div>
-        <div className={cx(reversed && "lg:order-1")}>
-          <div className="relative">
-            <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-brand-100/40 to-transparent blur-2xl dark:from-brand-900/20" />
-            <Card className="relative overflow-hidden rounded-3xl border-white/80 bg-gradient-to-br from-white to-navy-50/80 p-8 shadow-lift dark:from-navy-800 dark:to-navy-900 dark:border-navy-700">
-              <div className="grid gap-3">
-                <div className="h-3 w-3/5 rounded-full bg-brand-200/60 dark:bg-brand-900/30" />
-                <div className="h-3 w-4/5 rounded-full bg-navy-200/60 dark:bg-navy-700/30" />
-                <div className="h-3 w-2/5 rounded-full bg-navy-200/40 dark:bg-navy-700/20" />
-                <div className="mt-4 grid grid-cols-2 gap-3">
-                  <div className="rounded-xl bg-brand-50 p-4 dark:bg-brand-950/20"><div className="h-8 w-8 rounded-lg bg-brand-200/50 dark:bg-brand-800/30" /></div>
-                  <div className="rounded-xl bg-navy-50 p-4 dark:bg-navy-800/50"><div className="h-8 w-8 rounded-lg bg-navy-200/50 dark:bg-navy-700/30" /></div>
-                </div>
-                <div className="mt-2 h-24 rounded-xl bg-navy-100/80 dark:bg-navy-800/30" />
+        <div className="feature-ui-card feature-tilt-right absolute bottom-10 right-0 z-10 w-[58%] p-5">
+          <p className="text-xs font-bold uppercase tracking-[0.1em] text-indigo-600">Conversion flow</p>
+          <div className="mt-4 grid gap-3 text-sm text-slate-600">
+            <div className="flex justify-between"><span>Chats opened</span><strong className="text-midnight">4,820</strong></div>
+            <div className="flex justify-between"><span>Qualified</span><strong className="text-midnight">1,284</strong></div>
+            <div className="flex justify-between"><span>Meetings</span><strong className="text-indigo-600">318</strong></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (type === "ai") {
+    return (
+      <div className="feature-visual-stage">
+        <div className="feature-ui-card feature-tilt-right absolute right-6 top-6 w-[78%] p-6">
+          <p className="text-sm font-semibold text-midnight">AI suggestion</p>
+          <div className="mt-4 rounded-2xl bg-indigo-50 p-4 text-sm leading-6 text-slate-700">“I can help with that. Based on your workspace, the Team plan includes routing, tags, and AI summaries.”</div>
+          <div className="mt-4 flex gap-2"><span className="rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white">Use reply</span><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">Refine tone</span></div>
+        </div>
+        <div className="feature-ui-card feature-tilt-left absolute bottom-8 left-0 z-10 w-[62%] p-5">
+          <p className="text-xs font-bold uppercase tracking-[0.1em] text-indigo-600">Thread summary</p>
+          <div className="mt-3 space-y-2"><div className="h-2 rounded bg-slate-200" /><div className="h-2 w-5/6 rounded bg-slate-200" /><div className="h-2 w-2/3 rounded bg-slate-200" /></div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="feature-visual-stage">
+      <div className="feature-ui-card feature-tilt-left absolute left-2 top-5 w-[76%] p-6">
+        <p className="text-sm font-semibold text-midnight">Conversation stream</p>
+        <div className="mt-5 grid gap-3">
+          <div className="max-w-[78%] rounded-2xl rounded-tl-md bg-slate-100 px-4 py-3 text-sm text-slate-700">I need help with our workspace setup.</div>
+          <div className="ml-auto max-w-[82%] rounded-2xl rounded-tr-md bg-indigo-600 px-4 py-3 text-sm text-white">I’m here. Let’s get your team flowing today.</div>
+        </div>
+      </div>
+      <div className="feature-ui-card feature-tilt-right absolute bottom-8 right-2 z-10 w-[58%] p-5">
+        <p className="text-xs font-bold uppercase tracking-[0.1em] text-indigo-600">Agent context</p>
+        <div className="mt-4 grid gap-2"><div className="rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-600">Priority: High</div><div className="rounded-lg bg-indigo-50 px-3 py-2 text-sm text-indigo-700">Intent: onboarding</div></div>
+      </div>
+    </div>
+  );
+}
+
+function AsymmetricFeatureBlock({ feature, index }: { feature: (typeof asymmetricFeatures)[number]; index: number }): JSX.Element {
+  return (
+    <section className={cx("reveal-on-scroll overflow-hidden", feature.bg)}>
+      <div className="mx-auto grid w-full max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-12 lg:gap-10 lg:py-24">
+        <div className={cx("lg:col-span-5", feature.reverse && "lg:order-2 lg:col-start-8")}>
+          <p className="font-sans text-[11px] font-bold uppercase leading-[1.2] tracking-[0.1em] text-indigo-600">{feature.overline}</p>
+          <h2 className="mt-4 font-display text-[1.75rem] font-bold leading-[1.2] tracking-[-0.01em] text-midnight">{feature.title}</h2>
+          <p className="mt-4 max-w-xl font-sans text-base font-normal leading-[1.6] text-slate-600">{feature.description}</p>
+          <Link to={feature.link} className="mt-6 inline-flex items-center gap-1 text-[15px] font-medium text-indigo-600 hover:underline">
+            Learn more <ArrowRight size={16} />
+          </Link>
+        </div>
+        <div className={cx("lg:col-span-7", feature.reverse && "lg:order-1 lg:col-span-7")}>
+          <ProductVisual type={feature.visual} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FeatureGridSection(): JSX.Element {
+  return (
+    <section className="reveal-on-scroll bg-white">
+      <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:py-24">
+        <div className="mx-auto max-w-[640px] text-center">
+          <p className="font-sans text-[11px] font-bold uppercase leading-[1.2] tracking-[0.1em] text-indigo-600">EVERYTHING YOU NEED</p>
+          <h2 className="mt-4 font-display text-[clamp(1.5rem,2.5vw+0.5rem,2.25rem)] font-bold leading-[1.15] tracking-[-0.02em] text-midnight">Built for the rhythm of real conversations</h2>
+        </div>
+        <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {featureCards.map((feature, index) => (
+            <article key={feature.title} className={cx("reveal-child feature-card", index % 2 === 1 && "bg-indigo-50")} style={{ transitionDelay: `${index * 80}ms` }}>
+              <div className="grid h-14 w-14 place-items-center rounded-lg bg-indigo-50 text-indigo-600"><feature.icon size={48} strokeWidth={1.75} /></div>
+              <h3 className="mt-6 font-display text-[1.375rem] font-semibold leading-[1.3] text-midnight">{feature.title}</h3>
+              <p className="mt-3 line-clamp-2 text-sm leading-[1.5] text-slate-600">{feature.description}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FeatureTabsSection(): JSX.Element {
+  const [activeTab, setActiveTab] = useState(0);
+  const active = featureTabs[activeTab];
+
+  return (
+    <section className="reveal-on-scroll bg-[var(--gradient-surface)]">
+      <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:py-24">
+        <div className="flex flex-wrap justify-center gap-x-8 gap-y-3 border-b border-slate-200">
+          {featureTabs.map((tab, index) => (
+            <button
+              key={tab.label}
+              type="button"
+              onClick={() => setActiveTab(index)}
+              className={cx("relative pb-4 text-[15px] font-semibold transition-colors duration-300", activeTab === index ? "text-indigo-600" : "text-slate-500 hover:text-slate-700")}
+            >
+              {tab.label}
+              <span className={cx("absolute bottom-[-1px] left-0 h-[3px] w-full rounded-full bg-indigo-600 transition-transform duration-300", activeTab === index ? "scale-x-100" : "scale-x-0")} />
+            </button>
+          ))}
+        </div>
+        <div key={active.label} className="feature-tab-panel mt-12 grid items-center gap-10 lg:grid-cols-12">
+          <div className="lg:col-span-5">
+            <h2 className="font-display text-[1.75rem] font-semibold leading-[1.2] tracking-[-0.01em] text-midnight">{active.title}</h2>
+            <p className="mt-4 text-base leading-[1.6] text-slate-600">{active.description}</p>
+            <Link to={active.cta} className="mt-6 inline-flex items-center gap-1 text-[15px] font-medium text-indigo-600 hover:underline">Explore {active.label.toLowerCase()} <ArrowRight size={16} /></Link>
+          </div>
+          <div className="lg:col-span-7">
+            <div className="feature-tab-card">
+              <div className="flex items-center justify-between"><p className="text-sm font-semibold text-midnight">{active.label} workspace</p><span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600">Live view</span></div>
+              <div className="mt-8 grid gap-6 sm:grid-cols-[0.8fr_1.2fr]">
+                <div className="rounded-2xl bg-indigo-600 p-5 text-white"><div className="font-display text-4xl font-bold">{active.stat}</div><p className="mt-2 text-sm text-white/80">{active.caption}</p></div>
+                <div className="grid gap-3">{["Conversation captured", "Team routed", "Next step created"].map((item) => <div key={item} className="flex items-center gap-3 rounded-xl bg-slate-50 p-3 text-sm font-medium text-slate-600"><CheckCircle2 className="text-indigo-600" size={18} />{item}</div>)}</div>
               </div>
-            </Card>
+            </div>
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+function HomeFeatureSections(): JSX.Element {
+  return (
+    <>
+      {asymmetricFeatures.map((feature, index) => <AsymmetricFeatureBlock key={feature.title} feature={feature} index={index} />)}
+      <FeatureGridSection />
+      <FeatureTabsSection />
+    </>
   );
 }
 
@@ -317,7 +500,7 @@ function IntegrationsSection(): JSX.Element {
     <section className="border-y border-navy-100/60 bg-white dark:border-navy-800/60 dark:bg-navy-900/20">
       <div className="mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 sm:py-28">
         <div className="text-center">
-          <Pill tone="orange" className="rounded-full">Integrations</Pill>
+          <Pill tone="brand" className="rounded-full">Integrations</Pill>
           <h2 className="font-display mt-4 text-3xl font-extrabold tracking-tight text-navy-700 sm:text-4xl dark:text-white">200+ integrations</h2>
           <p className="mx-auto mt-3 max-w-2xl text-base text-navy-500 dark:text-navy-400">Connect FlowLyra to the tools your team already uses.</p>
         </div>
@@ -343,7 +526,7 @@ function TestimonialsSection(): JSX.Element {
     <section className="bg-navy-50/50 dark:bg-navy-950/30">
       <div className="mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 sm:py-28">
         <div className="text-center">
-          <Pill tone="orange" className="rounded-full">Testimonials</Pill>
+          <Pill tone="brand" className="rounded-full">Testimonials</Pill>
           <h2 className="font-display mt-4 text-3xl font-extrabold tracking-tight text-navy-700 sm:text-4xl dark:text-white">Loved by support teams everywhere</h2>
         </div>
         <div className="mt-12 grid gap-6 md:grid-cols-3">
@@ -385,7 +568,7 @@ function PricingPreviewSection(): JSX.Element {
   return (
     <section className="mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 sm:py-28">
       <div className="text-center">
-        <Pill tone="orange" className="rounded-full">Pricing</Pill>
+        <Pill tone="brand" className="rounded-full">Pricing</Pill>
         <h2 className="font-display mt-4 text-3xl font-extrabold tracking-tight text-navy-700 sm:text-4xl dark:text-white">Simple, transparent pricing</h2>
         <p className="mx-auto mt-3 max-w-2xl text-base text-navy-500 dark:text-navy-400">Start free. No credit card required.</p>
       </div>
@@ -480,6 +663,30 @@ function CTASection(): JSX.Element {
    ================================================================ */
 
 export function HomePage(): JSX.Element {
+  useEffect(() => {
+    const elements = Array.from(document.querySelectorAll<HTMLElement>(".reveal-on-scroll"));
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      elements.forEach((element) => element.classList.add("is-visible"));
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.16 },
+    );
+
+    elements.forEach((element) => observer.observe(element));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="min-h-screen bg-white font-sans text-navy-700 dark:bg-navy-950 dark:text-navy-100">
       <MarketingNavigation />
@@ -524,30 +731,7 @@ export function HomePage(): JSX.Element {
         {/* Social proof marquee */}
         <SocialProofBar />
 
-        {/* Feature: Increase Sales */}
-        <FeatureRow
-          accent="Increase Sales"
-          title="Turn conversations into revenue"
-          subtitle="Engage visitors with targeted messages, product recommendations, and proactive outreach that drives conversions."
-          features={salesFeatures}
-        />
-
-        {/* Feature: Improve Satisfaction */}
-        <FeatureRow
-          accent="Improve Satisfaction"
-          title="Deliver exceptional support experiences"
-          subtitle="Unify every conversation in one inbox, access full customer context, and respond faster than ever."
-          features={satisfactionFeatures}
-          reversed
-        />
-
-        {/* Feature: AI Automation */}
-        <FeatureRow
-          accent="Automate with AI"
-          title="Let AI handle the heavy lifting"
-          subtitle="From drafting replies to building chatbots, FlowLyra's AI tools reduce repetitive work so your team can focus on what matters."
-          features={aiFeatures}
-        />
+        <HomeFeatureSections />
 
         {/* Integrations */}
         <IntegrationsSection />
