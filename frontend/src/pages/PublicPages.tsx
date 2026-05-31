@@ -521,41 +521,101 @@ function IntegrationsSection(): JSX.Element {
   );
 }
 
+const voiceCards = [
+  { company: "NOVA RETAIL", stat: "43% faster responses", quote: "Flowlyra cut our first-response time in half. Customers notice.", name: "Sarah Chen", title: "VP Customer Experience" },
+  { company: "GROWTHSTACK", stat: "2.5x more sales", quote: "We switched from our old helpdesk and the difference was immediate. Our team actually enjoys using this.", name: "Marcus Rodriguez", title: "Head of Sales" },
+  { company: "NORDIC SAAS", quote: "The AI suggestions are subtle but brilliant. Agents accept them 80% of the time without editing, and the replies still sound like us.", name: "Emma Johansson", title: "COO" },
+  { company: "BRIGHTLINE", stat: "98% satisfaction rate", quote: "Setup took 15 minutes. Not days. Not weeks. Fifteen minutes.", name: "Priya Nair", title: "Support Operations Lead" },
+  { company: "ATLAS WORKS", quote: "Our CSAT went from 3.8 to 4.6 in the first quarter. The biggest change was giving agents context before they answered.", name: "Daniel Park", title: "Director of Support" },
+  { company: "KINSHIP LABS", quote: "Finally a support tool that doesn't feel like it was built in 2010.", name: "Maya Thompson", title: "Founder" },
+  { company: "VECTRA CLOUD", stat: "60% less ticket volume", quote: "The routing rules alone saved us two headcount worth of manual triage work. It is calmer, faster, and easier to manage.", name: "Owen Miller", title: "Revenue Operations" },
+  { company: "PULSE COMMERCE", quote: "We process 3,000 chats a day across 4 teams. Flowlyra doesn't even blink.", name: "Leah Williams", title: "Customer Care Manager" },
+  { company: "MERCURY FINTECH", quote: "The handoff from bot to human feels seamless. Customers don't have to repeat themselves, and agents start with the full story.", name: "Jon Bell", title: "CX Systems Manager" },
+];
+
+const homeStats = [
+  { value: 10000, suffix: "+", label: "support teams worldwide" },
+  { value: 4.8, suffix: "/5", label: "average customer satisfaction", decimals: 1 },
+  { value: 30, prefix: "<", suffix: "s", label: "average first response time" },
+  { value: 99.9, suffix: "%", label: "platform uptime", decimals: 1 },
+];
+
+function CountUpStat({ value, prefix = "", suffix = "", decimals = 0 }: { value: number; prefix?: string; suffix?: string; decimals?: number }): JSX.Element {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setDisplayValue(value);
+      return;
+    }
+
+    let frame = 0;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        const start = performance.now();
+        const tick = (now: number) => {
+          const progress = Math.min((now - start) / 800, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          setDisplayValue(value * eased);
+          if (progress < 1) frame = requestAnimationFrame(tick);
+        };
+        frame = requestAnimationFrame(tick);
+        observer.disconnect();
+      },
+      { threshold: 0.45 },
+    );
+
+    observer.observe(node);
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+    };
+  }, [value]);
+
+  const formatted = decimals > 0 ? displayValue.toFixed(decimals) : Math.round(displayValue).toLocaleString();
+  return <span ref={ref}>{prefix}{formatted}{suffix}</span>;
+}
+
+function VoiceCard({ card, index }: { card: (typeof voiceCards)[number]; index: number }): JSX.Element {
+  return (
+    <article className="voice-card reveal-child" style={{ transitionDelay: `${index * 80}ms` }}>
+      <div className="flex h-6 items-center font-sans text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{card.company}</div>
+      {card.stat && <div className="mt-5 font-display text-[2rem] font-bold leading-tight tracking-[-0.02em] text-indigo-600">{card.stat}</div>}
+      <div className="mt-5 font-display text-5xl leading-none text-indigo-200" aria-hidden="true">&ldquo;</div>
+      <p className="-mt-2 font-sans text-base font-normal italic leading-[1.6] text-slate-700">{card.quote}</p>
+      <div className="mt-6 border-t border-slate-200 pt-4">
+        <p className="text-sm font-semibold text-midnight">{card.name}</p>
+        <p className="mt-1 text-sm font-normal text-slate-500">{card.title}, {card.company}</p>
+      </div>
+    </article>
+  );
+}
+
 function TestimonialsSection(): JSX.Element {
   return (
-    <section className="bg-navy-50/50 dark:bg-navy-950/30">
-      <div className="mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 sm:py-28">
-        <div className="text-center">
-          <Pill tone="brand" className="rounded-full">Testimonials</Pill>
-          <h2 className="font-display mt-4 text-3xl font-extrabold tracking-tight text-navy-700 sm:text-4xl dark:text-white">Loved by support teams everywhere</h2>
+    <section className="reveal-on-scroll bg-slate-50">
+      <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:py-24">
+        <div className="mx-auto max-w-[600px] text-center">
+          <p className="font-sans text-[11px] font-bold uppercase leading-[1.2] tracking-[0.1em] text-indigo-600">WHAT TEAMS SAY</p>
+          <h2 className="mt-4 font-display text-[clamp(1.75rem,3.5vw+0.75rem,3rem)] font-bold leading-[1.1] tracking-[-0.025em] text-midnight">Real results from real teams</h2>
         </div>
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
-          {testimonials.map((t) => (
-            <Card key={t.name} className="p-6 dark:bg-navy-800/60 dark:border-navy-700/50">
-              <div className="flex gap-0.5">
-                {Array.from({ length: t.rating }).map((_, i) => <Star key={i} size={16} className="fill-brand-400 text-brand-400" />)}
-              </div>
-              <p className="mt-4 text-sm leading-7 text-navy-600 dark:text-navy-300">&ldquo;{t.quote}&rdquo;</p>
-              <div className="mt-5 flex items-center gap-3 border-t border-navy-100 pt-4 dark:border-navy-700/50">
-                <div className="grid h-10 w-10 place-items-center rounded-full bg-brand-100 text-sm font-bold text-brand-600 dark:bg-brand-900/30 dark:text-brand-400">{t.name[0]}</div>
-                <div>
-                  <div className="text-sm font-bold text-navy-700 dark:text-white">{t.name}</div>
-                  <div className="text-xs text-navy-400">{t.role}, {t.company}</div>
-                </div>
-              </div>
-            </Card>
-          ))}
+
+        <div className="voice-masonry mt-12">
+          {voiceCards.map((card, index) => <VoiceCard key={`${card.company}-${card.name}`} card={card} index={index} />)}
         </div>
-        <div className="mt-12 grid grid-cols-2 gap-6 md:grid-cols-4">
-          {[
-            { stat: "35,000+", label: "Companies" },
-            { stat: "98%", label: "Customer satisfaction" },
-            { stat: "2.4s", label: "Avg. response time" },
-            { stat: "24/7", label: "Availability" },
-          ].map((s) => (
-            <div key={s.label} className="text-center">
-              <div className="font-display text-3xl font-extrabold gradient-text">{s.stat}</div>
-              <div className="mt-1 text-sm font-semibold text-navy-400">{s.label}</div>
+
+        <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {homeStats.map((stat, index) => (
+            <div key={stat.label} className="reveal-child stat-card" style={{ transitionDelay: `${index * 80}ms` }}>
+              <div className="font-display text-[clamp(1.5rem,2.5vw+0.5rem,2.25rem)] font-bold leading-[1.15] tracking-[-0.02em] text-indigo-600">
+                <CountUpStat value={stat.value} prefix={stat.prefix} suffix={stat.suffix} decimals={stat.decimals} />
+              </div>
+              <p className="mt-2 text-sm font-normal leading-[1.5] text-slate-500">{stat.label}</p>
             </div>
           ))}
         </div>

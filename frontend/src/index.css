@@ -461,3 +461,39 @@ html.dark .chat-bubble-note {
     transform: none;
   }
 }
+
+/* ============================================
+   Section 17 Voice Cards + Stats
+   ============================================ */
+.voice-masonry {
+  column-count: 1;
+  column-gap: var(--space-6);
+}
+
+@media (min-width: 768px) {
+  .voice-masonry { column-count: 2; }
+}
+
+@media (min-width: 1024px) {
+  .voice-masonry { column-count: 3; }
+}
+
+.voice-card {
+  display: inline-block;
+  width: 100%;
+  break-inside: avoid;
+  margin-bottom: var(--space-6);
+  background: #FFFFFF;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-card {
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  background: #FFFFFF;
+  padding: var(--space-6);
+  text-align: center;
+}
