@@ -1,8 +1,8 @@
 import {
-  ArrowRight, BarChart3, Bot, Check, CheckCircle2, ChevronDown, ChevronRight, CreditCard, Globe2,
-  Headphones, Layers3, LifeBuoy, LineChart, Lock, Mail, MessageCircle, MessageSquareText,
-  Network, Paperclip, Play, ShieldCheck, Sparkles, Star, TrendingUp, Truck, Users, Workflow,
-  Zap, Send, type LucideIcon,
+  ArrowRight, BarChart3, Bot, Check, CheckCircle2, ChevronDown, ChevronRight, CreditCard, Github, Globe2,
+  Headphones, Layers3, LifeBuoy, LineChart, Linkedin, Lock, Mail, MessageCircle, MessageSquareText,
+  Network, Paperclip, Play, ShieldCheck, Sparkles, Star, TrendingUp, Truck, Twitter, Users, Workflow,
+  Youtube, Zap, Send, type LucideIcon,
 } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -113,15 +113,79 @@ function Metric({ label, value }: { label: string; value: string }): JSX.Element
   );
 }
 
+const footerColumns = [
+  {
+    title: "Product",
+    links: [
+      { to: "/features", label: "Features" },
+      { to: "/pricing", label: "Pricing" },
+      { to: "/integrations", label: "Integrations" },
+      { to: "/product-tour", label: "Product Tour" },
+      { to: "/blog", label: "What\'s New" },
+      { to: "/help", label: "API & Developers" },
+    ],
+  },
+  {
+    title: "Solutions",
+    links: [
+      { to: "/solutions/customer-support", label: "Customer Support" },
+      { to: "/solutions/sales-marketing", label: "Sales & Marketing" },
+      { to: "/solutions/enterprise", label: "Enterprise" },
+      { to: "/integrations", label: "Ecommerce" },
+    ],
+  },
+  {
+    title: "Resources",
+    links: [
+      { to: "/help", label: "Help Center" },
+      { to: "/blog", label: "Blog" },
+      { to: "/status", label: "Status" },
+      { to: "/customers", label: "Community" },
+      { to: "/contact", label: "Contact" },
+    ],
+  },
+  {
+    title: "Company",
+    links: [
+      { to: "/customers", label: "About" },
+      { to: "/blog", label: "Careers" },
+      { to: "/terms", label: "Legal" },
+      { to: "/privacy", label: "Privacy" },
+      { to: "/terms", label: "Terms" },
+    ],
+  },
+];
+
+const socialLinks = [
+  { href: "#", label: "X", icon: Twitter },
+  { href: "#", label: "LinkedIn", icon: Linkedin },
+  { href: "#", label: "GitHub", icon: Github },
+  { href: "#", label: "YouTube", icon: Youtube },
+];
+
+function FlowlyraReverseLogo(): JSX.Element {
+  return (
+    <Link to="/" className="inline-flex items-center gap-2.5" aria-label="Flowlyra home">
+      <span className="grid h-10 w-10 place-items-center rounded-xl bg-white/10 ring-1 ring-white/15">
+        <svg viewBox="0 0 36 36" aria-hidden="true" className="h-7 w-7">
+          <path d="M7 14.5C10.2 8.8 17.7 7.8 22.1 11.8l2.1 1.9c1.7 1.5 4.1 1.2 5.8-.6" fill="none" stroke="currentColor" strokeWidth="4.2" strokeLinecap="round" />
+          <path d="M6 22.2c3.5 5.4 11.2 6.2 15.4 1.9l2.2-2.2c1.6-1.6 4.2-1.5 6.2.2" fill="none" stroke="currentColor" strokeWidth="4.2" strokeLinecap="round" />
+        </svg>
+      </span>
+      <span className="font-sans text-xl font-semibold tracking-[-0.02em] text-white">Flowlyra</span>
+    </Link>
+  );
+}
+
 function FooterColumn({ title, links }: { title: string; links: Array<{ to: string; label: string }> }): JSX.Element {
   return (
     <div>
-      <h2 className="text-sm font-black uppercase tracking-wide text-navy-400">{title}</h2>
-      <div className="mt-3 grid gap-2">
+      <h2 className="text-[13px] font-semibold uppercase leading-[1.2] tracking-[0.1em] text-slate-400">{title}</h2>
+      <nav className="mt-5 grid gap-0" aria-label={`${title} footer links`}>
         {links.map((link) => (
-          <Link key={link.to} to={link.to} className="text-sm font-medium text-navy-400 hover:text-white transition-colors">{link.label}</Link>
+          <Link key={`${title}-${link.label}`} to={link.to} className="flex min-h-8 items-center text-sm font-normal text-slate-300 transition-colors duration-200 hover:text-white">{link.label}</Link>
         ))}
-      </div>
+      </nav>
     </div>
   );
 }
@@ -132,31 +196,25 @@ function FooterColumn({ title, links }: { title: string; links: Array<{ to: stri
 
 function SiteFooter(): JSX.Element {
   return (
-    <footer className="bg-navy-900 text-navy-300" role="contentinfo">
-      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-6">
-        <div className="lg:col-span-1">
-          <Link to="/" className="inline-flex items-center gap-2.5">
-            <img src={flowlyraMark} alt="" className="h-9 w-9 rounded-xl" />
-            <span className="font-display text-lg font-extrabold text-white">FlowLyra</span>
-          </Link>
-          <p className="mt-4 text-sm leading-6 text-navy-400">Conversations that move.</p>
-          {/* Social icons */}
-          <div className="mt-5 flex gap-3">
-            {["X", "Li", "Gh", "Yt"].map((s) => (
-              <span key={s} className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-white/5 text-xs font-bold text-navy-400 hover:bg-white/10 hover:text-white transition-colors cursor-pointer">{s}</span>
+    <footer className="bg-midnight text-slate-300" role="contentinfo">
+      <div className="mx-auto grid w-full max-w-7xl gap-12 px-4 pb-12 pt-24 sm:px-6 md:grid-cols-2 lg:grid-cols-[1.35fr_repeat(4,1fr)]">
+        <div className="md:col-span-2 lg:col-span-1">
+          <FlowlyraReverseLogo />
+          <p className="mt-5 max-w-[280px] text-sm font-normal leading-[1.5] text-slate-400">AI-augmented live chat &amp; customer support platform</p>
+        </div>
+        {footerColumns.map((column) => <FooterColumn key={column.title} title={column.title} links={column.links} />)}
+      </div>
+
+      <div className="border-t border-[rgba(148,163,184,0.2)]">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-5 px-4 py-6 text-center sm:px-6 md:flex-row md:text-left">
+          <p className="text-xs font-medium leading-[1.4] text-slate-500">© 2026 Flowlyra. All rights reserved.</p>
+          <div className="flex items-center gap-4">
+            {socialLinks.map(({ href, label, icon: Icon }) => (
+              <a key={label} href={href} aria-label={label} className="text-slate-500 transition-all duration-200 hover:scale-110 hover:text-white">
+                <Icon size={20} aria-hidden="true" />
+              </a>
             ))}
           </div>
-        </div>
-        <FooterColumn title="Product" links={[{ to: "/features", label: "Features" }, { to: "/pricing", label: "Pricing" }, { to: "/integrations", label: "Integrations" }, { to: "/product-tour", label: "Product Tour" }, { to: "/help", label: "Help Center" }]} />
-        <FooterColumn title="Solutions" links={solutionLinks} />
-        <FooterColumn title="Resources" links={[{ to: "/customers", label: "Customers" }, { to: "/blog", label: "Blog" }, { to: "/help", label: "Documentation" }, { to: "/help", label: "API Reference" }]} />
-        <FooterColumn title="Company" links={[{ to: "/contact", label: "Contact" }, { to: "/customers", label: "About" }, { to: "/status", label: "Status" }, { to: "/blog", label: "Careers" }]} />
-        <FooterColumn title="Legal" links={[{ to: "/privacy", label: "Privacy" }, { to: "/terms", label: "Terms" }, { to: "/privacy", label: "Security" }, { to: "/terms", label: "Cookies" }]} />
-      </div>
-      <div className="border-t border-white/5">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 py-5 sm:flex-row sm:px-6">
-          <p className="text-xs text-navy-400">&copy; {new Date().getFullYear()} FlowLyra. All rights reserved.</p>
-          <p className="text-xs text-navy-400">Built with care for customer-obsessed teams.</p>
         </div>
       </div>
     </footer>
@@ -762,40 +820,17 @@ function PricingPreviewSection(): JSX.Element {
 }
 
 function CTASection(): JSX.Element {
-  const [email, setEmail] = useState("");
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-brand-500 via-brand-600 to-brand-700">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.15),transparent_50%)]" />
-      <div className="relative mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 sm:py-28">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="font-display text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
-            Ready to transform your customer conversations?
-          </h2>
-          <p className="mt-4 text-base leading-7 text-brand-100">
-            Join 10,000+ support teams using Flowlyra to deliver exceptional customer experiences.
-          </p>
-          <form
-            className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center"
-            onSubmit={(e) => { e.preventDefault(); toast.success("Welcome! Check your email."); setEmail(""); }}
-          >
-            <input
-              type="email"
-              required
-              placeholder="Enter your work email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="h-12 w-full rounded-xl border-2 border-white/20 bg-white/10 px-4 text-sm text-white placeholder-white/60 backdrop-blur-sm outline-none transition-all focus:border-white/40 focus:ring-4 focus:ring-white/10 sm:max-w-sm"
-              aria-label="Work email"
-            />
-            <button
-              type="submit"
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-white px-6 text-sm font-bold text-brand-600 shadow-lg transition-all hover:bg-brand-50 hover:shadow-xl sm:w-auto"
-            >
-              Start free trial <ArrowRight size={16} />
-            </button>
-          </form>
-          <p className="mt-4 text-xs text-brand-200">No credit card required. 14-day free trial on all plans.</p>
-        </div>
+    <section className="bg-[var(--gradient-brand)]">
+      <div className="mx-auto flex w-full max-w-7xl flex-col items-center px-4 py-20 text-center sm:px-6">
+        <h2 className="font-display text-[clamp(1.5rem,2.5vw+0.5rem,2.25rem)] font-bold leading-[1.15] tracking-[-0.02em] text-white">Ready to let conversations flow?</h2>
+        <p className="mt-4 text-[1.125rem] font-normal leading-[1.7] text-white/80">Start your 14-day free trial. No credit card required.</p>
+        <Link
+          to="/signup"
+          className="mt-8 inline-flex h-[52px] items-center justify-center rounded-xl bg-white px-8 py-3.5 text-base font-bold text-indigo-600 shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-glow-indigo focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/30 active:scale-[0.97]"
+        >
+          Start flowing free
+        </Link>
       </div>
     </section>
   );
