@@ -2,16 +2,17 @@ import {
   ArrowRight, Bot, CheckCircle2, ChevronDown, ChevronRight, CreditCard, Globe2,
   Headphones, Layers3, LifeBuoy, LineChart, Lock, Mail, MessageSquareText,
   Network, Play, ShieldCheck, Sparkles, Star, TrendingUp, Truck, Users, Workflow,
-  Zap, Menu, X, Send, type LucideIcon,
+  Zap, Send, type LucideIcon,
 } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import { Link, NavLink, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button, Card, Pill, cx } from "../components/ui";
 import flowlyraLogo from "../assets/flowlyra-logo.svg";
 import flowlyraMark from "../assets/flowlyra-mark.svg";
 import { api } from "../lib/api";
 import { useAuthStore } from "../stores/authStore";
+import { MarketingNavigation } from "../components/MarketingNavigation";
 
 /* ================================================================
    DATA
@@ -122,97 +123,6 @@ function FooterColumn({ title, links }: { title: string; links: Array<{ to: stri
         ))}
       </div>
     </div>
-  );
-}
-
-/* ================================================================
-   SITE HEADER (shared by Home & Pricing standalone pages)
-   ================================================================ */
-
-function SiteHeader(): JSX.Element {
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  return (
-    <header
-      className={cx(
-        "sticky top-0 z-50 w-full transition-all duration-300",
-        scrolled ? "glass border-b border-white/10 shadow-soft" : "bg-transparent"
-      )}
-      role="banner"
-    >
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3.5 sm:px-6">
-        <Link to="/" className="inline-flex items-center gap-2.5" aria-label="FlowLyra home">
-          <img src={flowlyraMark} alt="" className="h-9 w-9 rounded-xl shadow-lg shadow-brand/20" />
-          <span className="font-display text-xl font-extrabold tracking-tight text-brand-500">FlowLyra</span>
-        </Link>
-
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
-          {topNav.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                cx(
-                  "rounded-xl px-3.5 py-2 text-sm font-semibold transition-colors",
-                  isActive ? "text-brand-500" : "text-navy-500 hover:text-navy-700 dark:text-navy-300 dark:hover:text-white"
-                )
-              }
-            >
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
-
-        <div className="flex items-center gap-3">
-          <Link to="/login" className="hidden text-sm font-semibold text-navy-500 hover:text-navy-700 dark:text-navy-300 dark:hover:text-white sm:inline-flex">Log in</Link>
-          <Link
-            to="/signup"
-            className={cx(
-              "hidden rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow-glow transition-all hover:shadow-glow-lg sm:inline-flex",
-              "bg-brand-500 hover:bg-brand-600"
-            )}
-          >
-            Start free trial
-          </Link>
-          <button
-            type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-navy-500 hover:bg-navy-100 dark:text-navy-300 dark:hover:bg-navy-800 lg:hidden"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Toggle menu"
-            aria-expanded={mobileOpen}
-          >
-            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile menu */}
-      {mobileOpen && (
-        <nav className="glass border-t border-white/10 px-4 pb-4 pt-2 lg:hidden" aria-label="Mobile navigation">
-          {topNav.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              onClick={() => setMobileOpen(false)}
-              className="block rounded-xl px-3 py-3 text-sm font-semibold text-navy-500 hover:bg-navy-100 dark:text-navy-300 dark:hover:bg-navy-800"
-            >
-              {item.label}
-            </Link>
-          ))}
-          <div className="mt-3 flex flex-col gap-2 border-t border-navy-100/60 pt-3 dark:border-navy-700/60">
-            <Link to="/login" onClick={() => setMobileOpen(false)} className="rounded-xl px-3 py-3 text-sm font-semibold text-navy-500 dark:text-navy-300">Log in</Link>
-            <Link to="/signup" onClick={() => setMobileOpen(false)} className="rounded-xl bg-brand-500 px-3 py-3 text-center text-sm font-bold text-white hover:bg-brand-600">Start free trial</Link>
-          </div>
-        </nav>
-      )}
-    </header>
   );
 }
 
@@ -528,7 +438,7 @@ export function HomePage(): JSX.Element {
 
   return (
     <div className="min-h-screen bg-white font-sans text-navy-700 dark:bg-navy-950 dark:text-navy-100">
-      <SiteHeader />
+      <MarketingNavigation />
 
       <main>
         {/* Hero */}
@@ -703,7 +613,7 @@ export function PricingPage(): JSX.Element {
 
   return (
     <div className="min-h-screen bg-white font-sans text-navy-700 dark:bg-navy-950 dark:text-navy-100">
-      <SiteHeader />
+      <MarketingNavigation />
 
       <main>
         {/* Header */}
@@ -841,42 +751,7 @@ export function PricingPage(): JSX.Element {
 function PublicLayout({ title, subtitle, children }: { title: string; subtitle: string; children: JSX.Element | JSX.Element[] }): JSX.Element {
   return (
     <div className="min-h-screen bg-white text-navy-700 dark:bg-navy-950 dark:text-navy-100">
-      <header className="sticky top-0 z-[700] border-b border-navy-100 bg-white/90 backdrop-blur-md dark:border-navy-800 dark:bg-navy-950/90">
-        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
-          <Link to="/" className="inline-flex items-center gap-2" aria-label="FlowLyra home">
-            <img src={flowlyraMark} alt="" className="h-8 w-8 rounded-lg" />
-            <span className="font-display text-lg font-bold text-brand-500">FlowLyra</span>
-          </Link>
-          <nav className="hidden items-center gap-1 lg:flex">
-            {topNav.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className={({ isActive }) => cx("rounded-md px-3 py-2 text-sm font-medium transition-colors", isActive ? "text-brand-500 bg-brand-50" : "text-navy-600 hover:text-navy-700 hover:bg-navy-50 dark:text-navy-300 dark:hover:text-white dark:hover:bg-navy-800")}
-              >
-                {item.label}
-              </NavLink>
-            ))}
-          </nav>
-          <div className="flex items-center gap-2">
-            <Link to="/login"><Button variant="ghost" size="sm">Log in</Button></Link>
-            <Link to="/signup"><Button variant="primary" size="sm" className="shadow-glow hover:shadow-glow-lg">Start free</Button></Link>
-          </div>
-        </div>
-        <div className="border-t border-navy-100/80 lg:hidden dark:border-navy-800/80">
-          <div className="mx-auto flex w-full max-w-7xl gap-2 overflow-x-auto px-4 py-2 sm:px-6">
-            {topNav.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className={({ isActive }) => cx("whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium", isActive ? "bg-brand-500 text-white" : "text-navy-500 hover:bg-navy-50 dark:text-navy-300 dark:hover:bg-navy-800")}
-              >
-                {item.label}
-              </NavLink>
-            ))}
-          </div>
-        </div>
-      </header>
+      <MarketingNavigation />
 
       <main>
         <section className="relative border-b border-navy-100 bg-navy-50 dark:border-navy-800 dark:bg-navy-900/30">
