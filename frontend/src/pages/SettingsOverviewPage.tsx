@@ -40,7 +40,7 @@ export function SettingsOverviewPage(): JSX.Element {
               <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-black uppercase tracking-wide backdrop-blur">
                 <Compass size={14} /> Feature Hub
               </div>
-              <h1 className="font-display text-3xl font-black tracking-tight sm:text-4xl">Find every LiveChat-style feature from one place.</h1>
+              <h1 className="font-display text-3xl font-black tracking-tight sm:text-4xl">Find every Flowlyra feature from one place.</h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-white/85 sm:text-base">
                 Search by normal words like “sneak peek”, “transcript”, “chat limit”, “WhatsApp”, “AI summary”, or “routing”. Each card tells users exactly what the feature does and where to configure it.
               </p>

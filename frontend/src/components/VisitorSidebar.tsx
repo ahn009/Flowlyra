@@ -142,7 +142,7 @@ export function VisitorSidebar(): JSX.Element {
 
         {/* Section 1: Profile */}
         <div className="shrink-0 border-b border-navy-100 px-5 py-5 text-center dark:border-navy-700">
-          <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-orange-100 text-xl font-bold text-orange-600">
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-brand-100 text-xl font-bold text-brand-600 dark:bg-brand-950 dark:text-brand-300">
             {initials(visitorName)}
           </div>
           <div className="mt-3 text-base font-semibold text-navy-700 dark:text-navy-100">{visitorName}</div>

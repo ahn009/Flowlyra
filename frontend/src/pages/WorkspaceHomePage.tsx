@@ -47,7 +47,7 @@ export function WorkspaceHomePage(): JSX.Element {
               </div>
               <h1 className="font-display text-3xl font-black tracking-tight sm:text-4xl">Run support, sales, automation, and reports from one clear home.</h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-white/80 sm:text-base">
-                Start with the setup checklist, then use the product map to jump to the exact LiveChat-style area you need.
+                Start with the setup checklist, then use the product map to jump to any area of Flowlyra you need.
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-3 xl:w-[520px]">

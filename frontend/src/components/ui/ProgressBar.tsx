@@ -13,7 +13,7 @@ const progressBarVariants = cva("relative h-2 w-full overflow-hidden rounded-ful
       brand: "bg-brand-100 dark:bg-brand-900/30",
       green: "bg-green-100 dark:bg-green-900/30",
       red: "bg-red-100 dark:bg-red-900/30",
-      yellow: "bg-yellow-100 dark:bg-yellow-900/30",
+      yellow: "bg-amber-100 dark:bg-amber-900/30",
       blue: "bg-blue-100 dark:bg-blue-900/30",
       gray: "bg-navy-200 dark:bg-navy-600",
     },
@@ -28,7 +28,7 @@ const barColorMap: Record<string, string> = {
   brand: "bg-brand",
   green: "bg-green-500",
   red: "bg-red-500",
-  yellow: "bg-yellow-500",
+  yellow: "bg-amber-400",
   blue: "bg-blue-500",
   gray: "bg-navy-500",
 };
