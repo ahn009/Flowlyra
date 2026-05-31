@@ -261,7 +261,7 @@ export class ChatPanel {
     this.body.querySelector(".cf-typing-wrap")?.remove();
     if (!show) return;
     const node = document.createElement("div");
-    node.className = "cf-msg cf-agent cf-typing-wrap";
+    node.className = "cf-typing-wrap";
     const label = document.createElement("div");
     label.className = "cf-agent-name";
     if (avatarUrl) {
@@ -337,10 +337,10 @@ export class ChatPanel {
     this.fileInput.type = "file";
     this.fileInput.hidden = true;
     const attach = document.createElement("button");
-    attach.className = "cf-btn cf-icon";
+    attach.className = "cf-btn-attach";
     attach.type = "button";
     attach.setAttribute("aria-label", this.i18n.t("attachment.label"));
-    attach.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.4 11.6 12 21a6 6 0 0 1-8.5-8.5l9.8-9.8a4 4 0 1 1 5.7 5.7l-9.8 9.8a2 2 0 1 1-2.8-2.8l8.9-8.9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+    attach.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21.4 11.6 12 21a6 6 0 0 1-8.5-8.5l9.8-9.8a4 4 0 1 1 5.7 5.7l-9.8 9.8a2 2 0 1 1-2.8-2.8l8.9-8.9"/></svg>`;
 
     const emoji = document.createElement("button");
     emoji.className = "cf-btn cf-icon";
@@ -354,9 +354,10 @@ export class ChatPanel {
     gif.textContent = "GIF";
 
     const send = document.createElement("button");
-    send.className = "cf-btn";
+    send.className = "cf-btn-send";
     send.type = "button";
-    send.innerHTML = `${escapeHtml(this.i18n.t("input.send"))}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 14-7-7 14-2-5-5-2Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`;
+    send.setAttribute("aria-label", this.i18n.t("input.send"));
+    send.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>`;
 
     this.input.className = "cf-input";
     this.input.placeholder = this.i18n.t("input.placeholder");
@@ -404,16 +405,25 @@ export class ChatPanel {
 
     const composer = document.createElement("div");
     composer.className = "cf-composer";
-    composer.append(this.input, send, this.fileInput);
+    composer.append(attach, this.input, send, this.fileInput);
 
     row.append(tools, composer);
     this.footer.replaceChildren(row, hint);
+
+    const updateSendState = () => {
+      if (this.input.value.trim()) {
+        send.classList.add("active");
+      } else {
+        send.classList.remove("active");
+      }
+    };
 
     const submit = () => {
       const text = this.input.value.trim();
       if (!text) return;
       this.handlers.onMessage(text);
       this.input.value = "";
+      updateSendState();
     };
     send.addEventListener("click", submit);
     this.input.addEventListener("keydown", (event) => {
@@ -422,7 +432,10 @@ export class ChatPanel {
         submit();
       }
     });
-    this.input.addEventListener("input", () => this.handlers.onPreview(this.input.value));
+    this.input.addEventListener("input", () => {
+      this.handlers.onPreview(this.input.value);
+      updateSendState();
+    });
     attach.addEventListener("click", () => this.fileInput.click());
     this.fileInput.addEventListener("change", () => {
       const file = this.fileInput.files?.[0];

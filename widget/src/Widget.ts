@@ -1089,7 +1089,7 @@ export class Widget implements FlowLyraInstance {
     this.bubble.className = `cf-bubble cf-root cf-pos-${position} cf-theme-${theme}`;
     this.bubble.type = "button";
     this.bubble.setAttribute("aria-label", this.i18n.t("header.title"));
-    this.bubble.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg><span class="cf-badge" hidden>0</span>`;
+    this.bubble.innerHTML = `<svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M4 10 C7 4 11 4 14 10 C17 16 21 16 24 10" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M4 17 C7 11 11 11 14 17 C17 23 21 23 24 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.65"/></svg><span class="cf-badge" hidden>0</span>`;
     this.bubble.addEventListener("click", () => this.toggle());
     document.body.append(this.bubble);
   }
