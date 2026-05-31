@@ -24,7 +24,7 @@ const InboxPage = lazyNamed(() => import("./pages/InboxPage"), "InboxPage");
 const TicketDetailPage = lazyNamed(() => import("./pages/TicketsPage"), "TicketDetailPage");
 const TicketsPage = lazyNamed(() => import("./pages/TicketsPage"), "TicketsPage");
 const AgentsPage = lazyNamed(() => import("./pages/AdminPages"), "AgentsPage");
-const AnalyticsPage = lazyNamed(() => import("./pages/AdminPages"), "AnalyticsPage");
+const AnalyticsPage = lazyNamed(() => import("./pages/AnalyticsDashboardPage"), "AnalyticsPage");
 const BillingPage = lazyNamed(() => import("./pages/AdminPages"), "BillingPage");
 const CannedResponsesPage = lazyNamed(() => import("./pages/AdminPages"), "CannedResponsesPage");
 const InstallPage = lazyNamed(() => import("./pages/AdminPages"), "InstallPage");
