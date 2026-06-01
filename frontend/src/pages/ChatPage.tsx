@@ -136,6 +136,8 @@ export function ChatPage(): JSX.Element {
   const [chatListView, setChatListView] = useState<ChatListView>("my");
   const [chatListSearch, setChatListSearch] = useState("");
   const [visitorPanelOpen, setVisitorPanelOpen] = useState(false);
+  const [headerMoreOpen, setHeaderMoreOpen] = useState(false);
+  const [toolbarMoreOpen, setToolbarMoreOpen] = useState(false);
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -534,21 +536,65 @@ export function ChatPage(): JSX.Element {
                 </div>
               </div>
             </div>
-            <div className="flex shrink-0 items-center gap-1">
+            <div className="flex shrink-0 items-center gap-1.5">
               <button
                 className={`flex h-8 w-8 items-center justify-center rounded-md transition hover:bg-navy-50 ${visitorPanelOpen ? "bg-brand-50 text-brand-500" : "text-navy-400 hover:text-navy-600"}`}
                 title="Visitor details"
                 onClick={() => setVisitorPanelOpen((v) => !v)}
-              ><UserRound size={15} /></button>
-              <button className="flex h-8 w-8 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-50 hover:text-navy-600" title="Copy link"><Link2 size={15} /></button>
-              <button className="flex h-8 w-8 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-50 hover:text-navy-600" title="More options"><MoreHorizontal size={15} /></button>
-              <div className="mx-1 h-4 w-px bg-navy-100" />
-              <button className="flex h-8 w-8 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-50 hover:text-navy-600" onClick={() => void startCall("video")} title="Video call"><Video size={15} /></button>
-              <button className="flex h-8 w-8 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-50 hover:text-navy-600" onClick={() => void startCall("screen")} title="Screen share"><ScreenShare size={15} /></button>
-              <button className="flex h-8 w-8 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-50 hover:text-navy-600" onClick={() => setAssignModal(true)} title="Assign"><UserRound size={15} /></button>
-              <button className="flex h-8 items-center gap-1 rounded-md px-2 text-xs font-semibold text-navy-400 transition hover:bg-navy-50 hover:text-navy-600" onClick={() => void downloadTranscript()} title="Download transcript"><Link2 size={14} /> Transcript</button>
-              <button className="flex h-8 items-center gap-1 rounded-md px-2 text-xs font-semibold text-navy-400 transition hover:bg-navy-50 hover:text-navy-600" onClick={() => void emailTranscript()} title="Email transcript"><MessageSquare size={14} /> Email</button>
-              <div className="mx-1 h-4 w-px bg-navy-100" />
+              >
+                <UserRound size={15} />
+              </button>
+              <button className="flex h-8 w-8 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-50 hover:text-navy-600" title="Copy link">
+                <Link2 size={15} />
+              </button>
+              <div className="relative">
+                <button
+                  className={`flex h-8 w-8 items-center justify-center rounded-md transition hover:bg-navy-50 ${headerMoreOpen ? "bg-navy-50 text-navy-600" : "text-navy-400 hover:text-navy-600"}`}
+                  title="More options"
+                  onClick={() => setHeaderMoreOpen((v) => !v)}
+                >
+                  <MoreHorizontal size={15} />
+                </button>
+                {headerMoreOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setHeaderMoreOpen(false)} />
+                    <div className="absolute right-0 top-full z-50 mt-1 w-52 rounded-xl border border-navy-100 bg-white py-1 shadow-lg">
+                      <button
+                        className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-navy-600 hover:bg-navy-50"
+                        onClick={() => { void startCall("video"); setHeaderMoreOpen(false); }}
+                      >
+                        <Video size={15} className="shrink-0 text-navy-400" /> Video call
+                      </button>
+                      <button
+                        className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-navy-600 hover:bg-navy-50"
+                        onClick={() => { void startCall("screen"); setHeaderMoreOpen(false); }}
+                      >
+                        <ScreenShare size={15} className="shrink-0 text-navy-400" /> Screen share
+                      </button>
+                      <button
+                        className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-navy-600 hover:bg-navy-50"
+                        onClick={() => { setAssignModal(true); setHeaderMoreOpen(false); }}
+                      >
+                        <UserRound size={15} className="shrink-0 text-navy-400" /> Assign chat
+                      </button>
+                      <div className="mx-3 my-1 h-px bg-navy-100" />
+                      <button
+                        className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-navy-600 hover:bg-navy-50"
+                        onClick={() => { void downloadTranscript(); setHeaderMoreOpen(false); }}
+                      >
+                        <Link2 size={15} className="shrink-0 text-navy-400" /> Download transcript
+                      </button>
+                      <button
+                        className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-navy-600 hover:bg-navy-50"
+                        onClick={() => { void emailTranscript(); setHeaderMoreOpen(false); }}
+                      >
+                        <MessageSquare size={15} className="shrink-0 text-navy-400" /> Email transcript
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+              <div className="mx-0.5 h-4 w-px bg-navy-100" />
               <button
                 className="flex items-center gap-1.5 rounded-lg bg-success-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-success-700"
                 onClick={() => quickAction.mutate({ path: `/chats/${id}/resolve` })}
@@ -587,39 +633,29 @@ export function ChatPage(): JSX.Element {
           )}
 
           {/* Messages */}
-          <div className="min-h-0 flex-1 overflow-y-auto bg-navy-50/50 px-5 py-4">
-            {messages.length > 0 ? messages.map((message) => (
-              <MessageRow
-                key={message.id}
-                message={message}
-                currentUserId={me?.id}
-                onReact={(emoji) => reactMessage.mutate({ messageId: message.id, emoji })}
-                onEdit={(content) => editMessage.mutate({ messageId: message.id, content })}
-                onDelete={() => deleteMessage.mutate(message.id)}
-              />
-            )) : <EmptyConversation />}
+          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
+            {messages.length > 0 ? messages.map((message, idx) => {
+              const prev = messages[idx - 1];
+              const next = messages[idx + 1];
+              const isFirstInGroup = !prev || prev.is_internal || message.is_internal
+                || (prev.sender_type ?? "") !== (message.sender_type ?? "");
+              const isLastInGroup = !next || next.is_internal || message.is_internal
+                || (next.sender_type ?? "") !== (message.sender_type ?? "");
+              return (
+                <MessageRow
+                  key={message.id}
+                  message={message}
+                  currentUserId={me?.id}
+                  isFirstInGroup={isFirstInGroup}
+                  isLastInGroup={isLastInGroup}
+                  senderName={message.sender_type !== "agent" ? (data?.visitor_name || data?.visitor_email || "Visitor") : undefined}
+                  onReact={(emoji) => reactMessage.mutate({ messageId: message.id, emoji })}
+                  onEdit={(content) => editMessage.mutate({ messageId: message.id, content })}
+                  onDelete={() => deleteMessage.mutate(message.id)}
+                />
+              );
+            }) : <EmptyConversation />}
           </div>
-
-          {/* AI Suggestions */}
-          {suggestions.length > 0 && (
-            <div className="shrink-0 border-t border-navy-100 bg-white px-4 py-2.5">
-              <div className="mb-1.5 flex items-center gap-1.5">
-                <Sparkles size={12} className="text-purple-500" />
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-purple-500">AI suggestions</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {suggestions.map((item) => (
-                  <button
-                    key={item}
-                    onClick={() => setReply(item)}
-                    className="max-w-[220px] truncate rounded-full border border-purple-200 bg-purple-50 px-3 py-1.5 text-xs font-medium text-purple-700 transition hover:border-purple-300 hover:bg-purple-100"
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Input area */}
           <div className="shrink-0 border-t border-navy-100 bg-white">
@@ -701,6 +737,27 @@ export function ChatPage(): JSX.Element {
               </div>
             )}
 
+            {/* AI Suggestion Banner */}
+            {suggestions.length > 0 && (
+              <div className="mx-4 mb-2 rounded-lg border border-brand-100 bg-brand-50 px-3 py-2">
+                <div className="mb-1.5 flex items-center gap-1.5">
+                  <Sparkles size={12} className="text-brand-500" />
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-brand-500">Suggested replies</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {suggestions.map((item) => (
+                    <button
+                      key={item}
+                      onClick={() => setReply(item)}
+                      className="max-w-[220px] truncate rounded-full border border-brand-200 bg-white px-3 py-1 text-xs font-medium text-brand-700 transition hover:bg-brand-50"
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Input container */}
             <div className="mx-4 mt-3 mb-2 rounded-xl border border-navy-100 bg-navy-50/50 focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-500/20 transition-all duration-150">
               {noteMode && (
@@ -711,7 +768,7 @@ export function ChatPage(): JSX.Element {
               )}
               <textarea
                 ref={textareaRef}
-                className="min-h-[56px] max-h-[120px] w-full resize-none bg-transparent px-4 py-2.5 text-sm leading-6 text-navy-700 outline-none placeholder:text-navy-300"
+                className="min-h-[80px] max-h-[160px] w-full resize-none bg-transparent px-4 py-2.5 text-sm leading-6 text-navy-700 outline-none placeholder:text-navy-300"
                 placeholder={noteMode ? "Write an internal note..." : "Reply to visitor... (Ctrl+K for quick actions)"}
                 value={reply}
                 onChange={(event) => {
@@ -750,10 +807,12 @@ export function ChatPage(): JSX.Element {
                     className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition ${noteMode ? "bg-warning-100 text-warning-700" : "text-navy-400 hover:bg-navy-100 hover:text-navy-600"}`}
                   >
                     {noteMode ? <StickyNote size={13} /> : <MessageSquare size={13} />}
-                    {noteMode ? "Note" : "Message"}
+                    {noteMode ? "Note ▾" : "Message ▾"}
                   </button>
                   <div className="mx-1 h-4 w-px bg-navy-200" />
-                  <button className="flex h-8 w-8 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-100 hover:text-navy-600" title="Emoji"><SmilePlus size={15} /></button>
+                  <button className="flex h-8 w-8 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-100 hover:text-navy-600" title="Emoji">
+                    <SmilePlus size={15} />
+                  </button>
                   <label htmlFor="agent-chat-upload" className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-100 hover:text-navy-600" title="Attach file">
                     <Paperclip size={15} />
                   </label>
@@ -769,49 +828,61 @@ export function ChatPage(): JSX.Element {
                   >
                     <Tag size={15} />
                   </button>
-                  <button className="flex h-8 w-8 items-center justify-center rounded-md text-xs font-bold text-navy-400 transition hover:bg-navy-100 hover:text-navy-600" title="Canned responses">#</button>
-                  <div className="mx-1 h-4 w-px bg-navy-200" />
-                  <PlanGate
-                    feature="ai_copilot"
-                    fallback={(
-                      <button
-                        onClick={() => navigate("/admin/billing")}
-                        className="flex h-8 w-8 items-center justify-center rounded-md bg-amber-50 text-amber-600 transition hover:bg-amber-100"
-                        title="Upgrade for AI Copilot"
-                      >
-                        <Sparkles size={15} />
-                      </button>
-                    )}
-                  >
+                  <button className="flex h-8 w-8 items-center justify-center rounded-md text-xs font-bold text-navy-400 transition hover:bg-navy-100 hover:text-navy-600" title="Canned responses (type /shortcut)">#</button>
+                  {/* More actions */}
+                  <div className="relative">
                     <button
-                      onClick={() => setCopilotOpen(true)}
-                      className="flex h-8 w-8 items-center justify-center rounded-md bg-purple-50 text-purple-500 transition hover:bg-purple-100"
-                      title="AI Copilot"
+                      onClick={() => setToolbarMoreOpen((v) => !v)}
+                      className={`flex h-8 w-8 items-center justify-center rounded-md transition ${toolbarMoreOpen ? "bg-navy-100 text-navy-600" : "text-navy-400 hover:bg-navy-100 hover:text-navy-600"}`}
+                      title="More actions"
                     >
-                      <Sparkles size={15} />
+                      <MoreHorizontal size={15} />
                     </button>
-                  </PlanGate>
-                  <button
-                    onClick={() => { setProductPanelOpen((v) => !v); setCouponPanelOpen(false); }}
-                    className={`flex h-8 w-8 items-center justify-center rounded-md transition ${productPanelOpen ? "bg-success-50 text-success-600" : "text-navy-400 hover:bg-navy-100 hover:text-navy-600"}`}
-                    title="Products"
-                  >
-                    <Search size={15} />
-                  </button>
-                  <button
-                    onClick={() => { setCouponPanelOpen((v) => !v); setProductPanelOpen(false); }}
-                    className={`flex h-8 w-8 items-center justify-center rounded-md transition ${couponPanelOpen ? "bg-warning-50 text-warning-600" : "text-navy-400 hover:bg-navy-100 hover:text-navy-600"}`}
-                    title="Coupon"
-                  >
-                    <Tag size={15} />
-                  </button>
-                  <button
-                    onClick={() => checkoutAssist.mutate()}
-                    className="flex h-8 w-8 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-100 hover:text-navy-600"
-                    title="Checkout assist"
-                  >
-                    <Zap size={15} />
-                  </button>
+                    {toolbarMoreOpen && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setToolbarMoreOpen(false)} />
+                        <div className="absolute bottom-full left-0 z-50 mb-1 w-52 rounded-xl border border-navy-100 bg-white py-1 shadow-lg">
+                          <PlanGate
+                            feature="ai_copilot"
+                            fallback={
+                              <button
+                                onClick={() => { navigate("/admin/billing"); setToolbarMoreOpen(false); }}
+                                className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-navy-600 hover:bg-navy-50"
+                              >
+                                <Sparkles size={15} className="shrink-0 text-brand-500" /> AI Copilot (upgrade)
+                              </button>
+                            }
+                          >
+                            <button
+                              onClick={() => { setCopilotOpen(true); setToolbarMoreOpen(false); }}
+                              className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-navy-600 hover:bg-navy-50"
+                            >
+                              <Sparkles size={15} className="shrink-0 text-brand-500" /> AI Copilot
+                            </button>
+                          </PlanGate>
+                          <div className="mx-3 my-1 h-px bg-navy-100" />
+                          <button
+                            onClick={() => { setProductPanelOpen((v) => !v); setCouponPanelOpen(false); setToolbarMoreOpen(false); }}
+                            className={`flex w-full items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-navy-50 ${productPanelOpen ? "text-success-600 font-medium" : "text-navy-600"}`}
+                          >
+                            <Search size={15} className="shrink-0 text-navy-400" /> Products
+                          </button>
+                          <button
+                            onClick={() => { setCouponPanelOpen((v) => !v); setProductPanelOpen(false); setToolbarMoreOpen(false); }}
+                            className={`flex w-full items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-navy-50 ${couponPanelOpen ? "text-warning-600 font-medium" : "text-navy-600"}`}
+                          >
+                            <Tag size={15} className="shrink-0 text-navy-400" /> Send coupon
+                          </button>
+                          <button
+                            onClick={() => { checkoutAssist.mutate(); setToolbarMoreOpen(false); }}
+                            className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-navy-600 hover:bg-navy-50"
+                          >
+                            <Zap size={15} className="shrink-0 text-navy-400" /> Checkout assist
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
                 <button
                   onClick={send}
@@ -824,9 +895,25 @@ export function ChatPage(): JSX.Element {
               </div>
             </div>
 
-            {/* Add tag row */}
-            <div className="flex items-center gap-2 border-t border-navy-100/60 px-4 py-2">
+            {/* Tag row */}
+            <div className="flex flex-wrap items-center gap-1.5 border-t border-navy-100/60 px-4 py-2.5">
               <Tag size={13} className="shrink-0 text-navy-400" />
+              {(currentChat?.tags ?? []).map((tag) => (
+                <span
+                  key={tag}
+                  className="flex items-center gap-1 rounded-full bg-navy-100 px-2.5 py-0.5 text-xs font-medium text-navy-600"
+                >
+                  {tag}
+                  <button
+                    type="button"
+                    aria-label={`Remove tag ${tag}`}
+                    className="ml-0.5 text-navy-400 transition hover:text-navy-600"
+                    onClick={() => quickAction.mutate({ path: `/chats/${id}/untag`, payload: { tag } })}
+                  >
+                    <X size={10} />
+                  </button>
+                </span>
+              ))}
               <input
                 id="chat-tag-input"
                 value={tagText}
@@ -838,7 +925,7 @@ export function ChatPage(): JSX.Element {
                   }
                 }}
                 placeholder="Add tag"
-                className="flex-1 bg-transparent text-xs text-navy-500 outline-none placeholder:text-navy-300"
+                className="min-w-[72px] flex-1 bg-transparent text-xs text-navy-500 outline-none placeholder:text-navy-300"
               />
               {tagText.trim() && (
                 <button
@@ -1050,19 +1137,25 @@ function MessageRow({
   onReact,
   onEdit,
   onDelete,
+  isFirstInGroup = true,
+  isLastInGroup = true,
+  senderName,
 }: {
   message: Message;
   currentUserId?: string;
   onReact: (emoji: string) => void;
   onEdit: (content: string) => void;
   onDelete: () => void;
+  isFirstInGroup?: boolean;
+  isLastInGroup?: boolean;
+  senderName?: string;
 }): JSX.Element {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(message.content ?? "");
 
   if (message.is_internal) {
     return (
-      <div className="my-2 px-4 py-1.5 text-center">
+      <div className="my-3 px-4 py-1.5 text-center">
         <span className="inline-block rounded-full border border-warning-200 bg-warning-50 px-3 py-1.5 text-xs font-medium italic text-warning-700">
           <span className="not-italic font-semibold uppercase tracking-wider text-[10px] text-warning-600 block mb-0.5">Private Note</span>
           {message.content}
@@ -1071,23 +1164,63 @@ function MessageRow({
     );
   }
 
+  if (message.sender_type === "system") {
+    return (
+      <div className="my-4 flex items-center gap-3 px-2">
+        <div className="h-px flex-1 bg-navy-100" />
+        <span className="shrink-0 text-[11px] text-navy-400">{message.content}</span>
+        <div className="h-px flex-1 bg-navy-100" />
+      </div>
+    );
+  }
+
   const mine = message.sender_type === "agent";
   const canModify = mine && !!currentUserId && !message.deleted_at;
   const reactionEntries = Object.entries(message.reactions ?? {});
 
+  const bubbleRadius = mine
+    ? isFirstInGroup && isLastInGroup
+      ? "rounded-[16px_16px_4px_16px]"
+      : isFirstInGroup
+        ? "rounded-[16px_16px_4px_16px]"
+        : isLastInGroup
+          ? "rounded-[4px_16px_16px_16px]"
+          : "rounded-[4px_16px_4px_16px]"
+    : isFirstInGroup && isLastInGroup
+      ? "rounded-[16px_16px_16px_4px]"
+      : isFirstInGroup
+        ? "rounded-[16px_16px_16px_4px]"
+        : isLastInGroup
+          ? "rounded-[16px_4px_16px_16px]"
+          : "rounded-[16px_4px_16px_4px]";
+
+  const topGap = isFirstInGroup ? "mt-4" : "mt-1";
+
   return (
-    <div className={`group mb-4 flex items-end gap-2.5 ${mine ? "flex-row-reverse" : "flex-row"}`}>
-      {/* Avatar */}
-      <div className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-[11px] font-bold mt-1 ${mine ? "bg-brand-100 text-brand-600" : "bg-navy-200 text-navy-600"}`}>
-        {mine ? initials(currentUserId || "AG") : "V"}
+    <div className={`group flex items-end gap-2 ${mine ? "flex-row-reverse" : "flex-row"} ${topGap}`}>
+      {/* Avatar — only visible on last bubble in group; placeholder keeps alignment */}
+      <div className="w-7 shrink-0">
+        {isLastInGroup ? (
+          <div className={`grid h-7 w-7 place-items-center rounded-full text-[10px] font-bold ${mine ? "bg-brand-100 text-brand-600" : "bg-navy-200 text-navy-600"}`}>
+            {mine ? initials(currentUserId || "AG") : "V"}
+          </div>
+        ) : <div className="h-7 w-7" />}
       </div>
 
-      <div className={`max-w-[75%] space-y-1 ${mine ? "" : ""}`}>
+      <div className={`flex max-w-[72%] flex-col ${mine ? "items-end" : "items-start"}`}>
+        {/* Sender label — first in group only */}
+        {isFirstInGroup && (
+          <span className="mb-1 px-1 text-[11px] font-medium text-navy-400">
+            {mine ? "You" : (senderName || "Visitor")}
+          </span>
+        )}
+
+        {/* Bubble */}
         <div
-          className={`overflow-hidden break-words px-4 py-2.5 text-sm leading-relaxed shadow-xs ${
+          className={`overflow-hidden break-words px-3.5 py-2.5 text-sm leading-relaxed ${bubbleRadius} ${
             mine
-              ? "rounded-2xl rounded-tr-md bg-brand-500 text-white"
-              : "rounded-2xl rounded-tl-md border border-navy-100 bg-white text-navy-700"
+              ? "bg-brand-500 text-white"
+              : "border border-navy-100 bg-white text-navy-800 shadow-xs"
           }`}
         >
           {editing ? (
@@ -1114,7 +1247,7 @@ function MessageRow({
             </div>
           ) : message.file_url ? (
             <a
-              className={`font-semibold underline underline-offset-4 ${mine ? "text-brand-500" : "text-white"}`}
+              className={`font-semibold underline underline-offset-4 ${mine ? "text-white/90 hover:text-white" : "text-brand-500"}`}
               href={message.file_url}
               target="_blank"
               rel="noreferrer"
@@ -1126,19 +1259,23 @@ function MessageRow({
           )}
         </div>
 
-        <div className={`flex items-center gap-2 px-1 text-[10px] text-navy-300 ${mine ? "justify-end" : "justify-start"}`}>
-          <span>{formatTime(message.created_at)}</span>
-          {message.edited_at ? <span className="text-navy-300">edited</span> : null}
-          {mine && (
-            <span className="inline-flex items-center gap-1 text-navy-300">
-              {message.is_read ? <CheckCheck size={11} className="text-brand-400" /> : <Check size={11} />}
-              {message.is_read ? "Read" : "Sent"}
-            </span>
-          )}
-        </div>
+        {/* Timestamp + status — last in group only */}
+        {isLastInGroup && (
+          <div className={`mt-1 flex items-center gap-1.5 px-1 text-[10px] text-navy-400 ${mine ? "justify-end" : "justify-start"}`}>
+            <span>{formatTime(message.created_at)}</span>
+            {message.edited_at ? <span>edited</span> : null}
+            {mine && (
+              <span className="inline-flex items-center gap-0.5">
+                {message.is_read ? <CheckCheck size={10} className="text-brand-400" /> : <Check size={10} />}
+                {message.is_read ? "Read" : "Sent"}
+              </span>
+            )}
+          </div>
+        )}
 
+        {/* Reactions */}
         {reactionEntries.length > 0 && (
-          <div className="flex flex-wrap gap-1 px-1">
+          <div className="mt-1 flex flex-wrap gap-1 px-1">
             {reactionEntries.map(([emoji, users]) => (
               <button
                 key={emoji}
@@ -1151,8 +1288,9 @@ function MessageRow({
           </div>
         )}
 
+        {/* Edit/Delete — hover only */}
         {canModify && (
-          <div className="flex gap-1 px-1 opacity-0 transition group-hover:opacity-100">
+          <div className={`mt-1 flex gap-1 px-1 opacity-0 transition group-hover:opacity-100 ${mine ? "self-end" : ""}`}>
             <button
               className="rounded border border-navy-200 bg-white px-2 py-0.5 text-xs text-navy-500 hover:text-navy-700"
               onClick={() => setEditing(true)}
@@ -1646,8 +1784,7 @@ function ChatVisitorPanel({ chat, open, onClose }: { chat?: ChatDetail; open: bo
   return (
     <>
       {open && <div className="fixed inset-0 z-[150] bg-black/30" onClick={onClose} />}
-      <aside className={`fixed inset-y-0 right-0 z-[160] flex w-80 flex-col overflow-y-auto border-l border-navy-100 bg-white shadow-2xl transition-transform duration-300 dark:border-navy-700 dark:bg-navy-900 ${open ? "translate-x-0" : "translate-x-full"}`}
-        style={{ borderTop: "3px solid #f97316" }}>
+      <aside className={`fixed inset-y-0 right-0 z-[160] flex w-80 flex-col overflow-y-auto border-l border-navy-100 bg-white shadow-2xl transition-transform duration-300 dark:border-navy-700 dark:bg-navy-900 ${open ? "translate-x-0" : "translate-x-full"}`}>
 
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between border-b border-navy-100 px-5 py-4 dark:border-navy-700">
