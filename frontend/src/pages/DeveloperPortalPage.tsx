@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 import { api } from "../lib/api";
 import { useMe } from "../lib/me";
@@ -121,13 +122,13 @@ const data = await resp.json();`;
       <section className="rounded-xl border border-navy-100 bg-white p-5 shadow-sm">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-base font-semibold">Your API Keys</h2>
-          <a href="/settings/api" className="text-xs font-semibold text-navy-600 underline">
+          <Link to="/settings/api" className="text-xs font-semibold text-navy-600 underline">
             Manage keys →
-          </a>
+          </Link>
         </div>
         {keysQuery.isLoading && <p className="text-sm text-navy-400">Loading…</p>}
         {activeKeys.length === 0 && !keysQuery.isLoading && (
-          <p className="text-sm text-navy-400">No active API keys. <a href="/settings/api" className="underline">Create one</a>.</p>
+          <p className="text-sm text-navy-400">No active API keys. <Link to="/settings/api" className="underline">Create one</Link>.</p>
         )}
         <div className="space-y-2">
           {activeKeys.map((key) => (
@@ -192,7 +193,7 @@ const data = await resp.json();`;
             ))}
           </div>
           <p className="mt-3 text-xs text-navy-400">
-            Subscribe to events at <a href="/settings/webhooks" className="underline">Settings → Webhooks</a>.
+            Subscribe to events at <Link to="/settings/webhooks" className="underline">Settings → Webhooks</Link>.
           </p>
         </section>
       </div>

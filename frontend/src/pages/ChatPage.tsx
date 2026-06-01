@@ -13,16 +13,19 @@ import {
   ChevronDown,
   Clock,
   Globe2,
+  Hash,
   Link2,
   MapPin,
+  MessageCircle,
   MessageSquare,
+  MessageSquareText,
   MoreHorizontal,
   Paperclip,
   Pin,
   Search,
   Plus,
   ScreenShare,
-  SmilePlus,
+  Smile,
   Sparkles,
   StickyNote,
   Tag,
@@ -101,6 +104,13 @@ const CHAT_LIST_LABELS: Record<ChatListView, string> = {
   supervised: "Supervised",
 };
 
+const EMOJI_GROUPS: { label: string; items: string[] }[] = [
+  { label: "Smileys", items: ["😀","😄","😆","😉","😊","😍","🤔","😎","😢","😡","😴","🤝","🙏","👋","👍","👎","💪","👏","🙌","🤞"] },
+  { label: "Hearts", items: ["❤️","💔","💕","💖","💗","💙","💚","💛","💜","🤍","🖤","🤎","💯","🔥","⭐","✨","🎉","🎊","🎈","🎁"] },
+  { label: "Objects", items: ["📞","📧","📱","💻","⌨️","🖱️","🖥️","📂","📁","🗂️","📅","📆","🗓️","📌","📍","📎","🔗","🔒","🔓","🔑"] },
+  { label: "Symbols", items: ["✅","❌","⚠️","ℹ️","❓","❗","➡️","⬅️","⬆️","⬇️","🔄","🔁","💡","💭","⏰","⏱️","💲","📈","📉","📊"] },
+];
+
 function numberFromCustomVariable(value: unknown): number | null {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string" && value.trim()) {
@@ -137,8 +147,10 @@ export function ChatPage(): JSX.Element {
   const [visitorPanelOpen, setVisitorPanelOpen] = useState(false);
   const [headerMoreOpen, setHeaderMoreOpen] = useState(false);
   const [toolbarMoreOpen, setToolbarMoreOpen] = useState(false);
+  const [emojiOpen, setEmojiOpen] = useState(false);
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const emojiRef = useRef<HTMLDivElement | null>(null);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
@@ -255,6 +267,29 @@ export function ChatPage(): JSX.Element {
   });
 
   useEffect(() => () => endCall(), []);
+
+  useEffect(() => {
+    if (!emojiOpen) return;
+    const timer = setTimeout(() => {
+      function handleClickOutside(e: MouseEvent) {
+        if (emojiRef.current && !emojiRef.current.contains(e.target as Node)) {
+          setEmojiOpen(false);
+        }
+      }
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, 10);
+    return () => clearTimeout(timer);
+  }, [emojiOpen]);
+
+  useEffect(() => {
+    if (!emojiOpen) return;
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === "Escape") setEmojiOpen(false);
+    }
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [emojiOpen]);
 
   const refreshChat = async (): Promise<void> => {
     await queryClient.invalidateQueries({ queryKey: ["chat", id] });
@@ -508,7 +543,7 @@ export function ChatPage(): JSX.Element {
 
         <div className="flex min-h-0 flex-col border-l border-navy-100 bg-white">
           {/* Chat header */}
-          <header className="flex shrink-0 items-center justify-between border-b border-navy-200 bg-white px-5 py-3">
+          <header className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-white px-5 py-3">
             <div className="flex min-w-0 items-center gap-3">
               <button
                 type="button"
@@ -518,7 +553,7 @@ export function ChatPage(): JSX.Element {
                 <ArrowLeft size={15} /> Back
               </button>
               <div className="relative shrink-0">
-                <div className="grid h-9 w-9 place-items-center rounded-full bg-brand-500 text-xs font-black text-white shadow-sm">
+                <div className="grid h-9 w-9 place-items-center rounded-full bg-indigo-600 text-xs font-black text-white shadow-sm">
                   {initials(currentChat?.visitor_name || currentChat?.visitor_email || "V")}
                 </div>
                 <span className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white ${currentChat?.visitor_status === "online" ? "bg-success-500" : "bg-navy-300"}`} />
@@ -595,10 +630,10 @@ export function ChatPage(): JSX.Element {
               </div>
               <div className="mx-0.5 h-4 w-px bg-navy-100" />
               <button
-                className="flex items-center gap-1.5 rounded-lg bg-success-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-success-700"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-emerald-500 text-white hover:bg-emerald-600 transition-colors"
                 onClick={() => quickAction.mutate({ path: `/chats/${id}/resolve` })}
               >
-                <Check size={13} /> Resolve
+                <Check className="h-4 w-4" /> Resolve
               </button>
             </div>
           </header>
@@ -632,7 +667,7 @@ export function ChatPage(): JSX.Element {
           )}
 
           {/* Messages */}
-          <div className="min-h-0 flex-1 overflow-y-auto bg-navy-50 px-5 py-5">
+          <div className="min-h-0 flex-1 overflow-y-auto bg-slate-50/50 px-5 py-5">
             {messages.length > 0 ? messages.map((message, idx) => {
               const prev = messages[idx - 1];
               const next = messages[idx + 1];
@@ -758,7 +793,7 @@ export function ChatPage(): JSX.Element {
             )}
 
             {/* Input container */}
-            <div className="mx-5 mt-4 overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white transition-[border-color] duration-150 focus-within:border-[#CBD5E1]">
+            <div className="border border-slate-200 rounded-xl bg-white overflow-hidden mx-5 mt-4 focus-within:border-slate-300 transition-colors">
               {noteMode && (
                 <div className="flex items-center gap-1.5 border-b border-warning-100 bg-warning-50 px-4 py-1.5 rounded-t-xl">
                   <StickyNote size={12} className="text-warning-600" />
@@ -767,7 +802,7 @@ export function ChatPage(): JSX.Element {
               )}
               <textarea
                 ref={textareaRef}
-                className="min-h-[72px] max-h-[160px] w-full resize-none bg-transparent px-4 py-3 text-sm leading-relaxed text-[#0F172A] outline-none placeholder:text-[#94A3B8]"
+                className="w-full min-h-[72px] max-h-[160px] resize-none border-none outline-none ring-0 bg-transparent px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:ring-0 focus:outline-none focus:border-none"
                 placeholder={noteMode ? "Write an internal note..." : "ctrl+K for quick actions"}
                 value={reply}
                 onChange={(event) => {
@@ -799,43 +834,81 @@ export function ChatPage(): JSX.Element {
               )}
 
               {/* Toolbar inside input container */}
-              <div className="flex items-center border-t border-[#F1F5F9] px-3 py-1.5">
+              <div className="flex items-center gap-0.5 border-t border-slate-100 px-3 py-1.5">
                 <div className="flex items-center gap-0.5">
                   <button
                     onClick={() => setNoteMode(!noteMode)}
-                    className={`flex items-center gap-1 rounded-md px-2 py-1 text-[13px] font-medium transition ${noteMode ? "bg-warning-100 text-warning-700" : "text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#475569]"}`}
+                    className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[13px] font-medium transition-colors cursor-pointer ${noteMode ? "bg-warning-100 text-warning-700" : "text-slate-600 hover:bg-slate-100 hover:text-slate-700"}`}
                   >
-                    {noteMode ? <StickyNote size={16} /> : <MessageSquare size={16} />}
-                    {noteMode ? "Note ▾" : "Message ▾"}
+                    {noteMode ? <StickyNote className="h-4 w-4" /> : <MessageCircle className="h-4 w-4" />}
+                    {noteMode ? "Note" : "Message"}
+                    <ChevronDown className="h-3 w-3 ml-0.5" />
                   </button>
-                  <div className="mx-1.5 h-5 w-px shrink-0 bg-[#E2E8F0]" />
-                  <button className="flex h-8 w-8 items-center justify-center rounded-md text-[#64748B] transition hover:bg-[#F1F5F9] hover:text-[#334155]" title="Emoji">
-                    <SmilePlus size={18} />
+                  <div className="w-px h-5 bg-slate-200 mx-2 flex-shrink-0" />
+                  <button className="inline-flex items-center justify-center h-8 w-8 rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-colors cursor-pointer" title="Canned responses (type /shortcut)">
+                    <MessageSquareText className="h-[18px] w-[18px]" />
                   </button>
-                  <label htmlFor="agent-chat-upload" className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-[#64748B] transition hover:bg-[#F1F5F9] hover:text-[#334155]" title="Attach file">
-                    <Paperclip size={18} />
+                  <button
+                    className="inline-flex items-center justify-center h-8 w-8 rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-colors cursor-pointer"
+                    title="Add tag"
+                    onClick={() => document.getElementById("chat-tag-input")?.focus()}
+                  >
+                    <Hash className="h-[18px] w-[18px]" />
+                  </button>
+                  <label htmlFor="agent-chat-upload" className="inline-flex items-center justify-center h-8 w-8 rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-colors cursor-pointer" title="Attach file">
+                    <Paperclip className="h-[18px] w-[18px]" />
                   </label>
                   <input id="agent-chat-upload" className="hidden" type="file" onChange={(event) => {
                     const file = event.target.files?.[0];
                     if (file) void uploadFile(file);
                     event.currentTarget.value = "";
                   }} />
-                  <button
-                    className="flex h-8 w-8 items-center justify-center rounded-md text-[#64748B] transition hover:bg-[#F1F5F9] hover:text-[#334155]"
-                    title="Add tag"
-                    onClick={() => document.getElementById("chat-tag-input")?.focus()}
-                  >
-                    <Tag size={18} />
-                  </button>
-                  <button className="flex h-8 w-8 items-center justify-center rounded-md text-sm font-bold text-[#64748B] transition hover:bg-[#F1F5F9] hover:text-[#334155]" title="Canned responses (type /shortcut)">#</button>
+                  {/* Emoji picker */}
+                  <div className="relative">
+                    <button
+                      className={`inline-flex items-center justify-center h-8 w-8 rounded-md transition-colors cursor-pointer ${emojiOpen ? "bg-slate-100 text-slate-700" : "text-slate-500 hover:bg-slate-100 hover:text-slate-700"}`}
+                      title="Emoji"
+                      onClick={() => setEmojiOpen((v) => !v)}
+                    >
+                      <Smile className="h-[18px] w-[18px]" />
+                    </button>
+                    {emojiOpen && (
+                      <div
+                        ref={emojiRef}
+                        className="absolute bottom-full mb-2 left-0 z-50 bg-white border border-slate-200 rounded-xl shadow-lg p-3 w-72 max-h-64 overflow-y-auto"
+                      >
+                        {EMOJI_GROUPS.map((group) => (
+                          <div key={group.label}>
+                            <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1 mt-2 first:mt-0">{group.label}</div>
+                            <div className="grid grid-cols-10 gap-0.5">
+                              {group.items.map((emoji) => (
+                                <button
+                                  key={emoji}
+                                  type="button"
+                                  className="flex items-center justify-center h-7 w-7 rounded text-base hover:bg-slate-100 transition-colors"
+                                  onClick={() => {
+                                    setReply((v) => v + emoji);
+                                    setEmojiOpen(false);
+                                    textareaRef.current?.focus();
+                                  }}
+                                >
+                                  {emoji}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                   {/* More actions */}
                   <div className="relative">
                     <button
                       onClick={() => setToolbarMoreOpen((v) => !v)}
-                      className={`flex h-8 w-8 items-center justify-center rounded-md transition ${toolbarMoreOpen ? "bg-[#F1F5F9] text-[#334155]" : "text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#334155]"}`}
+                      className={`inline-flex items-center justify-center h-8 w-8 rounded-md transition-colors cursor-pointer ${toolbarMoreOpen ? "bg-slate-100 text-slate-700" : "text-slate-500 hover:bg-slate-100 hover:text-slate-700"}`}
                       title="More actions"
                     >
-                      <MoreHorizontal size={18} />
+                      <MoreHorizontal className="h-[18px] w-[18px]" />
                     </button>
                     {toolbarMoreOpen && (
                       <>
@@ -886,7 +959,7 @@ export function ChatPage(): JSX.Element {
                 <button
                   onClick={send}
                   disabled={!reply.trim()}
-                  className={`ml-auto flex items-center rounded-lg px-4 py-1.5 text-[13px] font-semibold transition ${reply.trim() ? "cursor-pointer bg-[#4F46E5] text-white hover:bg-[#4338CA]" : "cursor-default bg-[#F1F5F9] text-[#94A3B8]"}`}
+                  className={`ml-auto px-4 py-1.5 rounded-lg text-[13px] font-semibold transition-colors ${reply.trim() ? "cursor-pointer bg-indigo-600 text-white hover:bg-indigo-700 active:bg-indigo-800" : "cursor-default bg-slate-100 text-slate-400 select-none"}`}
                   title="Send (Ctrl+Enter)"
                 >
                   Send
@@ -1166,9 +1239,9 @@ function MessageRow({
   if (message.sender_type === "system") {
     return (
       <div className="my-4 flex items-center gap-3 px-2">
-        <div className="h-px flex-1 bg-navy-100" />
-        <span className="shrink-0 text-[11px] text-navy-400">{message.content}</span>
-        <div className="h-px flex-1 bg-navy-100" />
+        <div className="flex-1 h-px bg-slate-200" />
+        <span className="shrink-0 text-xs text-slate-400 whitespace-nowrap">{message.content}</span>
+        <div className="flex-1 h-px bg-slate-200" />
       </div>
     );
   }
@@ -1200,7 +1273,7 @@ function MessageRow({
       {/* Avatar — only visible on last bubble in group; placeholder keeps alignment */}
       <div className="w-7 shrink-0">
         {isLastInGroup ? (
-          <div className={`grid h-7 w-7 place-items-center rounded-full text-[10px] font-bold ${mine ? "bg-brand-100 text-brand-600" : "bg-navy-200 text-navy-600"}`}>
+          <div className={`grid h-7 w-7 place-items-center rounded-full text-[10px] font-bold ${mine ? "bg-indigo-100 text-indigo-600" : "bg-slate-200 text-slate-600"}`}>
             {mine ? initials(currentUserId || "AG") : "V"}
           </div>
         ) : <div className="h-7 w-7" />}
@@ -1209,7 +1282,7 @@ function MessageRow({
       <div className={`flex max-w-[72%] flex-col ${mine ? "items-end" : "items-start"}`}>
         {/* Sender label — first in group only */}
         {isFirstInGroup && (
-          <span className="mb-1 px-1 text-[12px] font-medium text-navy-500">
+          <span className="mb-1 px-1 text-xs font-medium text-slate-500">
             {mine ? "You" : (senderName || "Visitor")}
           </span>
         )}
@@ -1218,8 +1291,8 @@ function MessageRow({
         <div
           className={`overflow-hidden break-words px-3.5 py-2.5 text-sm leading-relaxed ${bubbleRadius} ${
             mine
-              ? "bg-brand-500 text-white shadow-[0_1px_3px_rgba(79,70,229,0.2)]"
-              : "border border-navy-200 bg-white text-navy-800 shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
+              ? "bg-indigo-600 text-white shadow-[0_1px_3px_rgba(79,70,229,0.2)]"
+              : "border border-slate-200 bg-white text-slate-800 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
           }`}
         >
           {editing ? (
@@ -1260,12 +1333,12 @@ function MessageRow({
 
         {/* Timestamp + status — last in group only */}
         {isLastInGroup && (
-          <div className={`mt-1 flex items-center gap-1.5 px-1 text-[10px] text-navy-400 ${mine ? "justify-end" : "justify-start"}`}>
+          <div className={`mt-1 flex items-center gap-1.5 px-1 text-[11px] text-slate-400 ${mine ? "justify-end" : "justify-start"}`}>
             <span>{formatTime(message.created_at)}</span>
             {message.edited_at ? <span>edited</span> : null}
             {mine && (
               <span className="inline-flex items-center gap-0.5">
-                {message.is_read ? <CheckCheck size={10} className="text-brand-400" /> : <Check size={10} />}
+                {message.is_read ? <CheckCheck size={10} className="text-indigo-400" /> : <Check size={10} />}
                 {message.is_read ? "Read" : "Sent"}
               </span>
             )}
