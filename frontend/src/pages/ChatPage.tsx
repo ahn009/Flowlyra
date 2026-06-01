@@ -759,7 +759,7 @@ export function ChatPage(): JSX.Element {
             )}
 
             {/* Input container */}
-            <div className="mx-4 mt-3 mb-2 rounded-xl border border-navy-200 bg-white shadow-sm focus-within:border-brand-500 focus-within:shadow-[0_0_0_3px_rgba(79,70,229,0.08)] transition-all duration-150">
+            <div className="mx-4 mt-3 mb-2 rounded-xl border border-gray-200 bg-white transition-colors duration-150 hover:border-gray-300 focus-within:border-gray-300 focus-within:shadow-[0_0_0_3px_rgba(0,0,0,0.04)]">
               {noteMode && (
                 <div className="flex items-center gap-1.5 border-b border-warning-100 bg-warning-50 px-4 py-1.5 rounded-t-xl">
                   <StickyNote size={12} className="text-warning-600" />
@@ -800,7 +800,7 @@ export function ChatPage(): JSX.Element {
               )}
 
               {/* Toolbar inside input container */}
-              <div className="flex items-center justify-between px-3 py-2">
+              <div className="flex items-center justify-between border-t border-gray-100 px-3 py-2">
                 <div className="flex items-center gap-0.5">
                   <button
                     onClick={() => setNoteMode(!noteMode)}
