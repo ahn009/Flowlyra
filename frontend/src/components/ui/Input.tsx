@@ -63,8 +63,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             onChange={onChange}
             disabled={disabled}
             className={cn(
-              "w-full rounded-md border border-navy-100 bg-white px-3 py-2 text-sm text-navy-700 placeholder:text-navy-300 transition-all duration-150",
-              "focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500",
+              "w-full min-h-[44px] rounded-md border border-navy-200 bg-white px-3 py-2 text-sm text-navy-700 placeholder:text-navy-400 transition-all duration-150",
+              "focus:outline-none focus:ring-[3px] focus:ring-indigo-50 focus:border-indigo-600",
               "disabled:cursor-not-allowed disabled:bg-navy-50 disabled:text-navy-300",
               "dark:bg-navy-800 dark:border-navy-600 dark:text-navy-50 dark:placeholder:text-navy-400 dark:focus:ring-brand-500/40",
               "dark:disabled:bg-navy-900",

@@ -185,8 +185,6 @@ declare global {
   interface Window {
     FlowLyraConfig?: FlowLyraConfig;
     FlowLyra?: FlowLyraInstance;
-    LiveChat?: FlowLyraInstance;
     FlowLyraQueue?: Array<[keyof FlowLyraInstance, unknown[]]>;
-    LiveChatQueue?: Array<[keyof FlowLyraInstance, unknown[]]>;
   }
 }

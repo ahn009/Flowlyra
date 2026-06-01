@@ -1,7 +1,7 @@
 import {
   ArrowRight, BarChart3, Bot, Check, CheckCircle2, ChevronDown, ChevronRight, CreditCard, Github, Globe2,
   Headphones, Layers3, LifeBuoy, LineChart, Linkedin, Lock, Mail, MessageCircle, MessageSquareText,
-  Network, Paperclip, Play, ShieldCheck, Sparkles, Star, TrendingUp, Truck, Twitter, Users, Workflow,
+  Network, Paperclip, Play, ShieldCheck, Sparkles, TrendingUp, Truck, Twitter, Users, Workflow,
   Youtube, Zap, Send, type LucideIcon,
 } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
@@ -75,9 +75,9 @@ const aiFeatures = [
 ];
 
 const testimonials = [
-  { name: "Sarah Chen", company: "TechRetail Co", role: "VP of Customer Success", quote: "FlowLyra reduced our first response time by 62% and our CSAT scores jumped 18 points in the first quarter.", rating: 5 },
-  { name: "Marcus Rodriguez", company: "GrowthStack", role: "Head of Sales", quote: "We saw a 3.2x increase in qualified leads after deploying FlowLyra's proactive chat on our product pages.", rating: 5 },
-  { name: "Emma Johansson", company: "Nordic SaaS AB", role: "COO", quote: "The AI Copilot handles 40% of routine inquiries automatically. Our agents focus on high-value conversations now.", rating: 5 },
+  { name: "Sarah Chen", company: "TechRetail Co", role: "VP of Customer Success", quote: "FlowLyra reduced our first response time by 62% and our CSAT scores jumped 18 points in the first quarter." },
+  { name: "Marcus Rodriguez", company: "GrowthStack", role: "Head of Sales", quote: "We saw a 3.2x increase in qualified leads after deploying FlowLyra's proactive chat on our product pages." },
+  { name: "Emma Johansson", company: "Nordic SaaS AB", role: "COO", quote: "The AI Copilot handles 40% of routine inquiries automatically. Our agents focus on high-value conversations now." },
 ];
 
 const homepagePlans = [
@@ -869,7 +869,7 @@ export function HomePage(): JSX.Element {
     <div className="min-h-screen bg-white font-sans text-navy-700 dark:bg-navy-950 dark:text-navy-100">
       <MarketingNavigation />
 
-      <main>
+      <main id="main-content">
         {/* Hero */}
         <section className="hero-gradient-bg constellation relative overflow-hidden text-white">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,0.22),transparent_26rem),radial-gradient(circle_at_82%_24%,rgba(255,255,255,0.14),transparent_24rem),radial-gradient(circle_at_52%_88%,rgba(249,112,102,0.18),transparent_30rem)]" />
@@ -1053,7 +1053,7 @@ function PublicLayout({ title, subtitle, children }: { title: string; subtitle: 
     <div className="min-h-screen bg-white text-navy-700 dark:bg-navy-950 dark:text-navy-100">
       <MarketingNavigation />
 
-      <main>
+      <main id="main-content">
         <section className="relative border-b border-navy-100 bg-navy-50 dark:border-navy-800 dark:bg-navy-900/30">
           <div className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-brand-100/40 blur-3xl dark:bg-brand-900/10" />
           <div className="pointer-events-none absolute right-0 top-32 h-80 w-80 rounded-full bg-brand-50/50 blur-3xl dark:bg-brand-950/10" />
@@ -1329,12 +1329,12 @@ export function CustomersPage(): JSX.Element {
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             {testimonials.map((t) => (
               <Card key={t.name} className="p-6 dark:bg-navy-800/60 dark:border-navy-700/50">
-                <div className="flex gap-0.5">
-                  {Array.from({ length: t.rating }).map((_, i) => <Star key={i} size={14} className="fill-brand-400 text-brand-400" />)}
+                <div className="font-display text-4xl leading-none text-indigo-200" aria-hidden="true">&ldquo;</div>
+                <p className="mt-2 text-sm leading-6 italic text-navy-600 dark:text-navy-300">{t.quote}</p>
+                <div className="mt-4 border-t border-slate-100 pt-3 dark:border-navy-700">
+                  <div className="text-sm font-bold text-navy-700 dark:text-white">{t.name}</div>
+                  <div className="text-xs text-navy-400">{t.role}, {t.company}</div>
                 </div>
-                <p className="mt-3 text-sm leading-6 text-navy-600 dark:text-navy-300">&ldquo;{t.quote}&rdquo;</p>
-                <div className="mt-3 text-sm font-bold text-navy-700 dark:text-white">{t.name}</div>
-                <div className="text-xs text-navy-400">{t.role}, {t.company}</div>
               </Card>
             ))}
           </div>

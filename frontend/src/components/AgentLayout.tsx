@@ -453,7 +453,7 @@ export function AgentLayout(): JSX.Element {
             </button>
           </div>
         </header>
-        <main className="min-h-[calc(100dvh-56px)] min-w-0">
+        <main id="main-content" className="min-h-[calc(100dvh-56px)] min-w-0">
           <Outlet />
         </main>
       </div>

@@ -1192,9 +1192,8 @@ function safeToken(value: string): string {
 }
 
 function flushQueue(instance: FlowLyraInstance): void {
-  const queue = [...(window.FlowLyraQueue ?? []), ...(window.LiveChatQueue ?? [])];
+  const queue = [...(window.FlowLyraQueue ?? [])];
   window.FlowLyraQueue = [];
-  window.LiveChatQueue = [];
   for (const [method, args] of queue) {
     try {
       const fn = (instance as unknown as Record<string, (...args: unknown[]) => unknown>)[method as string];
@@ -1211,7 +1210,6 @@ function bootWidget(): void {
   window.FlowLyra?.destroy();
   const instance = new Widget(config);
   window.FlowLyra = instance;
-  window.LiveChat = instance;
   flushQueue(instance);
 }
 

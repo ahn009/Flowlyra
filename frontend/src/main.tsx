@@ -23,6 +23,12 @@ const queryClient = new QueryClient();
 registerServiceWorker();
 registerInstallPromptCapture();
 
+const skipLink = document.createElement("a");
+skipLink.href = "#main-content";
+skipLink.textContent = "Skip to content";
+skipLink.className = "sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:rounded-lg focus:bg-indigo-600 focus:px-4 focus:py-2 focus:text-white focus:text-sm focus:font-semibold focus:shadow-lg";
+document.body.prepend(skipLink);
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
