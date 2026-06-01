@@ -1,4 +1,4 @@
-const CACHE_NAME = "flowlyra-shell-v2";
+const CACHE_NAME = "flowlyra-shell-v3";
 const OFFLINE_URL = "/offline.html";
 const APP_SHELL = ["/offline.html", "/manifest.webmanifest", "/favicon.svg"];
 
@@ -43,17 +43,40 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Stale-while-revalidate for static assets
-  event.respondWith(
-    caches.open(CACHE_NAME).then(async (cache) => {
-      const cached = await cache.match(event.request);
-      const networkPromise = fetch(event.request).then((response) => {
+  // For JS/CSS assets with hashed filenames (e.g., ChatPage-abc123.js):
+  // These are immutable — if the hash matches, the content is correct.
+  // Use cache-first for hashed assets, network-first for everything else.
+  const url = new URL(event.request.url);
+  const isHashedAsset = /\/assets\/.*\.[a-f0-9]{8,}\.(js|css)$/i.test(url.pathname);
+
+  if (isHashedAsset) {
+    // Cache-first for hashed assets — they're immutable
+    event.respondWith(
+      caches.open(CACHE_NAME).then(async (cache) => {
+        const cached = await cache.match(event.request);
+        if (cached) return cached;
+        const response = await fetch(event.request);
         if (response.ok) cache.put(event.request, response.clone()).catch(() => undefined);
         return response;
-      }).catch(() => cached);
-      return cached || networkPromise;
-    })
-  );
+      })
+    );
+  } else {
+    // Network-first for non-hashed assets (fonts, icons, manifest)
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone)).catch(() => undefined);
+          }
+          return response;
+        })
+        .catch(async () => {
+          const cached = await caches.match(event.request);
+          return cached || new Response("", { status: 503 });
+        })
+    );
+  }
 });
 
 self.addEventListener("push", (event) => {
