@@ -509,12 +509,12 @@ export function ChatPage(): JSX.Element {
 
         <div className="flex min-h-0 flex-col border-l border-navy-100 bg-white">
           {/* Chat header */}
-          <header className="flex shrink-0 items-center justify-between border-b border-navy-100 bg-white px-5 py-3">
+          <header className="flex shrink-0 items-center justify-between border-b border-navy-200 bg-white px-5 py-3">
             <div className="flex min-w-0 items-center gap-3">
               <button
                 type="button"
                 onClick={() => navigate("/inbox")}
-                className="flex shrink-0 items-center gap-1 text-sm font-semibold text-navy-400 transition hover:text-navy-600"
+                className="flex shrink-0 items-center gap-1 text-sm font-semibold text-navy-600 transition hover:text-brand-600"
               >
                 <ArrowLeft size={15} /> Back
               </button>
@@ -525,7 +525,7 @@ export function ChatPage(): JSX.Element {
                 <span className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white ${currentChat?.visitor_status === "online" ? "bg-success-500" : "bg-navy-300"}`} />
               </div>
               <div className="min-w-0">
-                <h1 className="truncate text-sm font-semibold text-navy-700">
+                <h1 className="truncate text-sm font-bold text-navy-800">
                   {currentChat?.visitor_name || currentChat?.visitor_email || "Website visitor"}
                 </h1>
                 <div className="flex items-center gap-1.5 text-xs text-navy-400">
@@ -633,7 +633,7 @@ export function ChatPage(): JSX.Element {
           )}
 
           {/* Messages */}
-          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
+          <div className="min-h-0 flex-1 overflow-y-auto bg-navy-50 px-5 py-5">
             {messages.length > 0 ? messages.map((message, idx) => {
               const prev = messages[idx - 1];
               const next = messages[idx + 1];
@@ -759,7 +759,7 @@ export function ChatPage(): JSX.Element {
             )}
 
             {/* Input container */}
-            <div className="mx-4 mt-3 mb-2 rounded-xl border border-navy-100 bg-navy-50/50 focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-500/20 transition-all duration-150">
+            <div className="mx-4 mt-3 mb-2 rounded-xl border border-navy-200 bg-white shadow-sm focus-within:border-brand-500 focus-within:shadow-[0_0_0_3px_rgba(79,70,229,0.08)] transition-all duration-150">
               {noteMode && (
                 <div className="flex items-center gap-1.5 border-b border-warning-100 bg-warning-50 px-4 py-1.5 rounded-t-xl">
                   <StickyNote size={12} className="text-warning-600" />
@@ -804,17 +804,17 @@ export function ChatPage(): JSX.Element {
                 <div className="flex items-center gap-0.5">
                   <button
                     onClick={() => setNoteMode(!noteMode)}
-                    className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition ${noteMode ? "bg-warning-100 text-warning-700" : "text-navy-400 hover:bg-navy-100 hover:text-navy-600"}`}
+                    className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold transition ${noteMode ? "bg-warning-100 text-warning-700" : "text-navy-600 hover:bg-navy-100 hover:text-navy-700"}`}
                   >
                     {noteMode ? <StickyNote size={13} /> : <MessageSquare size={13} />}
                     {noteMode ? "Note ▾" : "Message ▾"}
                   </button>
                   <div className="mx-1 h-4 w-px bg-navy-200" />
-                  <button className="flex h-8 w-8 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-100 hover:text-navy-600" title="Emoji">
-                    <SmilePlus size={15} />
+                  <button className="flex h-8 w-8 items-center justify-center rounded-md text-navy-500 transition hover:bg-navy-100 hover:text-navy-700" title="Emoji">
+                    <SmilePlus size={17} />
                   </button>
-                  <label htmlFor="agent-chat-upload" className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-100 hover:text-navy-600" title="Attach file">
-                    <Paperclip size={15} />
+                  <label htmlFor="agent-chat-upload" className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-navy-500 transition hover:bg-navy-100 hover:text-navy-700" title="Attach file">
+                    <Paperclip size={17} />
                   </label>
                   <input id="agent-chat-upload" className="hidden" type="file" onChange={(event) => {
                     const file = event.target.files?.[0];
@@ -822,18 +822,18 @@ export function ChatPage(): JSX.Element {
                     event.currentTarget.value = "";
                   }} />
                   <button
-                    className="flex h-8 w-8 items-center justify-center rounded-md text-navy-400 transition hover:bg-navy-100 hover:text-navy-600"
+                    className="flex h-8 w-8 items-center justify-center rounded-md text-navy-500 transition hover:bg-navy-100 hover:text-navy-700"
                     title="Add tag"
                     onClick={() => document.getElementById("chat-tag-input")?.focus()}
                   >
-                    <Tag size={15} />
+                    <Tag size={17} />
                   </button>
-                  <button className="flex h-8 w-8 items-center justify-center rounded-md text-xs font-bold text-navy-400 transition hover:bg-navy-100 hover:text-navy-600" title="Canned responses (type /shortcut)">#</button>
+                  <button className="flex h-8 w-8 items-center justify-center rounded-md text-sm font-bold text-navy-500 transition hover:bg-navy-100 hover:text-navy-700" title="Canned responses (type /shortcut)">#</button>
                   {/* More actions */}
                   <div className="relative">
                     <button
                       onClick={() => setToolbarMoreOpen((v) => !v)}
-                      className={`flex h-8 w-8 items-center justify-center rounded-md transition ${toolbarMoreOpen ? "bg-navy-100 text-navy-600" : "text-navy-400 hover:bg-navy-100 hover:text-navy-600"}`}
+                      className={`flex h-8 w-8 items-center justify-center rounded-md transition ${toolbarMoreOpen ? "bg-navy-100 text-navy-700" : "text-navy-500 hover:bg-navy-100 hover:text-navy-700"}`}
                       title="More actions"
                     >
                       <MoreHorizontal size={15} />
@@ -887,7 +887,7 @@ export function ChatPage(): JSX.Element {
                 <button
                   onClick={send}
                   disabled={!reply.trim()}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500 text-white transition hover:bg-brand-600 disabled:bg-navy-200 disabled:text-navy-400"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-600 text-white shadow-[0_1px_3px_rgba(79,70,229,0.3)] transition hover:bg-brand-700 disabled:bg-navy-200 disabled:text-navy-400 disabled:shadow-none"
                   title="Send (Ctrl+Enter)"
                 >
                   <SendHorizontal size={15} />
@@ -896,12 +896,12 @@ export function ChatPage(): JSX.Element {
             </div>
 
             {/* Tag row */}
-            <div className="flex flex-wrap items-center gap-1.5 border-t border-navy-100/60 px-4 py-2.5">
-              <Tag size={13} className="shrink-0 text-navy-400" />
+            <div className="flex flex-wrap items-center gap-1.5 border-t border-navy-200 px-4 py-2.5">
+              <Tag size={15} className="shrink-0 text-navy-500" />
               {(currentChat?.tags ?? []).map((tag) => (
                 <span
                   key={tag}
-                  className="flex items-center gap-1 rounded-full bg-navy-100 px-2.5 py-0.5 text-xs font-medium text-navy-600"
+                  className="flex items-center gap-1 rounded-full border border-navy-200 bg-navy-100 px-2.5 py-0.5 text-xs font-medium text-navy-700"
                 >
                   {tag}
                   <button
@@ -925,7 +925,7 @@ export function ChatPage(): JSX.Element {
                   }
                 }}
                 placeholder="Add tag"
-                className="min-w-[72px] flex-1 bg-transparent text-xs text-navy-500 outline-none placeholder:text-navy-300"
+                className="min-w-[72px] flex-1 bg-transparent text-xs font-medium text-navy-600 outline-none placeholder:text-navy-400"
               />
               {tagText.trim() && (
                 <button
@@ -1210,7 +1210,7 @@ function MessageRow({
       <div className={`flex max-w-[72%] flex-col ${mine ? "items-end" : "items-start"}`}>
         {/* Sender label — first in group only */}
         {isFirstInGroup && (
-          <span className="mb-1 px-1 text-[11px] font-medium text-navy-400">
+          <span className="mb-1 px-1 text-[12px] font-medium text-navy-500">
             {mine ? "You" : (senderName || "Visitor")}
           </span>
         )}
@@ -1219,8 +1219,8 @@ function MessageRow({
         <div
           className={`overflow-hidden break-words px-3.5 py-2.5 text-sm leading-relaxed ${bubbleRadius} ${
             mine
-              ? "bg-brand-500 text-white"
-              : "border border-navy-100 bg-white text-navy-800 shadow-xs"
+              ? "bg-brand-500 text-white shadow-[0_1px_3px_rgba(79,70,229,0.2)]"
+              : "border border-navy-200 bg-white text-navy-800 shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
           }`}
         >
           {editing ? (
