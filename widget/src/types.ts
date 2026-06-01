@@ -65,6 +65,7 @@ export interface WidgetConfig {
   giphy_api_key?: string | null;
   inactivity_message?: { enabled?: boolean; delay_seconds?: number; text?: string };
   voice_video_enabled?: boolean;
+  ice_servers?: RTCIceServer[];
 }
 
 export interface WidgetInitResponse {

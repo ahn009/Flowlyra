@@ -356,6 +356,7 @@ export class ChatPanel {
     const send = document.createElement("button");
     send.className = "cf-btn-send";
     send.type = "button";
+    send.disabled = true;
     send.setAttribute("aria-label", this.i18n.t("input.send"));
     send.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>`;
 
@@ -400,12 +401,12 @@ export class ChatPanel {
     cobrowse.addEventListener("click", () => this.handlers.onCobrowseRequest?.());
     const tools = document.createElement("div");
     tools.className = "cf-tools";
-    if (this.init.widget_config.allow_attachments !== false) tools.append(attach);
     tools.append(voice, video, screen, cobrowse, emoji, gif);
 
     const composer = document.createElement("div");
     composer.className = "cf-composer";
-    composer.append(attach, this.input, send, this.fileInput);
+    if (this.init.widget_config.allow_attachments !== false) composer.append(attach);
+    composer.append(this.input, send, this.fileInput);
 
     row.append(tools, composer);
     this.footer.replaceChildren(row, hint);
@@ -413,8 +414,10 @@ export class ChatPanel {
     const updateSendState = () => {
       if (this.input.value.trim()) {
         send.classList.add("active");
+        send.disabled = false;
       } else {
         send.classList.remove("active");
+        send.disabled = true;
       }
     };
 
@@ -445,26 +448,59 @@ export class ChatPanel {
 
     let picker: HTMLElement | null = null;
     let gifPicker: HTMLElement | null = null;
-    emoji.addEventListener("click", () => {
+    const closeEmojiPicker = () => {
       if (picker) {
         picker.remove();
         picker = null;
+        emoji.setAttribute("aria-expanded", "false");
+      }
+    };
+    const closeGifPicker = () => {
+      if (gifPicker) {
+        gifPicker.remove();
+        gifPicker = null;
+      }
+    };
+
+    emoji.setAttribute("aria-haspopup", "dialog");
+    emoji.setAttribute("aria-expanded", "false");
+    emoji.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (picker) {
+        closeEmojiPicker();
         return;
       }
+      closeGifPicker();
       picker = createEmojiPicker((value) => {
         this.input.value += value;
+        this.input.dispatchEvent(new Event("input", { bubbles: true }));
         this.input.focus();
+        closeEmojiPicker();
       });
+      picker.addEventListener("click", (event) => event.stopPropagation());
       this.footer.append(picker);
+      emoji.setAttribute("aria-expanded", "true");
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!picker) return;
+      const target = event.target as Node | null;
+      if (target && (picker.contains(target) || emoji.contains(target))) return;
+      closeEmojiPicker();
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      closeEmojiPicker();
     });
 
     gif.addEventListener("click", () => {
       if (!this.handlers.onGifSearch || !this.handlers.onGifPick) return;
       if (gifPicker) {
-        gifPicker.remove();
-        gifPicker = null;
+        closeGifPicker();
         return;
       }
+      closeEmojiPicker();
       const panel = document.createElement("div");
       panel.className = "cf-emoji-panel";
       const search = document.createElement("input");

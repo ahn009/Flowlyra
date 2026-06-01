@@ -4,7 +4,7 @@ import {
   Network, Paperclip, Play, ShieldCheck, Sparkles, TrendingUp, Truck, Twitter, Users, Workflow,
   Youtube, Zap, Send, type LucideIcon,
 } from "lucide-react";
-import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import { Component, FormEvent, useCallback, useEffect, useRef, useState, type ErrorInfo, type ReactNode } from "react";
 import toast from "react-hot-toast";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button, Card, Pill, cx } from "../components/ui";
@@ -98,6 +98,29 @@ interface PublicIncident {
 interface PublicBlogPost {
   id: string; slug: string; title: string; excerpt: string; content_markdown: string;
   cover_image_url?: string | null; tags: string[]; published_at?: string | null;
+}
+
+class PublicSectionErrorBoundary extends Component<{ name: string; children: ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError(): { hasError: boolean } {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo): void {
+    console.error(`[PublicSectionErrorBoundary] ${this.props.name} failed:`, error, info);
+  }
+
+  render(): ReactNode {
+    if (this.state.hasError) {
+      return (
+        <section className="bg-white px-4 py-16 text-center dark:bg-navy-950">
+          <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">This section could not load. Please refresh the page.</p>
+        </section>
+      );
+    }
+    return this.props.children;
+  }
 }
 
 /* ================================================================
@@ -625,7 +648,7 @@ function CountUpStat({ value, prefix = "", suffix = "", decimals = 0 }: { value:
         frame = requestAnimationFrame(tick);
         observer.disconnect();
       },
-      { threshold: 0.45 },
+      { threshold: 0.1, rootMargin: "0px 0px -50px 0px" },
     );
 
     observer.observe(node);
@@ -843,11 +866,14 @@ function CTASection(): JSX.Element {
 export function HomePage(): JSX.Element {
   useEffect(() => {
     const elements = Array.from(document.querySelectorAll<HTMLElement>(".reveal-on-scroll"));
+    elements.forEach((element) => element.classList.remove("is-visible"));
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       elements.forEach((element) => element.classList.add("is-visible"));
       return;
     }
+
+    document.documentElement.classList.add("js-scroll-reveal");
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -858,7 +884,7 @@ export function HomePage(): JSX.Element {
           }
         });
       },
-      { threshold: 0.16 },
+      { threshold: 0.1, rootMargin: "0px 0px -50px 0px" },
     );
 
     elements.forEach((element) => observer.observe(element));
@@ -909,19 +935,29 @@ export function HomePage(): JSX.Element {
         {/* Social proof marquee */}
         <SocialProofBar />
 
-        <HomeFeatureSections />
+        <PublicSectionErrorBoundary name="home features">
+          <HomeFeatureSections />
+        </PublicSectionErrorBoundary>
 
         {/* Integrations */}
-        <IntegrationsSection />
+        <PublicSectionErrorBoundary name="integrations">
+          <IntegrationsSection />
+        </PublicSectionErrorBoundary>
 
         {/* Testimonials */}
-        <TestimonialsSection />
+        <PublicSectionErrorBoundary name="testimonials">
+          <TestimonialsSection />
+        </PublicSectionErrorBoundary>
 
         {/* Pricing preview */}
-        <PricingPreviewSection />
+        <PublicSectionErrorBoundary name="pricing preview">
+          <PricingPreviewSection />
+        </PublicSectionErrorBoundary>
 
         {/* Final CTA */}
-        <CTASection />
+        <PublicSectionErrorBoundary name="final cta">
+          <CTASection />
+        </PublicSectionErrorBoundary>
       </main>
 
       <SiteFooter />
@@ -976,11 +1012,14 @@ export function PricingPage(): JSX.Element {
 
   useEffect(() => {
     const elements = Array.from(document.querySelectorAll<HTMLElement>(".reveal-on-scroll"));
+    elements.forEach((element) => element.classList.remove("is-visible"));
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       elements.forEach((element) => element.classList.add("is-visible"));
       return;
     }
+
+    document.documentElement.classList.add("js-scroll-reveal");
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -991,7 +1030,7 @@ export function PricingPage(): JSX.Element {
           }
         });
       },
-      { threshold: 0.16 },
+      { threshold: 0.1, rootMargin: "0px 0px -50px 0px" },
     );
 
     elements.forEach((element) => observer.observe(element));

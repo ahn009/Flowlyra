@@ -300,23 +300,18 @@ html.dark .chat-bubble-note {
 }
 
 .animate-hero-title {
-  opacity: 0;
   animation: hero-slide-up 700ms var(--ease-spring) forwards;
 }
 
 .animate-hero-subtitle {
-  opacity: 0;
   animation: hero-fade-up 700ms var(--ease-spring) 200ms forwards;
 }
 
 .animate-hero-ctas {
-  opacity: 0;
   animation: hero-fade-up 700ms var(--ease-spring) 400ms forwards;
 }
 
 .animate-hero-card {
-  opacity: 0;
-  transform: scale(0.9);
   animation-name: hero-card-in;
   animation-duration: 700ms;
   animation-timing-function: var(--ease-spring);
@@ -332,8 +327,6 @@ html.dark .chat-bubble-note {
 }
 
 .animate-trust-logo {
-  opacity: 0;
-  transform: translateY(12px);
   animation: hero-fade-up 600ms var(--ease-out) forwards;
 }
 
@@ -371,9 +364,14 @@ html.dark .chat-bubble-note {
    Section 16 Home Feature Sections
    ============================================ */
 .reveal-on-scroll {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out);
+}
+
+.js-scroll-reveal .reveal-on-scroll:not(.is-visible) {
   opacity: 0;
   transform: translateY(24px);
-  transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out);
 }
 
 .reveal-on-scroll.is-visible {
@@ -382,9 +380,14 @@ html.dark .chat-bubble-note {
 }
 
 .reveal-child {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out), box-shadow var(--duration-normal) var(--ease-default), background-color var(--duration-normal) var(--ease-default);
+}
+
+.js-scroll-reveal .reveal-on-scroll:not(.is-visible) .reveal-child {
   opacity: 0;
   transform: translateY(24px);
-  transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out), box-shadow var(--duration-normal) var(--ease-default), background-color var(--duration-normal) var(--ease-default);
 }
 
 .reveal-on-scroll.is-visible .reveal-child {
@@ -435,8 +438,6 @@ html.dark .chat-bubble-note {
 }
 
 .feature-tab-panel {
-  opacity: 0;
-  transform: translateY(16px);
   animation: feature-tab-in 300ms var(--ease-out) forwards;
 }
 

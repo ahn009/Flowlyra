@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import type { ComponentType } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 
 import { useI18n } from "./i18n/I18nProvider";
 import { registerNotificationSoundUnlock } from "./lib/notificationSound";
@@ -84,6 +84,16 @@ function ScreenFallback(): JSX.Element {
   return <div className="grid min-h-[40vh] place-items-center text-sm font-semibold text-navy-400">Loading...</div>;
 }
 
+function ScrollToTop(): null {
+  const { pathname, search } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [pathname, search]);
+
+  return null;
+}
+
 function AuthGuard(): JSX.Element {
   const { t } = useI18n();
   const user = useAuthStore((state) => state.user);
@@ -162,8 +172,10 @@ export function App(): JSX.Element {
   }, []);
 
   return (
-    <Suspense fallback={<ScreenFallback />}>
-      <Routes>
+    <>
+      <ScrollToTop />
+      <Suspense fallback={<ScreenFallback />}>
+        <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/features" element={<FeaturesPage />} />
         <Route path="/pricing" element={<PricingPage />} />
@@ -236,7 +248,8 @@ export function App(): JSX.Element {
           <Route path="/supervision" element={<SupervisionPage />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-    </Suspense>
+        </Routes>
+      </Suspense>
+    </>
   );
 }

@@ -191,7 +191,7 @@ export function styles(color: string, customCss = ""): string {
 .cf-footnote a:hover{color:#4F46E5}
 
 /* ── Emoji panel ── */
-.cf-emoji-panel{position:absolute;bottom:64px;right:12px;width:280px;max-height:240px;overflow:auto;background:#fff;border:1px solid #E2E8F0;border-radius:12px;box-shadow:0 10px 15px -3px rgba(15,23,42,0.08);padding:8px;animation:cfSlideIn .2s ease;z-index:10}
+.cf-emoji-panel{position:absolute;bottom:64px;right:12px;width:min(280px,calc(100vw - 32px));max-height:min(280px,50vh);overflow:auto;background:#fff;border:1px solid #E2E8F0;border-radius:12px;box-shadow:0 20px 35px -12px rgba(15,23,42,0.28);padding:8px;animation:cfSlideIn .2s ease;z-index:2147483001}
 .cf-emoji-group-label{font-size:10px;text-transform:uppercase;color:#64748B;margin:6px 4px 4px;letter-spacing:0.06em;font-weight:600}
 .cf-emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:2px}
 .cf-gif-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:8px}
