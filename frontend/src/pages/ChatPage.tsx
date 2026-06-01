@@ -232,6 +232,13 @@ export function ChatPage(): JSX.Element {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent): void => {
+      // Never intercept when user is typing in an input, textarea, select, or contenteditable
+      const tag = (event.target as HTMLElement)?.tagName?.toLowerCase();
+      const isEditable = (event.target as HTMLElement)?.isContentEditable;
+      if (tag === "input" || tag === "textarea" || tag === "select" || isEditable) {
+        return;
+      }
+
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "enter") {
         event.preventDefault();
         send();
@@ -242,22 +249,22 @@ export function ChatPage(): JSX.Element {
         setShortcutOpen((value) => !value);
         return;
       }
-      if (event.key.toLowerCase() === "r") {
+      if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === "r") {
         event.preventDefault();
         textareaRef.current?.focus();
         return;
       }
-      if (event.key.toLowerCase() === "n") {
+      if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === "n") {
         event.preventDefault();
         setNoteMode((value) => !value);
         return;
       }
-      if (event.key.toLowerCase() === "a") {
+      if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === "a") {
         event.preventDefault();
         setAssignModal(true);
         return;
       }
-      if (event.key.toLowerCase() === "t") {
+      if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === "t") {
         event.preventDefault();
         document.getElementById("chat-tag-input")?.focus();
       }
@@ -2067,8 +2074,13 @@ interface ShortcutsModalProps {
 function ShortcutsModal({ onClose }: ShortcutsModalProps): JSX.Element {
   const shortcuts = [
     ["Ctrl + Enter", "Send reply"],
-    ["#", "Open canned responses"],
-    ["Esc", "Close dialogs"],
+    ["Ctrl + Shift + A", "Assign chat"],
+    ["Ctrl + Shift + N", "Toggle note mode"],
+    ["Ctrl + Shift + T", "Focus tag input"],
+    ["Ctrl + Shift + R", "Focus reply box"],
+    ["Ctrl + K", "Command palette"],
+    ["? (outside input)", "Show keyboard shortcuts"],
+    ["Esc", "Close dialogs / emoji picker"],
   ];
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4" onClick={onClose}>
