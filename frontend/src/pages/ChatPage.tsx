@@ -22,7 +22,6 @@ import {
   Search,
   Plus,
   ScreenShare,
-  SendHorizontal,
   SmilePlus,
   Sparkles,
   StickyNote,
@@ -887,7 +886,7 @@ export function ChatPage(): JSX.Element {
                 <button
                   onClick={send}
                   disabled={!reply.trim()}
-                  className={`ml-auto flex items-center rounded-lg px-4 py-1.5 text-[13px] font-semibold transition ${reply.trim() ? "bg-[#EEF2FF] text-[#4F46E5] hover:bg-[#E0E7FF]" : "cursor-default bg-transparent text-[#CBD5E1]"}`}
+                  className={`ml-auto flex items-center rounded-lg px-4 py-1.5 text-[13px] font-semibold transition ${reply.trim() ? "bg-[#EEF2FF] text-[#4F46E5] hover:bg-[#E0E7FF]" : "cursor-default bg-transparent text-[#94A3B8]"}`}
                   title="Send (Ctrl+Enter)"
                 >
                   Send

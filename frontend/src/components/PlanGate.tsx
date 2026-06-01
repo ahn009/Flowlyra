@@ -34,7 +34,7 @@ export function PlanGate({ feature, children, currentPlan, fallback }: PlanGateP
   const allowed = planRank(activePlan) >= planRank(requirement.plan);
 
   if (allowed) return <>{children}</>;
-  if (fallback) return <>{fallback}</>;
+  if (fallback !== undefined) return <>{fallback}</>;
 
   return (
     <div className="rounded-2xl border border-dashed border-amber-300 bg-amber-50 p-5 text-slate-900">
