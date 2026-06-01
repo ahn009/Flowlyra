@@ -126,6 +126,11 @@ function AuthGuard(): JSX.Element {
 
 export function App(): JSX.Element {
   useEffect(() => {
+    // Clear the chunk retry flag on successful render
+    sessionStorage.removeItem("chunk_retry");
+  }, []);
+
+  useEffect(() => {
     registerNotificationSoundUnlock();
   }, []);
 
