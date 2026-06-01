@@ -768,7 +768,7 @@ export function ChatPage(): JSX.Element {
               <textarea
                 ref={textareaRef}
                 className="min-h-[72px] max-h-[160px] w-full resize-none bg-transparent px-4 py-3 text-sm leading-relaxed text-[#0F172A] outline-none placeholder:text-[#94A3B8]"
-                placeholder={noteMode ? "Write an internal note..." : "Reply to visitor... (Ctrl+K for quick actions)"}
+                placeholder={noteMode ? "Write an internal note..." : "ctrl+K for quick actions"}
                 value={reply}
                 onChange={(event) => {
                   const v = event.target.value;
@@ -886,7 +886,7 @@ export function ChatPage(): JSX.Element {
                 <button
                   onClick={send}
                   disabled={!reply.trim()}
-                  className={`ml-auto flex items-center rounded-lg px-4 py-1.5 text-[13px] font-semibold transition ${reply.trim() ? "bg-[#EEF2FF] text-[#4F46E5] hover:bg-[#E0E7FF]" : "cursor-default bg-transparent text-[#94A3B8]"}`}
+                  className={`ml-auto flex items-center rounded-lg px-4 py-1.5 text-[13px] font-semibold transition ${reply.trim() ? "cursor-pointer bg-[#4F46E5] text-white hover:bg-[#4338CA]" : "cursor-default bg-[#F1F5F9] text-[#94A3B8]"}`}
                   title="Send (Ctrl+Enter)"
                 >
                   Send
@@ -896,11 +896,11 @@ export function ChatPage(): JSX.Element {
 
             {/* Tag row */}
             <div className="mt-2 flex flex-wrap items-center gap-2 px-5 py-2">
-              <Tag size={14} className="shrink-0 text-[#94A3B8]" />
+              <Tag size={14} className="shrink-0 text-[#64748B]" />
               {(currentChat?.tags ?? []).map((tag) => (
                 <span
                   key={tag}
-                  className="flex items-center gap-1 rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-2.5 py-0.5 text-xs font-medium text-[#475569] transition hover:bg-[#E2E8F0]"
+                  className="flex items-center gap-1 rounded-full bg-[#E2E8F0] px-3 py-1 text-[13px] font-medium text-[#334155] transition"
                 >
                   {tag}
                   <button
@@ -924,7 +924,7 @@ export function ChatPage(): JSX.Element {
                   }
                 }}
                 placeholder="Add tag"
-                className="min-w-[72px] flex-1 bg-transparent text-[13px] text-[#0F172A] outline-none placeholder:text-[#94A3B8] focus:placeholder:text-[#4F46E5]"
+                className="min-w-[72px] flex-1 bg-transparent text-[13px] text-[#0F172A] outline-none placeholder:text-[#64748B] placeholder:font-medium hover:placeholder:text-[#4F46E5] focus:placeholder:text-[#4F46E5]"
               />
               {tagText.trim() && (
                 <button
