@@ -95,32 +95,59 @@ function AuthGuard(): JSX.Element {
 
   useEffect(() => {
     let alive = true;
-    async function ensureToken(): Promise<void> {
-      if (!user) {
-        setChecked(true);
-        return;
-      }
-      if (!refreshTokenValue) {
-        await logout();
-        if (alive) setChecked(true);
-        return;
-      }
-      try {
-        await refreshToken();
-      } catch {
-        await logout();
-      } finally {
-        if (alive) setChecked(true);
-      }
-    }
-    void ensureToken();
-    return () => {
-      alive = false;
-    };
-  }, [logout, refreshToken, refreshTokenValue, user]);
 
-  if (!checked) return <div className="grid min-h-screen place-items-center bg-white text-sm font-medium text-navy-400 dark:bg-navy-900">{t("auth.checkingSession")}</div>;
-  if (!user || !accessToken) return <Navigate to="/login" replace />;
+    async function checkAuth(): Promise<void> {
+      // No user in store at all → go to login
+      if (!user) {
+        if (alive) setChecked(true);
+        return;
+      }
+
+      // User exists and we have an access token → trust it.
+      // The API interceptor will handle 401s and refresh automatically.
+      if (accessToken) {
+        if (alive) setChecked(true);
+        return;
+      }
+
+      // User exists but no access token (edge case: store partially restored).
+      // Try to refresh using the refresh token.
+      if (refreshTokenValue) {
+        try {
+          await refreshToken();
+        } catch {
+          // Refresh failed, but DON'T logout — just proceed.
+          // The API interceptor will handle 401s on actual API calls.
+          // Only logout if we have NO tokens at all.
+          const currentToken = useAuthStore.getState().accessToken;
+          if (!currentToken) {
+            await logout();
+          }
+        }
+      } else {
+        // No access token AND no refresh token → session is truly dead
+        await logout();
+      }
+
+      if (alive) setChecked(true);
+    }
+
+    void checkAuth();
+    return () => { alive = false; };
+  // Only run once on mount — not on every token change
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (!checked) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-white text-sm font-medium text-navy-400 dark:bg-navy-900">
+        {t("auth.checkingSession")}
+      </div>
+    );
+  }
+
+  if (!user) return <Navigate to="/login" replace />;
+
   return <AgentLayout />;
 }
 

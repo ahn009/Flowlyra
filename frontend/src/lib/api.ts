@@ -87,6 +87,24 @@ function writeTokens(accessToken: string, refreshToken?: string | null): void {
 }
 
 function clearStaleAuth(): void {
-  localStorage.removeItem("cf-auth");
-  if (window.location.pathname !== "/login") window.location.assign("/login");
+  try {
+    const raw = localStorage.getItem("cf-auth");
+    if (raw) {
+      const parsed = JSON.parse(raw) as { state?: Record<string, unknown>; version?: number };
+      // Only clear tokens, keep user data for a moment so React can redirect gracefully
+      if (parsed.state) {
+        parsed.state.accessToken = null;
+        parsed.state.refreshTokenValue = null;
+      }
+      localStorage.setItem("cf-auth", JSON.stringify(parsed));
+    }
+  } catch {
+    localStorage.removeItem("cf-auth");
+  }
+  // Dispatch a custom event so React components can react
+  window.dispatchEvent(new CustomEvent("flowlyra:session-expired"));
+  // Only hard redirect as a last resort if not already on login
+  if (window.location.pathname !== "/login" && window.location.pathname !== "/signup") {
+    window.location.assign("/login");
+  }
 }
