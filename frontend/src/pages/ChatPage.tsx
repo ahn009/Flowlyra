@@ -759,7 +759,7 @@ export function ChatPage(): JSX.Element {
             )}
 
             {/* Input container */}
-            <div className="mx-4 mt-3 mb-2 rounded-xl border border-gray-200 bg-white transition-colors duration-150 hover:border-gray-300 focus-within:border-gray-300 focus-within:shadow-[0_0_0_3px_rgba(0,0,0,0.04)]">
+            <div className="mx-5 mt-4 overflow-hidden rounded-[10px] border border-[#E2E8F0] bg-white transition-[border-color] duration-150 focus-within:border-[#CBD5E1]">
               {noteMode && (
                 <div className="flex items-center gap-1.5 border-b border-warning-100 bg-warning-50 px-4 py-1.5 rounded-t-xl">
                   <StickyNote size={12} className="text-warning-600" />
@@ -768,7 +768,7 @@ export function ChatPage(): JSX.Element {
               )}
               <textarea
                 ref={textareaRef}
-                className="min-h-[80px] max-h-[160px] w-full resize-none bg-transparent px-4 py-2.5 text-sm leading-6 text-navy-700 outline-none placeholder:text-navy-300"
+                className="min-h-[72px] max-h-[160px] w-full resize-none bg-transparent px-4 py-3 text-sm leading-relaxed text-[#0F172A] outline-none placeholder:text-[#94A3B8]"
                 placeholder={noteMode ? "Write an internal note..." : "Reply to visitor... (Ctrl+K for quick actions)"}
                 value={reply}
                 onChange={(event) => {
@@ -800,21 +800,21 @@ export function ChatPage(): JSX.Element {
               )}
 
               {/* Toolbar inside input container */}
-              <div className="flex items-center justify-between border-t border-gray-100 px-3 py-2">
+              <div className="flex items-center border-t border-[#F1F5F9] px-3 py-1.5">
                 <div className="flex items-center gap-0.5">
                   <button
                     onClick={() => setNoteMode(!noteMode)}
-                    className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold transition ${noteMode ? "bg-warning-100 text-warning-700" : "text-navy-600 hover:bg-navy-100 hover:text-navy-700"}`}
+                    className={`flex items-center gap-1 rounded-md px-2 py-1 text-[13px] font-medium transition ${noteMode ? "bg-warning-100 text-warning-700" : "text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#475569]"}`}
                   >
-                    {noteMode ? <StickyNote size={13} /> : <MessageSquare size={13} />}
+                    {noteMode ? <StickyNote size={16} /> : <MessageSquare size={16} />}
                     {noteMode ? "Note ▾" : "Message ▾"}
                   </button>
-                  <div className="mx-1 h-4 w-px bg-navy-200" />
-                  <button className="flex h-8 w-8 items-center justify-center rounded-md text-navy-500 transition hover:bg-navy-100 hover:text-navy-700" title="Emoji">
-                    <SmilePlus size={17} />
+                  <div className="mx-1.5 h-5 w-px shrink-0 bg-[#E2E8F0]" />
+                  <button className="flex h-8 w-8 items-center justify-center rounded-md text-[#64748B] transition hover:bg-[#F1F5F9] hover:text-[#334155]" title="Emoji">
+                    <SmilePlus size={18} />
                   </button>
-                  <label htmlFor="agent-chat-upload" className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-navy-500 transition hover:bg-navy-100 hover:text-navy-700" title="Attach file">
-                    <Paperclip size={17} />
+                  <label htmlFor="agent-chat-upload" className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-[#64748B] transition hover:bg-[#F1F5F9] hover:text-[#334155]" title="Attach file">
+                    <Paperclip size={18} />
                   </label>
                   <input id="agent-chat-upload" className="hidden" type="file" onChange={(event) => {
                     const file = event.target.files?.[0];
@@ -822,21 +822,21 @@ export function ChatPage(): JSX.Element {
                     event.currentTarget.value = "";
                   }} />
                   <button
-                    className="flex h-8 w-8 items-center justify-center rounded-md text-navy-500 transition hover:bg-navy-100 hover:text-navy-700"
+                    className="flex h-8 w-8 items-center justify-center rounded-md text-[#64748B] transition hover:bg-[#F1F5F9] hover:text-[#334155]"
                     title="Add tag"
                     onClick={() => document.getElementById("chat-tag-input")?.focus()}
                   >
-                    <Tag size={17} />
+                    <Tag size={18} />
                   </button>
-                  <button className="flex h-8 w-8 items-center justify-center rounded-md text-sm font-bold text-navy-500 transition hover:bg-navy-100 hover:text-navy-700" title="Canned responses (type /shortcut)">#</button>
+                  <button className="flex h-8 w-8 items-center justify-center rounded-md text-sm font-bold text-[#64748B] transition hover:bg-[#F1F5F9] hover:text-[#334155]" title="Canned responses (type /shortcut)">#</button>
                   {/* More actions */}
                   <div className="relative">
                     <button
                       onClick={() => setToolbarMoreOpen((v) => !v)}
-                      className={`flex h-8 w-8 items-center justify-center rounded-md transition ${toolbarMoreOpen ? "bg-navy-100 text-navy-700" : "text-navy-500 hover:bg-navy-100 hover:text-navy-700"}`}
+                      className={`flex h-8 w-8 items-center justify-center rounded-md transition ${toolbarMoreOpen ? "bg-[#F1F5F9] text-[#334155]" : "text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#334155]"}`}
                       title="More actions"
                     >
-                      <MoreHorizontal size={15} />
+                      <MoreHorizontal size={18} />
                     </button>
                     {toolbarMoreOpen && (
                       <>
@@ -887,27 +887,27 @@ export function ChatPage(): JSX.Element {
                 <button
                   onClick={send}
                   disabled={!reply.trim()}
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-600 text-white shadow-[0_1px_3px_rgba(79,70,229,0.3)] transition hover:bg-brand-700 disabled:bg-navy-200 disabled:text-navy-400 disabled:shadow-none"
+                  className={`ml-auto flex items-center rounded-lg px-4 py-1.5 text-[13px] font-semibold transition ${reply.trim() ? "bg-[#EEF2FF] text-[#4F46E5] hover:bg-[#E0E7FF]" : "cursor-default bg-transparent text-[#CBD5E1]"}`}
                   title="Send (Ctrl+Enter)"
                 >
-                  <SendHorizontal size={15} />
+                  Send
                 </button>
               </div>
             </div>
 
             {/* Tag row */}
-            <div className="flex flex-wrap items-center gap-1.5 border-t border-navy-200 px-4 py-2.5">
-              <Tag size={15} className="shrink-0 text-navy-500" />
+            <div className="mt-2 flex flex-wrap items-center gap-2 px-5 py-2">
+              <Tag size={14} className="shrink-0 text-[#94A3B8]" />
               {(currentChat?.tags ?? []).map((tag) => (
                 <span
                   key={tag}
-                  className="flex items-center gap-1 rounded-full border border-navy-200 bg-navy-100 px-2.5 py-0.5 text-xs font-medium text-navy-700"
+                  className="flex items-center gap-1 rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-2.5 py-0.5 text-xs font-medium text-[#475569] transition hover:bg-[#E2E8F0]"
                 >
                   {tag}
                   <button
                     type="button"
                     aria-label={`Remove tag ${tag}`}
-                    className="ml-0.5 text-navy-400 transition hover:text-navy-600"
+                    className="ml-0.5 rounded-full text-[#94A3B8] transition hover:bg-[#FFF5F5] hover:text-[#EF4444]"
                     onClick={() => quickAction.mutate({ path: `/chats/${id}/untag`, payload: { tag } })}
                   >
                     <X size={10} />
@@ -925,11 +925,11 @@ export function ChatPage(): JSX.Element {
                   }
                 }}
                 placeholder="Add tag"
-                className="min-w-[72px] flex-1 bg-transparent text-xs font-medium text-navy-600 outline-none placeholder:text-navy-400"
+                className="min-w-[72px] flex-1 bg-transparent text-[13px] text-[#0F172A] outline-none placeholder:text-[#94A3B8] focus:placeholder:text-[#4F46E5]"
               />
               {tagText.trim() && (
                 <button
-                  className="text-xs font-semibold text-brand-500 transition hover:text-brand-600"
+                  className="rounded-md px-2 py-0.5 text-[13px] font-semibold text-[#4F46E5] transition hover:bg-[#EEF2FF]"
                   onClick={() => {
                     quickAction.mutate({ path: `/chats/${id}/tag`, payload: { tag: tagText.trim() } });
                     setTagText("");
