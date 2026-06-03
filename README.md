@@ -287,6 +287,7 @@ Base prefix: `/api/v1`
 ## Operational Commands
 
 Start stack:
+ Docker version --check
 
 ```bash
 cd docker
@@ -321,3 +322,15 @@ docker compose up --build
 For step-by-step manual testing (API, sockets, widget, DB, Celery, troubleshooting), see:
 
 - `LOCAL_DEVELOPMENT_AND_TESTING.md`
+
+
+
+
+
+
+
+
+
+
+
+
