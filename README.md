@@ -1,33 +1,26 @@
 # FlowLyra
 
-FlowLyra is a multi-tenant, human-first customer support platform.
-Customers chat with real agents in real time; AI is used only for private agent reply suggestions.
+FlowLyra is a multi-tenant customer support platform for real-time human support, AI-assisted agent workflows, ticketing, knowledge management, customer engagement, and developer integrations.
 
-## What Is In This Repository
+AI in this codebase is designed around private agent assistance and knowledge retrieval rather than replacing the live support experience.
 
-- `backend/`: FastAPI API + Socket.IO ASGI server + Celery worker + Alembic migrations
-- `frontend/`: React + Vite agent dashboard and admin panels
-- `widget/`: embeddable TypeScript chat widget (`dist/widget.js`)
-- `docker/`: local Docker Compose stack
+## Repository Map
 
-## Core Capabilities
+- `backend/`: FastAPI API, Socket.IO ASGI app, SQLAlchemy models, Alembic migrations, Celery workers, integrations, middleware, and tests.
+- `frontend/`: React, Vite, TypeScript workspace app, public website pages, developer portal, admin/settings screens, and Playwright/Vitest tests.
+- `widget/`: embeddable TypeScript chat widget built as a Vite library.
+- `desktop/`: Electron desktop shell that opens the FlowLyra workspace.
+- `sdk/`: Node.js, Python, and PHP API clients for `/api/v1/platform/*` endpoints.
+- `docker/`: development and production Docker Compose files plus backend/nginx Docker config.
+- `docs/`: security, legal, operations, QA, compliance, and launch-readiness documentation.
+- `qa/load/`: k6 load tests for widget initialization and Socket.IO capacity.
+- Root planning/report files: implementation roadmap, parity gap reports, and product documentation.
 
-- Real-time customer <> agent chat over Socket.IO
-- Multi-tenant organization boundaries (org-scoped data and auth)
-- Agent authentication with access/refresh JWT tokens
-- Role-aware admin endpoints (admin/supervisor/agent)
-- Ticketing, contacts, canned replies, routing rules, proactive triggers
-- Analytics endpoints (overview, volume, response time, CSAT, agent stats)
-- AI reply suggestions for agents (with local fallback when OpenAI key is absent)
-- File upload pipeline with validation and optional S3 storage
-- Optional SendGrid email integration
-- Celery worker for async background tasks
+## Product Surface
 
-## Public Website Pages (Production IA)
+### Public Website
 
-FlowLyra now includes a full public-facing website layer (in addition to the agent app):
-
-- `/` home
+- `/`
 - `/features`
 - `/pricing`
 - `/solutions/customer-support`
@@ -39,58 +32,99 @@ FlowLyra now includes a full public-facing website layer (in addition to the age
 - `/help`
 - `/contact`
 - `/status`
+- `/blog`
 - `/privacy`
 - `/terms`
+- `/security`
 - `/signup`
 
-Authenticated product workspace remains under:
+### Public Product Experiences
 
-- `/inbox`, `/chat/:id`, `/tickets`, `/contacts`
+- `/chat/:wsId`
+- `/kb/:orgSlug`
+- `/kb/:orgSlug/:slug`
+- `/api-docs`
+- `/api-changelog`
+- `/api-status`
+
+### Authenticated Workspace
+
+- `/home`
+- `/inbox`
+- `/archives`
+- `/inbox/chat/:id`
+- `/tickets`
+- `/ticket/:id`
+- `/contacts`
+- `/developer`
+- `/supervision`
+- `/engage/*`
 - `/admin/*`
+- `/settings/*`
+
+## Core Capabilities
+
+- Real-time visitor-to-agent chat over Socket.IO.
+- Multi-tenant organization boundaries across auth, data access, and API operations.
+- Access and refresh JWT auth, token revocation, password reset, invite acceptance, and optional cookie auth.
+- Agent, supervisor, and admin workspace flows.
+- Inbox, chat assignment, transfer, resolution, notes, tags, and conversion to ticket.
+- Ticketing, contacts, teams, canned responses, routing rules, and proactive engagement.
+- Knowledge base, public KB pages, chatbot configuration, AI knowledge sources, and RAG support.
+- AI reply assistance, summarization, sentiment, and provider abstraction for OpenAI or Anthropic.
+- Analytics, reporting, scheduled reports, audit logs, security events, and operational polish endpoints.
+- API keys, webhooks, public platform API, SDKs, and developer portal.
+- Billing and subscriptions through Stripe configuration.
+- Channels and integrations including email, WhatsApp, Messenger, Telegram, SMS/Twilio, Slack, HubSpot, Salesforce, Shopify, Zapier, Stripe, and Google Analytics.
+- Enterprise/security controls including RBAC, rate limiting, CSRF protection, dynamic CORS, security headers, SAML/SCIM, OAuth, 2FA, CAPTCHA, IP allowlists, visitor bans, retention settings, and audit middleware.
+- Upload validation with optional S3 storage.
+- Push notification configuration for web, FCM, and APNS.
+- Voice/video settings through WebRTC STUN/TURN configuration.
 
 ## Architecture
 
 ```text
-Customer Site (Widget)
+Customer site
+  -> FlowLyra widget
   -> HTTP /api/v1/widget/init
   -> Socket.IO /socket.io
 
 FastAPI + Socket.IO ASGI (backend/app/main.py)
-  -> PostgreSQL (tenant data)
-  -> Redis (socket rooms, rate limiting, token blacklist, caching)
-  -> Celery worker (AI suggestion jobs)
-  -> OpenAI (optional, agent-only suggestions)
-  -> AWS S3 (optional uploads)
-  -> SendGrid (optional emails)
+  -> PostgreSQL for tenant data
+  -> Redis for sockets, rate limits, token revocation, cache, and Celery broker/result storage
+  -> Celery workers for async jobs
+  -> Optional AI providers, object storage, email, billing, push, and channel integrations
 
-Agent Dashboard (React)
+React workspace and public site
   -> REST API /api/v1/*
   -> Socket.IO live updates
 ```
 
 ## Tech Stack
 
-- Backend: Python 3.11, FastAPI, SQLAlchemy 2, Alembic, Redis, Celery, Socket.IO
-- Frontend: React 18, Vite 5, TypeScript, TanStack Query, Zustand
-- Widget: TypeScript, Vite library build (IIFE)
-- Infra: PostgreSQL 15, Redis 7, Docker Compose
-- CI/CD: GitHub Actions (`.github/workflows/deploy.yml`)
+- Backend: Python 3.11, FastAPI, SQLAlchemy 2, Alembic, Pydantic, Redis, Celery, Socket.IO, pytest.
+- Frontend: React 18, Vite 5, TypeScript, React Router, TanStack Query, Zustand, Tailwind CSS, Vitest, Playwright.
+- Widget: TypeScript, Vite library build, Socket.IO client.
+- Desktop: Electron.
+- SDKs: Node.js, Python, PHP.
+- Infrastructure: PostgreSQL 15, Redis 7, Docker Compose, nginx config.
 
 ## Prerequisites
 
-- Docker Engine + Docker Compose plugin
-- Node.js 20+ (for local frontend/widget workflows)
-- Python 3.11+ (for local backend workflows)
+- Docker Engine with the Docker Compose plugin.
+- Node.js 20+ for frontend, widget, SDK, or desktop workflows.
+- Python 3.11+ for backend workflows.
+- k6 if you plan to run `qa/load` tests.
 
-## Quick Start (Docker, Recommended)
+## Quick Start With Docker
 
-1. Create environment file:
+1. Create the environment file:
 
 ```bash
 cp .env.example .env
 ```
 
-2. Start full stack:
+2. Start the development stack:
 
 ```bash
 cd docker
@@ -104,38 +138,49 @@ docker compose up --build
 - API docs: `http://localhost:8000/docs`
 - Widget dev page: `http://localhost:5174`
 - Health check: `http://localhost:8000/health`
+- Host Postgres port: `5433`
 
 4. Default seeded login:
 
 - Email: `admin@flowlyra.dev`
 - Password: `Dev@12345`
 
-## Important Environment Variables
+The development Compose backend runs migrations and seeds dev data on startup. Remove dev seeding from production startup commands.
+
+## Environment Variables
 
 Copy `.env.example` and set values for your environment.
 
-Required for production:
+Required for production or staging:
 
-- `SECRET_KEY`: strong random value (32+ chars). App validation fails for weak/default values in `production`/`staging`.
-- `DATABASE_URL`: production Postgres connection string
-- `REDIS_URL`, `CELERY_BROKER_URL`, `CELERY_RESULT_BACKEND`
-- `CORS_ORIGINS`: explicit allowed origins (no wildcards)
-- `FRONTEND_BASE_URL`: used to generate password reset links
-- `ENVIRONMENT=production`
+- `ENVIRONMENT=production` or `ENVIRONMENT=staging`
+- `SECRET_KEY`: strong random value, 32+ characters.
+- `DATABASE_URL`
+- `REDIS_URL`
+- `CELERY_BROKER_URL`
+- `CELERY_RESULT_BACKEND`
+- `CORS_ORIGINS`: explicit trusted origins.
+- `API_BASE_URL`
+- `FRONTEND_BASE_URL`
 
 Common optional integrations:
 
-- `OPENAI_API_KEY`, `OPENAI_MODEL`
-- `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_S3_BUCKET`, `AWS_REGION`
-- `SENDGRID_API_KEY`, `FROM_EMAIL`
-- `CLOUDFLARE_WIDGET_URL`
+- AI: `AI_PROVIDER`, `OPENAI_API_KEY`, `OPENAI_MODEL`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, embedding/RAG settings.
+- Storage: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_S3_BUCKET`, `AWS_REGION`.
+- Email: `SENDGRID_API_KEY`, `FROM_EMAIL`.
+- Billing: Stripe secret, publishable, webhook, and price ID variables.
+- OAuth/SAML/SCIM/security: Google, Microsoft, SAML, CAPTCHA, KMS, and 2FA variables.
+- Channel integrations: WhatsApp/Meta, Slack, Salesforce, HubSpot, Shopify, GitHub, and related OAuth credentials.
+- Push: VAPID, FCM, and APNS variables.
+- Voice/video: WebRTC STUN/TURN variables.
+- Observability: `SENTRY_DSN`, `SENTRY_ENVIRONMENT`, `SENTRY_TRACES_SAMPLE_RATE`, `LOG_LEVEL`, `JSON_LOGS`.
 
-Frontend runtime variables (optional):
+Frontend runtime variables live in `frontend/.env.example`:
 
-- `VITE_API_BASE_URL` (default: `http://localhost:8000/api/v1`)
-- `VITE_SOCKET_URL` (default: `http://localhost:8000`)
+- `VITE_API_BASE_URL`
+- `VITE_SOCKET_URL`
 
-## Local Development (Without Docker)
+## Local Development Without Docker
 
 ### Backend
 
@@ -149,6 +194,8 @@ python -m scripts.seed_dev
 uvicorn app.main:app --reload
 ```
 
+If you use the Docker Compose Postgres service from the host, point `DATABASE_URL` at port `5433` because Compose maps container port `5432` to host port `5433`.
+
 ### Frontend
 
 ```bash
@@ -166,13 +213,23 @@ npm run dev
 npm run build
 ```
 
+### Desktop
+
+```bash
+cd desktop
+npm install
+npm start
+```
+
+Set `FLOWLYRA_DESKTOP_URL` to open a deployed workspace instead of the default local inbox.
+
 ## Tests And Quality Gates
 
 ### Backend
 
 ```bash
 cd backend
-pytest --cov=app
+pytest -q
 ```
 
 ### Frontend
@@ -182,6 +239,10 @@ cd frontend
 npm test
 npm run typecheck
 npm run build
+npm run e2e
+npm run a11y:audit
+npm run visual:test
+npm run perf:budget
 ```
 
 ### Widget
@@ -190,9 +251,15 @@ npm run build
 cd widget
 npm run typecheck
 npm run build
+npm run build:budget
 ```
 
-CI runs backend tests + frontend tests on pushes/PRs, then builds and optionally deploys on `main`.
+### Load Tests
+
+```bash
+k6 run qa/load/k6-chat-concurrency.js -e BASE_URL=http://localhost:8000 -e ORG_SLUG=test-org
+k6 run qa/load/k6-socket-capacity.js -e WS_URL=ws://localhost:8000/socket.io/?EIO=4\&transport=websocket -e VUS=500 -e DURATION=5m
+```
 
 ## Database Migrations
 
@@ -228,66 +295,17 @@ Production-style embed:
 <script async src="https://cdn.flowlyra.com/widget.js"></script>
 ```
 
-## Docker Images
+## SDKs
 
-Build locally:
+The SDKs authenticate with `X-API-Key` and target `/api/v1/platform/*` endpoints.
 
-```bash
-docker build -f docker/Dockerfile.backend -t flowlyra-backend:latest backend
-docker build -t flowlyra-frontend:latest frontend
-docker build -t flowlyra-widget:latest widget
-```
+- `sdk/node`: `@flowlyra/sdk`
+- `sdk/python`: `flowlyra-sdk`
+- `sdk/php`: `flowlyra/sdk`
 
-## Production Readiness Checklist
+## Docker Commands
 
-- Set `ENVIRONMENT=production`
-- Rotate `SECRET_KEY` and all external API credentials
-- Restrict `CORS_ORIGINS` to trusted domains only
-- Use managed PostgreSQL + Redis with backups and monitoring
-- Terminate TLS at ingress/load balancer
-- Run backend with multiple replicas and shared Redis
-- Run Celery worker as separate scalable service
-- Configure centralized logs and error alerting
-- Run migrations during deploy (before traffic cutover)
-- Remove dev seeding from runtime startup command
-- Add uptime checks on `/health`
-
-## Deployment Notes
-
-`docker/docker-compose.yml` is development-oriented. The backend startup command currently runs:
-
-- `alembic upgrade head`
-- `python -m scripts.seed_dev`
-- `uvicorn ...`
-
-For production, keep migrations in deployment pipeline but remove `seed_dev` from runtime startup.
-
-## API Surface (High Level)
-
-Base prefix: `/api/v1`
-
-- `auth`: login, refresh, logout, invite acceptance, password reset
-- `widget`: visitor session/widget init
-- `chats`: chat lifecycle, assign/transfer/resolve/close, notes, tags, convert-to-ticket
-- `tickets`: CRUD + comments + resolve
-- `contacts`: list + delete
-- `agents`: profile/status/admin management
-- `admin`: org config, teams, canned responses, routing rules, triggers, billing placeholders
-- `analytics`: overview and trend endpoints
-- `upload`: file upload endpoint
-
-## Security Controls Implemented
-
-- JWT auth with token type validation and revocation (Redis blacklist)
-- Role-based guards for protected endpoints
-- Rate limiting middleware (stricter for auth routes)
-- Tenant scoping through org-aware queries and token claims
-- Upload validation (type + size)
-
-## Operational Commands
-
-Start stack:
- Docker version --check
+Start the stack:
 
 ```bash
 cd docker
@@ -302,7 +320,7 @@ docker compose logs -f backend
 docker compose logs -f celery
 ```
 
-Stop stack:
+Stop the stack:
 
 ```bash
 cd docker
@@ -317,20 +335,52 @@ docker compose down -v
 docker compose up --build
 ```
 
-## Extended Local Guide
+Build images locally:
 
-For step-by-step manual testing (API, sockets, widget, DB, Celery, troubleshooting), see:
+```bash
+docker build -f docker/Dockerfile.backend -t flowlyra-backend:latest backend
+docker build -t flowlyra-frontend:latest frontend
+docker build -t flowlyra-widget:latest widget
+```
 
-- `LOCAL_DEVELOPMENT_AND_TESTING.md`
+## API Surface
 
+Base prefix: `/api/v1`
 
+- `auth`: login, refresh, logout, invites, password reset, OAuth callback helpers.
+- `public`: public site/API helpers.
+- `widget`: widget initialization and visitor session flows.
+- `chats`: inbox, messages, assignment, transfers, resolution, notes, tags, and ticket conversion.
+- `tickets`: ticket lifecycle, comments, SLA/workflow behavior.
+- `contacts`: customer profile management.
+- `ecommerce`: ecommerce/product/order foundations.
+- `agents`: agent profile, availability, and management.
+- `admin`: workspace configuration, teams, routing, triggers, canned responses, billing/admin setup.
+- `analytics`: reporting, exports, trends, CSAT, response time, and agent stats.
+- `engage`: campaigns, goals, traffic, greetings, and proactive workflows.
+- `integrations`: marketplace, OAuth, health checks, and logs.
+- `upload`: validated file upload.
+- `audit`: audit log access.
+- `billing`: subscription and plan flows.
+- `notifications`: notification preferences and delivery state.
+- `api-keys`: scoped API key management.
+- `webhooks`: outbound webhook subscriptions and deliveries.
+- `platform`: external API consumed by SDKs.
+- `kb`: admin and public knowledge base endpoints.
+- `ai`: assistant, summarization, sentiment, and knowledge search.
+- `chatbot`: chatbot configuration and behavior.
+- `channels`: channel setup and webhooks.
+- `security`: enterprise security controls.
+- `scim`: identity provisioning.
+- `gaps` and `polish`: parity, benchmarking, and launch-readiness endpoints.
 
+## Production Notes
 
-
-
-
-
-
-
-
-
+- Use managed PostgreSQL and Redis with backups and monitoring.
+- Run migrations during deployment before traffic cutover.
+- Run the API and Celery worker as separate scalable processes.
+- Restrict CORS to trusted origins.
+- Rotate `SECRET_KEY` and all third-party credentials.
+- Terminate TLS at ingress or load balancer.
+- Configure centralized logs, Sentry, health checks, and uptime checks.
+- Review `docs/SECURITY.md`, `docs/LEGAL.md`, and `docs/phase15/*` before launch.
