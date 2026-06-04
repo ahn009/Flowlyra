@@ -4,7 +4,7 @@ import {
   Network, Paperclip, Play, ShieldCheck, Sparkles, TrendingUp, Truck, Twitter, Users, Workflow,
   Youtube, Zap, Send, type LucideIcon,
 } from "lucide-react";
-import { Component, FormEvent, useCallback, useEffect, useRef, useState, type ErrorInfo, type ReactNode } from "react";
+import { Component, FormEvent, useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ErrorInfo, type ReactNode } from "react";
 import toast from "react-hot-toast";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button, Card, Pill, cx } from "../components/ui";
@@ -264,7 +264,7 @@ function HeroGlassCard({
   agent: string;
 }): JSX.Element {
   return (
-    <div className={cx("hero-glass-card animate-hero-card", className)} style={{ animationDelay: delay }}>
+    <div className={cx("hero-glass-card animate-hero-card", className)} style={{ "--hero-enter-delay": delay } as CSSProperties}>
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">{title}</p>
@@ -864,7 +864,7 @@ function CTASection(): JSX.Element {
    ================================================================ */
 
 export function HomePage(): JSX.Element {
-  useEffect(() => {
+  useLayoutEffect(() => {
     const elements = Array.from(document.querySelectorAll<HTMLElement>(".reveal-on-scroll"));
     elements.forEach((element) => element.classList.remove("is-visible"));
 

@@ -299,35 +299,41 @@ html.dark .chat-bubble-note {
   padding: var(--space-6);
 }
 
+.animate-hero-title,
+.animate-hero-subtitle,
+.animate-hero-ctas,
+.animate-hero-card,
+.animate-trust-logo {
+  opacity: 0;
+}
+
 .animate-hero-title {
-  animation: hero-slide-up 700ms var(--ease-spring) forwards;
+  animation: hero-slide-up 620ms var(--ease-spring) 0ms both;
 }
 
 .animate-hero-subtitle {
-  animation: hero-fade-up 700ms var(--ease-spring) 200ms forwards;
+  animation: hero-fade-up 620ms var(--ease-spring) 140ms both;
 }
 
 .animate-hero-ctas {
-  animation: hero-fade-up 700ms var(--ease-spring) 400ms forwards;
+  animation: hero-fade-up 620ms var(--ease-spring) 260ms both;
 }
 
 .animate-hero-card {
-  animation-name: hero-card-in;
-  animation-duration: 700ms;
-  animation-timing-function: var(--ease-spring);
-  animation-fill-mode: forwards;
+  --hero-enter-delay: 0ms;
+  animation: hero-card-in 620ms var(--ease-spring) var(--hero-enter-delay) both;
 }
 
 .animate-float-gentle {
-  animation: hero-card-in 700ms var(--ease-spring) forwards, hero-float 3s ease-in-out 900ms infinite;
+  animation: hero-card-in 620ms var(--ease-spring) var(--hero-enter-delay) both, hero-float 3.8s ease-in-out calc(var(--hero-enter-delay) + 900ms) infinite;
 }
 
 .animate-float-gentle-slow {
-  animation: hero-card-in 700ms var(--ease-spring) forwards, hero-float-slow 3.4s ease-in-out 1000ms infinite;
+  animation: hero-card-in 620ms var(--ease-spring) var(--hero-enter-delay) both, hero-float-slow 4.2s ease-in-out calc(var(--hero-enter-delay) + 1000ms) infinite;
 }
 
 .animate-trust-logo {
-  animation: hero-fade-up 600ms var(--ease-out) forwards;
+  animation: hero-fade-up 520ms var(--ease-out) both;
 }
 
 @keyframes hero-gradient-shift {
