@@ -53,7 +53,7 @@ function registerListeners(instance: Socket): void {
   instance.on("chat:message:new", (message: Message) => {
     const activeChatId = useChatStore.getState().activeChatId;
     useChatStore.getState().addMessage(message);
-    if (message.sender_type === "customer" && !message.is_internal) {
+    if (isVisitorMessage(message) && !message.is_internal) {
       rememberNotification(`message:${message.id}`);
       rememberNotification(`chat:${message.chat_id}`);
       playIncomingChatSound();
@@ -82,6 +82,7 @@ function registerListeners(instance: Socket): void {
   instance.on("chat:new", (payload: { chat: Chat; message?: Message | null }) => {
     useChatStore.getState().addChat(payload.message ? { ...payload.chat, last_message: { content: payload.message.content, sender_type: payload.message.sender_type, created_at: payload.message.created_at } } : payload.chat);
     if (payload.message) useChatStore.getState().addMessage(payload.message);
+    if (!payload.message) useChatStore.getState().incrementUnread(payload.chat.id);
     rememberNotification(`chat:${payload.chat.id}`);
     if (payload.message) rememberNotification(`message:${payload.message.id}`);
     useNotificationStore.getState().addNotification({
@@ -112,6 +113,7 @@ function registerListeners(instance: Socket): void {
     const key = payload.chat_id ? `chat:${payload.chat_id}` : `${payload.title}:${payload.body}`;
     if (wasRecentlyNotified(key)) return;
     rememberNotification(key);
+    if (isVisitorChatNotification(payload) && payload.chat_id) useChatStore.getState().incrementUnread(payload.chat_id);
     useNotificationStore.getState().addNotification({
       id: payload.id,
       kind: payload.kind,
@@ -123,6 +125,14 @@ function registerListeners(instance: Socket): void {
     playIncomingChatSound();
   });
   instance.on("sla:breach", () => toast.error("SLA breach"));
+}
+
+function isVisitorMessage(message: Pick<Message, "sender_type">): boolean {
+  return message.sender_type === "customer" || message.sender_type === "visitor";
+}
+
+function isVisitorChatNotification(payload: ServerNotificationPayload): boolean {
+  return payload.kind === "chat.new_message" || payload.title.toLowerCase().includes("visitor message");
 }
 
 function rememberNotification(key: string): void {

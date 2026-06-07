@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { Clock, Globe2, MessageCircle, MessageSquare, Pin, Search, Sparkles, UsersRound } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api } from "../lib/api";
 import { useMe } from "../lib/me";
 import { PageHeader } from "../components/AgentLayout";
@@ -38,13 +38,18 @@ export function InboxPage(): JSX.Element {
 
   const chats = Object.values(useChatStore((state) => state.chats));
   const unreadCounts = useChatStore((state) => state.unreadCounts);
+  const hydrateUnreadCounts = useChatStore((state) => state.hydrateUnreadCounts);
   const rows = useMemo(() => mergeChats(data, chats), [data, chats]);
+
+  useEffect(() => {
+    hydrateUnreadCounts(data);
+  }, [data, hydrateUnreadCounts]);
 
   const waiting = rows.filter((chat) => chat.status === "waiting").length;
   const active = rows.filter((chat) => chat.status === "active").length;
   const online = rows.filter((chat) => chat.visitor_status === "online").length;
   const pinned = rows.filter((chat) => chat.is_pinned).length;
-  const totalUnread = Object.values(unreadCounts).reduce((sum, count) => sum + count, 0);
+  const totalUnread = rows.reduce((sum, chat) => sum + unreadCountForChat(chat, unreadCounts), 0);
 
   return (
     <PageShell>
@@ -84,7 +89,7 @@ export function InboxPage(): JSX.Element {
             </label>
           </div>
           <div className="max-h-[620px] overflow-y-auto lg:max-h-[calc(100dvh-330px)]">
-            {rows.length ? rows.map((chat) => <ChatRow key={chat.id} chat={chat} unreadCount={unreadCounts[chat.id] ?? 0} />) : <EmptyState />}
+            {rows.length ? rows.map((chat) => <ChatRow key={chat.id} chat={chat} unreadCount={unreadCountForChat(chat, unreadCounts)} />) : <EmptyState />}
           </div>
         </Card>
         <div className="grid place-items-center rounded-2xl border border-navy-100 dark:border-navy-700 bg-white/70 p-4 backdrop-blur dark:bg-navy-900/50 sm:p-8">
@@ -105,6 +110,10 @@ function mergeChats(serverChats: Chat[], realtimeChats: Chat[]): Chat[] {
     if ((a.is_pinned ? 1 : 0) !== (b.is_pinned ? 1 : 0)) return (b.is_pinned ? 1 : 0) - (a.is_pinned ? 1 : 0);
     return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
   });
+}
+
+function unreadCountForChat(chat: Chat, unreadCounts: Record<string, number>): number {
+  return unreadCounts[chat.id] ?? chat.unread_count ?? 0;
 }
 
 function ChatRow({ chat, unreadCount }: { chat: Chat; unreadCount: number }): JSX.Element {

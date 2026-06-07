@@ -133,14 +133,14 @@
 
   /* ─── Semantic Mode Tokens (Section 26) ─── */
   --bg-primary: #FFFFFF;
-  --bg-secondary: #F8FAFC;
-  --bg-tertiary: #F1F5F9;
+  --bg-secondary: #F1F5F9;
+  --bg-tertiary: #E2E8F0;
   --bg-elevated: #FFFFFF;
   --text-primary: #0F172A;
-  --text-secondary: #475569;
-  --text-muted: #64748B;
-  --border-default: #E2E8F0;
-  --border-subtle: #F1F5F9;
+  --text-secondary: #334155;
+  --text-muted: #475569;
+  --border-default: #CBD5E1;
+  --border-subtle: #DCE4EE;
   --interactive-primary: #4F46E5;
   --interactive-hover: #4338CA;
 

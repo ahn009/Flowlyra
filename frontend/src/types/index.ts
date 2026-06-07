@@ -29,9 +29,10 @@ export interface Chat {
   visitor_referrer?: string | null;
   visitor_page_views?: number | null;
   visitor_status?: "online" | "offline";
+  unread_count?: number;
   last_message?: {
     content: string | null;
-    sender_type: "customer" | "agent" | "system";
+    sender_type: "customer" | "visitor" | "agent" | "system" | "bot";
     created_at: string;
   } | null;
   tags: string[];
@@ -42,7 +43,7 @@ export interface Chat {
 export interface Message {
   id: string;
   chat_id: string;
-  sender_type: "customer" | "agent" | "system";
+  sender_type: "customer" | "visitor" | "agent" | "system" | "bot";
   content: string | null;
   content_type: string;
   file_url?: string | null;

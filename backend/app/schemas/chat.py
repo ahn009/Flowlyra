@@ -50,6 +50,7 @@ class ChatOut(BaseModel):
     visitor_current_url: str | None = None
     visitor_referrer: str | None = None
     visitor_page_views: int | None = None
+    unread_count: int = 0
 
     model_config = {"from_attributes": True}
 

@@ -217,6 +217,87 @@ html.dark .glass {
 }
 
 /* ============================================
+   Dashboard Light Mode Contrast
+   ============================================ */
+html:not(.dark) .agent-shell {
+  --bg-primary: #ffffff;
+  --bg-secondary: #eef2f7;
+  --bg-tertiary: #e2e8f0;
+  --bg-elevated: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #475569;
+  --border-default: #cbd5e1;
+  --border-subtle: #dbe3ee;
+  --color-surface: #eef2f7;
+  --color-surface-muted: #e2e8f0;
+  --color-surface-hover: #e8edff;
+  --color-muted: #475569;
+  --color-text-secondary: #334155;
+  --color-border: #cbd5e1;
+  background: #eef2f7;
+  color: #0f172a;
+}
+
+html:not(.dark) .agent-shell .bg-navy-50 {
+  background-color: #f1f5f9;
+}
+
+html:not(.dark) .agent-shell .bg-navy-50\/60 {
+  background-color: rgba(226, 232, 240, 0.72);
+}
+
+html:not(.dark) .agent-shell .bg-white\/70 {
+  background-color: rgba(255, 255, 255, 0.86);
+}
+
+html:not(.dark) .agent-shell .bg-white\/80 {
+  background-color: rgba(255, 255, 255, 0.94);
+}
+
+html:not(.dark) .agent-shell .bg-brand-50 {
+  background-color: #e9edff;
+}
+
+html:not(.dark) .agent-shell .border-navy-100,
+html:not(.dark) .agent-shell .border-navy-200 {
+  border-color: #cbd5e1;
+}
+
+html:not(.dark) .agent-shell .border-brand-100 {
+  border-color: #c7d2fe;
+}
+
+html:not(.dark) .agent-shell .text-navy-300 {
+  color: #64748b;
+}
+
+html:not(.dark) .agent-shell .text-navy-400,
+html:not(.dark) .agent-shell .text-navy-500 {
+  color: #475569;
+}
+
+html:not(.dark) .agent-shell .text-navy-600 {
+  color: #334155;
+}
+
+html:not(.dark) .agent-shell .text-navy-700,
+html:not(.dark) .agent-shell .text-midnight {
+  color: #0f172a;
+}
+
+html:not(.dark) .agent-shell input::placeholder,
+html:not(.dark) .agent-shell textarea::placeholder {
+  color: #64748b;
+}
+
+html:not(.dark) .agent-shell input,
+html:not(.dark) .agent-shell textarea,
+html:not(.dark) .agent-shell select {
+  color: #0f172a;
+}
+
+/* ============================================
    Chat Bubble Styles
    ============================================ */
 .chat-bubble-agent {

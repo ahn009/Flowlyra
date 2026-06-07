@@ -282,7 +282,7 @@ export function AgentLayout(): JSX.Element {
   }
 
   return (
-    <div className="min-h-screen bg-white text-navy-700 dark:bg-navy-900 dark:text-navy-100">
+    <div className="agent-shell min-h-screen bg-white text-navy-700 dark:bg-navy-900 dark:text-navy-100">
       <Toaster position="top-right" />
       <aside className={`fixed inset-y-0 left-0 z-[200] hidden flex-col border-r border-navy-200 bg-navy-50 transition-all duration-300 dark:bg-navy-900 dark:border-navy-700 md:flex ${sidebarWidth}`}>
         {/* Logo */}

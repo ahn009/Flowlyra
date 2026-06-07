@@ -351,6 +351,18 @@ async def chats_with_contact_data(db: AsyncSession, chats: list[Chat]) -> list[d
     )
     latest_messages = {row.chat_id: row for row in latest_message_rows}
 
+    unread_count_rows = await db.execute(
+        select(Message.chat_id, func.count(Message.id))
+        .where(
+            Message.chat_id.in_(chat_ids),
+            Message.is_internal.is_(False),
+            Message.is_read.is_(False),
+            Message.sender_type.in_(["customer", "visitor"]),
+        )
+        .group_by(Message.chat_id)
+    )
+    unread_counts = {row[0]: int(row[1] or 0) for row in unread_count_rows}
+
     rows = []
     redis = get_redis()
     visitor_presence = {}
@@ -378,6 +390,7 @@ async def chats_with_contact_data(db: AsyncSession, chats: list[Chat]) -> list[d
             "sender_type": latest_message.sender_type,
             "created_at": latest_message.created_at,
         } if latest_message else None
+        data["unread_count"] = unread_counts.get(chat.id, 0)
         rows.append(data)
     return rows
 

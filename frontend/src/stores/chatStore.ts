@@ -12,6 +12,8 @@ interface ChatState {
   aiSuggestions: Record<string, string[]>;
   addChat: (chat: Chat) => void;
   addMessage: (message: Message) => void;
+  hydrateUnreadCounts: (chats: Chat[]) => void;
+  incrementUnread: (chatId: string, count?: number) => void;
   setPreview: (chatId: string, text: string) => void;
   setTyping: (chatId: string, typing: boolean) => void;
   setActiveChat: (chatId: string | null) => void;
@@ -33,6 +35,25 @@ export const useChatStore = create<ChatState>((set) => ({
   unreadCounts: {},
   aiSuggestions: {},
   addChat: (chat) => set((state) => ({ chats: { ...state.chats, [chat.id]: chat } })),
+  hydrateUnreadCounts: (chats) =>
+    set((state) => {
+      let changed = false;
+      const nextUnread = { ...state.unreadCounts };
+      for (const chat of chats) {
+        const serverCount = chat.unread_count ?? 0;
+        if (serverCount > 0 && state.activeChatId !== chat.id && nextUnread[chat.id] === undefined) {
+          nextUnread[chat.id] = serverCount;
+          changed = true;
+        }
+      }
+      return changed ? { unreadCounts: nextUnread } : state;
+    }),
+  incrementUnread: (chatId, count = 1) =>
+    set((state) => (
+      state.activeChatId === chatId
+        ? state
+        : { unreadCounts: { ...state.unreadCounts, [chatId]: (state.unreadCounts[chatId] ?? 0) + count } }
+    )),
   addMessage: (message) =>
     set((state) => {
       const alreadyExists = hasMessage(state.messages[message.chat_id] ?? [], message.id);
@@ -50,7 +71,7 @@ export const useChatStore = create<ChatState>((set) => ({
                 updated_at: message.created_at
               }
             };
-      const isVisitorSideMessage = message.sender_type === "customer";
+      const isVisitorSideMessage = isVisitorMessage(message);
       const shouldIncrementUnread =
         !alreadyExists &&
         !message.is_internal &&
@@ -96,13 +117,17 @@ export const useChatStore = create<ChatState>((set) => ({
       const messages = state.messages[chatId];
       if (!messages) return state;
       const updated = messages.map((msg) => {
-        if (reader === "agent" && (msg.sender_type === "customer" || (msg.sender_type as string) === "visitor")) return { ...msg, is_read: true };
+        if (reader === "agent" && isVisitorMessage(msg)) return { ...msg, is_read: true };
         if (reader === "visitor" && msg.sender_type === "agent") return { ...msg, is_read: true };
         return msg;
       });
       return { messages: { ...state.messages, [chatId]: updated } };
     })
 }));
+
+function isVisitorMessage(message: Pick<Message, "sender_type">): boolean {
+  return message.sender_type === "customer" || message.sender_type === "visitor";
+}
 
 function hasMessage(messages: Message[], id: string): boolean {
   return messages.some((message) => message.id === id);
