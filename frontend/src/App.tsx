@@ -4,6 +4,14 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 
 import { useI18n } from "./i18n/I18nProvider";
 import { registerNotificationSoundUnlock } from "./lib/notificationSound";
+import {
+  BlogPage,
+  BlogPostPage,
+  HomePage,
+  NotFoundPage,
+  PricingPage,
+  SolutionEnterprisePage,
+} from "./pages/PublicPages";
 import { useAuthStore } from "./stores/authStore";
 
 function lazyNamed(loader: () => Promise<Record<string, unknown>>, key: string) {
@@ -52,20 +60,14 @@ const ApiChangelogPage = lazyNamed(() => import("./pages/ApiPlatformPages"), "Ap
 const ApiDocsPage = lazyNamed(() => import("./pages/ApiPlatformPages"), "ApiDocsPage");
 const ApiStatusPage = lazyNamed(() => import("./pages/ApiPlatformPages"), "ApiStatusPage");
 const IntegrationsMarketplacePage = lazyNamed(() => import("./pages/IntegrationsMarketplacePage"), "IntegrationsMarketplacePage");
-const BlogPage = lazyNamed(() => import("./pages/PublicPages"), "BlogPage");
-const BlogPostPage = lazyNamed(() => import("./pages/PublicPages"), "BlogPostPage");
 const ContactPage = lazyNamed(() => import("./pages/UtilityPages"), "ContactPage");
 const CustomersPage = lazyNamed(() => import("./pages/MarketingSubPages"), "CustomersPage");
 const FeaturesPage = lazyNamed(() => import("./pages/MarketingSubPages"), "FeaturesPage");
 const HelpPage = lazyNamed(() => import("./pages/UtilityPages"), "HelpPage");
-const HomePage = lazyNamed(() => import("./pages/PublicPages"), "HomePage");
 const IntegrationsPage = lazyNamed(() => import("./pages/MarketingSubPages"), "IntegrationsPage");
-const NotFoundPage = lazyNamed(() => import("./pages/PublicPages"), "NotFoundPage");
-const PricingPage = lazyNamed(() => import("./pages/PublicPages"), "PricingPage");
 const PrivacyPage = lazyNamed(() => import("./pages/UtilityPages"), "PrivacyPage");
 const ProductTourPage = lazyNamed(() => import("./pages/UtilityPages"), "ProductTourPage");
 const SignupPage = lazyNamed(() => import("./pages/UtilityPages"), "SignupPage");
-const SolutionEnterprisePage = lazyNamed(() => import("./pages/PublicPages"), "SolutionEnterprisePage");
 const SolutionSalesPage = lazyNamed(() => import("./pages/MarketingSubPages"), "SolutionSalesPage");
 const SolutionSupportPage = lazyNamed(() => import("./pages/MarketingSubPages"), "SolutionSupportPage");
 const StatusPage = lazyNamed(() => import("./pages/UtilityPages"), "StatusPage");
@@ -81,7 +83,7 @@ const MomentsPage = lazyNamed(() => import("./pages/GapsPage"), "MomentsPage");
 const VoiceVideoPage = lazyNamed(() => import("./pages/GapsPage"), "VoiceVideoPage");
 
 function ScreenFallback(): JSX.Element {
-  return <div className="grid min-h-[40vh] place-items-center text-sm font-semibold text-navy-400">Loading...</div>;
+  return <div className="min-h-screen bg-white dark:bg-navy-950" aria-busy="true" />;
 }
 
 function ScrollToTop(): null {

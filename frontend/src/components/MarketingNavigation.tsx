@@ -1,7 +1,7 @@
 import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { cx } from "./ui";
+import { cx, ThemeToggle } from "./ui";
 
 const marketingNavLinks = [
   { to: "/features", label: "Features" },
@@ -14,7 +14,7 @@ const marketingNavLinks = [
 function FlowlyraLogo(): JSX.Element {
   return (
     <Link to="/" className="inline-flex items-center gap-2.5" aria-label="Flowlyra home">
-      <span className="grid h-9 w-9 place-items-center rounded-xl bg-white/80 shadow-sm ring-1 ring-slate-200/70">
+      <span className="grid h-9 w-9 place-items-center rounded-xl bg-white/80 shadow-sm ring-1 ring-slate-200/70 dark:bg-white/10 dark:ring-white/10">
         <svg viewBox="0 0 36 36" aria-hidden="true" className="h-7 w-7">
           <defs>
             <linearGradient id="flowlyra-nav-mark" x1="4" y1="6" x2="32" y2="30" gradientUnits="userSpaceOnUse">
@@ -39,7 +39,7 @@ function FlowlyraLogo(): JSX.Element {
           />
         </svg>
       </span>
-      <span className="font-sans text-xl font-semibold tracking-[-0.02em] text-midnight">Flowlyra</span>
+      <span className="font-sans text-xl font-semibold tracking-[-0.02em] text-midnight dark:text-white">Flowlyra</span>
     </Link>
   );
 }
@@ -80,8 +80,8 @@ export function MarketingNavigation(): JSX.Element {
   return (
     <header
       className={cx(
-        "sticky top-0 z-50 h-[72px] border-b border-[rgba(226,232,240,0.6)] backdrop-blur-[12px] transition-all duration-200",
-        scrolled ? "bg-white/95 shadow-sm" : "bg-white/80",
+        "sticky top-0 z-50 h-[72px] border-b border-[rgba(226,232,240,0.6)] backdrop-blur-[12px] transition-all duration-200 dark:border-white/10",
+        scrolled ? "bg-white/95 shadow-sm dark:bg-slate-950/95" : "bg-white/80 dark:bg-slate-950/80",
       )}
       role="banner"
     >
@@ -95,7 +95,7 @@ export function MarketingNavigation(): JSX.Element {
               to={item.to}
               className={({ isActive }) =>
                 cx(
-                  "group relative py-2 font-sans text-[15px] font-medium text-slate-700 transition-colors duration-200 hover:text-indigo-600",
+                  "group relative py-2 font-sans text-[15px] font-medium text-slate-700 transition-colors duration-200 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-white",
                   "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:origin-left after:scale-x-0 after:rounded-full after:bg-indigo-600 after:transition-transform after:duration-200 hover:after:scale-x-100",
                   isActive && "font-semibold text-indigo-600 after:scale-x-100",
                 )
@@ -109,28 +109,32 @@ export function MarketingNavigation(): JSX.Element {
         <div className="hidden items-center gap-3 md:flex">
           <Link
             to="/login"
-            className="inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-[15px] font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-700 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-100"
+            className="inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-[15px] font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-700 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-100 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white"
           >
             Log in
           </Link>
+          <ThemeToggle />
           <PrimaryCta />
         </div>
 
-        <button
-          type="button"
-          className="inline-flex h-11 w-11 items-center justify-center rounded-xl text-slate-700 transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-100 md:hidden"
-          onClick={() => setMobileOpen(true)}
-          aria-label="Open navigation menu"
-          aria-expanded={mobileOpen}
-        >
-          <Menu size={24} />
-        </button>
+        <div className="flex items-center gap-1 md:hidden">
+          <ThemeToggle />
+          <button
+            type="button"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-xl text-slate-700 transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-100 dark:text-slate-200 dark:hover:bg-white/10"
+            onClick={() => setMobileOpen(true)}
+            aria-label="Open navigation menu"
+            aria-expanded={mobileOpen}
+          >
+            <Menu size={24} />
+          </button>
+        </div>
       </div>
 
       <div
         className={cx(
           "fixed inset-0 z-[9999] bg-midnight text-white transition-all duration-300 ease-out md:hidden",
-          mobileOpen ? "translate-x-0 opacity-100" : "translate-x-full opacity-0 pointer-events-none",
+          mobileOpen ? "translate-x-0 opacity-100" : "hidden translate-x-full opacity-0 pointer-events-none",
         )}
         aria-hidden={!mobileOpen}
       >

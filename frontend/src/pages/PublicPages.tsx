@@ -859,6 +859,364 @@ function CTASection(): JSX.Element {
   );
 }
 
+const modernHeroMetrics = [
+  { label: "First response", value: "18s", tone: "text-emerald-600" },
+  { label: "Conversations", value: "2,481", tone: "text-indigo-600" },
+  { label: "CSAT", value: "4.8", tone: "text-coral-600" },
+];
+
+const modernProofStats = [
+  { value: "62%", label: "faster first replies" },
+  { value: "3.2x", label: "more qualified leads" },
+  { value: "40%", label: "routine work assisted by AI" },
+  { value: "99.9%", label: "uptime for support teams" },
+];
+
+const modernCapabilities = [
+  {
+    icon: MessageSquareText,
+    title: "Live inbox that stays calm",
+    body: "Prioritized queues, typing preview, chat history, and handoff context keep agents moving without hunting through tabs.",
+  },
+  {
+    icon: Sparkles,
+    title: "AI help beside the agent",
+    body: "Draft replies, summaries, sentiment, and tag suggestions appear where work already happens.",
+  },
+  {
+    icon: Workflow,
+    title: "Routing built for real teams",
+    body: "Assign conversations by skills, availability, team load, page intent, VIP status, and campaign source.",
+  },
+  {
+    icon: LineChart,
+    title: "Reports you can act on",
+    body: "Track response time, CSAT, missed chats, conversions, agent performance, and channel quality in one place.",
+  },
+];
+
+const modernWorkflow = [
+  { label: "Capture", title: "Meet visitors at the right moment", body: "Widget greetings, campaign triggers, forms, and channel handoff bring every conversation into Flowlyra." },
+  { label: "Understand", title: "Give agents the full story", body: "Profiles, page history, tags, orders, tickets, and past chats sit next to the reply box." },
+  { label: "Resolve", title: "Move from chat to outcome", body: "Send replies, create tickets, transfer to specialists, share files, and follow up without breaking context." },
+];
+
+const modernUseCases = [
+  { icon: Headphones, title: "Customer support", body: "Resolve questions faster with queue control, canned replies, AI summaries, CSAT, and ticket conversion.", href: "/solutions/customer-support" },
+  { icon: TrendingUp, title: "Sales teams", body: "Spot high-intent visitors, qualify leads, share product details, and route warm chats to revenue teams.", href: "/solutions/sales-marketing" },
+  { icon: ShieldCheck, title: "Operations leaders", body: "Measure quality, staffing, response speed, security posture, and audit activity from one workspace.", href: "/solutions/enterprise" },
+];
+
+function ModernProductMockup(): JSX.Element {
+  return (
+    <div className="relative">
+      <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-2xl shadow-slate-900/10 dark:border-slate-700 dark:bg-slate-900 dark:shadow-black/30">
+        <div className="flex h-11 items-center justify-between border-b border-slate-200 bg-slate-950 px-4 text-white">
+          <div className="flex items-center gap-2">
+            <span className="h-2.5 w-2.5 rounded-full bg-coral-400" />
+            <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
+            <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
+          </div>
+          <span className="text-xs font-semibold text-slate-300">Live support workspace</span>
+        </div>
+
+        <div className="grid min-h-[420px] bg-slate-50 dark:bg-slate-900 xl:grid-cols-[210px_minmax(0,1fr)_220px]">
+          <aside className="hidden border-r border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-950 xl:block">
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Inbox</span>
+              <span className="rounded-md bg-emerald-50 px-2 py-1 text-[11px] font-bold text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300">24 live</span>
+            </div>
+            {[
+              ["Maya Wilson", "Pricing question", "2m", true],
+              ["Rashid Khan", "Order tracking", "6m", false],
+              ["Emily Stone", "Enterprise demo", "9m", false],
+              ["Jon Bell", "Billing help", "14m", false],
+            ].map(([name, topic, time, active]) => (
+              <div key={String(name)} className={cx("mb-2 rounded-md border p-3", active ? "border-indigo-200 bg-indigo-50 dark:border-indigo-500/40 dark:bg-indigo-500/15" : "border-transparent bg-white hover:bg-slate-50 dark:bg-slate-950 dark:hover:bg-slate-900")}>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="truncate text-sm font-bold text-slate-950 dark:text-white">{name}</span>
+                  <span className="shrink-0 text-[11px] font-medium text-slate-500 dark:text-slate-400">{time}</span>
+                </div>
+                <p className="mt-1 truncate text-xs text-slate-600 dark:text-slate-400">{topic}</p>
+              </div>
+            ))}
+          </aside>
+
+          <section className="flex min-h-[420px] min-w-0 flex-col bg-[#F8FAFC] dark:bg-slate-900">
+            <div className="flex h-14 items-center justify-between border-b border-slate-200 bg-white px-4 dark:border-slate-700 dark:bg-slate-950">
+              <div>
+                <p className="text-sm font-bold text-slate-950 dark:text-white">Maya Wilson</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Pricing page · Shopify customer</p>
+              </div>
+              <span className="hidden rounded-md bg-indigo-600 px-3 py-1 text-xs font-bold text-white sm:inline-flex">AI ready</span>
+            </div>
+            <div className="flex-1 space-y-3 p-4">
+              <div className="max-w-[78%] rounded-lg rounded-tl-sm bg-white px-4 py-3 text-sm leading-6 text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-100">
+                We are moving from email support. Can Flowlyra help sales and support work in the same chat?
+              </div>
+              <div className="ml-auto max-w-[82%] rounded-lg rounded-tr-sm bg-indigo-600 px-4 py-3 text-sm leading-6 text-white shadow-lg shadow-indigo-600/20">
+                Yes. You can route by intent, keep customer context visible, and convert complex chats into tickets without losing history.
+              </div>
+              <div className="max-w-[88%] rounded-md border border-indigo-100 bg-white p-3 shadow-sm dark:border-indigo-500/30 dark:bg-slate-800">
+                <div className="flex items-center gap-2 text-xs font-bold text-indigo-700 dark:text-indigo-300"><Sparkles size={14} /> Suggested next reply</div>
+                <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">“I can show you the sales handoff workflow and how support keeps the full timeline after conversion.”</p>
+              </div>
+            </div>
+            <div className="border-t border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-950">
+              <div className="flex min-h-11 items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
+                Type a reply...
+                <Send size={16} className="text-indigo-600" />
+              </div>
+            </div>
+          </section>
+
+          <aside className="hidden border-l border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-950 xl:block">
+            <p className="text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Customer context</p>
+            <div className="mt-4 grid gap-3">
+              {modernHeroMetrics.map((metric) => (
+                <div key={metric.label} className="rounded-md border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-900">
+                  <div className={cx("text-xl font-black", metric.tone)}>{metric.value}</div>
+                  <div className="mt-1 text-xs font-medium text-slate-600 dark:text-slate-300">{metric.label}</div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 rounded-md border border-slate-200 p-3 dark:border-slate-700">
+              <div className="text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Tags</div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {["VIP", "Annual", "Sales"].map((tag) => (
+                  <span key={tag} className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">{tag}</span>
+                ))}
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ModernHomeHero(): JSX.Element {
+  return (
+    <section className="border-b border-slate-200 bg-[#F6F8FB] dark:border-slate-800 dark:bg-slate-950">
+      <div className="mx-auto grid w-full max-w-7xl items-start gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[0.78fr_1.22fr] lg:py-16 xl:items-center">
+        <div>
+          <div className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-bold uppercase text-slate-600 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+            <Sparkles size={14} className="text-indigo-600" /> Flowlyra
+          </div>
+          <h1 className="mt-6 max-w-2xl font-sans text-[2.65rem] font-black leading-[1.04] tracking-[-0.035em] text-slate-950 dark:text-white sm:text-5xl lg:text-[4.35rem]">
+            Live chat. AI help. One flow.
+          </h1>
+          <p className="mt-5 max-w-xl text-base leading-7 text-slate-600 dark:text-slate-300 sm:text-lg">
+            Live chat, AI copilot, routing, tickets, customer context, and reporting in one focused support workspace.
+          </p>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Link
+              to="/signup"
+              className="inline-flex min-h-[48px] items-center justify-center rounded-md bg-slate-950 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-slate-950/20 transition hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-100 active:scale-[0.98]"
+            >
+              Start free trial
+            </Link>
+            <Link
+              to="/product-tour"
+              className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-6 py-3 text-sm font-bold text-slate-800 transition hover:border-indigo-300 hover:text-indigo-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-100 active:scale-[0.98] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-indigo-400 dark:hover:text-indigo-200"
+            >
+              <Play size={17} /> See product tour
+            </Link>
+          </div>
+          <div className="mt-8 grid max-w-xl grid-cols-3 gap-2 sm:gap-3">
+            {modernProofStats.slice(0, 3).map((stat) => (
+              <div key={stat.label} className="rounded-md border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+                <div className="text-xl font-black text-slate-950 dark:text-white">{stat.value}</div>
+                <p className="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-300">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <ModernProductMockup />
+      </div>
+    </section>
+  );
+}
+
+function ModernProofSection(): JSX.Element {
+  return (
+    <section className="bg-white dark:bg-slate-950">
+      <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6">
+        <div className="grid gap-6 border-b border-slate-200 pb-10 dark:border-slate-800 lg:grid-cols-[0.7fr_1.3fr] lg:items-center">
+          <p className="text-sm font-bold uppercase text-slate-500 dark:text-slate-400">Trusted by teams replacing slow support stacks</p>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            {modernProofStats.map((stat) => (
+              <div key={stat.label}>
+                <div className="text-2xl font-black text-slate-950 dark:text-white">{stat.value}</div>
+                <p className="mt-1 text-sm leading-5 text-slate-600 dark:text-slate-300">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ModernCapabilitiesSection(): JSX.Element {
+  return (
+    <section className="reveal-on-scroll bg-white dark:bg-slate-950">
+      <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:py-20">
+        <div className="grid gap-8 lg:grid-cols-[0.75fr_1.25fr]">
+          <div>
+            <p className="text-xs font-bold uppercase text-indigo-600">Core workspace</p>
+            <h2 className="mt-3 font-display text-3xl font-black leading-tight text-slate-950 dark:text-white sm:text-4xl">
+              Everything agents need, arranged around the conversation.
+            </h2>
+            <p className="mt-4 text-base leading-7 text-slate-600 dark:text-slate-300">
+              A focused support desk where AI, routing, tickets, and reporting support the agent instead of crowding the screen.
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {modernCapabilities.map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <article key={item.title} className="reveal-child rounded-md border border-slate-200 bg-[#FBFCFE] p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:hover:border-indigo-500/60" style={{ transitionDelay: `${index * 70}ms` }}>
+                  <div className="grid h-10 w-10 place-items-center rounded-md bg-indigo-50 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300"><Icon size={20} /></div>
+                  <h3 className="mt-5 text-base font-black text-slate-950 dark:text-white">{item.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{item.body}</p>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ModernWorkflowSection(): JSX.Element {
+  return (
+    <section className="reveal-on-scroll border-y border-slate-200 bg-[#EEF2F7] dark:border-slate-800 dark:bg-slate-900">
+      <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:py-20">
+        <div className="max-w-2xl">
+          <p className="text-xs font-bold uppercase text-indigo-600">Operating rhythm</p>
+          <h2 className="mt-3 font-display text-3xl font-black leading-tight text-slate-950 dark:text-white sm:text-4xl">
+            From website visitor to resolved customer, without losing context.
+          </h2>
+        </div>
+        <div className="mt-10 grid gap-4 lg:grid-cols-3">
+          {modernWorkflow.map((step, index) => (
+            <article key={step.label} className="reveal-child rounded-md border border-slate-300 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-950" style={{ transitionDelay: `${index * 90}ms` }}>
+              <div className="flex items-center justify-between">
+                <span className="rounded-full bg-slate-950 px-3 py-1 text-xs font-bold uppercase text-white dark:bg-indigo-600">{step.label}</span>
+                <span className="font-display text-3xl font-black text-slate-200 dark:text-slate-800">0{index + 1}</span>
+              </div>
+              <h3 className="mt-8 text-lg font-black text-slate-950 dark:text-white">{step.title}</h3>
+              <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">{step.body}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ModernUseCasesSection(): JSX.Element {
+  return (
+    <section className="reveal-on-scroll bg-white dark:bg-slate-950">
+      <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:py-20">
+        <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+          <div>
+            <p className="text-xs font-bold uppercase text-indigo-600">Built for the work</p>
+            <h2 className="mt-3 font-display text-3xl font-black leading-tight text-slate-950 dark:text-white sm:text-4xl">One platform, three teams aligned.</h2>
+          </div>
+          <Link to="/features" className="inline-flex items-center gap-2 text-sm font-bold text-indigo-700 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-200">
+            Explore all features <ArrowRight size={16} />
+          </Link>
+        </div>
+        <div className="mt-8 grid gap-4 md:grid-cols-3">
+          {modernUseCases.map((item, index) => {
+            const Icon = item.icon;
+            return (
+              <Link key={item.title} to={item.href} className="reveal-child group rounded-md border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:hover:border-indigo-500/60" style={{ transitionDelay: `${index * 90}ms` }}>
+                <div className="grid h-11 w-11 place-items-center rounded-md bg-slate-950 text-white dark:bg-indigo-600"><Icon size={20} /></div>
+                <h3 className="mt-6 text-lg font-black text-slate-950 dark:text-white">{item.title}</h3>
+                <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">{item.body}</p>
+                <span className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-indigo-700 group-hover:gap-3 dark:text-indigo-300">Learn more <ArrowRight size={15} /></span>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ModernIntegrationsSection(): JSX.Element {
+  return (
+    <section className="reveal-on-scroll bg-slate-950 text-white">
+      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:py-20">
+        <div>
+          <p className="text-xs font-bold uppercase text-indigo-300">Connected stack</p>
+          <h2 className="mt-3 font-display text-3xl font-black leading-tight text-white sm:text-4xl">Your conversations should know your business.</h2>
+          <p className="mt-4 text-base leading-7 text-slate-300">Connect ecommerce, CRM, analytics, payments, automation, and team chat so agents see the right context before they answer.</p>
+          <Link to="/integrations" className="mt-7 inline-flex items-center gap-2 rounded-md bg-white px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-indigo-50 active:scale-[0.98]">
+            View integrations <ArrowRight size={16} />
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {integrationsList.slice(0, 12).map((name) => (
+            <div key={name} className="rounded-md border border-white/10 bg-white/10 px-4 py-3 text-center text-sm font-bold text-slate-200">
+              {name}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ModernTestimonialsSection(): JSX.Element {
+  return (
+    <section className="reveal-on-scroll bg-[#F6F8FB] dark:bg-slate-900">
+      <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:py-20">
+        <div className="grid gap-8 lg:grid-cols-[0.7fr_1.3fr]">
+          <div>
+            <p className="text-xs font-bold uppercase text-indigo-600">Customer proof</p>
+            <h2 className="mt-3 font-display text-3xl font-black leading-tight text-slate-950 dark:text-white sm:text-4xl">Teams move faster when the conversation is the source of truth.</h2>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {testimonials.map((item, index) => (
+              <article key={item.name} className="reveal-child rounded-md border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-950" style={{ transitionDelay: `${index * 90}ms` }}>
+                <p className="text-sm leading-6 text-slate-700 dark:text-slate-200">“{item.quote}”</p>
+                <div className="mt-5 border-t border-slate-200 pt-4 dark:border-slate-800">
+                  <p className="text-sm font-black text-slate-950 dark:text-white">{item.name}</p>
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{item.role}, {item.company}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ModernCTASection(): JSX.Element {
+  return (
+    <section className="bg-white dark:bg-slate-950">
+      <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:py-20">
+        <div className="grid gap-8 rounded-md bg-indigo-600 px-6 py-10 text-white shadow-xl shadow-indigo-600/20 md:grid-cols-[1fr_auto] md:items-center md:px-10">
+          <div>
+            <h2 className="font-display text-3xl font-black leading-tight sm:text-4xl">Launch a cleaner support experience this week.</h2>
+            <p className="mt-3 max-w-2xl text-base leading-7 text-indigo-50">Start with live chat, then add routing, tickets, AI help, reporting, and integrations as your team grows.</p>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row md:flex-col">
+            <Link to="/signup" className="inline-flex min-h-[48px] items-center justify-center rounded-md bg-white px-6 py-3 text-sm font-bold text-indigo-700 transition hover:bg-indigo-50 active:scale-[0.98]">Start free trial</Link>
+            <Link to="/contact" className="inline-flex min-h-[48px] items-center justify-center rounded-md border border-white/35 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/10 active:scale-[0.98]">Contact sales</Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ================================================================
    EXPORTED: HomePage
    ================================================================ */
@@ -892,71 +1250,35 @@ export function HomePage(): JSX.Element {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white font-sans text-navy-700 dark:bg-navy-950 dark:text-navy-100">
+    <div className="min-h-screen bg-white font-sans text-slate-800 dark:bg-slate-950 dark:text-slate-100">
       <MarketingNavigation />
 
       <main id="main-content">
-        {/* Hero */}
-        <section className="hero-gradient-bg constellation relative overflow-hidden text-white">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,0.22),transparent_26rem),radial-gradient(circle_at_82%_24%,rgba(255,255,255,0.14),transparent_24rem),radial-gradient(circle_at_52%_88%,rgba(249,112,102,0.18),transparent_30rem)]" />
-          <div className="relative mx-auto grid min-h-0 w-full max-w-7xl items-center gap-12 px-4 py-20 sm:px-6 sm:py-24 md:min-h-[90vh] lg:grid-cols-12 lg:gap-10 lg:py-20">
-            <div className="lg:col-span-7">
-              <h1 className="animate-hero-title max-w-3xl font-display text-[clamp(2.25rem,5vw+1rem,4rem)] font-extrabold leading-[1.05] tracking-[-0.03em] text-white">
-                Support that flows. Sales that grow.
-              </h1>
-              <p className="animate-hero-subtitle mt-6 max-w-2xl font-sans text-[1.125rem] font-normal leading-[1.7] text-white/85">
-                The human-first platform where every chat turns into value.
-              </p>
-              <div className="animate-hero-ctas mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
-                <Link
-                  to="/signup"
-                  className="inline-flex items-center justify-center rounded-xl bg-white px-8 py-4 text-base font-bold text-indigo-600 shadow-lg shadow-indigo-950/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-glow-indigo focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/30 active:scale-[0.97]"
-                >
-                  Start flowing free
-                </Link>
-                <Link
-                  to="/product-tour"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/45 bg-white/10 px-8 py-4 text-base font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:bg-white/15 hover:border-white/70 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/25"
-                >
-                  <Play size={18} /> Watch demo
-                </Link>
-              </div>
-              <p className="animate-hero-ctas mt-4 text-xs font-medium leading-[1.4] text-white/60">
-                No credit card required · 14-day free trial
-              </p>
-              <div className="mt-10">
-                <MobileHeroGlassCard />
-              </div>
-            </div>
-            <HeroChatMockup />
-          </div>
-        </section>
+        <ModernHomeHero />
+        <ModernProofSection />
 
-        {/* Social proof marquee */}
-        <SocialProofBar />
-
-        <PublicSectionErrorBoundary name="home features">
-          <HomeFeatureSections />
+        <PublicSectionErrorBoundary name="modern capabilities">
+          <ModernCapabilitiesSection />
         </PublicSectionErrorBoundary>
 
-        {/* Integrations */}
-        <PublicSectionErrorBoundary name="integrations">
-          <IntegrationsSection />
+        <PublicSectionErrorBoundary name="modern workflow">
+          <ModernWorkflowSection />
         </PublicSectionErrorBoundary>
 
-        {/* Testimonials */}
-        <PublicSectionErrorBoundary name="testimonials">
-          <TestimonialsSection />
+        <PublicSectionErrorBoundary name="modern use cases">
+          <ModernUseCasesSection />
         </PublicSectionErrorBoundary>
 
-        {/* Pricing preview */}
-        <PublicSectionErrorBoundary name="pricing preview">
-          <PricingPreviewSection />
+        <PublicSectionErrorBoundary name="modern integrations">
+          <ModernIntegrationsSection />
         </PublicSectionErrorBoundary>
 
-        {/* Final CTA */}
-        <PublicSectionErrorBoundary name="final cta">
-          <CTASection />
+        <PublicSectionErrorBoundary name="modern testimonials">
+          <ModernTestimonialsSection />
+        </PublicSectionErrorBoundary>
+
+        <PublicSectionErrorBoundary name="modern cta">
+          <ModernCTASection />
         </PublicSectionErrorBoundary>
       </main>
 
