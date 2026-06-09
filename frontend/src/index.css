@@ -333,6 +333,120 @@ html.dark .chat-bubble-note {
 }
 
 /* ============================================
+   Agent Chat Page Dark Mode
+   ============================================ */
+html.dark .agent-chat-page {
+  background-color: #020617;
+  color: #e2e8f0;
+}
+
+html.dark .agent-chat-page [class~="bg-white"],
+html.dark .agent-chat-page [class~="bg-[#f4f6f8]"] {
+  background-color: #0f172a;
+}
+
+html.dark .agent-chat-page [class~="bg-navy-50"],
+html.dark .agent-chat-page [class~="bg-slate-50/50"],
+html.dark .agent-chat-page [class~="bg-slate-100"] {
+  background-color: #1e293b;
+}
+
+html.dark .agent-chat-page [class~="bg-navy-50/60"],
+html.dark .agent-chat-page [class~="bg-brand-50/60"] {
+  background-color: rgba(30, 41, 59, 0.82);
+}
+
+html.dark .agent-chat-page [class~="bg-brand-50"],
+html.dark .agent-chat-page [class~="bg-brand-50/70"] {
+  background-color: rgba(79, 70, 229, 0.16);
+}
+
+html.dark .agent-chat-page [class~="bg-purple-50"] {
+  background-color: rgba(88, 28, 135, 0.24);
+}
+
+html.dark .agent-chat-page [class~="bg-warning-50"],
+html.dark .agent-chat-page [class~="bg-warning-100"] {
+  background-color: rgba(146, 64, 14, 0.18);
+}
+
+html.dark .agent-chat-page [class~="bg-[#E2E8F0]"] {
+  background-color: #334155;
+}
+
+html.dark .agent-chat-page [class~="border-navy-100"],
+html.dark .agent-chat-page [class~="border-navy-200"],
+html.dark .agent-chat-page [class~="border-slate-100"],
+html.dark .agent-chat-page [class~="border-slate-200"],
+html.dark .agent-chat-page [class~="border-brand-100"] {
+  border-color: #334155;
+}
+
+html.dark .agent-chat-page [class~="border-warning-100"],
+html.dark .agent-chat-page [class~="border-warning-200"] {
+  border-color: rgba(245, 158, 11, 0.32);
+}
+
+html.dark .agent-chat-page [class~="text-navy-300"],
+html.dark .agent-chat-page [class~="text-navy-400"],
+html.dark .agent-chat-page [class~="text-slate-400"],
+html.dark .agent-chat-page [class~="text-[#64748B]"],
+html.dark .agent-chat-page [class~="text-[#94A3B8]"] {
+  color: #94a3b8;
+}
+
+html.dark .agent-chat-page [class~="text-navy-500"],
+html.dark .agent-chat-page [class~="text-navy-600"],
+html.dark .agent-chat-page [class~="text-slate-500"],
+html.dark .agent-chat-page [class~="text-slate-600"] {
+  color: #cbd5e1;
+}
+
+html.dark .agent-chat-page [class~="text-navy-700"],
+html.dark .agent-chat-page [class~="text-navy-800"],
+html.dark .agent-chat-page [class~="text-slate-700"],
+html.dark .agent-chat-page [class~="text-slate-800"],
+html.dark .agent-chat-page [class~="text-[#0F172A]"],
+html.dark .agent-chat-page [class~="text-[#334155]"] {
+  color: #e2e8f0;
+}
+
+html.dark .agent-chat-page input,
+html.dark .agent-chat-page textarea,
+html.dark .agent-chat-page select {
+  color: #e2e8f0;
+}
+
+html.dark .agent-chat-page input::placeholder,
+html.dark .agent-chat-page textarea::placeholder {
+  color: #94a3b8;
+}
+
+html.dark .agent-chat-page [class~="hover:bg-white"]:hover,
+html.dark .agent-chat-page [class~="hover:bg-navy-50"]:hover,
+html.dark .agent-chat-page [class~="hover:bg-slate-100"]:hover,
+html.dark .agent-chat-page [class~="hover:bg-[#EEF2FF]"]:hover {
+  background-color: #334155;
+}
+
+html.dark .agent-chat-page [class~="hover:text-navy-600"]:hover,
+html.dark .agent-chat-page [class~="hover:text-navy-700"]:hover,
+html.dark .agent-chat-page [class~="hover:text-slate-700"]:hover {
+  color: #f8fafc;
+}
+
+html.dark .agent-chat-page [class~="focus-within:bg-white"]:focus-within {
+  background-color: #0f172a;
+}
+
+html.dark .agent-chat-page [class~="shadow-lg"],
+html.dark .agent-chat-page [class~="shadow-lift"],
+html.dark .agent-chat-page [class~="shadow-sm"],
+html.dark .agent-chat-page [class~="shadow-xs"] {
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.36);
+}
+
+/* ============================================
    Widget Launcher Pulse
    ============================================ */
 @keyframes launcher-pulse {

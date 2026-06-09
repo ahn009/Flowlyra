@@ -509,7 +509,7 @@ export function ChatPage(): JSX.Element {
   const currentChat = data;
 
   return (
-    <section className="flex min-h-[calc(100dvh-56px)] flex-col overflow-x-auto bg-[#f4f6f8] text-navy-700">
+    <section className="agent-chat-page flex min-h-[calc(100dvh-56px)] flex-col overflow-x-auto bg-[#f4f6f8] text-navy-700">
       <div className="flex h-12 shrink-0 items-center justify-between border-b border-navy-100 bg-white px-4">
         <div className="flex min-w-0 items-center gap-3">
           <button
